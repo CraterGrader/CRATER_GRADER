@@ -1,10 +1,6 @@
 from sshkeyboard import listen_keyboard, stop_listening
 import serial
 import time
-import os
-
-
-# Establish serial interface
 
 
 class KeyboardTeleop():
@@ -14,6 +10,8 @@ class KeyboardTeleop():
     self.ctrl_increment = 5
     self.min_val = 4  # Can go >= 0, must be <= self.max_val
     self.max_val = 124  # Could go <= 127, must be >= self.min_val
+
+    # Establish serial interface
     self.serial_interface = serial.Serial(
         port=serial_port, baudrate=serial_baudrate, timeout=.1)
 
@@ -55,7 +53,7 @@ class KeyboardTeleop():
 
   def clean_and_close(self):
     """
-    Close out the teleop interface.
+    Close out the teleop interfaces, then exit the program.
     Args:
       None
     Returns:
@@ -64,8 +62,9 @@ class KeyboardTeleop():
     stop_listening()  # Stop the keyboard listener
     self.write_read(self.zero_speed)  # Write out zero speed
     self.serial_interface.close()  # Close out the serial interface
+    # Quit the program
     try:
-      raise SystemExit  # Quit the program
+      raise SystemExit
     except SystemExit as e:
       # Catch error for output handling, system will still exit
       print("Exiting...")
@@ -80,21 +79,28 @@ class KeyboardTeleop():
     """
     print(f"Key: {key}")
     if key == 'up':
+      # Increase speed
       write_val = self.curr_speed + self.ctrl_increment
       wrote_val = self.write_read(write_val)
     elif key == 'down':
+      # Decrease speed
       write_val = self.curr_speed - self.ctrl_increment
       wrote_val = self.write_read(write_val)
     elif key == '0':
+      # Decrease speed
       write_val = self.zero_speed
       wrote_val = self.write_read(write_val)
     elif key == 'q':
+      # Quit the program
       write_val = self.zero_speed
       wrote_val = self.write_read(write_val)
       self.clean_and_close()
 
 
 if __name__ == '__main__':
+  # Set port for serial communication
   alex_mac_port = '/dev/cu.usbmodem14101'
   ryan_jupyternb_port = 'COM6'
+
+  # Startup the teleop, give input through terminal
   keyboard_teleop = KeyboardTeleop(serial_port=alex_mac_port)
