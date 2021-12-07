@@ -1,6 +1,7 @@
 from sshkeyboard import listen_keyboard, stop_listening
 import serial
 import time
+import argparse
 
 
 class KeyboardTeleop():
@@ -97,10 +98,23 @@ class KeyboardTeleop():
       self.clean_and_close()
 
 
+def parse_args():
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+    '-p', '--port',
+    type=str,
+    help='Serial port to communicate to',
+    default='COM6'
+  )
+  return parser.parse_args()
+
+
+
 if __name__ == '__main__':
   # Set port for serial communication
-  alex_mac_port = '/dev/cu.usbmodem14101'
-  ryan_jupyternb_port = 'COM6'
+  # alex_mac_port = '/dev/cu.usbmodem14101'
+  # ryan_jupyternb_port = 'COM6'
+  args = parse_args()
 
   # Startup the teleop, give input through terminal
-  keyboard_teleop = KeyboardTeleop(serial_port=alex_mac_port)
+  keyboard_teleop = KeyboardTeleop(serial_port=args.port)
