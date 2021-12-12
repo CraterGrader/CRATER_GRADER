@@ -19,11 +19,13 @@ class KeyboardTeleop():
     self.b2m2 = 3
     # Emergency stop index
     self.estop_idx = 4
-    # Byte array for buffer: [Board1 M1, Board1 M2, Board2 M1, Board2 M2]
+    # Byte array for buffer: [Board1 M1, Board1 M2, Board2 M1, Board2 M2, estop]
     self.curr_cmds = [self.zero_spd,
                       self.zero_pos, self.zero_spd, self.zero_pos, self.estop_val]  # Must be integers in [0,255]
-    self.spd_increment = 100  # in [qpps]
-    self.pos_increment = 194  # ~15deg output, by encoder counts and gear ratio
+    self.spd_increment = 100  # Scaling factor for speed = in [qpps]
+    # Scaling factor for position = ~15deg output, by encoder counts and gear ratio
+    self.pos_increment = 194
+    self.offset = 127  # Where to center resulting values at
     # self.spd_min = 4
     # self.spd_max = 124
     # self.pos_min = 4
@@ -31,10 +33,15 @@ class KeyboardTeleop():
 
     # Establish serial interface
     self.serial_interface = serial.Serial(
-        port=serial_port, baudrate=serial_baudrate, timeout=.1)
+        port=serial_port, baudrate=serial_baudrate, timeout=2)
+    time.sleep(1)  # wait a couple seconds
 
     # Initialize the speeds to zero
     self.write_read(self.curr_cmds)
+
+    # Tell user the interface is ready
+    print("Keyboard Teleop Ready!")
+    print("======================")
 
     # Start up the keyboard listener
     listen_keyboard(on_press=self.handle_press, delay_second_char=0,
@@ -49,13 +56,57 @@ class KeyboardTeleop():
       data (str): The value that the arduino read.
     """
     # x = self.clamp(x, self.min_val, self.max_val)  # Clamp to actuator limits
-    self.serial_interface.write(bytes(curr_cmds))  # Write data
+    # Board1 M1 - Speed control
+    scaled_b1m1 = self.scale_and_offset(
+        curr_cmds[self.b1m1], self.spd_increment, self.offset)
+    # Board1 M2 - Position control
+    scaled_b1m2 = self.scale_and_offset(
+        curr_cmds[self.b1m2], self.pos_increment, self.offset)
+    # Board2 M1 - Speed control
+    scaled_b2m1 = self.scale_and_offset(
+        curr_cmds[self.b2m1], self.spd_increment, self.offset)
+    # Board2 M2 - Position control
+    scaled_b2m2 = self.scale_and_offset(
+        curr_cmds[self.b2m2], self.pos_increment, self.offset)
+
+    # Create byte array for scaled commands
+    scaled_cmds = [scaled_b1m1, scaled_b1m2, scaled_b2m1,
+                   scaled_b2m2, curr_cmds[self.estop_idx]]
+    print(f"scaled_cmds: {scaled_cmds}")
+    self.serial_interface.write(
+        bytes(scaled_cmds))  # Write scaled commands
+    print("bytes:", bytes(scaled_cmds))
     self.curr_cmds = curr_cmds  # Update the current commands
     time.sleep(0.05)  # Brief pause for serial transfer
-    data = self.serial_interface.readline()  # Read serial
-    print(f"Writing: {curr_cmds}, Read: {data}, curr_cmds: {curr_cmds}")
+    # data = self.serial_interface.readline()  # Read serial
+    # data = repr(self.serial_interface.read(1000))
+    data = self.serial_interface.read(1000)
+    print(f"Writing: {curr_cmds}\nRead: {data}")
     print("--")
     return data
+
+  def scale_and_offset(self, val, scale, offset):
+    """
+    Scales a value into 0-255 byte range, then centers at offset
+    Args:
+      val (int): Value to convert to a byte
+      scale (int): How much to scale value by, must be a factor of val
+      offset (int): Where to center scaled value at, to enable negative numbers
+    Returns:
+      scaled_val (int): Integer byte on scale of [0,255]
+    """
+    # Check input
+    assert type(val) == int, "val must be an integer"
+    assert type(scale) == int, "scale must be an integer"
+    assert type(offset) == int, "offset must be an integer"
+    assert val % scale == 0, "scale should be a factor of val"
+
+    # Perform the operation
+    scaled_val = (val / scale) + offset
+    # Clamp to make sure value within byte range
+    scaled_val = int(self.clamp(scaled_val, 0, 255))
+    print(f"scaled_val: {scaled_val}")
+    return scaled_val
 
   def clamp(self, val, min_val, max_val):
     """
@@ -119,13 +170,16 @@ class KeyboardTeleop():
       self.curr_cmds[self.b1m2] -= self.pos_increment
       self.curr_cmds[self.b2m2] += self.pos_increment
       wrote_val = self.write_read(self.curr_cmds)
-    elif key == '0':
-      # TODO
+    elif key == 'space':
       # Stop everything
-
-      # Reset set points
-      pass
-
+      self.estop_val = 1  # Tell arduino to stop everything
+      self.curr_cmds[self.estop_idx] = self.estop_val
+      wrote_val = self.write_read(self.curr_cmds)  # Write out with estop bit
+    elif key == 'r':
+      # Start everything
+      self.estop_val = 0  # Tell arduino to stop everything
+      self.curr_cmds[self.estop_idx] = self.estop_val
+      wrote_val = self.write_read(self.curr_cmds)  # Write out with estop bit
     elif key == 'q':
       # Quit the program
       self.clean_and_close()
