@@ -73,14 +73,15 @@ void loop() {
   // Check for estop
   estop_val = scaled_cmds[ESTOP_IDX];
   if (estop_val) {
+    // Keep steering at current position
+    b2m2_val = roboclaws[ROBOBOARD2_IDX].ReadEncM2(address, &status2, &valid2);
+//    b1m2_val = roboclaws[ROBOBOARD1_IDX].ReadEncM2(address, &status1, &valid1);
+    b1m2_val = -1 * b2m2_val; // Reading encoder for b1m2 always returns zero, temporary fix since both sides should be the same but opposite value
+
+    
     // Set speeds to zero
     b1m1_val = 0;
     b2m1_val = 0;
-
-    // Keep steering at current position
-    b1m2_val = roboclaws[ROBOBOARD1_IDX].ReadEncM2(address, &status1, &valid1);
-    b2m2_val = roboclaws[ROBOBOARD2_IDX].ReadEncM2(address, &status2, &valid2);
-
     
   } else {
     // Unscale motor commands

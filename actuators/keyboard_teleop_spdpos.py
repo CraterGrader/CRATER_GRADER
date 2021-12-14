@@ -82,8 +82,8 @@ class KeyboardTeleop():
     # Read from serial
     print("Please wait, reading...")
     time.sleep(0.05)  # Brief pause for serial transfer
-    data = self.serial_interface.read(1000)
-    # data = "TEST"
+    # data = "TEST"  # Uncomment to give fast input (skips reading)
+    data = self.serial_interface.read(1000)  # Uncomment to actually read data
     print(f"Read: {data}")
 
     print("--")
@@ -177,12 +177,12 @@ class KeyboardTeleop():
       # Stop everything
       self.estop_val = 1  # Tell arduino to stop everything
       self.curr_cmds[self.estop_idx] = self.estop_val
-      wrote_val = self.write_read(self.curr_cmds)  # Write out with estop bit
+      wrote_val = self.write_read(self.curr_cmds)  # Write out with estop set
     elif key == 'r':
       # Start everything
-      self.estop_val = 0  # Tell arduino to stop everything
+      self.estop_val = 0  # Tell arduino to start everything
       self.curr_cmds[self.estop_idx] = self.estop_val
-      wrote_val = self.write_read(self.curr_cmds)  # Write out with estop bit
+      wrote_val = self.write_read(self.curr_cmds)  # Write out with estop set
     elif key == 'q':
       # Quit the program
       self.clean_and_close()
