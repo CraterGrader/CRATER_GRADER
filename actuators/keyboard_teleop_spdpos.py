@@ -72,16 +72,20 @@ class KeyboardTeleop():
     # Create byte array for scaled commands
     scaled_cmds = [scaled_b1m1, scaled_b1m2, scaled_b2m1,
                    scaled_b2m2, curr_cmds[self.estop_idx]]
-    print(f"scaled_cmds: {scaled_cmds}")
+
+    # Write to serial
+    print(f"Writing: {curr_cmds} --> {scaled_cmds} --> {bytes(scaled_cmds)}")
     self.serial_interface.write(
         bytes(scaled_cmds))  # Write scaled commands
-    print("bytes:", bytes(scaled_cmds))
     self.curr_cmds = curr_cmds  # Update the current commands
+
+    # Read from serial
+    print("Please wait, reading...")
     time.sleep(0.05)  # Brief pause for serial transfer
-    # data = self.serial_interface.readline()  # Read serial
-    # data = repr(self.serial_interface.read(1000))
     data = self.serial_interface.read(1000)
-    print(f"Writing: {curr_cmds}\nRead: {data}")
+    # data = "TEST"
+    print(f"Read: {data}")
+
     print("--")
     return data
 
@@ -105,7 +109,6 @@ class KeyboardTeleop():
     scaled_val = (val / scale) + offset
     # Clamp to make sure value within byte range
     scaled_val = int(self.clamp(scaled_val, 0, 255))
-    print(f"scaled_val: {scaled_val}")
     return scaled_val
 
   def clamp(self, val, min_val, max_val):

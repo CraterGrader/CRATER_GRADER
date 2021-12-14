@@ -4,13 +4,9 @@
 #include <SoftwareSerial.h>
 #include "RoboClaw.h"
 
-//See limitations of Arduino SoftwareSerial
-//SoftwareSerial serial(10,11);	
-//RoboClaw roboclaw(&serial,10000);
-
-constexpr int NUM_ROBOCLAWS = 2;
-constexpr int NUM_MOTORS = NUM_ROBOCLAWS*2;
-constexpr int NUM_BYTES = 5; // [b1m1, b1m2, b2m1, b2m2, estop]
+// Initialize buffer for reading serial commands
+constexpr int NUM_BYTES = 5; // Expects [b1m1, b1m2, b2m1, b2m2, estop]
+uint8_t scaled_cmds[NUM_BYTES];
 
 // Indices for byte array
 constexpr int B1M1_IDX = 0;
@@ -30,6 +26,8 @@ int estop_val;
 constexpr int POS_ACCEL = 100;
 constexpr int POS_DECCEL = 100;
 constexpr int POS_SPD = 5000;
+uint8_t status1,status2; // For reading encoder values
+bool valid1,valid2; // For reading encoder values
 
 // Scaling and offset factors
 constexpr int SPD_SCALE = 100;
@@ -52,8 +50,6 @@ RoboClaw roboclaws[] = {
 };
 #define address 0x80 // stock from RoboClaw code
 
-uint8_t scaled_cmds[NUM_BYTES*2]; // buffer for reading serial commands
-
 void setup() {
   //Open roboclaw serial ports
   for (auto & roboclaw : roboclaws) {
@@ -65,22 +61,34 @@ void setup() {
 
 void loop() {
 
+  // Wait until enough bytes are available
+  while(Serial.available() < NUM_BYTES);
+  
   // Read motor commands from serial interface
-  while (!Serial.available());
   Serial.readBytes(scaled_cmds, NUM_BYTES);
-//  Serial.println("New message!");
   for (int i = 0; i < NUM_BYTES; ++i) {
-//    scaled_cmds[i] = scaled_cmds[i] - '0'; // Subtract for ascii 
     Serial.println(scaled_cmds[i]);
   }
 
-  // Unscale motor commands
-  b1m1_val = scale_and_offset(scaled_cmds[B1M1_IDX], SPD_SCALE, OFFSET);
-  b1m2_val = scale_and_offset(scaled_cmds[B1M2_IDX], POS_SCALE, OFFSET);
-  b2m1_val = scale_and_offset(scaled_cmds[B2M1_IDX], SPD_SCALE, OFFSET);
-  b2m2_val = scale_and_offset(scaled_cmds[B2M2_IDX], POS_SCALE, OFFSET);
+  // Check for estop
   estop_val = scaled_cmds[ESTOP_IDX];
+  if (estop_val) {
+    // Set speeds to zero
+    b1m1_val = 0;
+    b2m1_val = 0;
 
+    // Keep steering at current position
+    b1m2_val = roboclaws[ROBOBOARD1_IDX].ReadEncM2(address, &status1, &valid1);
+    b2m2_val = roboclaws[ROBOBOARD2_IDX].ReadEncM2(address, &status2, &valid2);
+
+    
+  } else {
+    // Unscale motor commands
+    b1m1_val = scale_and_offset(scaled_cmds[B1M1_IDX], SPD_SCALE, OFFSET);
+    b1m2_val = scale_and_offset(scaled_cmds[B1M2_IDX], POS_SCALE, OFFSET);
+    b2m1_val = scale_and_offset(scaled_cmds[B2M1_IDX], SPD_SCALE, OFFSET);
+    b2m2_val = scale_and_offset(scaled_cmds[B2M2_IDX], POS_SCALE, OFFSET);
+  }
   // Print for debugging
   Serial.print("[");
   Serial.print(b1m1_val);
@@ -105,7 +113,7 @@ void loop() {
   roboclaws[ROBOBOARD2_IDX].SpeedAccelDeccelPositionM2(address,POS_ACCEL,POS_SPD,POS_DECCEL,b2m2_val,1); //address, accel, speed, deccel, position, flag
 }
 
-// Undo scaling and offset to get desired value back
+// Function to undo scaling and offset to get desired value back
 int scale_and_offset(int val, int scale, int offset){
   int result;
   result = (val - offset) * scale;
