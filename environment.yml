@@ -1,0 +1,13 @@
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+  - jupyterlab
+  - pandas
+  - numpy
+  - scipy
+  - tqdm
+  - matplotlib
+  - pip:
+    - opencv-python
