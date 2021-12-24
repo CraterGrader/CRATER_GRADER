@@ -5,14 +5,15 @@ The goal of docker is to streamline software development by providing a consiste
 
 ### High-level Notes:
 The `cg-dev` docker container is the primary container for development. This container:
-- Is based on a ROS2 Galactic image, which runs on Ubuntu 20.04 (Focal).
+- Is based on a [ROS2 Galactic image](https://hub.docker.com/_/ros), which runs on Ubuntu 20.04 (Focal Fossa).
 - Can have new system packages (e.g. `apt-get ...`) added to `cg_dev.dockerfile`, ideally at the bottom of the file to keep re-build times shorter.
 - Can have new python packages added to `environment.yml` (pip-specific packages should go at the very bottom, otherwise order doesn't matter).
 - Uses volumes to sync file changes between the container and the host machine; any changes made will appear in both places, whether or not the container is active.
 - In-container Github access is on-going work :) please commit/push/pull/etc. from outside the container for now. ~~Enables in-container access to remote Github repository by copying host machine ssh keys to the local container (only a local image) to allow commit/push/pull/etc. If you are using a different configuration (i.e. not an ssh key(s)), please access the remote Github via a separate terminal window outside the docker container.~~
-- Starts in a conda environment already (specifically the `cg` conda environment, with packages as specified in the `environment.yml` file). You can double check the current and available conda environments by running `conda env list` from within the active container.
+- Starts each shell in a conda environment (specifically the `cg` conda environment, with packages as specified in the `environment.yml` file). You can double check the current and available conda environments by running `conda env list` from within the active container.
 - Uses a `zsh` shell for convenient command line information (e.g. Github repo status), specifically with the [powerlevel10k theme](https://github.com/romkatv/powerlevel10k). The theme is customized for the container as specified by the `docker/.p10k.zsh` file
 - Is initialized with vim editing customizations, located in the `docker/.vim/` directory and `docker/.vimrc` file.
+- Has [tmux](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/) for multiple terminal windows (note that the visualization sometimes seems buggy, to be resolved going forward).
 
 ### Instructions
 First, make sure Docker and Docker Compose are installed.
