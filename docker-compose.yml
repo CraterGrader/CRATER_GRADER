@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  cg-dev:
+    build:
+      context: ./
+      dockerfile: ./docker/dev.dockerfile
+    volumes:
+      - .:/root/CRATER_GRADER
+      - ~/.ssh/:/root/.ssh/ # Non-functioning in windows
+      - ~/.gitconfig:/root/.gitconfig # Non-functioning in windows
+    tty: true # use terminal, i.e. -t flag
+    stdin_open: true # allow terminal input, i.e. -i flag
