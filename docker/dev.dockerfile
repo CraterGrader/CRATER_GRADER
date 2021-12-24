@@ -12,5 +12,12 @@ RUN PATH="$PATH:/usr/bin/zsh"
 # Default powerline10k theme, no plugins installed
 RUN sh -c "$(wget -O- https://raw.githubusercontent.com/deluan/zsh-in-docker/master/zsh-in-docker.sh)"
 
+# Setup zsh theme
+COPY /docker/.p10k.zsh /root/
+RUN echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
+
+# Setup vim theme
+COPY /docker/.vim /root/.vim
+COPY /docker/.vimrc /root/.vimrc
 
 CMD ["zsh"]

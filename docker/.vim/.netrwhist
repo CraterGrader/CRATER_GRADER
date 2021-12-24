@@ -1,0 +1,8 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_1='/Users/alexpletta/Documents/CS 400/x2/LuStory/JoziahStory'
+let g:netrw_dirhist_2='/Users/alexpletta/Documents/CS 400/x2/AlexStory/Test'
+let g:netrw_dirhist_3='/Users/alexpletta/Documents/CS 400/x2/LuStory/JoziahStory'
+let g:netrw_dirhist_4='/Users/alexpletta/Documents/SBEL/gym-chrono/gym_chrono.egg-info'
+let g:netrw_dirhist_5='/Users/alexpletta/Documents/UW_Madison_S10/Senior-Design/software-dev/ros1_workspace/src/04_actuation/actuation_braking/launch'
+let g:netrw_dirhist_6='/Users/alexpletta/.ssh'
