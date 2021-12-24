@@ -3,7 +3,8 @@ services:
   cg-dev:
     build:
       context: ./
-      dockerfile: ./docker/dev.dockerfile
+      # dockerfile: ./docker/dev.dockerfile
+      dockerfile: ./docker/ros.dockerfile
     volumes:
       - .:/root/CRATER_GRADER
       - ~/.ssh/:/root/.ssh/ # Non-functioning in windows
