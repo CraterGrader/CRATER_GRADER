@@ -17,7 +17,7 @@ The `cg-dev` docker container is the primary container for development. This con
 
 ### Instructions
 First, make sure Docker and Docker Compose are installed.
-1. [Docker](https://docs.docker.com/desktop/)
+1. [Docker Desktop for Mac/Windows](https://docs.docker.com/desktop/) OR [Docker Engine for Linux](https://docs.docker.com/engine/install/#server)
 2. [Docker Compose](https://docs.docker.com/compose/install/)
 - Once complete, you can verify your installation version by running the following command:
   ```
