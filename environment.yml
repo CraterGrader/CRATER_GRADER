@@ -11,3 +11,4 @@ dependencies:
   - matplotlib
   - pip:
     - opencv-python
+    - catkin_pkg
