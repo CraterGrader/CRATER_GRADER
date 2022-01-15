@@ -1,1 +1,7 @@
+# Mac iCloud files
 *.icloud
+
+# ROS2 workspace build files 
+cg_ws/build/
+cg_ws/install/
+cg_ws/log/

@@ -1,3 +1,9 @@
 [submodule "docker/.vim/plugged/CSApprox"]
 	path = docker/.vim/plugged/CSApprox
-	url = https://github.com/vim-scripts/CSApprox.git
+	url = git@github.com:vim-scripts/CSApprox.git
+[submodule "docker/.vim/plugged/vim-colorschemes"]
+	path = docker/.vim/plugged/vim-colorschemes
+	url = git@github.com:flazz/vim-colorschemes.git
+[submodule "docker/.vim/plugged/vim-medic_chalk"]
+	path = docker/.vim/plugged/vim-medic_chalk
+	url = git@github.com:ParamagicDev/vim-medic_chalk.git
