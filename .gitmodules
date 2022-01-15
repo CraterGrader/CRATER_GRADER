@@ -1,3 +1,0 @@
-[submodule "docker/.vim/plugged/CSApprox"]
-	path = docker/.vim/plugged/CSApprox
-	url = https://github.com/vim-scripts/CSApprox.git
