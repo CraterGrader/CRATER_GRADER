@@ -5,6 +5,3 @@
 cg_ws/build/
 cg_ws/install/
 cg_ws/log/
-
-# Annoying vim color scheme
-docker/.vim/plugged/vim-colorschemes/colors/darkBlue.vim
