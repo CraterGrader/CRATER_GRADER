@@ -40,7 +40,8 @@ RUN apt-get install -y\
   vim\
   tmux\
   figlet\
-  iputils-ping
+  iputils-ping\
+  ssh-client
 
 # Make entry
 ENTRYPOINT ["/entrypoint.sh"]

@@ -4,9 +4,13 @@ services:
     build:
       context: ./
       dockerfile: ./docker/cg_dev.dockerfile
+      network: host
     volumes:
       - .:/root/CRATER_GRADER
       - ~/.ssh/:/root/.ssh/ # May be non-functioning in windows
       - ~/.gitconfig:/root/.gitconfig # May be non-functioning in windows
+    ports:
+      - 8080:8080
+      - 22:22
     tty: true # use terminal, i.e. -t flag
     stdin_open: true # allow terminal input, i.e. -i flag
