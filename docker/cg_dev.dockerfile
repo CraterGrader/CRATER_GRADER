@@ -39,7 +39,8 @@ RUN apt-get install -y\
   libgl1-mesa-glx\
   vim\
   tmux\
-  figlet
+  figlet\
+  iputils-ping
 
 # Make entry
 ENTRYPOINT ["/entrypoint.sh"]
