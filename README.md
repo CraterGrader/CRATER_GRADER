@@ -52,7 +52,7 @@ docker-compose down cg-dev
 ```
 
 ### Other Notes/Tips
-- To completely remove all docker related files from your system (e.g. to clear up resources), use `docker system prune -a --volumes`. Note that this will also clear the cache, so you will need to re-build the image afterwards.
+- To completely remove all docker related files from your system (e.g. to clear up resources), use `docker system prune -a --volumes`. Note that this will also clear the cache, so you will need to re-build the image afterwards. See the Docker documentation for more information about [pruning to reclaim space](https://docs.docker.com/config/pruning/), and [managing file system storage for Mac](https://docs.docker.com/desktop/mac/space/).
 - You can check the status of containers using `docker-compose ps`, or with the desktop app.
 - The `docker-compose.yml` file defines how the dockerfile(s) get called.
 - If desired, you can omit the image name (e.g. `cg-dev`) with steps 1-2 and 4 to apply `docker-compose` commands to all services in `docker-compose.yml`. Step 3 still requires specification of an image name.
