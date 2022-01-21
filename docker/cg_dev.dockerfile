@@ -1,6 +1,8 @@
 # Initialize base image
 FROM ros:galactic
 
+# Adding an arbitrary comment
+
 # Set working directory
 WORKDIR /root/CRATER_GRADER
 
