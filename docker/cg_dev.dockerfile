@@ -1,5 +1,7 @@
 # Initialize base image
 FROM ros:galactic
+ARG ROSDISTRO=galactic
+ENV ROSDISTRO=$ROSDISTRO
 
 # Set working directory
 WORKDIR /root/CRATER_GRADER
