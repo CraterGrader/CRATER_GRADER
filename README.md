@@ -40,11 +40,11 @@ Then, use the following commands to create/activate the environment (after Docke
 
 2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; at time of writing (12/24/2021) it takes ~5min on a Mid-2015 MacBook Pro. Subsequent builds will likely be much shorter because of docker's cache system.
 ```
-docker-compose build cg-dev
+docker-compose build
 ```
 3. Bring the image up in the background. It will be running, but we won't attach to it yet. If you'd like, you can check the result of this step by running `docker-compose ps` before and/or after the command to see the container status. You can also view the container status with the docker desktop app.
 ```
-docker-compose up -d cg-dev
+docker-compose up -d
 ```
 4. Attach to a shell in the image. You will now be in the container.
 ```
@@ -54,7 +54,7 @@ docker-compose exec cg-dev zsh
 
 5. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. To re-start the container up again, simply begin with step 2 (i.e. no need to re-build unless dockerfile/etc. changes were made).
 ```
-docker-compose down cg-dev
+docker-compose down
 ```
 
 ### Other Notes/Tips
