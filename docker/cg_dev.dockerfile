@@ -1,9 +1,9 @@
 # Initialize base image
 FROM ros:galactic
 
-# Adding an arbitrary comment
-
 # Delete previous comment and replaced it with this comment
+
+# Adding another arbitrary comment
 WORKDIR /root/CRATER_GRADER
 
 # Entrypoint
