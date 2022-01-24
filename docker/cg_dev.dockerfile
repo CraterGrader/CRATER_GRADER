@@ -3,7 +3,7 @@ FROM ros:galactic
 
 # Adding an arbitrary comment
 
-# Set working directory
+# Delete previous comment and replaced it with this comment
 WORKDIR /root/CRATER_GRADER
 
 # Entrypoint
