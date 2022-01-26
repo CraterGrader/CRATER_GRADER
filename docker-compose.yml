@@ -21,8 +21,8 @@ services:
     hostname: 'novnc'
     image: theasp/novnc:latest
     environment:
-      DISPLAY_WIDTH: 5000
-      DISPLAY_HEIGHT: 5000
+      DISPLAY_WIDTH: 2000
+      DISPLAY_HEIGHT: 1500
       RUN_XTERM: "no"
       RUN_FLUXBOX: "yes"
     ports:
