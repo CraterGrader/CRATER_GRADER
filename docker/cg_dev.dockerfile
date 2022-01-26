@@ -45,7 +45,8 @@ RUN apt-get install -y\
   iputils-ping\
   ssh-client\
   ros-$ROSDISTRO-rviz2\
-  ros-$ROSDISTRO-plotjuggler-ros
+  ros-$ROSDISTRO-plotjuggler-ros\
+  ros-$ROSDISTRO-joy
 
 # Make entry
 ENTRYPOINT ["/entrypoint.sh"]
