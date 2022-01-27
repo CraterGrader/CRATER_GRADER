@@ -1,5 +1,7 @@
 # Initialize base image
 FROM ros:galactic
+ARG ROSDISTRO=galactic
+ENV ROSDISTRO=$ROSDISTRO
 
 # Set working directory
 WORKDIR /root/CRATER_GRADER
@@ -34,12 +36,16 @@ RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh &
   conda env create --name cg -f /root/environment.yml --force &&\
   rm -f /root/environment.yml
 
-# Install any other system packages
+# Install any other system packages, including for ROS
 RUN apt-get install -y\
   libgl1-mesa-glx\
   vim\
   tmux\
-  figlet
+  figlet\
+  iputils-ping\
+  ssh-client\
+  ros-$ROSDISTRO-rviz2\
+  ros-$ROSDISTRO-plotjuggler-ros
 
 # Make entry
 ENTRYPOINT ["/entrypoint.sh"]
