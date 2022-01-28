@@ -3,6 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joy.hpp>
+#include <cg_msgs/msg/actuator_command.hpp>
 
 namespace cg {
 namespace teleop {
@@ -14,10 +15,13 @@ public:
 
 private:
   /* Publishers and Subscribers */
+  rclcpp::Publisher<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_pub_;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */
   // Callback for joystick input
+  void timerCallback();
   void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
 
   int joy_axis_drive_i_ = 1; // Axis index for forward/backward drive
