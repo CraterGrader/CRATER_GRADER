@@ -7,5 +7,10 @@ def generate_launch_description():
             package='joy',
             executable='joy_node',
             name='joy_node'
+        ),
+        Node(
+            package='teleop',
+            executable='teleop_node',
+            name='teleop_node'
         )
     ])
