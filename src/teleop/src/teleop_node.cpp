@@ -19,8 +19,10 @@ TeleopNode::TeleopNode() : Node("teleop_node") {
 
 void TeleopNode::timerCallback() {
   auto cmd_msg = cg_msgs::msg::ActuatorCommand();
-  cmd_msg.wheel_velocity = 0;
-  cmd_msg.steer_velocity = 1;
+  cmd_msg.wheel_velocity = std::max(-100.0, std::min(100*joy_axis_drive_state_, 100.0));
+  cmd_msg.steer_velocity = std::max(-100.0, std::min(100*joy_axis_steer_state_, 100.0));
+  rclcpp::Time timestamp = this->get_clock()->now();
+  cmd_msg.header.stamp = timestamp;
   cmd_pub_->publish(cmd_msg);
 }
 
