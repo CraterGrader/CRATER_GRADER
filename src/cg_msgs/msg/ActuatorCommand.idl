@@ -1,0 +1,17 @@
+#include "std_msgs/msg/Header.idl"
+
+module cg_msgs {
+    module msg {
+        struct ActuatorCommand {
+            std_msgs::msg::Header header;
+
+            // Velocity of wheel actuators, in percent of full scale [0-100]
+            @default (value = 0.0)
+            double wheel_velocity;
+
+            // Velocity of steer actuators, in percent of full scale [0-100]
+            @default (value = 0.0)
+            double steer_velocity;
+        };
+    };
+};
