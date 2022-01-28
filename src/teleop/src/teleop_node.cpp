@@ -15,6 +15,12 @@ TeleopNode::TeleopNode() : Node("teleop_node") {
     std::chrono::milliseconds(100),
     std::bind(&TeleopNode::timerCallback, this)
   );
+
+  // Load parameters
+  this->declare_parameter<int>("axis_drive", 1);
+  this->get_parameter("axis_drive", joy_axis_drive_i_);
+  this->declare_parameter<int>("axis_steer", 0);
+  this->get_parameter("axis_steer", joy_axis_steer_i_);
 }
 
 void TeleopNode::timerCallback() {
