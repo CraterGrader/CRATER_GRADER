@@ -10,9 +10,9 @@ TeleopNode::TeleopNode() : Node("teleop_node") {
   );
 }
 
-void TeleopNode::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) const {
-  joy_axis_fb_state_ = msg->axes[joy_axis_fb_i_];
-  joy_axis_lr_state_ = msg->axes[joy_axis_lr_i_];
+void TeleopNode::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
+  joy_axis_drive_state_ = msg->axes[joy_axis_drive_i_];
+  joy_axis_steer_state_ = msg->axes[joy_axis_steer_i_];
 }
 
 }  // namespace teleop

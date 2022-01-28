@@ -18,12 +18,12 @@ private:
 
   /* Callbacks */
   // Callback for joystick input
-  void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) const;
+  void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
 
-  int joy_axis_fb_i_ = 1; // Axis index for forward/backward joystick data
-  int joy_axis_lr_i_ = 0; // Axis index for left/right joystick data
-  double joy_axis_fb_state_ = 0.0;  // Forward/backward joystick state (+1 max fwd, -1 max bwd)
-  double joy_axis_lr_state_ = 0.0;  // Left/right joystick state (+1 max left, -1 max right)
+  int joy_axis_drive_i_ = 1; // Axis index for forward/backward drive
+  int joy_axis_steer_i_ = 0; // Axis index for steer data
+  double joy_axis_drive_state_ = 0.0;  // Forward/backward drive state (+1 max fwd, -1 max bwd)
+  double joy_axis_steer_state_ = 0.0;  // Left/right steer state (+1 max left, -1 max right)
 };
 
 
