@@ -27,6 +27,7 @@ ament_target_dependencies(teleop_node
   rclcpp
   rclcpp_components
   sensor_msgs
+  cg_msgs
 )
 
 if(BUILD_TESTING)
