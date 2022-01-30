@@ -1,0 +1,5 @@
+teleop_node:
+  ros__parameters:
+    # Joystick parameters (For Logitech Extreme 3D Pro Joystick)
+    axis_drive: 1  # Index of drive axis in joystick message
+    axis_steer: 0  # Index of steer axis in joystick message
