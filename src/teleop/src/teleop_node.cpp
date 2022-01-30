@@ -25,6 +25,8 @@ TeleopNode::TeleopNode() : Node("teleop_node") {
 
 void TeleopNode::timerCallback() {
   auto cmd_msg = cg_msgs::msg::ActuatorCommand();
+  // Joystick states are in range [-1, 1]
+  // Scale to the range [-100, 100] % of full scale velocity
   cmd_msg.wheel_velocity = std::max(-100.0, std::min(100*joy_axis_drive_state_, 100.0));
   cmd_msg.steer_velocity = std::max(-100.0, std::min(100*joy_axis_steer_state_, 100.0));
   rclcpp::Time timestamp = this->get_clock()->now();
