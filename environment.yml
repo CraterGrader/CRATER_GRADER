@@ -12,5 +12,3 @@ dependencies:
   - pip:
     - opencv-python
     - catkin_pkg
-    - empy
-    - lark
