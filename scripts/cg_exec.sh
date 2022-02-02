@@ -8,7 +8,7 @@ DEVICES=(
   "/dev/something_else"
 )
 
-docker-compose down
+# docker-compose down
 
 # Check for existence of devices
 DOCKER_COMPOSE_FILE="${SCRIPT_DIR}/../docker-compose.yml"
