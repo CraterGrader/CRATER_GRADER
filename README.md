@@ -27,11 +27,13 @@ The `cg-dev` docker container is the primary container for development. This con
   
 ### Instructions
 First, make sure Docker and Docker Compose are installed.
+- Note: the Docker container is only supported for Docker Compose V1! Please ensure you are NOT using Docker Compose V2. You can check your Docker Compose version with the command below. If you are using Docker Compose V2, please follow the [instructions to downgrade Docker Compose from V2 to V1](https://docs.google.com/document/d/1jfx4iIHU75oZIDoqdjntO-pl-NpeXwyXDELDhlwWVM0/edit?usp=sharing).
 1. [Docker Desktop for Mac/Windows](https://docs.docker.com/desktop/) OR [Docker Engine for Linux](https://docs.docker.com/engine/install/#server)
 2. [Docker Compose](https://docs.docker.com/compose/install/)
 - Once complete, you can verify your installation version by running the following command:
   ```
-  docker-compose --version
+  $ docker-compose --version
+  docker-compose version 1.29.2, build 5becea4c
   ```
 
 Then, use the following commands to create/activate the environment (after Docker is installed). Make sure to start somewhere in this repository (exact location doesn't matter). Note that `cg-dev` is one example of a docker-compose service to be run; in general the `docker-compose.yml` file can contain more than one service, and if so you may want to specify a different service for the following commands.
