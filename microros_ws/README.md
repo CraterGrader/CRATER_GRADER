@@ -31,6 +31,8 @@ Specifically, replicate these steps:
 * `ros2 run micro_ros_setup build_agent.sh`
 * `source install/local_setup.zsh`
 
+If Docker container is brought down and restarted, need to rerun steps from `source install/local_setup.zsh` and `ros2 run micro_ros_setup create_agent_ws.sh`
+
 ## Testing Communication with Due
 
 Verify that the Due is readable from within the Docker container, e.g it exists at `/dev/ttyACM0` inside the container.
@@ -42,3 +44,9 @@ In the Docker container, run `ros2 run micro_ros_agent micro_ros_agent serial --
 Run `ros2 topic list`. You should be able to see the topic `/micro_ros_arduino_node_publisher`. Echo the topic and verify that data is being received from the Due.
 
 NOTE: It appears that if the `micro_ros_agent` is killed and restarted, messages won't appear. In this case, if you don't see the topic, you may need to hit the RESET button on the Arduino
+
+## Reflashing the Due
+
+To upload a new sketch the Arduino, make sure that `micro_ros_agent` is not running (otherwise it will hog the serial interface, and you'll end up with an error in the Arduino IDE, something like `SAM-BA operation failed`).
+
+After the sketch is uploaded, restart `micro_ros_agent`. You will also probably have to hit the RESET button on Arduino as well (seems like `micro_ros_agent` needs to run first before Arduino).
