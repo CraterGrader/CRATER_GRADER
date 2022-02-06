@@ -8,7 +8,7 @@
 #include <rclc/executor.h>
 
 #include <std_msgs/msg/string.h>
-#include <std_msgs/msg/float64_multi_array.h>
+#include <std_msgs/msg/float32.h>
 
 
 // NUM_HANDLES must be updated to reflect total number of subscribers + publishers
@@ -17,7 +17,7 @@
 #define LED_PIN 13
 #define LOOP_PERIOD_MS 10
 // TIMER_TIMEOUT_MS appears to control the publishing period
-#define TIMER_TIMEOUT_MS 20
+#define TIMER_TIMEOUT_MS 100
 
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
@@ -28,10 +28,10 @@ rcl_allocator_t allocator;
 rcl_node_t node;
 rcl_timer_t timer;
 
-rcl_subscription_t actuator_cmd_sub;
+rcl_subscription_t cmd_wheel_vel_sub;
 rcl_publisher_t debug_msg_pub;
 
-std_msgs__msg__Float64MultiArray cmd_msg;
+std_msgs__msg__Float32 cmd_wheel_vel_msg;
 std_msgs__msg__String debug_msg;
 bool cmd_msg_received = false;
 
@@ -42,10 +42,10 @@ void error_loop(){
   }
 }
 
-void actuator_cmd_callback(const void * msgin)
+void cmd_wheel_vel_callback(const void * msgin)
 {
-  const std_msgs__msg__Float64MultiArray * msg = (const std_msgs__msg__Float64MultiArray *)msgin;
-  cmd_msg = *msg;
+  const std_msgs__msg__Float32 * msg = (const std_msgs__msg__Float32 *)msgin;
+  cmd_wheel_vel_msg = *msg;
   cmd_msg_received = true;
 }
 
@@ -54,11 +54,13 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
     if (cmd_msg_received) {
-      String debug_str = "Currently received data: [";
-      for (size_t i = 0; i < cmd_msg.data.size; ++i) {
-        debug_str += String(cmd_msg.data.data[i]) + String(", ");
-      }
+      String debug_str = "Currently received data: " + String(cmd_wheel_vel_msg.data);
+//      debug_str += cmd_msg.layout.dim.size;
+//      for (size_t i = 0; i < cmd_msg.layout.dim.size; ++i) {
+//        debug_str += String(cmd_msg.data[i]) + String(", ");
+//      }
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
+//      debug_msg.data.data = const_cast<char*>("Data received!");
     } else {
       debug_msg.data.data = const_cast<char*>("No data received");
     }
@@ -82,12 +84,12 @@ void setup() {
   // create node
   RCCHECK(rclc_node_init_default(&node, "arduino_actuator_interface_node", "", &support));
 
-  // create subscriber
+  // create subscribers
   RCCHECK(rclc_subscription_init_default(
-    &actuator_cmd_sub,
+    &cmd_wheel_vel_sub,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64MultiArray),
-    "arduino_cmd"));
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
+    "arduino_cmd_wheel_vel"));
 
   // create publishers
   RCCHECK(rclc_publisher_init_default(
@@ -106,7 +108,7 @@ void setup() {
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, NUM_HANDLES, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
-  RCCHECK(rclc_executor_add_subscription(&executor, &actuator_cmd_sub, &cmd_msg, &actuator_cmd_callback, ON_NEW_DATA));
+  RCCHECK(rclc_executor_add_subscription(&executor, &cmd_wheel_vel_sub, &cmd_wheel_vel_msg, &cmd_wheel_vel_callback, ON_NEW_DATA));
 }
 
 void loop() {

@@ -5,8 +5,8 @@ namespace arduino {
 
 SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   // Initialize publishers and subscribers
-  cmd_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/arduino_cmd", 1
+  wheel_vel_pub_ = this->create_publisher<std_msgs::msg::Float32>(
+    "/arduino_cmd_wheel_vel", 1
   );
   cmd_sub_ = this->create_subscription<cg_msgs::msg::ActuatorCommand>(
     "/actuator_cmd", 1, std::bind(&SerialInterfaceNode::cmdCallback, this, std::placeholders::_1)
@@ -18,11 +18,18 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
 }
 
 void SerialInterfaceNode::timerCallback() {
-  // TODO
+  auto cmd_msg = std_msgs::msg::Float32();
+  // cmd_msg.layout.dim.push_back(std_msgs::msg::MultiArrayDimension());
+  // cmd_msg.data.push_back(actuator_cmd_.wheel_velocity);
+  // cmd_msg.data.push_back(actuator_cmd_.steer_velocity);
+  // cmd_msg.layout.dim[0].size = cmd_msg.data.size();
+  // cmd_msg.layout.dim[0].stride = 1;
+  cmd_msg.data = actuator_cmd_.wheel_velocity;
+  wheel_vel_pub_->publish(cmd_msg);
 }
 
 void SerialInterfaceNode::cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {
-  // TODO
+  actuator_cmd_ = *msg;
 }
 
 }  // namespace arduino
