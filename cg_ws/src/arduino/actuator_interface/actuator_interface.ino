@@ -10,6 +10,7 @@
 #include <std_msgs/msg/string.h>
 #include <std_msgs/msg/float32.h>
 
+#include "RoboClaw.h"
 
 // NUM_HANDLES must be updated to reflect total number of subscribers + publishers
 #define NUM_HANDLES 2
@@ -35,6 +36,13 @@ std_msgs__msg__Float32 cmd_wheel_vel_msg;
 std_msgs__msg__String debug_msg;
 bool cmd_msg_received = false;
 
+/* RoboClaws */
+#define ROBOCLAW_ADDRESS 0x80
+#define NUM_ROBOCLAWS 1
+RoboClaw roboclaws[] = {
+  RoboClaw(&Serial1,10000) // Pins 18 and 19 on the Due
+};
+
 void error_loop(){
   while(1){
     digitalWrite(LED_PIN, !digitalRead(LED_PIN));
@@ -54,13 +62,16 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
     if (cmd_msg_received) {
+      // Command RoboClaws
+      int wheel_pwm = (cmd_wheel_vel_msg.data + 100.0) / (200.0) * (127); // Map [-100, 100] to [0, 127] // TODO define these as constants
+      if (abs(wheel_pwm - 64) <= 1) wheel_pwm = 64;  // Fix to zero when close to zero
+      for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
+        roboclaws[i].ForwardBackwardM1(ROBOCLAW_ADDRESS, wheel_pwm);
+        roboclaws[i].ForwardBackwardM2(ROBOCLAW_ADDRESS, wheel_pwm);
+      }
+
       String debug_str = "Currently received data: " + String(cmd_wheel_vel_msg.data);
-//      debug_str += cmd_msg.layout.dim.size;
-//      for (size_t i = 0; i < cmd_msg.layout.dim.size; ++i) {
-//        debug_str += String(cmd_msg.data[i]) + String(", ");
-//      }
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
-//      debug_msg.data.data = const_cast<char*>("Data received!");
     } else {
       debug_msg.data.data = const_cast<char*>("No data received");
     }
@@ -109,6 +120,12 @@ void setup() {
   RCCHECK(rclc_executor_init(&executor, &support.context, NUM_HANDLES, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_wheel_vel_sub, &cmd_wheel_vel_msg, &cmd_wheel_vel_callback, ON_NEW_DATA));
+
+  // Set up RoboClaws
+  for (auto & roboclaw : roboclaws) {
+    roboclaw.begin(38400);
+  }
+
 }
 
 void loop() {
