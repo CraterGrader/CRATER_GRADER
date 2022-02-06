@@ -7,8 +7,8 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
-#include <std_msgs/msg/int32.h>
 #include <std_msgs/msg/string.h>
+#include <std_msgs/msg/float64_multi_array.h>
 
 
 // NUM_HANDLES must be updated to reflect total number of subscribers + publishers
@@ -16,7 +16,8 @@
 
 #define LED_PIN 13
 #define LOOP_PERIOD_MS 10
-#define TIMER_TIMEOUT_MS 1000
+// TIMER_TIMEOUT_MS appears to control the publishing period
+#define TIMER_TIMEOUT_MS 20
 
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
@@ -30,7 +31,7 @@ rcl_timer_t timer;
 rcl_subscription_t actuator_cmd_sub;
 rcl_publisher_t debug_msg_pub;
 
-std_msgs__msg__Int32 cmd_msg;
+std_msgs__msg__Float64MultiArray cmd_msg;
 std_msgs__msg__String debug_msg;
 bool cmd_msg_received = false;
 
@@ -43,7 +44,7 @@ void error_loop(){
 
 void actuator_cmd_callback(const void * msgin)
 {
-  const std_msgs__msg__Int32 * msg = (const std_msgs__msg__Int32 *)msgin;
+  const std_msgs__msg__Float64MultiArray * msg = (const std_msgs__msg__Float64MultiArray *)msgin;
   cmd_msg = *msg;
   cmd_msg_received = true;
 }
@@ -53,7 +54,10 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
     if (cmd_msg_received) {
-      String debug_str = "Currently received data: " + String(cmd_msg.data);
+      String debug_str = "Currently received data: [";
+      for (size_t i = 0; i < cmd_msg.data.size; ++i) {
+        debug_str += String(cmd_msg.data.data[i]) + String(", ");
+      }
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
     } else {
       debug_msg.data.data = const_cast<char*>("No data received");
@@ -82,8 +86,8 @@ void setup() {
   RCCHECK(rclc_subscription_init_default(
     &actuator_cmd_sub,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-    "actuator_cmd"));
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64MultiArray),
+    "arduino_cmd"));
 
   // create publishers
   RCCHECK(rclc_publisher_init_default(
