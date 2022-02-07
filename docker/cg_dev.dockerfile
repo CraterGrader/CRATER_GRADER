@@ -48,13 +48,6 @@ RUN apt-get install -y\
   ros-$ROSDISTRO-plotjuggler-ros\
   ros-$ROSDISTRO-joy
 
-RUN git clone -b $ROSDISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
-
-RUN apt update && rosdep update \
-  && rosdep install --from-path src --ignore-src -y \
-  && colcon build \
-  && source install/local_setup.zsh \
-
-  # Make entry
-  ENTRYPOINT ["/entrypoint.sh"]
+# Make entry
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["zsh"]
