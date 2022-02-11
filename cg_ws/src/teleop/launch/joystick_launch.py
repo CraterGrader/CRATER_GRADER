@@ -20,5 +20,10 @@ def generate_launch_description():
             executable='teleop_node',
             name='teleop_node',
             parameters=[teleop_params]
+        ),
+        Node(
+            package='arduino',
+            executable='serial_interface_node',
+            name='serial_interface_node'
         )
     ])

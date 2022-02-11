@@ -8,7 +8,7 @@
 #include <rclc/executor.h>
 
 #include <std_msgs/msg/string.h>
-#include <std_msgs/msg/float32.h>
+#include <std_msgs/msg/int64.h>
 
 #include "RoboClaw.h"
 
@@ -29,10 +29,11 @@ rcl_allocator_t allocator;
 rcl_node_t node;
 rcl_timer_t timer;
 
-rcl_subscription_t cmd_wheel_vel_sub;
+// Instantiate publishers and subscribers
+rcl_subscription_t cmd_sub;
 rcl_publisher_t debug_msg_pub;
 
-std_msgs__msg__Float32 cmd_wheel_vel_msg;
+std_msgs__msg__Int64 cmd_msg;
 std_msgs__msg__String debug_msg;
 bool cmd_msg_received = false;
 
@@ -50,10 +51,10 @@ void error_loop(){
   }
 }
 
-void cmd_wheel_vel_callback(const void * msgin)
+void cmd_callback(const void * msgin)
 {
-  const std_msgs__msg__Float32 * msg = (const std_msgs__msg__Float32 *)msgin;
-  cmd_wheel_vel_msg = *msg;
+  const std_msgs__msg__Int64 * msg = (const std_msgs__msg__Int64 *)msgin;
+  cmd_msg = *msg;
   cmd_msg_received = true;
 }
 
@@ -63,14 +64,16 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   if (timer != NULL) {
     if (cmd_msg_received) {
       // Command RoboClaws
-      int wheel_pwm = (cmd_wheel_vel_msg.data + 100.0) / (200.0) * (127); // Map [-100, 100] to [0, 127] // TODO define these as constants
+      int wheel_pwm = cmd_msg.data & 0x7F; // First byte indicates drive command in range [0, 127]
       if (abs(wheel_pwm - 64) <= 1) wheel_pwm = 64;  // Fix to zero when close to zero
       for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
         roboclaws[i].ForwardBackwardM1(ROBOCLAW_ADDRESS, wheel_pwm);
         roboclaws[i].ForwardBackwardM2(ROBOCLAW_ADDRESS, wheel_pwm);
       }
+      int steer_pwm = (cmd_msg.data >> 8) & 0x7F; // Second byte indicates steer command in range [0, 127]
+      if (abs(steer_pwm - 64) <= 1) steer_pwm = 64;  // Fix to zero when close to zero
 
-      String debug_str = "Currently received data: " + String(cmd_wheel_vel_msg.data);
+      String debug_str = "Currently received: {Drive: " + String(wheel_pwm) + "; Steer: " + String(steer_pwm) + "}";
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
     } else {
       debug_msg.data.data = const_cast<char*>("No data received");
@@ -95,12 +98,11 @@ void setup() {
   // create node
   RCCHECK(rclc_node_init_default(&node, "arduino_actuator_interface_node", "", &support));
 
-  // create subscribers
   RCCHECK(rclc_subscription_init_default(
-    &cmd_wheel_vel_sub,
+    &cmd_sub,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
-    "arduino_cmd_wheel_vel"));
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
+    "arduino_cmd"));
 
   // create publishers
   RCCHECK(rclc_publisher_init_default(
@@ -119,7 +121,7 @@ void setup() {
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, NUM_HANDLES, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
-  RCCHECK(rclc_executor_add_subscription(&executor, &cmd_wheel_vel_sub, &cmd_wheel_vel_msg, &cmd_wheel_vel_callback, ON_NEW_DATA));
+  RCCHECK(rclc_executor_add_subscription(&executor, &cmd_sub, &cmd_msg, &cmd_callback, ON_NEW_DATA));
 
   // Set up RoboClaws
   for (auto & roboclaw : roboclaws) {
@@ -131,5 +133,4 @@ void setup() {
 void loop() {
   delay(LOOP_PERIOD_MS);
   RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(LOOP_PERIOD_MS)));
-
 }

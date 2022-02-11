@@ -5,8 +5,8 @@ namespace arduino {
 
 SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   // Initialize publishers and subscribers
-  wheel_vel_pub_ = this->create_publisher<std_msgs::msg::Float32>(
-    "/arduino_cmd_wheel_vel", 1
+  cmd_pub_ = this->create_publisher<std_msgs::msg::Int64>(
+    "/arduino_cmd", 1
   );
   cmd_sub_ = this->create_subscription<cg_msgs::msg::ActuatorCommand>(
     "/actuator_cmd", 1, std::bind(&SerialInterfaceNode::cmdCallback, this, std::placeholders::_1)
@@ -18,14 +18,16 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
 }
 
 void SerialInterfaceNode::timerCallback() {
-  auto cmd_msg = std_msgs::msg::Float32();
-  // cmd_msg.layout.dim.push_back(std_msgs::msg::MultiArrayDimension());
-  // cmd_msg.data.push_back(actuator_cmd_.wheel_velocity);
-  // cmd_msg.data.push_back(actuator_cmd_.steer_velocity);
-  // cmd_msg.layout.dim[0].size = cmd_msg.data.size();
-  // cmd_msg.layout.dim[0].stride = 1;
-  cmd_msg.data = actuator_cmd_.wheel_velocity;
-  wheel_vel_pub_->publish(cmd_msg);
+  auto cmd_msg = std_msgs::msg::Int64();
+  int64_t cmd_data = 0;
+  // Scale wheel velocity in range [-100.0, 100.0] to [0, 127]
+  int8_t data = static_cast<int8_t>((actuator_cmd_.wheel_velocity + 100) / 200.0 * 127);
+  cmd_data |= data;
+  // Scale steer position in range [-100.0, 100.0] to [0, 127]
+  data =  static_cast<int8_t>((actuator_cmd_.steer_position + 100) / 200.0 * 127);
+  cmd_data |= (data << 8);
+  cmd_msg.data = cmd_data;
+  cmd_pub_->publish(cmd_msg);
 }
 
 void SerialInterfaceNode::cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {

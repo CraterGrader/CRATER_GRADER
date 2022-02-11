@@ -2,7 +2,7 @@
 #define ARDUINO__SERIAL_INTERFACE_NODE_HPP
 
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/float32.hpp>
+#include <std_msgs/msg/int64.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 
 namespace cg {
@@ -15,7 +15,7 @@ public:
 
 private:
   /* Publishers and Subscribers */
-  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr wheel_vel_pub_;
+  rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr cmd_pub_;
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
