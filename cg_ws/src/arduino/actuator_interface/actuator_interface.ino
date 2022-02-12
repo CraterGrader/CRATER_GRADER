@@ -23,6 +23,14 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
+#define BYTE_TO_QPPS_SPD_SCALE 100
+#define BYTE_TO_QPPS_POS_SCALE 21
+#define BYTE_TO_QPPS_ZERO_OFFSET 127
+
+#define POSN_CTRL_ACCEL_QPPS 600
+#define POSN_CTRL_DECCEL_QPPS 600
+#define POSN_CTRL_SPD_QPPS 1300
+
 rclc_executor_t executor;
 rclc_support_t support;
 rcl_allocator_t allocator;
@@ -39,9 +47,10 @@ bool cmd_msg_received = false;
 
 /* RoboClaws */
 #define ROBOCLAW_ADDRESS 0x80
-#define NUM_ROBOCLAWS 1
+#define NUM_ROBOCLAWS 2
 RoboClaw roboclaws[] = {
-  RoboClaw(&Serial1,10000) // Pins 18 and 19 on the Due
+  RoboClaw(&Serial1,10000), // Pins 18 and 19 on the Due
+  RoboClaw(&Serial2,10000) // Pins 16 and 17 on the Due
 };
 
 void error_loop(){
@@ -64,22 +73,33 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   if (timer != NULL) {
     if (cmd_msg_received) {
       // Command RoboClaws
-      int wheel_pwm = cmd_msg.data & 0x7F; // First byte indicates drive command in range [0, 127]
-      if (abs(wheel_pwm - 64) <= 1) wheel_pwm = 64;  // Fix to zero when close to zero
-      for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
-        roboclaws[i].ForwardBackwardM1(ROBOCLAW_ADDRESS, wheel_pwm);
-        roboclaws[i].ForwardBackwardM2(ROBOCLAW_ADDRESS, wheel_pwm);
-      }
-      int steer_pwm = (cmd_msg.data >> 8) & 0x7F; // Second byte indicates steer command in range [0, 127]
-      if (abs(steer_pwm - 64) <= 1) steer_pwm = 64;  // Fix to zero when close to zero
+      int drive_cmd_raw = cmd_msg.data & 0xFF; // First byte indicates drive command in range [0, 255]
+      if (abs(drive_cmd_raw - 127) <= 1) drive_cmd_raw = 127;  // Fix to zero when close to zero
+      int drive_cmd = byte_to_qpps(drive_cmd_raw, BYTE_TO_QPPS_SPD_SCALE, BYTE_TO_QPPS_ZERO_OFFSET); 
 
-      String debug_str = "Currently received: {Drive: " + String(wheel_pwm) + "; Steer: " + String(steer_pwm) + "}";
+      int steer_cmd_raw = (cmd_msg.data >> 8) & 0xFF; // Second byte indicates steer command in range [0, 255]
+      if (abs(steer_cmd_raw - 127) <= 1) steer_cmd_raw = 127;  // Fix to zero when close to zero
+      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
+
+      for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
+        roboclaws[i].SpeedM1(ROBOCLAW_ADDRESS, drive_cmd);
+        roboclaws[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, steer_cmd, 1);
+//        roboclaws[i].ForwardBackwardM2(ROBOCLAW_ADDRESS, drive_cmd_raw);
+      }
+
+      String debug_str = "Currently commanding: {Drive: " + String(drive_cmd) + "; Steer: " + String(steer_cmd) + "}";
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
     } else {
       debug_msg.data.data = const_cast<char*>("No data received");
     }
     RCSOFTCHECK(rcl_publish(&debug_msg_pub, &debug_msg, NULL));
   }
+}
+
+// Converts a byte [0, 255] to the appropriate QPPS value
+int byte_to_qpps(const int &val, const int &scale, const int &zero_offset)
+{
+  return (val - zero_offset) * scale;
 }
 
 void setup() {

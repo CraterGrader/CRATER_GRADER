@@ -20,11 +20,11 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
 void SerialInterfaceNode::timerCallback() {
   auto cmd_msg = std_msgs::msg::Int64();
   int64_t cmd_data = 0;
-  // Scale wheel velocity in range [-100.0, 100.0] to [0, 127]
-  int8_t data = static_cast<int8_t>((actuator_cmd_.wheel_velocity + 100) / 200.0 * 127);
+  // Scale wheel velocity in range [-100.0, 100.0] to [0, 255]
+  uint8_t data = static_cast<uint8_t>((actuator_cmd_.wheel_velocity + 100) / 200.0 * 255);
   cmd_data |= data;
-  // Scale steer position in range [-100.0, 100.0] to [0, 127]
-  data =  static_cast<int8_t>((actuator_cmd_.steer_position + 100) / 200.0 * 127);
+  // Scale steer position in range [-100.0, 100.0] to [0, 255]
+  data =  static_cast<uint8_t>((actuator_cmd_.steer_position + 100) / 200.0 * 255);
   cmd_data |= (data << 8);
   cmd_msg.data = cmd_data;
   cmd_pub_->publish(cmd_msg);
