@@ -43,7 +43,7 @@ Then, use the following commands to create/activate the environment (after Docke
 docker-compose build
 ```
 
-3. Docker does not have an automatic garbage collection, so every time we build an image more disk space will continue to be taken up by dangling images. To remove the dangling images, run the following command. For more information, see [What are Docker \<none\>:\<none\> images?](https://projectatomic.io/blog/2015/07/what-are-docker-none-none-images/)
+3. Docker does not have an automatic garbage collection, so every time we build an image more disk space may continue to be taken up by dangling images. To remove any dangling images, run the following command. For more information, see [What are Docker \<none\>:\<none\> images?](https://projectatomic.io/blog/2015/07/what-are-docker-none-none-images/). Note that in cases where no dangling images were generated you will see an output of `"docker rmi" requires at least 1 argument.`; this is expected.
 ```
 docker rmi $(docker images -f "dangling=true" -q)
 ```
