@@ -47,8 +47,12 @@ bool cmd_msg_received = false;
 
 /* RoboClaws */
 #define ROBOCLAW_ADDRESS 0x80
-#define NUM_ROBOCLAWS 2
-RoboClaw roboclaws[] = {
+#define NUM_ROBOCLAWS_MOBILITY 2
+RoboClaw roboclawstool[] = {
+  RoboClaw(&Serial3,10000);
+};
+
+RoboClaw roboclawsmobility[] = {
   RoboClaw(&Serial1,10000), // Pins 18 and 19 on the Due
   RoboClaw(&Serial2,10000) // Pins 16 and 17 on the Due
 };
@@ -82,8 +86,8 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
 
       for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
-        roboclaws[i].SpeedM1(ROBOCLAW_ADDRESS, drive_cmd);
-        roboclaws[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, steer_cmd, 1);
+        roboclawsmobility[i].SpeedM1(ROBOCLAW_ADDRESS, drive_cmd);
+        roboclawsmobility[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, steer_cmd, 1);
 //        roboclaws[i].ForwardBackwardM2(ROBOCLAW_ADDRESS, drive_cmd_raw);
       }
 
@@ -144,7 +148,7 @@ void setup() {
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_sub, &cmd_msg, &cmd_callback, ON_NEW_DATA));
 
   // Set up RoboClaws
-  for (auto & roboclaw : roboclaws) {
+  for (auto & roboclaw : roboclawsmobility) {
     roboclaw.begin(38400);
   }
 
