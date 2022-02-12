@@ -36,23 +36,29 @@ First, make sure Docker and Docker Compose are installed.
 
 Then, use the following commands to create/activate the environment (after Docker is installed). Make sure to start somewhere in this repository (exact location doesn't matter). Note that `cg-dev` is one example of a docker-compose service to be run; in general the `docker-compose.yml` file can contain more than one service, and if so you may want to specify a different service for the following commands.
 
-1. Start the Docker application, if it's not already running.
+1. Start the Docker application, if it's not already running (it should already be running for Linux-based systems).
 
 2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; at time of writing (12/24/2021) it takes ~5min on a Mid-2015 MacBook Pro. Subsequent builds will likely be much shorter because of docker's cache system.
 ```
 docker-compose build
 ```
-3. Bring the image up in the background. It will be running, but we won't attach to it yet. If you'd like, you can check the result of this step by running `docker-compose ps` before and/or after the command to see the container status. You can also view the container status with the docker desktop app.
+
+3. Docker does not have an automatic garbage collection, so every time we build an image more disk space will continue to be taken up by dangling images. To remove the dangling images, run the following command.
+```
+docker rmi $(docker images -f "dangling=true" -q)
+```
+
+4. Bring the image up in the background. It will be running, but we won't attach to it yet. If you'd like, you can check the result of this step by running `docker-compose ps` before and/or after the command to see the container status. You can also view the container status with the docker desktop app.
 ```
 docker-compose up -d
 ```
-4. Attach to a shell in the image. You will now be in the container.
+5. Attach to a shell in the image. You will now be in the container.
 ```
 docker-compose exec cg-dev zsh
 ```
-- To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 5 (you can simply re-attach when you want, by running step 4 again after exiting)
+- To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 6 (you can simply re-attach when you want, by running step 4 again after exiting)
 
-5. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. To re-start the container up again, simply begin with step 2 (i.e. no need to re-build unless dockerfile/etc. changes were made).
+6. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
 ```
 docker-compose down
 ```
