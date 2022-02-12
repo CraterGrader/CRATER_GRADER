@@ -36,17 +36,20 @@ RUN conda init zsh &&\
   conda env create --name cg -f /root/environment.yml --force &&\
   rm -f /root/environment.yml
 
-# Install any other system packages, including for ROS
-# RUN apt-get install -y \
-#   figlet \
-#   libgl1-mesa-glx \
-#   vim \
-#   tmux \
-#   iputils-ping \
-#   tree \
-#   ros-$ROSDISTRO-rviz2 \
-#   ros-$ROSDISTRO-plotjuggler-ros \
-#   ros-$ROSDISTRO-joy
+# Install system packages
+RUN apt-get install -y \
+  figlet \
+  libgl1-mesa-glx \
+  vim \
+  tmux \
+  iputils-ping \
+  tree
+
+# Additional custom packages
+RUN apt-get install -y \
+  ros-$ROSDISTRO-rviz2 \
+  ros-$ROSDISTRO-plotjuggler-ros \
+  ros-$ROSDISTRO-joy
 
 # Avoid user input prompts, use default answers 
 # RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install openssh-client
@@ -54,8 +57,8 @@ RUN conda init zsh &&\
 
 
 # Make entrypoint
-COPY docker/cgdev_entrypoint.sh /
-RUN chmod +x /cgdev_entrypoint.sh
+COPY docker/cgdev_ros_only_entrypoint.sh /
+RUN chmod +x /cgdev_ros_only_entrypoint.sh
 
-ENTRYPOINT ["/cgdev_entrypoint.sh"]
+ENTRYPOINT ["/cgdev_ros_only_entrypoint.sh"]
 CMD ["zsh"]
