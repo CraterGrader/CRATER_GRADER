@@ -1,21 +1,27 @@
 # Get conda files
 FROM continuumio/miniconda3 as conda_setup
 
-# Use microRos as the base image
-FROM microros/base:galactic as base
+# # Use microRos as the base image
+# FROM microros/base:galactic as base
+# ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
+
+# # MicroRos setup
+# WORKDIR /uros_ws
+# RUN source /opt/ros/$ROS_DISTRO/setup.sh \
+#   && source install/local_setup.sh \
+#   && ros2 run micro_ros_setup create_agent_ws.sh \
+#   && ros2 run micro_ros_setup build_agent.sh \
+#   && rm -rf /root/CRATER_GRADER/cg_ws/firmware/ 
+
+# # Clean up microRos setup
+# WORKDIR /root/CRATER_GRADER/cg_ws/src/
+# RUN rm -rf colcon.meta eProsima ros2/ ros2.repos uros
+
+# Use ros as the base image
+FROM ros:galactic as base
 ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
 
-# MicroRos setup
-WORKDIR /uros_ws
-RUN . /opt/ros/$ROS_DISTRO/setup.sh \
-  && . install/local_setup.sh \
-  && ros2 run micro_ros_setup create_agent_ws.sh \
-  && ros2 run micro_ros_setup build_agent.sh \
-  && rm -rf /root/CRATER_GRADER/cg_ws/firmware/ 
 
-# Clean up microRos setup
-WORKDIR /root/CRATER_GRADER/cg_ws/src/
-RUN rm -rf colcon.meta eProsima ros2/ ros2.repos uros
 
 # Vim theme
 COPY docker/.vim /root/.vim
@@ -35,6 +41,12 @@ RUN echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
 
 # Set working directory
 WORKDIR /root/CRATER_GRADER/cg_ws/
+COPY cg_ws/src/ ./src/
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build
+
+
+
 
 # Set ROS environment variable for building Docker
 ARG ROSDISTRO=galactic
@@ -42,26 +54,25 @@ ENV ROSDISTRO=$ROSDISTRO
 
 # Setup conda environment
 COPY --from=conda_setup /opt/conda/. /opt/conda/
-COPY environment.yml /root/
-ENV PATH=/root/miniconda3/bin:${PATH}
-RUN conda init zsh &&\
-  conda env create --name cg -f /root/environment.yml --force &&\
-  rm -f /root/environment.yml
+# COPY environment.yml /root/
+# RUN conda init zsh &&\
+#   conda env create --name cg -f /root/environment.yml --force &&\
+#   rm -f /root/environment.yml
 
-# Install system packages
-RUN apt-get install -y \
-  figlet \
-  libgl1-mesa-glx \
-  vim \
-  tmux \
-  iputils-ping \
-  tree
+# # Install system packages
+# RUN apt-get install -y \
+#   figlet \
+#   libgl1-mesa-glx \
+#   vim \
+#   tmux \
+#   iputils-ping \
+#   tree
 
-# Additional custom packages
-RUN apt-get install -y \
-  ros-$ROSDISTRO-rviz2 \
-  ros-$ROSDISTRO-plotjuggler-ros \
-  ros-$ROSDISTRO-joy
+# # Additional custom packages
+# RUN apt-get install -y \
+#   ros-$ROSDISTRO-rviz2 \
+#   ros-$ROSDISTRO-plotjuggler-ros \
+#   ros-$ROSDISTRO-joy
 
 # Avoid user input prompts, use default answers 
 # RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install openssh-client
