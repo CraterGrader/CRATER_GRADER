@@ -3,7 +3,7 @@ services:
   cg-dev:
     build:
       context: ./
-      dockerfile: ./docker/microros.dockerfile
+      dockerfile: ./docker/cgdev_uros.dockerfile
       network: host
     devices:
       - /dev/input/:/dev/input/
