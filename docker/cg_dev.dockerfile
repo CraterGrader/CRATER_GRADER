@@ -8,17 +8,17 @@ ARG ROSDISTRO=galactic
 # ENV ROSDISTRO=$ROSDISTRO
 
 # Set working directory
-WORKDIR /root/CRATER_GRADER
+WORKDIR /root/CRATER_GRADER/cg_ws
 
 # Entrypoint
-COPY docker/entrypoint.sh /
+COPY ../docker/entrypoint.sh /
 
 # Vim theme
-COPY docker/.vim /root/.vim
-COPY docker/.vimrc /root/.vimrc
+COPY ../docker/.vim /root/.vim
+COPY ../docker/.vimrc /root/.vimrc
 
 # Zsh theme, and make entrypoint executable
-COPY docker/.p10k.zsh /root/
+COPY ../docker/.p10k.zsh /root/
 ENV TERM=xterm-256color
 RUN apt-get update && apt-get install -y zsh bash wget &&\
   PATH="$PATH:/usr/bin/zsh" &&\
@@ -36,7 +36,7 @@ ENV PATH=/root/miniconda3/bin:${PATH}
 # RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh &&\
 #   zsh Miniconda3-latest-Linux-x86_64.sh -b -u &&\
 #   rm -f Miniconda3-latest-Linux-x86_64.sh &&\
-  
+
 RUN conda init zsh &&\
   conda env create --name cg -f /root/environment.yml --force &&\
   rm -f /root/environment.yml
@@ -49,9 +49,9 @@ RUN apt-get install -y\
   tmux\
   figlet\
   iputils-ping
-  # ros-$ROSDISTRO-rviz2\
-  # ros-$ROSDISTRO-plotjuggler-ros\
-  # ros-$ROSDISTRO-joy
+# ros-$ROSDISTRO-rviz2\
+# ros-$ROSDISTRO-plotjuggler-ros\
+# ros-$ROSDISTRO-joy
 
 # Avoid user input prompts, use default answers 
 # RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install openssh-client
