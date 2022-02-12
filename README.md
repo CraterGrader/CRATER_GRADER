@@ -16,7 +16,7 @@ The `cg-dev` docker container is the primary container for development. This con
 - Can have new system packages (e.g. `apt-get ...`) added to `cg_dev.dockerfile`, ideally at the bottom of the file to keep re-build times shorter.
 - Can have new python packages added to `environment.yml` (pip-specific packages should go at the very bottom, otherwise order doesn't matter).
 - Uses volumes to sync file changes between the container and the host machine; any changes made will appear in both places, whether or not the container is active.
-- Enables in-container access to remote Github repository by copying host machine ssh keys to the local container (only a local image) to allow commit/push/pull/etc. If you are using a different configuration (i.e. not an ssh key(s)), please access the remote Github via a separate terminal window outside the docker container.
+- Perform all git operations outside of the container (i.e. on local host OS, in separate terminal outside the container). While in-container git use is possible, compatibility can vary significantly depending on OS and architecture. For example, well-supported environments are Unix-based machines with `x86_64` architecture, but Windows machines can have problems copying git credentials to the container and `ARM` architectures can have problems with `openssh-client` configuration.
 - Starts each shell in a conda environment (specifically the `cg` conda environment, with packages as specified in the `environment.yml` file). You can double check the current and available conda environments by running `conda env list` from within the active container.
 - Uses a `zsh` shell for convenient command line information (e.g. Github repo status), specifically with the [powerlevel10k theme](https://github.com/romkatv/powerlevel10k). The theme is customized for the container as specified by the `docker/.p10k.zsh` file
 - Is initialized with vim editing customizations, located in the `docker/.vim/` directory and `docker/.vimrc` file.
@@ -36,23 +36,30 @@ First, make sure Docker and Docker Compose are installed.
 
 Then, use the following commands to create/activate the environment (after Docker is installed). Make sure to start somewhere in this repository (exact location doesn't matter). Note that `cg-dev` is one example of a docker-compose service to be run; in general the `docker-compose.yml` file can contain more than one service, and if so you may want to specify a different service for the following commands.
 
-1. Start the Docker application, if it's not already running.
+1. Start the Docker application, if it's not already running (it should already be running for Linux-based systems).
 
-2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; at time of writing (12/24/2021) it takes ~5min on a Mid-2015 MacBook Pro. Subsequent builds will likely be much shorter because of docker's cache system.
+2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-10 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
 ```
 docker-compose build
 ```
-3. Bring the image up in the background. It will be running, but we won't attach to it yet. If you'd like, you can check the result of this step by running `docker-compose ps` before and/or after the command to see the container status. You can also view the container status with the docker desktop app.
+
+3. Docker does not have an automatic garbage collection, so every time we build an image more disk space may continue to be taken up by dangling images. To remove any dangling images, run the following command. For more information, see [What are Docker \<none\>:\<none\> images?](https://projectatomic.io/blog/2015/07/what-are-docker-none-none-images/).
+- Note that in some cases no dangling images are generated so you will see an output of `"docker rmi" requires at least 1 argument.`; this is expected.
+```
+docker rmi $(docker images -f "dangling=true" -q)
+```
+
+4. Bring the image up in the background. It will be running, but we won't attach to it yet. If you'd like, you can check the result of this step by running `docker-compose ps` before and/or after the command to see the container status. You can also view the container status with the docker desktop app.
 ```
 docker-compose up -d
 ```
-4. Attach to a shell in the image. You will now be in the container.
+5. Attach to a shell in the image. You will now be in the container.
 ```
 docker-compose exec cg-dev zsh
 ```
-- To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 5 (you can simply re-attach when you want, by running step 4 again after exiting)
+- To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 6 (you can simply re-attach when you want, by running step 4 again after exiting)
 
-5. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. To re-start the container up again, simply begin with step 2 (i.e. no need to re-build unless dockerfile/etc. changes were made).
+6. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
 ```
 docker-compose down
 ```
