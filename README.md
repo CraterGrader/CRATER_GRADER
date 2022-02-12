@@ -38,12 +38,12 @@ Then, use the following commands to create/activate the environment (after Docke
 
 1. Start the Docker application, if it's not already running (it should already be running for Linux-based systems).
 
-2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; at time of writing (12/24/2021) it takes ~5min on a Mid-2015 MacBook Pro. Subsequent builds will likely be much shorter because of docker's cache system.
+2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-10 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
 ```
 docker-compose build
 ```
 
-3. Docker does not have an automatic garbage collection, so every time we build an image more disk space will continue to be taken up by dangling images. To remove the dangling images, run the following command.
+3. Docker does not have an automatic garbage collection, so every time we build an image more disk space will continue to be taken up by dangling images. To remove the dangling images, run the following command. For more information, see [What are Docker \<none\>:\<none\> images?](https://projectatomic.io/blog/2015/07/what-are-docker-none-none-images/)
 ```
 docker rmi $(docker images -f "dangling=true" -q)
 ```
