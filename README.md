@@ -1,15 +1,14 @@
 # CRATER_GRADER
 
-### Mac OS setup notes
+### Docker Description and Setup
+The goal of docker is to streamline software development by providing a consistent environment/packages that is host machine agnostic. The following steps describe how to get up and running the the docker resources in this repository. For more extensive background on docker please consult the docker documentation and google for other questions you might have. 
+
+## Notice for iCloud users (MacOS):
 - If using iCloud, clone this repository OUTSIDE the files tracked by iCloud. iCloud and git are both great forms of version control software on their own and when coupled can create issues such as duplicate files (e.g. see [stacked overflow post](https://stackoverflow.com/questions/59308049/icloud-drive-desktop-sync-vs-git-deleted-files-reappear-and-duplicates-with-n)) that can in some cases hinder software development. Both iCloud and git can be used together but must be separate. A good workflow for this is to clone the git repository to a location outside iCloud and either access the repository there directly OR use a symlink to store a pointer to the repository from anywhere in the file system (i.e. including from within an iCloud directory). Read more about [how to create symlinks on mac](https://www.switchingtomac.com/tutorials/osx/how-to-create-symlinks-on-your-mac/), and the following command for creating the symlink:
 ```
 ln -s /path/to/cloned/repository /path/to/store/symlink/directory
 ```
 A folder with the same name as the cloned repository will appear in the directory given in the symlink filepath. The folder in the symlink directory can then be accessed from anywhere in the file system to interact with the repository, now stored outside iCloud.
-
-## Docker Description and Setup
-The goal of docker is to streamline software development by providing a consistent environment/packages that is host machine agnostic. The following steps describe how to get up and running the the docker resources in this repository. For more extensive background on docker please consult the docker documentation and google for other questions you might have. 
-
 ### High-level Notes:
 The `cg-dev` docker container is the primary container for development. This container:
 - Is based on a [ROS2 Galactic image](https://hub.docker.com/_/ros), which runs on Ubuntu 20.04 (Focal Fossa).
