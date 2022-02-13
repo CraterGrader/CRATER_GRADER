@@ -15,6 +15,7 @@ echo 'source /root/cg_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
 
 # Start new shells in the cg conda environment
 echo "conda activate cg" >> ~/.zshrc
+echo "conda activate cg" >> ~/.bashrc
 
 # Welcome message
 echo "figlet -f slant 'CraterGrader'" >> ~/.zshrc
