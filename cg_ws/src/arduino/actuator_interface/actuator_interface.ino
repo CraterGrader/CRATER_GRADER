@@ -48,13 +48,13 @@ bool cmd_msg_received = false;
 /* RoboClaws */
 #define ROBOCLAW_ADDRESS 0x80
 #define NUM_ROBOCLAWS_MOBILITY 2
-RoboClaw roboclawsmobility[] = {
-  RoboClaw(&Serial1,10000), // Pins 18 and 19 on the Due
-  RoboClaw(&Serial2,10000) // Pins 16 and 17 on the Due
-};
 #define NUM_ROBOCLAWS_TOOL 1
+RoboClaw roboclawsmobility[] = {
+  RoboClaw(&Serial3,10000), // Pins 14(Tx) and 15(Rx) on the Due
+  RoboClaw(&Serial2,10000) // Pins 16(Tx) and 17(Rx) on the Due
+};
 RoboClaw roboclawstool[] = {
-  RoboClaw(&Serial3,10000); // Figure out which pins on the Due
+  RoboClaw(&Serial1,10000) // Pins 18(Tx) and 19(Rx) on the Due
 };
 
 void error_loop(){
