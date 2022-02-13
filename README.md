@@ -1,15 +1,25 @@
 # CRATER_GRADER
+Complete source code for robot designed to autonomously grade lunar craters.
+
+
+## Table of Contents
+  1. [Docker Description and Setup](#docker-description-and-setup)
+      - [Notice for iCloud users (MacOS):](#notice-for-icloud-users-macos)
+  2. [High-Level Notes:](#high-level-notes)
+  3. [Instructions](#setup-instructions)
+  4. [Other Notes/Tips](#other-notestips)
 
 ## Docker Description and Setup
 The goal of docker is to streamline software development by providing a consistent environment/packages that is host machine agnostic. The following steps describe how to get up and running the the docker resources in this repository. For more extensive background on docker please consult the docker documentation and google for other questions you might have. 
 
 #### Notice for iCloud users (MacOS):
-- If using iCloud, clone this repository OUTSIDE the files tracked by iCloud. iCloud and git are both great forms of version control software on their own and when coupled can create issues such as duplicate files (e.g. see [stacked overflow post](https://stackoverflow.com/questions/59308049/icloud-drive-desktop-sync-vs-git-deleted-files-reappear-and-duplicates-with-n)) that can in some cases hinder software development. Both iCloud and git can be used together but must be separate. A good workflow for this is to clone the git repository to a location outside iCloud and either access the repository there directly OR use a symlink to store a pointer to the repository from anywhere in the file system (i.e. including from within an iCloud directory). Read more about [how to create symlinks on mac](https://www.switchingtomac.com/tutorials/osx/how-to-create-symlinks-on-your-mac/), and the following command for creating the symlink:
-```
-ln -s /path/to/cloned/repository /path/to/store/symlink/directory
-```
-A folder with the same name as the cloned repository will appear in the directory given in the symlink filepath. The folder in the symlink directory can then be accessed from anywhere in the file system to interact with the repository, now stored outside iCloud.
-## High-level Notes:
+> - If using iCloud, clone this repository OUTSIDE the files tracked by iCloud. iCloud and git are both great forms of version control software on their own and when coupled can create issues such as duplicate files (e.g. see [stack overflow post](https://stackoverflow.com/questions/59308049/icloud-drive-desktop-sync-vs-git-deleted-files-reappear-and-duplicates-with-n)) that can in some cases hinder software development. Both iCloud and git can be used together but must be separate. A good workflow for this is to clone the git repository to a location outside iCloud and either access the repository there directly OR use a symlink to store a pointer to the repository from anywhere in the file system (i.e. including from within an iCloud directory). Read more about [how to create symlinks on mac](https://www.switchingtomac.com/tutorials/osx/how-to-create-symlinks-on-your-mac/), and the following command for creating the symlink:
+> ```
+> ln -s /path/to/cloned/repository /path/to/store/symlink/directory
+> ```
+> A folder with the same name as the cloned repository will appear in the directory given in the symlink filepath. The folder in the symlink directory can then be accessed from anywhere in the file system to interact with the repository, now stored outside iCloud.
+
+## High-Level Notes:
 The `cg-dev` docker container is the primary container for development. This container:
 - Is based on a [ROS2 Galactic image](https://hub.docker.com/_/ros), which runs on Ubuntu 20.04 (Focal Fossa).
 - Can have new system packages (e.g. `apt-get ...`) added to `cg_dev.dockerfile`, ideally at the bottom of the file to keep re-build times shorter.
@@ -24,7 +34,7 @@ The `cg-dev` docker container is the primary container for development. This con
   - Start gui appliation in the Docker container (e.g. `ros2 run rviz2 rviz2`, `ros2 run plotjuggler plotjuggler`, etc.)
   - Go to the following link in a browser: http://localhost:8080/vnc_auto.html
   
-## Instructions
+## Setup Instructions
 First, make sure Docker and Docker Compose are installed.
 1. [Docker Desktop for Mac/Windows](https://docs.docker.com/desktop/) OR [Docker Engine for Linux](https://docs.docker.com/engine/install/#server)
 2. [Docker Compose](https://docs.docker.com/compose/install/)
@@ -35,7 +45,7 @@ First, make sure Docker and Docker Compose are installed.
 
 Then, use the following commands to create/activate the environment (after Docker is installed). Make sure to start somewhere in this repository (exact location doesn't matter). Note that `cg-dev` is one example of a docker-compose service to be run; in general the `docker-compose.yml` file can contain more than one service, and if so you may want to specify a different service for the following commands.
 
-1. Start the Docker application, if it's not already running (it should already be running for Linux-based systems).
+1. Start the Docker application/daemon, if it's not already running (Windows/MacOS only, the Docker daemon should already be running for Linux-based systems).
 
 2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-30 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
 ```
@@ -64,8 +74,10 @@ docker-compose down
 ```
 
 ## Other Notes/Tips
-- To completely remove all docker related files from your system (e.g. to clear up resources), use `docker system prune -a --volumes`. Note that this will also clear the cache, so you will need to re-build the image afterwards. See the Docker documentation for more information about [pruning to reclaim space](https://docs.docker.com/config/pruning/), and [managing file system storage for Mac](https://docs.docker.com/desktop/mac/space/).
+- To completely remove _all docker related files from your system_ (e.g. to clear up resources), use the following command. Only non-active containers will be removed (i.e. containers that are "down"; any containers that are "up" will not be affected). Note that this command will clear the Docker build cache, so you will need to re-build any removed images afterwards. See the Docker documentation for more information about [pruning to reclaim space](https://docs.docker.com/config/pruning/), and/or [managing file system storage for Mac](https://docs.docker.com/desktop/mac/space/).
+  ```
+  docker system prune -a --volumes
+  ```
 - You can check the status of containers using `docker-compose ps`, or with the desktop app.
 - The `docker-compose.yml` file defines how the dockerfile(s) get called.
-- If desired, you can omit the image name (e.g. `cg-dev`) with steps 1-2 and 4 to apply `docker-compose` commands to all services in `docker-compose.yml`. Step 3 still requires specification of an image name.
-- The `entrypoint.sh` runs on startup, and shouldn't need to be edited except for rare instances.
+- If desired, you can add an additional arguement for the image name (e.g. `cg-dev`) with steps 2, 4, and 6 to apply `docker-compose` commands to only that service. Service must exist in `docker-compose.yml`. Step 5 still requires specification of an image name.
