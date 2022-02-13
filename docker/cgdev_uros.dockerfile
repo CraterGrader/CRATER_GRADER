@@ -61,6 +61,8 @@ RUN conda init bash \
   && . /opt/ros/$ROS_DISTRO/setup.sh \
   && colcon build
 
+# ------- Add custom packages below -------
+
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
