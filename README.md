@@ -38,7 +38,7 @@ Then, use the following commands to create/activate the environment (after Docke
 
 1. Start the Docker application, if it's not already running (it should already be running for Linux-based systems).
 
-2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-10 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
+2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-30 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
 ```
 docker-compose build
 ```
