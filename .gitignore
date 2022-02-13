@@ -2,3 +2,4 @@
 cg_ws/build/
 cg_ws/install/
 cg_ws/log/
+__pycache__/
