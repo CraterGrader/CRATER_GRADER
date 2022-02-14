@@ -43,16 +43,23 @@ void TeleopNode::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
   joy_axis_drive_state_  = msg->axes[joy_axis_drive_i_];
   joy_axis_steer_state_  = msg->axes[joy_axis_steer_i_];
 
-
   if (joy_tool_pressed) {
-    if (msg->buttons[joy_raise_tool_i_] == 0 && msg->buttons[joy_lower_tool_i_] == 0) joy_tool_pressed = false;
+    if (msg->buttons[joy_raise_tool_i_] == 0 && msg->buttons[joy_lower_tool_i_] == 0) 
+    {
+      joy_tool_pressed = false;
+    }
   } else {
-    //If raise bumper pressed, then raise
-    if (msg->buttons[joy_raise_tool_i_] != 0) joy_tool_height_state_++;
     //If lower bumper pressed, then lower
-    if (msg->buttons[joy_lower_tool_i_] != 0) joy_tool_height_state_--;    
+    if (msg->buttons[joy_lower_tool_i_] == 1) {
+      joy_tool_pressed = true;  
+      joy_tool_height_state_--; 
+    }    
+    //If raise bumper pressed, then raise
+    if (msg->buttons[joy_raise_tool_i_] == 1) {
+      joy_tool_pressed = true;  
+      joy_tool_height_state_++;
+    }
     // Mark bumpers as pressed to avoid sticky button effects
-    joy_tool_pressed = true;
   }
 
 }
