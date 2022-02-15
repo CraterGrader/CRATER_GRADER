@@ -3,3 +3,5 @@ teleop_node:
     # Joystick parameters (For Logitech Extreme 3D Pro Joystick)
     axis_drive: 1  # Index of drive axis in joystick message
     axis_steer: 3  # Index of steer axis in joystick message
+    tool_raise: 5 # Index of left bumper in joystick message
+    tool_lower: 4 # Index of right bumper in joystick message

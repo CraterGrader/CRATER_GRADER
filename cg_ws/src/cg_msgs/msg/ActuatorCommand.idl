@@ -12,6 +12,10 @@ module cg_msgs {
       // Position of steer actuators, in percent of full scale [-100, 100]
       @default (value = 0.0)
       double steer_position;
+
+      // Position of tool actuators, in percent of full scale [-100, 100]
+      @default (value = 0.0)
+      double tool_position;
     };
   };
 };

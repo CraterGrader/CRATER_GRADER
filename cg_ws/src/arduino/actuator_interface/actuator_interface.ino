@@ -32,6 +32,10 @@
 #define POSN_CTRL_DECCEL_QPPS 600
 #define POSN_CTRL_SPD_QPPS 1300
 
+#define TOOL_CTRL_ACCEL_QPPS 600
+#define TOOL_CTRL_DECCEL_QPPS 600
+#define TOOL_CTRL_SPD_QPPS 1300
+
 rclc_executor_t executor;
 rclc_support_t support;
 rcl_allocator_t allocator;
@@ -48,10 +52,14 @@ bool cmd_msg_received = false;
 
 /* RoboClaws */
 #define ROBOCLAW_ADDRESS 0x80
-#define NUM_ROBOCLAWS 2
-RoboClaw roboclaws[] = {
-  RoboClaw(&Serial1,10000), // Pins 18 and 19 on the Due
-  RoboClaw(&Serial2,10000) // Pins 16 and 17 on the Due
+#define NUM_ROBOCLAWS_MOBILITY 2
+#define NUM_ROBOCLAWS_TOOL 1
+RoboClaw roboclawsmobility[] = {
+  RoboClaw(&Serial1,10000), // Pins 18(Tx) and 18(Rx) on the Due
+  RoboClaw(&Serial2,10000) // Pins 16(Tx) and 17(Rx) on the Due
+};
+RoboClaw roboclawstool[] = {
+  RoboClaw(&Serial3,10000) // Pins 14(Tx) and 15(Rx) on the Due
 };
 // Rear RoboClaw has sign flipped
 int roboclaw_signs[] = {
@@ -86,12 +94,29 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       if (abs(steer_cmd_raw - 127) <= 1) steer_cmd_raw = 127;  // Fix to zero when close to zero
       int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
 
-      for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
-        roboclaws[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd);
-        roboclaws[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
+      int tool_cmd_raw = (cmd_msg.data >> 16) & 0xFF; // Third byte indicates tool height command in range [0, 255]
+      if (abs(tool_cmd_raw) <= 1) tool_cmd_raw = 0;  // Fix to zero when close to zero
+      int tool_cmd = byte_to_qpps(tool_cmd_raw, BYTE_TO_QPPS_POS_SCALE, 0);
+
+      // Send Mobility Commands
+      for (int i = 0; i < NUM_ROBOCLAWS_MOBILITY; ++i) {
+        roboclawsmobility[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd);
+        roboclawsmobility[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
       }
 
-      String debug_str = "Currently commanding: {Drive: " + String(drive_cmd) + "; Steer: " + String(steer_cmd) + "}";
+      // Send Tool Commands
+      for (int i = 0; i < NUM_ROBOCLAWS_TOOL; i++) {
+        roboclawstool[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
+      }
+
+      String debug_str = "Currently commanding: {Drive: " + 
+        String(drive_cmd) + 
+        "; Steer: " + 
+        String(steer_cmd) + 
+        "; Tool: " + 
+        String(tool_cmd_raw) + 
+        "}";
+        
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
     } else {
       debug_msg.data.data = const_cast<char*>("No data received");
@@ -150,7 +175,10 @@ void setup() {
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_sub, &cmd_msg, &cmd_callback, ON_NEW_DATA));
 
   // Set up RoboClaws
-  for (auto & roboclaw : roboclaws) {
+  for (auto & roboclaw : roboclawsmobility) {
+    roboclaw.begin(38400);
+  }
+  for (auto & roboclaw : roboclawstool) {
     roboclaw.begin(38400);
   }
 
