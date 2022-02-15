@@ -23,7 +23,8 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
-#define BYTE_TO_QPPS_SPD_SCALE 100
+//#define BYTE_TO_QPPS_SPD_SCALE 100
+#define BYTE_TO_QPPS_SPD_SCALE 25  // Reduce max speed from what was calibrated
 #define BYTE_TO_QPPS_POS_SCALE 21
 #define BYTE_TO_QPPS_ZERO_OFFSET 127
 
@@ -51,6 +52,10 @@ bool cmd_msg_received = false;
 RoboClaw roboclaws[] = {
   RoboClaw(&Serial1,10000), // Pins 18 and 19 on the Due
   RoboClaw(&Serial2,10000) // Pins 16 and 17 on the Due
+};
+// Rear RoboClaw has sign flipped
+int roboclaw_signs[] = {
+  -1, 1
 };
 
 void error_loop(){
@@ -82,9 +87,8 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
 
       for (int i = 0; i < NUM_ROBOCLAWS; ++i) {
-        roboclaws[i].SpeedM1(ROBOCLAW_ADDRESS, drive_cmd);
-        roboclaws[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, steer_cmd, 1);
-//        roboclaws[i].ForwardBackwardM2(ROBOCLAW_ADDRESS, drive_cmd_raw);
+        roboclaws[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd);
+        roboclaws[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
       }
 
       String debug_str = "Currently commanding: {Drive: " + String(drive_cmd) + "; Steer: " + String(steer_cmd) + "}";
@@ -138,6 +142,8 @@ void setup() {
     RCL_MS_TO_NS(TIMER_TIMEOUT_MS),
     timer_callback));
 
+  cmd_msg.data = 0;
+
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, NUM_HANDLES, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
@@ -147,6 +153,7 @@ void setup() {
   for (auto & roboclaw : roboclaws) {
     roboclaw.begin(38400);
   }
+
 
 }
 
