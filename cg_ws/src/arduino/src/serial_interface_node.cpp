@@ -29,7 +29,6 @@ void SerialInterfaceNode::timerCallback() {
 
   // Scale tool position in range [0.0, 100.0] to [0, 255]
   data =  static_cast<uint8_t>((actuator_cmd_.tool_position) / 100.0 * 255);
-  RCLCPP_INFO(this->get_logger(), "Data: '%d'", data);
   cmd_data |= (data << 16);
 
   cmd_msg.data = cmd_data;
