@@ -8,9 +8,9 @@ services:
     devices:
       - /dev/input/:/dev/input/
       # - /dev/ttyACM0:/dev/ttyACM0
-    # device_cgroup_rules:
-    #   - 'c 166:* rmw' # Arduino Due
-    #   - 'c 81:* rwm' # Intel RealSense (seems like general USB video)
+      # device_cgroup_rules:
+      #   - 'c 166:* rmw' # Arduino Due
+      #   - 'c 81:* rwm' # Intel RealSense (seems like general USB video)
     volumes:
       - .:/root/CRATER_GRADER
       # - /dev/:/dev/ # access the low level hardware
