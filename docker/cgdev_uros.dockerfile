@@ -83,11 +83,11 @@ RUN echo "export DISPLAY=:20" >> ~/.zshrc
 RUN echo "export DISPLAY=:20" >> ~/.bashrc
 
 # Always try to start windows management in background to be ready for VNC
-RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.vimrc
+RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc
 RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
 
 # Clean up unnecessary output files
-RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.vimrc
+RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc
 RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
 # ---------------------------------
 
