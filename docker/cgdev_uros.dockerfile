@@ -22,19 +22,19 @@ RUN sh -c "$(wget -O- https://raw.githubusercontent.com/deluan/zsh-in-docker/mas
 RUN echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
 
 # Automatically setup and build MicroROS packages
-WORKDIR /root/microros_ws_autobuild
-RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
-  && apt-get update && rosdep update \
-  && rosdep install --from-path src --ignore-src -y \
-  && . /opt/ros/$ROS_DISTRO/setup.sh \
-  && colcon build \
-  && . install/local_setup.sh \
-  && ros2 run micro_ros_setup create_firmware_ws.sh host \
-  && ros2 run micro_ros_setup build_firmware.sh \
-  && . install/local_setup.sh \
-  && ros2 run micro_ros_setup create_agent_ws.sh \
-  && ros2 run micro_ros_setup build_agent.sh \
-  && . install/local_setup.sh
+# WORKDIR /root/microros_ws_autobuild
+# RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
+#   && apt-get update && rosdep update \
+#   && rosdep install --from-path src --ignore-src -y \
+#   && . /opt/ros/$ROS_DISTRO/setup.sh \
+#   && colcon build \
+#   && . install/local_setup.sh \
+#   && ros2 run micro_ros_setup create_firmware_ws.sh host \
+#   && ros2 run micro_ros_setup build_firmware.sh \
+#   && . install/local_setup.sh \
+#   && ros2 run micro_ros_setup create_agent_ws.sh \
+#   && ros2 run micro_ros_setup build_agent.sh \
+#   && . install/local_setup.sh
 
 # Install system packages "starter pack"
 RUN apt-get update && apt-get install -y \
@@ -69,9 +69,27 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy
 
-# Avoid user input prompts, use default answers 
-# RUN DEBIAN_FRONTEND=noninteractive apt-get -yq install openssh-client
-# RUN DEBIAN_FRONTEND=noninteractive apt-get -yq --no-upgrade install openssh-client
+
+# ------- VNC GUI Configuration -------
+# Install vnc, xvfb for VNC configuration, fluxbox for window managment
+RUN apt-get install -y x11vnc xvfb fluxbox
+RUN mkdir ~/.vnc
+
+# Setup a VNC password
+RUN x11vnc -storepasswd cratergrader ~/.vnc/passwd
+
+# Start the VNC server
+RUN echo "export DISPLAY=:20" >> ~/.zshrc
+RUN echo "export DISPLAY=:20" >> ~/.bashrc
+
+# Always try to start windows management in background to be ready for VNC
+RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.vimrc
+RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
+
+# Clean up unnecessary output files
+RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.vimrc
+RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
+# ---------------------------------
 
 # Setup entrypoint
 COPY docker/cgdev_uros_entrypoint.sh /
