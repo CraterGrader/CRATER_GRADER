@@ -22,19 +22,19 @@ RUN sh -c "$(wget -O- https://raw.githubusercontent.com/deluan/zsh-in-docker/mas
 RUN echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
 
 # Automatically setup and build MicroROS packages
-# WORKDIR /root/microros_ws_autobuild
-# RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
-#   && apt-get update && rosdep update \
-#   && rosdep install --from-path src --ignore-src -y \
-#   && . /opt/ros/$ROS_DISTRO/setup.sh \
-#   && colcon build \
-#   && . install/local_setup.sh \
-#   && ros2 run micro_ros_setup create_firmware_ws.sh host \
-#   && ros2 run micro_ros_setup build_firmware.sh \
-#   && . install/local_setup.sh \
-#   && ros2 run micro_ros_setup create_agent_ws.sh \
-#   && ros2 run micro_ros_setup build_agent.sh \
-#   && . install/local_setup.sh
+WORKDIR /root/microros_ws_autobuild
+RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
+  && apt-get update && rosdep update \
+  && rosdep install --from-path src --ignore-src -y \
+  && . /opt/ros/$ROS_DISTRO/setup.sh \
+  && colcon build \
+  && . install/local_setup.sh \
+  && ros2 run micro_ros_setup create_firmware_ws.sh host \
+  && ros2 run micro_ros_setup build_firmware.sh \
+  && . install/local_setup.sh \
+  && ros2 run micro_ros_setup create_agent_ws.sh \
+  && ros2 run micro_ros_setup build_agent.sh \
+  && . install/local_setup.sh
 
 # Install system packages "starter pack"
 RUN apt-get update && apt-get install -y \

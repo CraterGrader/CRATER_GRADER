@@ -6,8 +6,8 @@ echo 'source /opt/ros/$ROS_DISTRO/setup.zsh' >> /root/.zshrc
 echo 'source /opt/ros/$ROS_DISTRO/setup.bash' >> /root/.bashrc
 
 # Source microROS overlay packages
-# echo 'source /root/microros_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
-# echo 'source /root/microros_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
+echo 'source /root/microros_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
+echo 'source /root/microros_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
 
 # Fix zsh autocomplete
 echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc
