@@ -1,10 +1,13 @@
+# -------- Build on existing docker images ----------------
 # Get conda files
 FROM continuumio/miniconda3 as conda_setup
 
 # Use ros as the base image
 FROM ros:galactic as ros_base
 ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
+# ---------------------------------------------------------
 
+# -------- Environment configuration ----------------------
 # Setup vim theme
 COPY docker/.vim/ /root/.vim/
 COPY docker/.vimrc /root/.vimrc
@@ -20,7 +23,9 @@ RUN sh -c "$(wget -O- https://raw.githubusercontent.com/deluan/zsh-in-docker/mas
 
 # Initialize custom zsh theme
 RUN echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
+# ---------------------------------------------------------
 
+# -------- System and non-transient packages --------------
 # Automatically setup and build MicroROS packages
 WORKDIR /root/microros_ws_autobuild
 RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
@@ -60,17 +65,9 @@ RUN conda init bash \
   && conda activate cg \
   && . /opt/ros/$ROS_DISTRO/setup.sh \
   && colcon build
+# ---------------------------------------------------------
 
-# ------- Add custom packages below -------
-
-# Install additional custom packages
-RUN apt-get update && apt-get install -y \
-  ros-$ROS_DISTRO-rviz2 \
-  ros-$ROS_DISTRO-plotjuggler-ros \
-  ros-$ROS_DISTRO-joy
-
-
-# ------- VNC GUI Configuration -------
+# -------- VNC GUI Configuration --------------------------
 # Install vnc, xvfb for VNC configuration, fluxbox for window managment
 RUN apt-get install -y x11vnc xvfb fluxbox
 RUN mkdir ~/.vnc
@@ -89,8 +86,18 @@ RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
 # Clean up unnecessary output files
 RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc
 RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
-# ---------------------------------
+# ---------------------------------------------------------
 
+# -------- Custom and transient packages ------------------
+# Install additional custom packages
+RUN apt-get update && apt-get install -y \
+  ros-$ROS_DISTRO-rviz2 \
+  ros-$ROS_DISTRO-plotjuggler-ros \
+  ros-$ROS_DISTRO-joy
+
+# ---------------------------------------------------------
+
+# -------- Container entrypoint ---------------------------
 # Setup entrypoint
 COPY docker/cgdev_uros_entrypoint.sh /
 RUN chmod +x /cgdev_uros_entrypoint.sh
@@ -99,3 +106,4 @@ RUN chmod +x /cgdev_uros_entrypoint.sh
 WORKDIR /root/CRATER_GRADER/cg_ws/
 ENTRYPOINT ["/cgdev_uros_entrypoint.sh"]
 CMD ["zsh"]
+# ---------------------------------------------------------

@@ -9,7 +9,7 @@ echo 'source /opt/ros/$ROS_DISTRO/setup.bash' >> /root/.bashrc
 echo 'source /root/microros_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
 echo 'source /root/microros_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
 
-# Fix zsh autocomplete
+# Fix zsh autocomplete for ROS2 packages
 echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc
 echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc
 
@@ -24,7 +24,7 @@ echo "conda activate cg" >> ~/.bashrc
 # Welcome message
 echo "figlet -f slant 'CraterGrader'" >> ~/.zshrc
 
-# Start the VNC server
-x11vnc -forever -usepw -create
+# Start the VNC server, in shared mode so more than one user can access
+x11vnc -forever -usepw -create -shared
 
 exec "$@"
