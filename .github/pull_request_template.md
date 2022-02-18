@@ -10,6 +10,7 @@ https://cratergrader.atlassian.net/browse/CG-XXX
 * How could someone reproduce these tests?
 
 ### Checklist
+- [ ] Did you self-review your code?
 - [ ] Does the code build?
 - [ ] Is documentation/README up-to-date?
 - [ ] Do all unit tests pass?
