@@ -9,4 +9,7 @@ microros_ws/*
 
 # Other
 *.DS_Store
+<<<<<<< HEAD
 __pycache__/
+=======
+>>>>>>> main
