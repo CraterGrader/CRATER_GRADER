@@ -23,7 +23,6 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
-//#define BYTE_TO_QPPS_SPD_SCALE 100
 #define BYTE_TO_QPPS_SPD_SCALE 25  // Reduce max speed from what was calibrated
 #define BYTE_TO_QPPS_POS_SCALE 21
 #define BYTE_TO_QPPS_ZERO_OFFSET 127
@@ -153,8 +152,6 @@ void setup() {
   for (auto & roboclaw : roboclaws) {
     roboclaw.begin(38400);
   }
-
-
 }
 
 void loop() {
