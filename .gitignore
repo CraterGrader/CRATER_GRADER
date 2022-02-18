@@ -2,3 +2,10 @@
 cg_ws/build/
 cg_ws/install/
 cg_ws/log/
+
+# Don't track microros files except for the README.md
+microros_ws/*
+!microros_ws/README.md
+
+# Other
+*.DS_Store

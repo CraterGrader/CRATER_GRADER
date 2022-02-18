@@ -14,3 +14,4 @@ dependencies:
     - catkin_pkg
     - empy
     - lark
+    - pyyaml

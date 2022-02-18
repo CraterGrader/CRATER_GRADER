@@ -9,9 +9,9 @@ module cg_msgs {
       @default (value = 0.0)
       double wheel_velocity;
 
-      // Velocity of steer actuators, in percent of full scale [-100, 100]
+      // Position of steer actuators, in percent of full scale [-100, 100]
       @default (value = 0.0)
-      double steer_velocity;
+      double steer_position;
     };
   };
 };

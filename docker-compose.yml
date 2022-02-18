@@ -3,14 +3,19 @@ services:
   cg-dev:
     build:
       context: ./
-      dockerfile: ./docker/cg_dev.dockerfile
+      dockerfile: ./docker/cgdev_uros.dockerfile
       network: host
     devices:
       - /dev/input/:/dev/input/
+      # - /dev/ttyACM0:/dev/ttyACM0
+    # device_cgroup_rules:
+    #   - 'c 166:* rmw' # Arduino Due
+    #   - 'c 81:* rwm' # Intel RealSense (seems like general USB video)
     volumes:
       - .:/root/CRATER_GRADER
-      - ~/.ssh/:/root/.ssh/ # May be non-functioning in windows
-      - ~/.gitconfig:/root/.gitconfig # May be non-functioning in windows
+      # - /dev/:/dev/ # access the low level hardware
+      # - ~/.ssh/:/root/.ssh/ # May be non-functioning in windows
+      # - ~/.gitconfig:/root/.gitconfig # May be non-functioning in windows
     ports:
       - 22:22 # SSH port
     tty: true # use terminal, i.e. -t flag
