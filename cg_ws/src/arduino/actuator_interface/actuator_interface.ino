@@ -26,7 +26,9 @@
 //#define BYTE_TO_QPPS_SPD_SCALE 100
 #define BYTE_TO_QPPS_SPD_SCALE 25  // Reduce max speed from what was calibrated
 #define BYTE_TO_QPPS_POS_SCALE 21
+#define BYTE_TO_QP_POS_SCALE 21
 #define BYTE_TO_QPPS_ZERO_OFFSET 127
+#define BYTE_TO_QP_TOOL_SCALE 21
 
 #define POSN_CTRL_ACCEL_QPPS 600
 #define POSN_CTRL_DECCEL_QPPS 600
@@ -92,11 +94,11 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
       int steer_cmd_raw = (cmd_msg.data >> 8) & 0xFF; // Second byte indicates steer command in range [0, 255]
       if (abs(steer_cmd_raw - 127) <= 1) steer_cmd_raw = 127;  // Fix to zero when close to zero
-      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
+      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QP_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
 
       int tool_cmd_raw = (cmd_msg.data >> 16) & 0xFF; // Third byte indicates tool height command in range [0, 255]
       if (abs(tool_cmd_raw) <= 1) tool_cmd_raw = 0;  // Fix to zero when close to zero
-      int tool_cmd = byte_to_qpps(tool_cmd_raw, BYTE_TO_QPPS_POS_SCALE, 0);
+      int tool_cmd = byte_to_qpps(tool_cmd_raw, BYTE_TO_QP_TOOL_SCALE, 0);
 
       // Send Mobility Commands
       for (int i = 0; i < NUM_ROBOCLAWS_MOBILITY; ++i) {
@@ -106,7 +108,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
       // Send Tool Commands
       for (int i = 0; i < NUM_ROBOCLAWS_TOOL; i++) {
-        roboclawstool[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
+        roboclawstool[i].SpeedAccelDeccelPositionM1(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
       }
 
       String debug_str = "Currently commanding: {Drive: " + 
@@ -114,7 +116,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         "; Steer: " + 
         String(steer_cmd) + 
         "; Tool: " + 
-        String(tool_cmd_raw) + 
+        String(tool_cmd) + 
         "}";
         
       debug_msg.data.data = const_cast<char*>(debug_str.c_str());
