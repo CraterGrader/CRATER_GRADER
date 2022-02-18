@@ -23,7 +23,6 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
-//#define BYTE_TO_QPPS_SPD_SCALE 100
 #define BYTE_TO_QPPS_SPD_SCALE 25  // Reduce max speed from what was calibrated
 #define BYTE_TO_QPPS_POS_SCALE 21
 #define BYTE_TO_QP_POS_SCALE 21
@@ -56,11 +55,11 @@ bool cmd_msg_received = false;
 #define ROBOCLAW_ADDRESS 0x80
 #define NUM_ROBOCLAWS_MOBILITY 2
 #define NUM_ROBOCLAWS_TOOL 1
-RoboClaw roboclawsmobility[] = {
+RoboClaw roboclaws_mobility[] = {
   RoboClaw(&Serial1,10000), // Pins 18(Tx) and 18(Rx) on the Due
   RoboClaw(&Serial2,10000) // Pins 16(Tx) and 17(Rx) on the Due
 };
-RoboClaw roboclawstool[] = {
+RoboClaw roboclaws_tool[] = {
   RoboClaw(&Serial3,10000) // Pins 14(Tx) and 15(Rx) on the Due
 };
 // Rear RoboClaw has sign flipped
@@ -102,13 +101,13 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
       // Send Mobility Commands
       for (int i = 0; i < NUM_ROBOCLAWS_MOBILITY; ++i) {
-        roboclawsmobility[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd);
-        roboclawsmobility[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
+        roboclaws_mobility[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd);
+        roboclaws_mobility[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
       }
 
       // Send Tool Commands
-      for (int i = 0; i < NUM_ROBOCLAWS_TOOL; i++) {
-        roboclawstool[i].SpeedAccelDeccelPositionM1(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
+      for (int i = 0; i < NUM_ROBOCLAWS_TOOL; ++i) {
+        roboclaws_tool[i].SpeedAccelDeccelPositionM1(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
       }
 
       String debug_str = "Currently commanding: {Drive: " + 
@@ -177,10 +176,10 @@ void setup() {
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_sub, &cmd_msg, &cmd_callback, ON_NEW_DATA));
 
   // Set up RoboClaws
-  for (auto & roboclaw : roboclawsmobility) {
+  for (auto & roboclaw : roboclaws_mobility) {
     roboclaw.begin(38400);
   }
-  for (auto & roboclaw : roboclawstool) {
+  for (auto & roboclaw : roboclaws_tool) {
     roboclaw.begin(38400);
   }
 

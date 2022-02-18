@@ -13,7 +13,7 @@ def generate_launch_description():
     )
 
     with open(
-        os.path.join(get_package_share_directory('teleop'),
+        os.path.join(get_package_share_directory('arduino'),
         'config',
         'device_params.yaml'), "r") as stream:
         device_params = yaml.load(
@@ -42,6 +42,6 @@ def generate_launch_description():
             package='micro_ros_agent',
             executable='micro_ros_agent',
             name='micro_ros_agent',
-            arguments=['serial', '--dev', device_params['arduino_port'], '-v6']
+            arguments=['serial', '--dev', device_params['arduino_node']['ros__parameters']['arduino_port'], '-v6']
         )
     ])

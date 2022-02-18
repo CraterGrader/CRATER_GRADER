@@ -5,3 +5,4 @@ teleop_node:
     axis_steer: 3  # Index of steer axis in joystick message
     tool_raise: 5 # Index of left bumper in joystick message
     tool_lower: 4 # Index of right bumper in joystick message
+    tool_increment: 5 # Percent of full scale movement for each button press
