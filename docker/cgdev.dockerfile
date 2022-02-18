@@ -70,22 +70,22 @@ RUN conda init bash \
 # -------- VNC GUI Configuration --------------------------
 # Install vnc, xvfb for VNC configuration, fluxbox for window managment
 RUN apt-get install -y x11vnc xvfb fluxbox
-RUN mkdir ~/.vnc
 
 # Setup a VNC password
-RUN x11vnc -storepasswd cratergrader ~/.vnc/passwd
+RUN  mkdir ~/.vnc\
+  && x11vnc -storepasswd cratergrader ~/.vnc/passwd
 
 # Start the VNC server
-RUN echo "export DISPLAY=:20" >> ~/.zshrc
-RUN echo "export DISPLAY=:20" >> ~/.bashrc
+RUN echo "export DISPLAY=:20" >> ~/.zshrc \
+  && echo "export DISPLAY=:20" >> ~/.bashrc
 
 # Always try to start windows management in background to be ready for VNC
-RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc
-RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
+RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc \
+  && echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
 
 # Clean up unnecessary output files
-RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc
-RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
+RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
+  && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
@@ -99,11 +99,11 @@ RUN apt-get update && apt-get install -y \
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
-COPY docker/cgdev_uros_entrypoint.sh /
-RUN chmod +x /cgdev_uros_entrypoint.sh
+COPY docker/cgdev_entrypoint.sh /
+RUN chmod +x /cgdev_entrypoint.sh
 
 # Make entry
 WORKDIR /root/CRATER_GRADER/cg_ws/
-ENTRYPOINT ["/cgdev_uros_entrypoint.sh"]
+ENTRYPOINT ["/cgdev_entrypoint.sh"]
 CMD ["zsh"]
 # ---------------------------------------------------------
