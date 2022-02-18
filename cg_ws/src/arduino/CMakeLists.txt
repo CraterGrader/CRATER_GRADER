@@ -45,5 +45,8 @@ install(TARGETS serial_interface_node
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME}
 )
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 ament_package()

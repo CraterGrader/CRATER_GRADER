@@ -21,6 +21,12 @@ TeleopNode::TeleopNode() : Node("teleop_node") {
   this->get_parameter("axis_drive", joy_axis_drive_i_);
   this->declare_parameter<int>("axis_steer", 0);
   this->get_parameter("axis_steer", joy_axis_steer_i_);
+  this->declare_parameter<int>("tool_raise", 0);
+  this->get_parameter("tool_raise", joy_raise_tool_i_);
+  this->declare_parameter<int>("tool_lower", 0);
+  this->get_parameter("tool_lower", joy_lower_tool_i_);
+  this->declare_parameter<int>("tool_increment", 0);
+  this->get_parameter("tool_increment", joy_tool_increment_);
 }
 
 void TeleopNode::timerCallback() {
@@ -29,14 +35,35 @@ void TeleopNode::timerCallback() {
   // Scale to the range [-100, 100] % of full scale velocity
   cmd_msg.wheel_velocity = std::max(-100.0, std::min(100*joy_axis_drive_state_, 100.0));
   cmd_msg.steer_position = std::max(-100.0, std::min(100*joy_axis_steer_state_, 100.0));
+  cmd_msg.tool_position = joy_tool_height_state_;
   rclcpp::Time timestamp = this->get_clock()->now();
   cmd_msg.header.stamp = timestamp;
   cmd_pub_->publish(cmd_msg);
 }
 
 void TeleopNode::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
-  joy_axis_drive_state_ = msg->axes[joy_axis_drive_i_];
-  joy_axis_steer_state_ = msg->axes[joy_axis_steer_i_];
+  joy_axis_drive_state_  = msg->axes[joy_axis_drive_i_];
+  joy_axis_steer_state_  = msg->axes[joy_axis_steer_i_];
+
+  if (joy_tool_pressed_) {
+    if (msg->buttons[joy_raise_tool_i_] == 0 && msg->buttons[joy_lower_tool_i_] == 0) 
+    {
+      joy_tool_pressed_ = false;
+    }
+  } else {
+    //If lower bumper pressed, then lower
+    if (msg->buttons[joy_lower_tool_i_]) {
+      joy_tool_pressed_ = true;  
+      joy_tool_height_state_ = std::max(0.0, joy_tool_height_state_ - joy_axis_steer_i_);
+    }    
+    //If raise bumper pressed, then raise
+    if (msg->buttons[joy_raise_tool_i_]) {
+      joy_tool_pressed_ = true;  
+      joy_tool_height_state_ = std::min(100.0, joy_tool_height_state_ + joy_axis_steer_i_);
+    }
+    // Mark bumpers as pressed to avoid sticky button effects
+  }
+
 }
 
 }  // namespace teleop

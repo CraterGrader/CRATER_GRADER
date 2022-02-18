@@ -26,8 +26,16 @@ private:
 
   int joy_axis_drive_i_; // Axis index for forward/backward drive
   int joy_axis_steer_i_; // Axis index for steer data
+  int joy_lower_tool_i_; // Axis index for tool lowering bumper data
+  int joy_raise_tool_i_; // Axis index for tool raising bumper data
+
+  int joy_tool_increment_; // Tool increment percent of full scale for each joystick bumper press
+
   double joy_axis_drive_state_ = 0.0;  // Forward/backward drive state (+1 max fwd, -1 max bwd)
   double joy_axis_steer_state_ = 0.0;  // Left/right steer state (+1 max left, -1 max right)
+  double joy_tool_height_state_ = 0.0;  // Up/down tool state (+100 max height, -100 max height)
+
+  bool joy_tool_pressed_ = false; //Records last pressed state to require independent presses
 };
 
 
