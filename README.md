@@ -7,6 +7,7 @@ Complete source code for robot designed to autonomously grade lunar craters.
       - [Notice for iCloud users (MacOS):](#notice-for-icloud-users-macos)
   2. [High-Level Notes:](#high-level-notes)
   3. [Setup Instructions](#setup-instructions)
+      - [GUI Visualization](#gui-visualization)
   4. [Other Notes/Tips](#other-notestips)
 
 ## Docker Description and Setup
