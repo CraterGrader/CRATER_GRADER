@@ -3,38 +3,13 @@ services:
   cg-dev:
     build:
       context: ./
-      dockerfile: ./docker/cgdev_uros.dockerfile
+      dockerfile: ./docker/cgdev.dockerfile
       network: host
     devices:
       - /dev/input/:/dev/input/
-      # - /dev/ttyACM0:/dev/ttyACM0
-    # device_cgroup_rules:
-    #   - 'c 166:* rmw' # Arduino Due
-    #   - 'c 81:* rwm' # Intel RealSense (seems like general USB video)
     volumes:
       - .:/root/CRATER_GRADER
-      # - /dev/:/dev/ # access the low level hardware
-      # - ~/.ssh/:/root/.ssh/ # May be non-functioning in windows
-      # - ~/.gitconfig:/root/.gitconfig # May be non-functioning in windows
     ports:
-      - 22:22 # SSH port
-    tty: true # use terminal, i.e. -t flag
-    stdin_open: true # allow terminal input, i.e. -i flag
-    environment:
-      DISPLAY: "novnc:0.0"
-    networks:
-      - x11
-  novnc:
-    hostname: 'novnc'
-    image: theasp/novnc:latest
-    environment:
-      DISPLAY_WIDTH: 2000
-      DISPLAY_HEIGHT: 1500
-      RUN_XTERM: "no"
-      RUN_FLUXBOX: "yes"
-    ports:
-      - "8080:8080" # Internet port
-    networks:
-      - x11
-networks:
-  x11:
+      - 5901:5900 # <external port>:<container port>
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag

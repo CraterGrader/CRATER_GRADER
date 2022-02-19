@@ -7,6 +7,7 @@ Complete source code for robot designed to autonomously grade lunar craters.
       - [Notice for iCloud users (MacOS):](#notice-for-icloud-users-macos)
   2. [High-Level Notes:](#high-level-notes)
   3. [Setup Instructions](#setup-instructions)
+      - [GUI Visualization](#gui-visualization)
   4. [Other Notes/Tips](#other-notestips)
 
 ## Docker Description and Setup
@@ -30,9 +31,7 @@ The `cg-dev` docker container is the primary container for development. This con
 - Uses a `zsh` shell for convenient command line information (e.g. Github repo status), specifically with the [powerlevel10k theme](https://github.com/romkatv/powerlevel10k). The theme is customized for the container as specified by the `docker/.p10k.zsh` file
 - Is initialized with vim editing customizations, located in the `docker/.vim/` directory and `docker/.vimrc` file.
 - Has [tmux](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/) for multiple terminal windows (note that the visualization sometimes seems buggy, to be resolved going forward).
-- FOR GUI VISUALIZATION (e.g. Rviz, PlotJuggler, RQt, etc.)
-  - Start gui appliation in the Docker container (e.g. `ros2 run rviz2 rviz2`, `ros2 run plotjuggler plotjuggler`, etc.)
-  - Go to the following link in a browser: http://localhost:8080/vnc_auto.html
+- This setup uses VNC to visualize GUI windows generated from the Docker container (e.g. Rviz, PlotJuggler, RQt, etc.). Note that the VNC client must be connected before GUI windows can be generated. The VNC client uses [fluxbox](https://wiki.debian.org/FluxBox) for rudimentary window management. To do so, follow the instructions below for [GUI Visualization](#gui-visualization)
   
 ## Setup Instructions
 First, make sure Docker and Docker Compose are installed.
@@ -72,6 +71,14 @@ First, make sure Docker and Docker Compose are installed.
   ```
   docker-compose down
   ```
+
+### GUI Visualization
+  1) Enter the container (e.g. `docker-compose exec cg-dev zsh`)
+  2) Open your VNC client application (e.g. download [VNC Viewer from RealVNC](https://www.realvnc.com/en/connect/download/viewer/))
+  3) Connect to the VNC server address (search in the VNC client application for `localhost:5901`)
+  4) When prompted, enter the VNC server password (for now, `cratergrader`)
+  5) Start gui appliation in the Docker container, either in VNC window or original container terminal; best practice is to use the original terminal you entered the container from (e.g. `ros2 run rviz2 rviz2`, `ros2 run plotjuggler plotjuggler`, etc.)
+
 
 ## Other Notes/Tips
 - To completely remove _all docker related files from your system_ (e.g. to clear up resources), use the following command. Only non-active containers will be removed (i.e. containers that are "down"; any containers that are "up" will not be affected). Note that this command will clear the Docker build cache, so you will need to re-build any removed images afterwards. See the Docker documentation for more information about [pruning to reclaim space](https://docs.docker.com/config/pruning/), and/or [managing file system storage for Mac](https://docs.docker.com/desktop/mac/space/).
