@@ -22,7 +22,6 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */
-  // Callback for joystick input
   void timerCallback();
 
 };
