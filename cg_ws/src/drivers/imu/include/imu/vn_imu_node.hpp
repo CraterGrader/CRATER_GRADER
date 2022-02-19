@@ -3,6 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
+#include "vn/sensors.h"
 
 namespace cg {
 namespace imu {
@@ -13,6 +14,9 @@ public:
   VnImuNode();
 
 private:
+  /* VectorNav */
+  vn::sensors::VnSensor vs_;
+
   /* Publishers and Subscribers */
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
   rclcpp::TimerBase::SharedPtr timer_;

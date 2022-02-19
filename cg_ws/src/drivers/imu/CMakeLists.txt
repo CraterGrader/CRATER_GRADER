@@ -29,6 +29,10 @@ ament_target_dependencies(imu_node
   rclcpp_components
   sensor_msgs
 )
+target_link_libraries(
+  imu_node
+  libvncxx
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
