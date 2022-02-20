@@ -3,7 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
-#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include "vn/sensors.h"
 
 namespace cg {
@@ -18,12 +18,13 @@ private:
   /* Publishers and Subscribers */
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   /* Callbacks */
   void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
   void timerCallback();
 
-  tf2::Quaternion orientation_;
+  geometry_msgs::msg::Quaternion orientation_;
 
 };
 

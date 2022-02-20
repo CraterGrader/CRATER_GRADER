@@ -14,7 +14,11 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+
 
 # Add third-party VectorNav Library
 add_subdirectory(vectornav/cpp)
@@ -41,7 +45,10 @@ add_executable(imu_viz_node src/imu_viz_main.cpp
 ament_target_dependencies(imu_viz_node
   rclcpp
   rclcpp_components
+  geometry_msgs
   sensor_msgs
+  tf2
+  tf2_ros
 )
 
 if(BUILD_TESTING)
