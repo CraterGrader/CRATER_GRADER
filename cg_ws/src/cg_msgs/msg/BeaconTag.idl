@@ -1,0 +1,11 @@
+#include "std_msgs/msg/Header.idl"
+
+module cg_msgs {
+  module msg {
+    struct BeaconMultiTag {
+      std_msgs::msg::Header header;
+
+      // Array of Tag info
+    };
+  };
+};
