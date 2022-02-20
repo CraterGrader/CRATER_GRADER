@@ -51,11 +51,20 @@ void VnImuNode::timerCallback() {
   q.normalize();
   msg.orientation = tf2::toMsg(q);
 
-  // Set acceleration
+  // Set linear acceleration
   msg.linear_acceleration.x = vs_data_register.accel[0];
   msg.linear_acceleration.y = vs_data_register.accel[1];
   msg.linear_acceleration.z = vs_data_register.accel[2];
 
+  // Set angular velocity
+  msg.angular_velocity.x = vs_data_register.gyro[0];
+  msg.angular_velocity.y = vs_data_register.gyro[1];
+  msg.angular_velocity.z = vs_data_register.gyro[2];
+
+  // TODO the IMU message also has fields for covariance matrix values, ideally we should be setting these fields as well
+  // The IMU message defaults to "zero" covariance matrices which means "unknown covariance"
+  // If we want to use open-source ROS packages for localization, we may need to estimate the covariance
+  // and set the values accordingly
   imu_pub_->publish(msg);
 }
 
