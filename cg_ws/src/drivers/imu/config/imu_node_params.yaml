@@ -1,0 +1,4 @@
+imu_node:
+  ros__parameters:
+    device_name: '/dev/ttyUSB0'
+    baud_rate: 115200
