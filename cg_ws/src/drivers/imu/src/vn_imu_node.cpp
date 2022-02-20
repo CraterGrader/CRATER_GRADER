@@ -12,7 +12,7 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
   this->declare_parameter<int>("baud_rate", 115200);
   this->get_parameter("baud_rate", baud_rate);
   try {
-    vs_.connect(device_name, baud_rate);  // TODO parametrize device name and baud rate
+    vs_.connect(device_name, baud_rate);
   } catch (const vn::not_found & e) {
     RCLCPP_FATAL(this->get_logger(), "VectorNav IMU not found at %s", device_name.c_str());
     throw std::runtime_error("VectorNav IMU not found");
