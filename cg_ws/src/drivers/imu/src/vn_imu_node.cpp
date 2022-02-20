@@ -15,6 +15,9 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
   int baud_rate;
   this->declare_parameter<int>("baud_rate", 115200);
   this->get_parameter("baud_rate", baud_rate);
+  int freq;
+  this->declare_parameter<int>("pub_freq", 20);
+  this->get_parameter("pub_freq", freq);
   try {
     vs_.connect(device_name, baud_rate);
   } catch (const vn::not_found & e) {
@@ -28,7 +31,7 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
     "/imu", 1
   );
   timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(50),
+    std::chrono::milliseconds(1000/freq),
     std::bind(&VnImuNode::timerCallback, this)
   );
 }
