@@ -1,3 +1,7 @@
+#include <math.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include "imu/vn_imu_node.hpp"
 
 namespace cg {
@@ -24,13 +28,24 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
     "/imu", 1
   );
   timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(100),
+    std::chrono::milliseconds(50),
     std::bind(&VnImuNode::timerCallback, this)
   );
 }
 
 void VnImuNode::timerCallback() {
-  // TODO
+  sensor_msgs::msg::Imu msg;
+  auto vs_data_register = vs_.readYawPitchRollMagneticAccelerationAndAngularRates();
+  tf2::Quaternion q;
+  q.setRPY(
+    M_PI/180.0*vs_data_register.yawPitchRoll[2],
+    M_PI/180.0*vs_data_register.yawPitchRoll[1],
+    M_PI/180.0*vs_data_register.yawPitchRoll[0]
+  );
+  q.normalize();
+  // RCLCPP_INFO(this->get_logger(), "%f, %f, %f", vs_data_register.yawPitchRoll[0], vs_data_register.yawPitchRoll[1], vs_data_register.yawPitchRoll[2]);
+  msg.orientation = tf2::toMsg(q);
+  imu_pub_->publish(msg);
 }
 
 }  // namespace imu
