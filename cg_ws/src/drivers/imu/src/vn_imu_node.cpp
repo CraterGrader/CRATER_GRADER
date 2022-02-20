@@ -43,10 +43,9 @@ void VnImuNode::timerCallback() {
   q.setRPY(
     M_PI/180.0*vs_data_register.yawPitchRoll[2],
     M_PI/180.0*vs_data_register.yawPitchRoll[1],
-    M_PI/180.0*vs_data_register.yawPitchRoll[0]
+    0.0  // Intentionally ignore yaw assuming no magnetometer data on the moon, and set to zero
   );
   q.normalize();
-  // RCLCPP_INFO(this->get_logger(), "%f, %f, %f", vs_data_register.yawPitchRoll[0], vs_data_register.yawPitchRoll[1], vs_data_register.yawPitchRoll[2]);
   msg.orientation = tf2::toMsg(q);
   imu_pub_->publish(msg);
 }

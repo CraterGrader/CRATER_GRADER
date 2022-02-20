@@ -1,3 +1,4 @@
+#include <math.h>
 #include <geometry_msgs/msg/transform_stamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "imu/imu_viz_node.hpp"
@@ -18,8 +19,9 @@ ImuVizNode::ImuVizNode() : Node("imu_viz_node") {
 }
 
 void ImuVizNode::imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg) {
-  // tf2::fromMsg(msg->orientation, orientation_);
-  orientation_ = msg->orientation;
+  tf2::fromMsg(msg->orientation, orientation_);
+  // Flip by 180 degrees for visualization in RViz (IMU frame has z-axis pointing DOWN)
+  orientation_ = tf2::Quaternion(0,1,0,0) * orientation_;
 }
 
 void ImuVizNode::timerCallback() {
@@ -27,7 +29,7 @@ void ImuVizNode::timerCallback() {
   transform_stamped.header.stamp = this->get_clock()->now();
   transform_stamped.header.frame_id = "map";
   transform_stamped.child_frame_id = "imu_viz";
-  transform_stamped.transform.rotation = orientation_;
+  transform_stamped.transform.rotation = tf2::toMsg(orientation_);
   transform_stamped.transform.translation.x = 1;
   transform_stamped.transform.translation.y = 1;
   transform_stamped.transform.translation.z = 1;

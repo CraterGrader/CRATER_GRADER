@@ -3,6 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include "vn/sensors.h"
 
@@ -24,7 +25,7 @@ private:
   void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
   void timerCallback();
 
-  geometry_msgs::msg::Quaternion orientation_;
+  tf2::Quaternion orientation_;
 
 };
 
