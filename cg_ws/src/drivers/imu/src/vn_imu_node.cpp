@@ -38,7 +38,10 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
 
 void VnImuNode::timerCallback() {
   sensor_msgs::msg::Imu msg;
+  // Read IMU data
   auto vs_data_register = vs_.readYawPitchRollMagneticAccelerationAndAngularRates();
+
+  // Set orientation
   tf2::Quaternion q;
   q.setRPY(
     M_PI/180.0*vs_data_register.yawPitchRoll[2],
@@ -47,6 +50,12 @@ void VnImuNode::timerCallback() {
   );
   q.normalize();
   msg.orientation = tf2::toMsg(q);
+
+  // Set acceleration
+  msg.linear_acceleration.x = vs_data_register.accel[0];
+  msg.linear_acceleration.y = vs_data_register.accel[1];
+  msg.linear_acceleration.z = vs_data_register.accel[2];
+
   imu_pub_->publish(msg);
 }
 
