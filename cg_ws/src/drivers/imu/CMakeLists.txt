@@ -25,7 +25,6 @@ add_subdirectory(vectornav/cpp)
 include_directories(include vectornav/cpp/include)
 
 # build nodes
-# IMU Node
 add_executable(imu_node src/imu_main.cpp
   src/vn_imu_node.cpp
 )
@@ -41,18 +40,6 @@ target_link_libraries(
   imu_node
   libvncxx
 )
-# IMU TF broadcaster node for visualization
-add_executable(imu_viz_node src/imu_viz_main.cpp
-  src/imu_viz_node.cpp
-)
-ament_target_dependencies(imu_viz_node
-  rclcpp
-  rclcpp_components
-  geometry_msgs
-  sensor_msgs
-  tf2
-  tf2_ros
-)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -60,7 +47,7 @@ if(BUILD_TESTING)
 endif()
 
 # Install targets
-install(TARGETS imu_node imu_viz_node
+install(TARGETS imu_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
