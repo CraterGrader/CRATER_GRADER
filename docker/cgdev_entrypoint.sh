@@ -2,9 +2,9 @@
 set -e
 
 # Udev rules
-/lib/systemd/systemd-udevd --daemon
-udevadm control --reload-rules
-udevadm trigger
+# /lib/systemd/systemd-udevd --daemon
+# udevadm control --reload-rules
+# udevadm trigger
 
 # # Source ROS underlay binaries
 echo 'source /opt/ros/$ROS_DISTRO/setup.zsh' >> /root/.zshrc

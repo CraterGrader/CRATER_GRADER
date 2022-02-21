@@ -1,42 +1,48 @@
 camera:
     camera:
       ros__parameters:
-        device_type: ''
+        initial_reset: true # helps reduce latency issues
+        device_type: d435i
         serial_no: ''
         usb_port_id: ''
 
-        color_fps: 30.0
+        color_fps: 15.0
         color_height: 480
         color_width: 640
         color_qos: "SENSOR_DATA"
 
-        depth_fps: 30.0
-        depth_height: 720
-        depth_width: 1280
+        depth_fps: 15.0
+        depth_height: 480
+        depth_width: 640
         depth_qos: "SENSOR_DATA"
 
-        infra_height: 720
-        infra_width: 1280
-        infra_qos: "SENSOR_DATA"
+        # infra_height: 720
+        # infra_width: 1280
+        # infra_qos: "SENSOR_DATA"
 
-        gyro_fps: 0.0
+        # gyro_fps: 0.0
 
-        enable_accel: true
         enable_color: true
         enable_depth: true
-        enable_gyro: true
-        enable_infra1: true
-        enable_infra2: true
+
+        enable_infra1: false
+        enable_infra2: false
+        enable_fisheye: false
+        enable_gyro: false
+        enable_accel: false
+
+        enable_sync: true
+
 
         enable_pointcloud: true
-        filters: ''
+        # filters: '' #colorizer
 
 
-        pointcloud_texture_index: 0
-        pointcloud_texture_stream: RS2_STREAM_COLOR
+        # pointcloud_texture_index: 0
+        # pointcloud_texture_stream: RS2_STREAM_COLOR
 
-        stereo_module:
-          emitter_enabled: 1
-        unite_imu_method: ''
+        # stereo_module:
+        #   emitter_enabled: 1
+        # unite_imu_method: ''
 
-        rosbag_filename: ''
+        # rosbag_filename: ''
