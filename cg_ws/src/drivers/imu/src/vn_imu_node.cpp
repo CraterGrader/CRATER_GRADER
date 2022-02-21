@@ -1,5 +1,6 @@
 #include <math.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <geometry_msgs/msg/transform_stamped.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include "imu/vn_imu_node.hpp"
@@ -18,6 +19,8 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
   int freq;
   this->declare_parameter<int>("pub_freq", 20);
   this->get_parameter("pub_freq", freq);
+  this->declare_parameter<bool>("publish_viz", false);
+  this->get_parameter("publish_viz", publish_viz_);
   try {
     vs_.connect(device_name, baud_rate);
   } catch (const vn::not_found & e) {
@@ -34,6 +37,7 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
     std::chrono::milliseconds(1000/freq),
     std::bind(&VnImuNode::timerCallback, this)
   );
+  viz_tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 }
 
 void VnImuNode::timerCallback() {
@@ -51,6 +55,9 @@ void VnImuNode::timerCallback() {
   q.normalize();
   msg.orientation = tf2::toMsg(q);
 
+  msg.header.stamp = this->get_clock()->now();
+  msg.header.frame_id = "imu";
+
   // Set linear acceleration
   msg.linear_acceleration.x = vs_data_register.accel[0];
   msg.linear_acceleration.y = vs_data_register.accel[1];
@@ -66,6 +73,23 @@ void VnImuNode::timerCallback() {
   // If we want to use open-source ROS packages for localization, we may need to estimate the covariance
   // and set the values accordingly
   imu_pub_->publish(msg);
+
+  // Broadcast TF for visualization
+  if (publish_viz_) {
+    // Flip by 180 degrees for visualization in RViz (IMU frame has z-axis pointing DOWN)
+    tf2::Quaternion viz_orientation = tf2::Quaternion(0,1,0,0) * q;
+    geometry_msgs::msg::TransformStamped transform_stamped;
+    transform_stamped.header.stamp = this->get_clock()->now();
+    transform_stamped.header.frame_id = "map";
+    transform_stamped.child_frame_id = "imu_viz";
+    transform_stamped.transform.rotation = tf2::toMsg(viz_orientation);
+
+    // Fix translation so that it is not coincident with map (and can be easier visualized)
+    transform_stamped.transform.translation.x = 1;
+    transform_stamped.transform.translation.y = 1;
+    transform_stamped.transform.translation.z = 1;
+    viz_tf_broadcaster_->sendTransform(transform_stamped);
+  }
 }
 
 }  // namespace imu

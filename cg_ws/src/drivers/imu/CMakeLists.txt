@@ -32,7 +32,10 @@ add_executable(imu_node src/imu_main.cpp
 ament_target_dependencies(imu_node
   rclcpp
   rclcpp_components
+  geometry_msgs
   sensor_msgs
+  tf2
+  tf2_ros
 )
 target_link_libraries(
   imu_node
