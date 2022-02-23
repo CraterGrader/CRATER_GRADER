@@ -19,7 +19,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-
 # Add third-party VectorNav Library
 add_subdirectory(vectornav/cpp)
 include_directories(include vectornav/cpp/include)
