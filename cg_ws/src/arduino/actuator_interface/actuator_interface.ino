@@ -7,7 +7,6 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
-#include <std_msgs/msg/string.h>
 #include <std_msgs/msg/int64.h>
 
 #include "RoboClaw.h"
@@ -28,6 +27,10 @@
 #define BYTE_TO_QP_POS_SCALE 21
 #define BYTE_TO_QPPS_ZERO_OFFSET 127
 #define BYTE_TO_QP_TOOL_SCALE -588
+#define QP_TO_BYTE_STEER_SCALE 22
+#define QP_TO_BYTE_STEER_OFFSET 127
+
+
 
 #define POSN_CTRL_ACCEL_QPPS 600
 #define POSN_CTRL_DECCEL_QPPS 600
@@ -43,12 +46,18 @@ rcl_allocator_t allocator;
 rcl_node_t node;
 rcl_timer_t timer;
 
+//Used for validating data stream from roboclaws to Due 
+uint8_t status1;
+bool valid1;
+
 // Instantiate publishers and subscribers
 rcl_subscription_t cmd_sub;
 rcl_publisher_t debug_msg_pub;
 
 std_msgs__msg__Int64 cmd_msg;
-std_msgs__msg__String debug_msg;
+std_msgs__msg__Int64 debug_msg;
+int64_t iter = 0;
+
 bool cmd_msg_received = false;
 
 /* RoboClaws */
@@ -56,7 +65,7 @@ bool cmd_msg_received = false;
 #define NUM_ROBOCLAWS_MOBILITY 2
 #define NUM_ROBOCLAWS_TOOL 1
 RoboClaw roboclaws_mobility[] = {
-  RoboClaw(&Serial1,10000), // Pins 18(Tx) and 18(Rx) on the Due
+  RoboClaw(&Serial1,10000), // Pins 18(Tx) and 19(Rx) on the Due
   RoboClaw(&Serial2,10000) // Pins 16(Tx) and 17(Rx) on the Due
 };
 RoboClaw roboclaws_tool[] = {
@@ -110,17 +119,30 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         roboclaws_tool[i].SpeedAccelDeccelPositionM1(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
       }
 
-      String debug_str = "Currently commanding: {Drive: " + 
-        String(drive_cmd) + 
-        "; Steer: " + 
-        String(steer_cmd) + 
-        "; Tool: " + 
-        String(tool_cmd) + 
-        "}";
+      // Read Encoder Values
+      // Read Steer 1 Encoder Value
+      int32_t R1enc2 = roboclaws_mobility[0].ReadEncM2(ROBOCLAW_ADDRESS, &status1, &valid1);
+      int8_t R1enc2Scale = int32_to_byte(R1enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
+      
+
+      // Read Steer 2 Encoder Value 
+
+      // Read Tool Encoder Value 
         
-      debug_msg.data.data = const_cast<char*>(debug_str.c_str());
+      // Read Speed Values
+      // Read Drive 1 Speed
+
+      // Read Drive 2 Speed 
+
+
+//  functions 
+//int32_t enc2 = roboclaw.ReadEncM2(address, &status1, &valid1);
+//int32_t speed2 = roboclaw.ReadSpeedM2(address, &status2, &valid2);
+  
+      debug_msg.data = (int64_t)R1enc2Scale;
+
     } else {
-      debug_msg.data.data = const_cast<char*>("No data received");
+      debug_msg.data = 666;
     }
     RCSOFTCHECK(rcl_publish(&debug_msg_pub, &debug_msg, NULL));
   }
@@ -130,6 +152,12 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 int byte_to_qpps(const int &val, const int &scale, const int &zero_offset)
 {
   return (val - zero_offset) * scale;
+}
+
+// Converts a int32 to byte [0, 255] 
+int8_t int32_to_byte(const int32_t &val, const int &scale, const int &zero_offset)
+{
+  return (val/scale)+zero_offset;
 }
 
 void setup() {
@@ -158,7 +186,7 @@ void setup() {
   RCCHECK(rclc_publisher_init_default(
     &debug_msg_pub,
     &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String),
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
     "arduino_debug"));
 
   // create timer,
