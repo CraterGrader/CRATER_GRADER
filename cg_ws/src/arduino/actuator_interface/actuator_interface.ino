@@ -29,7 +29,10 @@
 #define BYTE_TO_QP_TOOL_SCALE -588
 #define QP_TO_BYTE_STEER_SCALE 22
 #define QP_TO_BYTE_STEER_OFFSET 127
-
+#define QP_TO_BYTE_DRIVE_SCALE 25 // DOUBLE CHECK VALUE FROM LIMITING
+#define QP_TO_BYTE_DRIVE_OFFSET 127 
+#define QP_TO_BYTE_TOOL_SCALE 22
+#define QP_TO_BYTE_TOOL_OFFSET 588 // DOUBLE CHECK VALUE FROM LIMITING
 
 
 #define POSN_CTRL_ACCEL_QPPS 600
@@ -49,6 +52,14 @@ rcl_timer_t timer;
 //Used for validating data stream from roboclaws to Due 
 uint8_t status1;
 bool valid1;
+uint8_t status2;
+bool valid2;
+uint8_t status3;
+bool valid3;
+uint8_t status4;
+bool valid4;
+uint8_t status5;
+bool valid5;
 
 // Instantiate publishers and subscribers
 rcl_subscription_t cmd_sub;
@@ -123,24 +134,27 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       // Read Steer 1 Encoder Value
       int32_t R1enc2 = roboclaws_mobility[0].ReadEncM2(ROBOCLAW_ADDRESS, &status1, &valid1);
       int8_t R1enc2Scale = int32_to_byte(R1enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
-      
 
       // Read Steer 2 Encoder Value 
+      int32_t R2enc2 = roboclaws_mobility[1].ReadEncM2(ROBOCLAW_ADDRESS, &status2, &valid2);
+      int8_t R2enc2Scale = int32_to_byte(R2enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
 
       // Read Tool Encoder Value 
-        
+      int32_t R3enc1 = roboclaws_tool[0].ReadEncM1(ROBOCLAW_ADDRESS, &status3, &valid3);
+      int8_t R3enc1Scale = int32_to_byte(R3enc1, QP_TO_BYTE_TOOL_SCALE, QP_TO_BYTE_TOOL_OFFSET);
+
       // Read Speed Values
       // Read Drive 1 Speed
+      int32_t R1spd1 = roboclaws_mobility[0].ReadSpeedM1(ROBOCLAW_ADDRESS, &status4, &valid4);
+      int8_t R1spd1Scale = int32_to_byte(R1spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
 
       // Read Drive 2 Speed 
-
-
-//  functions 
-//int32_t enc2 = roboclaw.ReadEncM2(address, &status1, &valid1);
-//int32_t speed2 = roboclaw.ReadSpeedM2(address, &status2, &valid2);
+      int32_t R2spd1 = roboclaws_mobility[1].ReadSpeedM1(ROBOCLAW_ADDRESS, &status5, &valid5);
+      int8_t R2spd1Scale = int32_to_byte(R2spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
   
-      debug_msg.data = (int64_t)R1enc2Scale;
-
+      // [Steer 1 Encoder, Steer 2 Encoder,Tool Encoder Value, Drive 1 Speed, Drive 2 Speed]
+      debug_msg.data = ((int64_t)R2spd1Scale << 32) | ((int64_t)R1spd1Scale << 24) | ((int64_t)R3enc1Scale << 16) | ((int64_t)R2enc2Scale << 8) | (int64_t)R1enc2Scale ;
+      
     } else {
       debug_msg.data = 666;
     }
