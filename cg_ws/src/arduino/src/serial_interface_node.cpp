@@ -80,6 +80,7 @@ void SerialInterfaceNode::ardCallback(const std_msgs::msg::Int64::SharedPtr msg)
   ard_feedback_.term_byte = (ard_debug_.data >> 56) & 0xFF; // Eighth byte
 
   // Publish the message
+  ard_feedback_.header.stamp = this->get_clock()->now();
   ard_pub_->publish(ard_feedback_);
 }
 
