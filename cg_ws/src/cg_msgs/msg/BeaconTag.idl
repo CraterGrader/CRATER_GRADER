@@ -3,9 +3,20 @@
 module cg_msgs {
   module msg {
     struct BeaconTag {
+      
       std_msgs::msg::Header header;
 
-      // Array of Tag info
+      string tag_id;
+
+      double pose_x;
+      double pose_y;
+      double pose_z;
+
+      double orientation_x;
+      double orientation_y;
+      double orientation_z;
+      double orientation_w;
+
     };
   };
 };
