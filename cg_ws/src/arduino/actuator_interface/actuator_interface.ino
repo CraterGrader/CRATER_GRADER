@@ -6,6 +6,7 @@
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
+#include <cmath>
 
 #include <std_msgs/msg/int64.h>
 
