@@ -134,36 +134,36 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       // Read Encoder Values
       // Read Steer 1 Encoder Value
       int32_t R1enc2 = roboclaws_mobility[0].ReadEncM2(ROBOCLAW_ADDRESS, &status1, &valid1);
-      int8_t R1enc2Scale = int32_to_byte(R1enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
+      uint8_t R1enc2Scale = int32_to_byte(R1enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
 
       // Read Steer 2 Encoder Value 
       int32_t R2enc2 = roboclaws_mobility[1].ReadEncM2(ROBOCLAW_ADDRESS, &status2, &valid2);
-      int8_t R2enc2Scale = int32_to_byte(R2enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
+      uint8_t R2enc2Scale = int32_to_byte(R2enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
 
       // Read Tool Encoder Value 
       int32_t R3enc1 = roboclaws_tool[0].ReadEncM1(ROBOCLAW_ADDRESS, &status3, &valid3);
-      int8_t R3enc1Scale = int32_to_byte(R3enc1, QP_TO_BYTE_TOOL_SCALE, QP_TO_BYTE_TOOL_OFFSET);
+      uint8_t R3enc1Scale = int32_to_byte(R3enc1, QP_TO_BYTE_TOOL_SCALE, QP_TO_BYTE_TOOL_OFFSET);
 
       // Read Speed Values
       // Read Drive 1 Speed
       int32_t R1spd1 = roboclaws_mobility[0].ReadSpeedM1(ROBOCLAW_ADDRESS, &status4, &valid4);
-      int8_t R1spd1Scale = int32_to_byte(R1spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
+      uint8_t R1spd1Scale = int32_to_byte(R1spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
 
       // Read Drive 2 Speed 
       int32_t R2spd1 = roboclaws_mobility[1].ReadSpeedM1(ROBOCLAW_ADDRESS, &status5, &valid5);
-      int8_t R2spd1Scale = int32_to_byte(R2spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
+      uint8_t R2spd1Scale = int32_to_byte(R2spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
 
       // Drive delta position front
-      int8_t drive_delta_pos_front = 0;
+      uint8_t drive_delta_pos_front = 0;
 
       // Drive delta position rear
-      int8_t drive_delta_pos_rear = 0;
+      uint8_t drive_delta_pos_rear = 0;
 
       // Terminal byte (limit switches, heartbeat, etc.)
-      int8_t term_byte = 0;
+      uint8_t term_byte = 0;
   
       // [Steer 1 Encoder, Steer 2 Encoder, Tool Encoder Value, Drive 1 Speed, Drive 2 Speed, Drive Delta Pos Front, Drive Delta Pos Rear, Term Byte]
-      debug_msg.data = (term_byte << 56) | (drive_delta_pos_rear << 48) |(drive_delta_pos_front << 40) | (R2spd1Scale << 32) | (R1spd1Scale << 24) | (R3enc1Scale << 16) | (R2enc2Scale << 8) | R1enc2Scale;
+      debug_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
       
     } else {
       debug_msg.data = 666;
