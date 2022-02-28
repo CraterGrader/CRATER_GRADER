@@ -6,7 +6,7 @@
 #include <cg_msgs/msg/beacon_tag.hpp>
 
 namespace cg {
-namespace teleop {
+namespace uwb_beacon_rtls {
 
 class UWBBeaconRTLSNode : public rclcpp::Node {
 
@@ -15,7 +15,7 @@ public:
 
 private:
   /* Publishers and Subscribers */
-  rclcpp::Publisher<cg_msgs::msg::BeaconMultiTag>::SharedPtr cmd_pub_;
+  rclcpp::Publisher<cg_msgs::msg::BeaconMultiTag>::SharedPtr rtls_pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */

@@ -25,7 +25,7 @@ void UWBBeaconRTLSNode::timerCallback() {
 
   rclcpp::Time timestamp = this->get_clock()->now();
   multi_tag_msg.header.stamp = timestamp;
-  rtls_pub_->publish(cmd_msg);
+  rtls_pub_->publish(multi_tag_msg);
 }
 
 }  // namespace uwb_beacon_rtls

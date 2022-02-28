@@ -2,7 +2,7 @@
 
 module cg_msgs {
   module msg {
-    struct BeaconMultiTag {
+    struct BeaconTag {
       std_msgs::msg::Header header;
 
       // Array of Tag info
