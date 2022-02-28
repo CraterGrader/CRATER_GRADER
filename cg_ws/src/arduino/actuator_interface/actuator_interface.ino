@@ -162,7 +162,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       int8_t term_byte = 0;
   
       // [Steer 1 Encoder, Steer 2 Encoder, Tool Encoder Value, Drive 1 Speed, Drive 2 Speed, Drive Delta Pos Front, Drive Delta Pos Rear, Term Byte]
-      debug_msg.data = ((int64_t)term_byte << 56) | ((int64_t)drive_delta_pos_rear << 48) |((int64_t)drive_delta_pos_front << 40) | ((int64_t)R2spd1Scale << 32) | ((int64_t)R1spd1Scale << 24) | ((int64_t)R3enc1Scale << 16) | ((int64_t)R2enc2Scale << 8) | (int64_t)R1enc2Scale;
+      debug_msg.data = (term_byte << 56) | (drive_delta_pos_rear << 48) |(drive_delta_pos_front << 40) | (R2spd1Scale << 32) | (R1spd1Scale << 24) | (R3enc1Scale << 16) | (R2enc2Scale << 8) | R1enc2Scale;
       
     } else {
       debug_msg.data = 666;

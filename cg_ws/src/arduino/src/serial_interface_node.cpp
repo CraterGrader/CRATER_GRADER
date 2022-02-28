@@ -74,10 +74,10 @@ void SerialInterfaceNode::ardCallback(const std_msgs::msg::Int64::SharedPtr msg)
   ard_feedback_.drive_delta_front = (ard_debug_.data >> 40) & 0xFF; // Sixth byte
 
   // Drive delta position rear
-  ard_feedback_.drive_delta_rear = (ard_debug_.data >> 48) & 0xFF; // Sixth byte
+  ard_feedback_.drive_delta_rear = (ard_debug_.data >> 48) & 0xFF; // Seventh byte
 
   // Terminal byte (limit switches, heartbeat, etc.)
-  ard_feedback_.term_byte = (ard_debug_.data >> 56) & 0xFF; // Sixth byte
+  ard_feedback_.term_byte = (ard_debug_.data >> 56) & 0xFF; // Eighth byte
 
   // Publish the message
   ard_pub_->publish(ard_feedback_);
