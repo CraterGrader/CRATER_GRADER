@@ -180,7 +180,8 @@ int byte_to_qpps(const int &val, const int &scale, const int &zero_offset)
 // Converts a int32 to byte [0, 255] 
 int8_t int32_to_byte(const int32_t &val, const int &scale, const int &zero_offset)
 {
-  return (val/scale)+zero_offset;
+  int raw_value = (val/scale)+zero_offset; // Get raw value, then clamp 
+  return min(max(raw_value, 0), 255);
 }
 
 void setup() {
