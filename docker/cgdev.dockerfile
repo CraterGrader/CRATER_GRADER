@@ -101,6 +101,9 @@ RUN apt-get update && apt-get install -y \
 # Install additional custom packages
 RUN pip3 install \
   pyserial
+
+# Specify Python Path
+RUN export PYTHONPATH=/opt/conda/envs/cg/lib/python3.8/site-packages:$PYTHONPATH
 # ---------------------------------------------------------
 
 
