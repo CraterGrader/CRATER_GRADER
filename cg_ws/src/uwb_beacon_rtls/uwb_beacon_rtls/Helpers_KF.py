@@ -7,7 +7,7 @@ import numpy as np
 # Initialize the Constant Velocity model for UWB-based Positioning in KF 
 def initConstVelocityKF():
 
-    dt = 0.001    # system update rate (10 Hz)
+    dt = 0.01    # system update rate (100 Hz)
     
     # variance of the measurement noise, supposing the error is 15 cm (0.15 * 0.15) on X- & Y-axes
     # Tune the values based on your set-up and the demanded performance
@@ -66,7 +66,7 @@ def initConstVelocityKF():
 # Constant acceleration Motion Model for UWB-based Positioning in KF 
 def initConstAccelerationKF():
     
-    dt = 0.1    # system update rate (10Hz)
+    dt = 0.01    # system update rate (100 Hz)
     
     # variance of the measurement noise, supposing the error is 15 cm (0.15 * 0.15) on X- & Y-axes
     # Tune the values based on your set-up and the demanded performance

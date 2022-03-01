@@ -14,7 +14,6 @@ class KalmanFilter():
         if(A is None or obj_id is None):
             raise ValueError("State Model(A) and Transition (H) Matrices must be provided in object creation!")            
         self.n_states = A.shape[1]      # no. of column vectors in A (length of the state vector)
-#         self.m_outputs = H.shape[0]   # no. of row vectors in H (lenght of the meas. vector)
         
         # Set the place holders of Parameters for KF when object creation 
         self.A = A
@@ -50,7 +49,6 @@ class KalmanFilter():
         if(A is None or H is None):
             raise ValueError("State Model(A) and Transition(H) Matrices must be provided in KF!")            
         self.n_states = A.shape[1]      # no. of column vectors in A (length of the state vector)
-#         self.m_outputs = H.shape[0]   # no. of row vectors in H (lenght of the meas. vector)
         
         self.A = A
         self.H = H

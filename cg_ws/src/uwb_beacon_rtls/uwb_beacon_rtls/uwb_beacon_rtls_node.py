@@ -49,12 +49,17 @@ class dwm1001_localizer(Node):
         self.kalman_list = [] 
 
         # Get port parameters
+        self.get_logger().info("Getting parameters:")
+
         self.declare_parameter('beacon_port', '/dev/ttyACM0')
         self.declare_parameter('beacon_verbose', False)
 
+        self.declare_parameter('tag_names', ['tag1'])
+        self.tag_names = self.get_parameter('tag_names').get_parameter_value().string_array_value
+                
         # Serial port settings
         self.dwm_port = self.get_parameter('beacon_port').get_parameter_value().string_value
-        self.verbose = self.get_parameter('beacon_verbose').get_parameter_value()
+        self.beacon_verbose = self.get_parameter('beacon_verbose').get_parameter_value().bool_value
         self.serialPortDWM1001 = serial.Serial(
             port = self.dwm_port,
             baudrate = 115200,
@@ -203,6 +208,7 @@ class dwm1001_localizer(Node):
             # Note: PoseStamped() may be replaced with compatible Custom msgs for uniform msg type
             # Assign the PoseStamped msg into CustomTag msg
             tag = BeaconTag()
+            tag.tag_id = "id_" + str(tag_id)
             tag.header = ps.header
             tag.pose_x = ps.pose.position.x
             tag.pose_y = ps.pose.position.y
