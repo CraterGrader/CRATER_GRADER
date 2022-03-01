@@ -14,8 +14,8 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='uwb_beacon_rtls',
-            executable='uwb_beacon_rtls',
-            name='uwb_beacon_rtls',
+            executable='uwb_beacon_rtls_node',
+            name='uwb_beacon_rtls_node',
             parameters=[uwb_beacon_rtls_params]
         )
     ])

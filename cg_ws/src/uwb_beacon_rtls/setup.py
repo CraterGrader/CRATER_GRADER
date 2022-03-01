@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'uwb_beacon_rtls = uwb_beacon_rtls.uwb_tracking_dwm1001:main'
+            'uwb_beacon_rtls_node = uwb_beacon_rtls.uwb_beacon_rtls_node:main'
         ],
     },
 )
