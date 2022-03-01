@@ -6,7 +6,7 @@ module cg_msgs {
       std_msgs::msg::Header header;
 
       // Array of Tag info (currently expecting only 2 at most)
-      cg_msgs::msg::BeaconTag tags [2];
+      cg_msgs::msg::BeaconTag TagsList [2];
 
     };
   };

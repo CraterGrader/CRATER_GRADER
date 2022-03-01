@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'uwb_rtls = uwb_rtls.uwb_tracking_dwm1001:main'
         ],
     },
 )

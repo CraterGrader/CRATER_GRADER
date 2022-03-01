@@ -1,0 +1,6 @@
+teleop_node:
+  ros__parameters:
+    beacon_port: '/dev/ttyACM0'
+    tag_names:
+      - 'Tag1'
+    

@@ -97,6 +97,13 @@ RUN apt-get update && apt-get install -y \
 
 # ---------------------------------------------------------
 
+# -------- Python Packages --------------------------------
+# Install additional custom packages
+RUN pip3 install \
+  pyserial
+# ---------------------------------------------------------
+
+
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
 COPY docker/cgdev_entrypoint.sh /
