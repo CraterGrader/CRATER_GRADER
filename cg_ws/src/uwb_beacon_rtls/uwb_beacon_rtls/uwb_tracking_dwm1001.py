@@ -38,7 +38,7 @@ class dwm1001_localizer(Node):
         
         self.multipleTags = BeaconMultiTag()
         self.pub_tags = self.create_publisher( BeaconMultiTag, "/dwm1001/multiTags", 10) 
-        timer_period = 0.1 # 10Hz
+        timer_period = 0.001 # 10Hz
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
         
@@ -87,6 +87,7 @@ class dwm1001_localizer(Node):
 
     def timer_callback(self) :
 
+        self.get_logger().info("Processing Tag Callback")
         try:
 
             # just read everything from serial port
@@ -102,15 +103,17 @@ class dwm1001_localizer(Node):
 
                 # If getting a tag position
                 if b"POS" in serDataList[0] :
-                    self.get_logger().info(serDataList[0])
                     
-
-                    tag_id = int(serDataList[1])  
-                    # tag_id = str(serDataList[1], 'UTF8')  # IDs in 0 - 15
-                    tag_macID = str(serDataList[2], 'UTF8')
-                    t_pose_x = float(serDataList[3])
-                    t_pose_y = float(serDataList[4])
-                    t_pose_z = float(serDataList[5])   
+                    try:
+                        tag_id = int(serDataList[1])  
+                        # tag_id = str(serDataList[1], 'UTF8')  # IDs in 0 - 15
+                        tag_macID = str(serDataList[2], 'UTF8')
+                        t_pose_x = float(serDataList[3])
+                        t_pose_y = float(serDataList[4])
+                        t_pose_z = float(serDataList[5])   
+                    except:
+                        self.get_logger().info("Failed to parse tag data!")
+                        return
 
                     # To use this raw pose of DWM1001 as a measurement data in KF
                     t_pose_list = [t_pose_x, t_pose_y, t_pose_z]
@@ -170,17 +173,6 @@ class dwm1001_localizer(Node):
             self.serialPortDWM1001.write(DWM1001_API_COMMANDS.RESET)
             self.serialPortDWM1001.write(DWM1001_API_COMMANDS.SINGLE_ENTER)
 
-        finally:
-             self.get_logger().info("Quitting, and sending reset command to dev board")
-             # self.serialPortDWM1001.reset_input_buffer()
-             # self.serialPortDWM1001.write(DWM1001_API_COMMANDS.RESET)
-             # self.serialPortDWM1001.write(DWM1001_API_COMMANDS.SINGLE_ENTER)
-
-             # serialReadLine = self.serialPortDWM1001.read_until()
-             # if b"reset" in serialReadLine:
-             #     self.get_logger().info("succesfully closed ")
-             #     self.serialPortDWM1001.close()
-
 
     def publishTagPositions(self, serialData):
         """
@@ -192,10 +184,15 @@ class dwm1001_localizer(Node):
 
         # If getting a tag position
         if b"POS" in ser_pose_data[0] :
-            #rospy.loginfo(arrayData)  # just for debug
 
             tag_id = str(ser_pose_data[1], 'UTF8')  # IDs in 0 - 15
             tag_macID = str(ser_pose_data[2], 'UTF8')
+
+            try:
+                tag_id = int(tag_id)
+            except:
+                self.get_logger().info("Tag ID could not be converted to Int!")
+                return 
 
             ps = PoseStamped()
             ps.pose.position.x = float(ser_pose_data[3])
@@ -210,7 +207,7 @@ class dwm1001_localizer(Node):
 
             raw_pose_xzy = [ps.pose.position.x, ps.pose.position.y, ps.pose.position.z]
 
-            # TODO: PoseStamped() may be replaced with compatible Custom msgs for uniform msg type
+            # Note: PoseStamped() may be replaced with compatible Custom msgs for uniform msg type
             # Assign the PoseStamped msg into CustomTag msg
             tag = BeaconTag()
             tag.header = ps.header
@@ -225,38 +222,17 @@ class dwm1001_localizer(Node):
             if tag_id not in self.topics:
                 self.topics[tag_id] = self.create_publisher( PoseStamped, "/dwm1001/id_" + tag_macID + "/pose", 10) 
                 self.multipleTags.TagsList.append(tag) # append custom Tags into the multiple tag msgs
-                
-                #rospy.loginfo("New tag {}. x: {}m, y: {}m, z: {}m".format(
-                #    str(tag_id),
-                #    ps.pose.position.x,
-                #    ps.pose.position.y,
-                #    ps.pose.position.z
-                #))
-            
-            # self.topics[tag_id].publish(ps)
-            
+                        
             # Publish only pose data without "NAN"
             if(np.isnan(raw_pose_xzy).any()): 
-                pass
+                self.get_logger().info("Raw Serial data include Nan!")
+                return
             else:
                 self.topics[tag_id].publish(ps) 
                 self.multipleTags.TagsList[int(tag_id)]= tag
 
-                # Publish multiple tags data for RVIZ visualization 
-                # pub_tags = rospy.Publisher("/dwm1001/multiTags", MultiTags, queue_size=100)                  
-             
             self.pub_tags.publish(self.multipleTags)    
-                        
 
-            # if self.verbose :
-            #     rospy.loginfo("Tag " + str(tag_macID) + ": "
-            #         + " x: "
-            #         + str(ps.pose.position.x)
-            #         + " y: "
-            #         + str(ps.pose.position.y)
-            #         + " z: "
-            #         + str(ps.pose.position.z)
-            #     )
     
     # Publish Tag positions using KF 
     def publishTagPoseKF(self, id_int, id_str, kfPoseData):

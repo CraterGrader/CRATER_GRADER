@@ -3,21 +3,27 @@
 <package format="3">
   <name>uwb_beacon_rtls</name>
   <version>0.0.0</version>
-  <description>Essential nodes for UWB Based Real-time localization system of CraterGrader</description>
-  <maintainer email="jharring@andrew.cmu.edu">John Harrington</maintainer>
+  <description>UltraWideband Real Time Localization System</description>
+  <maintainer email="jharring@andrew.cmu.edu">root</maintainer>
   <license>TODO</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
-  <depend>cg_msgs</depend>
-  <depend>rclcpp</depend>
-  <depend>sensor_msgs</depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
+  <build_depend>rosidl_default_generators</build_depend>
+
+  <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>ros2launch</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>cg_msgs</exec_depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>

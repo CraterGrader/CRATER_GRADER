@@ -8,14 +8,14 @@ def generate_launch_description():
     uwb_beacon_rtls_params =  os.path.join(
         get_package_share_directory('uwb_beacon_rtls'),
         'config',
-        'uwb_beacon_rtls_node_parms.yaml'
+        'uwb_beacon_rtls.yaml'
     )
 
     return LaunchDescription([
         Node(
             package='uwb_beacon_rtls',
-            executable='uwb_beacon_rtls_node',
-            name='uwb_beacon_rtls_node',
+            executable='uwb_beacon_rtls',
+            name='uwb_beacon_rtls',
             parameters=[uwb_beacon_rtls_params]
         )
     ])

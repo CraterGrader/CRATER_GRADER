@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'uwb_rtls'
+package_name = 'uwb_beacon_rtls'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'uwb_rtls = uwb_rtls.uwb_tracking_dwm1001:main'
+            'uwb_beacon_rtls = uwb_beacon_rtls.uwb_tracking_dwm1001:main'
         ],
     },
 )
