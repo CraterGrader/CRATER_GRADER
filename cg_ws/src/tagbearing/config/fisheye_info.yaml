@@ -1,0 +1,20 @@
+image_width: 640
+image_height: 480
+camera_name: fisheye_camera
+camera_matrix: # K Intrinsic Matrix
+  rows: 3
+  cols: 3
+  data: [203.718327157626, 0, 319.5, 0, 203.718327157626, 239.5, 0, 0, 1]
+distortion_model: fisheye
+distortion_coefficients: # D Matrix
+  rows: 1
+  cols: 4
+  data: [0, 0, 0, 0]
+rectification_matrix: # R Matrix
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix: # P Projection Matrix
+  rows: 3
+  cols: 4
+  data: [203.718327157626, 0, 319.5, 0, 0, 203.718327157626, 239.5, 0, 0, 0, 1, 0]
