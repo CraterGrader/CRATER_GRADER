@@ -6,7 +6,7 @@
 
 import numpy as np 
 from numpy.linalg import multi_dot
-from numpy.linalg import inv   # pinv may be more generic 
+from numpy.linalg import pinv   # pinv may be more generic 
 
 class KalmanFilter():
 
@@ -73,7 +73,7 @@ class KalmanFilter():
 
         # Measurement Update
         S = multi_dot([self.H, self.P_p, np.transpose(self.H)]) + self.R
-        K = multi_dot([self.P_p, np.transpose(self.H), inv(S)])   # Kalman Gain
+        K = multi_dot([self.P_p, np.transpose(self.H), pinv(S)])   # Kalman Gain
         z_residual = z - np.dot(self.H, self.x_p)                 # Diff b/w measurement and prior
         self.x_m = self.x_p + np.dot(K, z_residual)
         self.P_m = self.P_p - multi_dot([K, self.H, self.P_p]) 

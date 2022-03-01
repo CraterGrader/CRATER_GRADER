@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ 
     This src is adapted from the following repo, which is under the MIT license:
-    https://github.com/TIERS/ros-dwm1001-uwb-localization
+    https://github.com/cliansang/uwb-tracking-ros
 
     For more info on the documentation of DWM1001, go to the following links from Decawave: 
     1. https://www.decawave.com/sites/default/files/dwm1001-api-guide.pdf
@@ -90,7 +90,7 @@ class dwm1001_localizer(Node):
         self.get_logger().info("Processing Tag Callback")
         try:
 
-            # just read everything from serial port
+            # read everything from serial port
             serialReadLine = self.serialPortDWM1001.read_until()
 
             try:
@@ -105,8 +105,7 @@ class dwm1001_localizer(Node):
                 if b"POS" in serDataList[0] :
                     
                     try:
-                        tag_id = int(serDataList[1])  
-                        # tag_id = str(serDataList[1], 'UTF8')  # IDs in 0 - 15
+                        tag_id = int(serDataList[1])  # IDs in 0 - 15
                         tag_macID = str(serDataList[2], 'UTF8')
                         t_pose_x = float(serDataList[3])
                         t_pose_y = float(serDataList[4])
@@ -125,12 +124,12 @@ class dwm1001_localizer(Node):
                     else:
                         t_pose_xyz = np.array(t_pose_list) # numpy array
 
-                    # t_pose_xyz = np.array([t_pose_x, t_pose_y, t_pose_z])
                     t_pose_xyz.shape = (len(t_pose_xyz), 1)    # force to be a column vector                                       
 
-                    if tag_macID not in self.kalman_list:   # TODO: tag_macID
-                        # self.kalman_list.append(tag_id)
+                    if tag_macID not in self.kalman_list: 
+
                         self.kalman_list.append(tag_macID)
+
                         # Suppose constant velocity motion model is used (x,y,z and velocities in 3D)
                         A = np.zeros((6,6))
                         H = np.zeros((3, 6))  # measurement (x,y,z without velocities) 
@@ -138,14 +137,9 @@ class dwm1001_localizer(Node):
                         # For constant acceleration model, define the place holders as follows:
                         # A = np.zeros((9,9)) 
                         # H = np.zeros((3, 9)) 
-                        # idx = self.kalman_list.index(tag_id)
-                        self.kalman_list[tag_id] = kf(A, H, tag_macID) # create KF object for tag id
-                        # self.kalman_list[tag_id] = kf(A, H, tag_macID) # create KF object for tag id
-                        # print(self.kalman_list[tag_id].isKalmanInitialized)
-                    
-                    # idx_kf = self.kalman_list.index(tag_id)
-                    # idx = self.kalman_list.index(tag_macID)  # index of the Tag ID
 
+                        self.kalman_list[tag_id] = kf(A, H, tag_macID) # create KF object for tag id
+                    
                     if self.kalman_list[tag_id].isKalmanInitialized == False:  
                         # Initialize the Kalman by asigning required parameters
                         # This should be done only once for each tags
@@ -154,14 +148,13 @@ class dwm1001_localizer(Node):
                         
                         self.kalman_list[tag_id].assignSystemParameters(A, B, H, Q, R, P_0, x_0)  # [tag_id]
                         self.kalman_list[tag_id].isKalmanInitialized = True                            
-                        # print(self.kalman_list[tag_id].isKalmanInitialized)                           
                 
                     self.kalman_list[tag_id].performKalmanFilter(t_pose_xyz, 0)  
                     t_pose_vel_kf = self.kalman_list[tag_id].x_m  # state vector contains both pose and velocities data
                     t_pose_kf = t_pose_vel_kf[0:3]  # extract only position data (x,y,z)
-                    # print(t_pose_kf)                      
+
                     self.publishTagPoseKF(tag_id, tag_macID, t_pose_kf)
-                    # print(len(self.kalman_list))
+
                     
                 ############### Kalman Filter ###############
 
@@ -272,7 +265,9 @@ class dwm1001_localizer(Node):
         # send a third one - just in case
         self.serialPortDWM1001.write(DWM1001_API_COMMANDS.SINGLE_ENTER)
 
+
 def main(args=None):
+
     rclpy.init(args=args)
 
     dwm1001 = dwm1001_localizer()
