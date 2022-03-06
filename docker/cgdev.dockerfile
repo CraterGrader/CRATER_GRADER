@@ -88,6 +88,10 @@ RUN conda init bash \
   && conda activate cg \
   && . /opt/ros/$ROS_DISTRO/setup.sh \
   && colcon build
+
+# Set domain id for ROS2 networking over LAN
+RUN echo "export ROS_DOMAIN_ID=69" >> ~/.zshrc \
+  && echo "export ROS_DOMAIN_ID=69" >> ~/.bashrc
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
