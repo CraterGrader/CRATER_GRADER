@@ -1,0 +1,60 @@
+camera:
+    camera:
+      ros__parameters:
+
+        # Device Configuration
+        initial_reset: false # refresh the connection on startup
+        device_type: d435i
+        # serial_no: ''
+        # usb_port_id: ''
+
+        # Data sources 
+        enable_depth: true
+        enable_color: false
+
+        enable_infra: false
+        enable_infra1: false
+        enable_infra2: false
+
+        enable_fisheye: false
+        enable_fisheye1: false
+        enable_fisheye2: false
+  
+        enable_gyro: false
+        enable_accel: false
+        enable_pose: false
+        
+        enable_sync: false
+        align_depth: false
+        enable_confidence: false
+
+        # Source settings
+        color_fps: 30.0
+        color_height: 480
+        color_width: 640
+        color_qos: "SENSOR_DATA"
+
+        depth_fps: 30.0
+        depth_height: 480
+        depth_width: 640
+        depth_qos: "SENSOR_DATA"
+
+        # infra_height: 720
+        # infra_width: 1280
+        # infra_qos: "SENSOR_DATA"
+
+        # Point cloud
+        enable_pointcloud: true
+        pointcloud_qos: "SENSOR_DATA" # Use 'Best Effort' publishing
+        filters: colorizer # Applies RGB to aligned depth image
+        pointcloud.stream_filter: 0 # Allows any filter for streaming point cloud
+        pointcloud_stream_format_filter: 0
+        pointcloud_texture_index: 0
+        pointcloud_texture_stream: RS2_STREAM_COLOR
+
+        # Other
+        # stereo_module:
+        #   emitter_enabled: 1
+        # unite_imu_method: ''
+
+        # rosbag_filename: ''

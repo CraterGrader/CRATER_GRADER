@@ -97,13 +97,7 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   ros-$ROS_DISTRO-realsense2-camera
-
 # ---------------------------------------------------------
-
-# Realsense setup
-# WORKDIR /etc/udev/rules.d/
-# COPY udev/99-realsense-libusb.rules /etc/udev/rules.d/
-# RUN apt-get install udev
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
