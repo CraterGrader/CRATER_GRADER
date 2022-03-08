@@ -49,22 +49,6 @@ RUN apt-get update && apt-get install -y \
   tmux \
   iputils-ping \
   tree
-
-# Setup conda environment
-COPY --from=conda_setup /opt/conda/ /opt/conda/
-COPY environment.yml /root/
-RUN conda init zsh \
-  && conda env create --name cg -f /root/environment.yml --force \
-  && rm -f /root/environment.yml
-
-# Automatically build cg_ws packages
-WORKDIR /root/cg_ws_autobuild/
-COPY cg_ws/src/ /root/cg_ws_autobuild/src/
-RUN conda init bash \
-  && . /root/.bashrc \
-  && conda activate cg \
-  && . /opt/ros/$ROS_DISTRO/setup.sh \
-  && colcon build
 # ---------------------------------------------------------
 
 # -------- VNC GUI Configuration --------------------------
@@ -86,6 +70,24 @@ RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc \
 # Clean up unnecessary output files
 RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
   && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
+# ---------------------------------------------------------
+
+# -------- Setup CraterGrader environment packages --------
+# Setup conda environment
+COPY --from=conda_setup /opt/conda/ /opt/conda/
+COPY environment.yml /root/
+RUN conda init zsh \
+  && conda env create --name cg -f /root/environment.yml --force \
+  && rm -f /root/environment.yml
+
+# Automatically build cg_ws packages
+WORKDIR /root/cg_ws_autobuild/
+COPY cg_ws/src/ /root/cg_ws_autobuild/src/
+RUN conda init bash \
+  && . /root/.bashrc \
+  && conda activate cg \
+  && . /opt/ros/$ROS_DISTRO/setup.sh \
+  && colcon build
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------

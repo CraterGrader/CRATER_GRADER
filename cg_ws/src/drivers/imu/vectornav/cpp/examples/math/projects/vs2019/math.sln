@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1062
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "math", "math.vcxproj", "{F3DEDE6E-9814-3561-A6C5-01E2F0CE136B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{72FA8039-B6D8-37DF-8FC0-CDE71377C512} = {72FA8039-B6D8-37DF-8FC0-CDE71377C512}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libvncxx", "..\..\..\..\projects\vs2019\libvncxx.vcxproj", "{72FA8039-B6D8-37DF-8FC0-CDE71377C512}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3DEDE6E-9814-3561-A6C5-01E2F0CE136B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F3DEDE6E-9814-3561-A6C5-01E2F0CE136B}.Debug|Win32.Build.0 = Debug|Win32
+		{F3DEDE6E-9814-3561-A6C5-01E2F0CE136B}.Release|Win32.ActiveCfg = Release|Win32
+		{F3DEDE6E-9814-3561-A6C5-01E2F0CE136B}.Release|Win32.Build.0 = Release|Win32
+		{72FA8039-B6D8-37DF-8FC0-CDE71377C512}.Debug|Win32.ActiveCfg = Debug|Win32
+		{72FA8039-B6D8-37DF-8FC0-CDE71377C512}.Debug|Win32.Build.0 = Debug|Win32
+		{72FA8039-B6D8-37DF-8FC0-CDE71377C512}.Release|Win32.ActiveCfg = Release|Win32
+		{72FA8039-B6D8-37DF-8FC0-CDE71377C512}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9528A14-6571-4CDA-A9C1-3F745D73CE53}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,6 @@
+imu_node:
+  ros__parameters:
+    device_name: '/dev/ttyUSB0'
+    baud_rate: 115200
+    pub_freq: 20  # Publishing frequency in Hz
+    publish_viz: false

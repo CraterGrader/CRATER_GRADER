@@ -28,7 +28,6 @@ private:
   void cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg);
 };
 
-
 }  // namespace arduino
 }  // namespace cg
 
