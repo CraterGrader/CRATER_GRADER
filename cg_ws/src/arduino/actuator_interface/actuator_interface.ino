@@ -64,7 +64,11 @@ rcl_publisher_t feedback_pub;
 
 std_msgs__msg__Int64 cmd_msg;
 std_msgs__msg__Int64 feedback_msg;
-int64_t iter = 0;
+
+int32_t deltaPosM1Last = 0;
+int32_t deltaPosM1Curr = 0;
+int32_t deltaPosM2Last = 0;
+int32_t deltaPosM2Curr = 0;
 
 bool cmd_msg_received = false;
 
@@ -150,10 +154,14 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       uint8_t R2spd1Scale = int32_to_byte(R2spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       // Drive delta position front
-      uint8_t drive_delta_pos_front = 0;
+      deltaPosM1Curr = roboclaws_mobility[0].ReadEncM1(ROBOCLAW_ADDRESS, &status1, &valid1);
+      uint8_t drive_delta_pos_front = deltaPosM1Curr-deltaPosM1Last;
+      deltaPosM1Last = deltaPosM1Curr;
 
       // Drive delta position rear
-      uint8_t drive_delta_pos_rear = 0;
+      deltaPosM2Curr = roboclaws_mobility[1].ReadEncM1(ROBOCLAW_ADDRESS, &status1, &valid1);
+      uint8_t drive_delta_pos_rear = deltaPosM2Curr - deltaPosM2Last;
+      deltaPosM2Last = deltaPosM2Curr;
 
       // Terminal byte (limit switches, heartbeat, etc.)
       uint8_t term_byte = 0;
