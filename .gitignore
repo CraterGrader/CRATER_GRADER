@@ -8,5 +8,5 @@ cg_ws/nohup.out
 
 # Other
 *.DS_Store
-__pycache__/
-.vscode
+*__pycache__/
+*.vscode
