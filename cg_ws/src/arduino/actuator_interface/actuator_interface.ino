@@ -1,5 +1,4 @@
 #include <micro_ros_arduino.h>
-
 #include <stdio.h>
 #include <string>
 #include <rcl/rcl.h>
@@ -7,9 +6,7 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 #include <cmath>
-
 #include <std_msgs/msg/int64.h>
-
 #include "RoboClaw.h"
 
 // NUM_HANDLES must be updated to reflect total number of subscribers + publishers
@@ -26,6 +23,9 @@
 #define BYTE_TO_QPPS_DRIVE_SCALE 25  // Drive Scale 
 #define BYTE_TO_QP_STEER_SCALE 22 // Steer Scale
 #define BYTE_TO_QPPS_DRIVE_STEER_OFFSET 127 // 
+#define BYTE_TO_QPPS_DELTA_POS_SCALE 10  // Drive Scale 
+#define BYTE_TO_QPPS_DELTA_POS_OFFSET 127 // 
+
 
 #define BYTE_TO_QP_TOOL_SCALE -588 // Tool Scale
 #define BYTE_TO_QP_TOOL_OFFSET 0 // Tool offset 
@@ -155,12 +155,12 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
       // Drive delta position front
       deltaPosM1Curr = roboclaws_mobility[0].ReadEncM1(ROBOCLAW_ADDRESS, &status1, &valid1);
-      uint8_t drive_delta_pos_front = deltaPosM1Curr-deltaPosM1Last;
+      uint8_t drive_delta_pos_front = int32_to_byte(deltaPosM1Curr-deltaPosM1Last, BYTE_TO_QPPS_DELTA_POS_SCALE, BYTE_TO_QPPS_DELTA_POS_OFFSET);
       deltaPosM1Last = deltaPosM1Curr;
 
       // Drive delta position rear
       deltaPosM2Curr = roboclaws_mobility[1].ReadEncM1(ROBOCLAW_ADDRESS, &status1, &valid1);
-      uint8_t drive_delta_pos_rear = deltaPosM2Curr - deltaPosM2Last;
+      uint8_t drive_delta_pos_rear = int32_to_byte(deltaPosM2Curr - deltaPosM2Last, BYTE_TO_QPPS_DELTA_POS_SCALE, BYTE_TO_QPPS_DELTA_POS_OFFSET);
       deltaPosM2Last = deltaPosM2Curr;
 
       // Terminal byte (limit switches, heartbeat, etc.)

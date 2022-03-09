@@ -30,6 +30,8 @@ private:
   #define QP_TO_BYTE_DRIVE_OFFSET (127) 
   #define QP_TO_BYTE_TOOL_SCALE (22)
   #define QP_TO_BYTE_TOOL_OFFSET (588) // DOUBLE CHECK VALUE FROM LIMITING
+  #define QP_TO_BYTE_DELTA_POS_SCALE (10)  // Drive Scale 
+  #define QP_TO_BYTE_DELTA_POS_OFFSET (127) // 
   
   /* Message data */
   cg_msgs::msg::ActuatorCommand actuator_cmd_;

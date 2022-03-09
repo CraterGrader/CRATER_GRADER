@@ -71,10 +71,12 @@ void SerialInterfaceNode::ardCallback(const std_msgs::msg::Int64::SharedPtr msg)
   enc_telemetry_.drive_vel_rear = SerialInterfaceNode::byte_to_qpps(drive_vel_rear_byte, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
 
   // Drive delta position front
-  enc_telemetry_.drive_delta_front = (ard_feedback_.data >> 40) & 0xFF; // Sixth byte
+  int drive_delta_pos_front = (ard_feedback_.data >> 40) & 0xFF
+  enc_telemetry_.drive_delta_front = SerialInterfaceNode::byte_to_qpps(drive_delta_pos_front, QP_TO_BYTE_DELTA_POS_SCALE, QP_TO_BYTE_DELTA_POS_OFFSET); // Sixth byte
 
   // Drive delta position rear
-  enc_telemetry_.drive_delta_rear = (ard_feedback_.data >> 48) & 0xFF; // Seventh byte
+  int drive_delta_pos_rear = (ard_feedback_.data >> 48) & 0xFF;
+  enc_telemetry_.drive_delta_rear = SerialInterfaceNode::byte_to_qpps(drive_delta_pos_rear, QP_TO_BYTE_DELTA_POS_SCALE, QP_TO_BYTE_DELTA_POS_OFFSET);  // Seventh byte
 
   // Terminal byte (limit switches, heartbeat, etc.)
   enc_telemetry_.term_byte = (ard_feedback_.data >> 56) & 0xFF; // Eighth byte
