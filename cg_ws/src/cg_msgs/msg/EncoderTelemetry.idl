@@ -2,7 +2,7 @@
 
 module cg_msgs {
   module msg {
-    struct ArduinoFeedback {
+    struct EncoderTelemetry {
       std_msgs::msg::Header header;
 
       // Steer position front

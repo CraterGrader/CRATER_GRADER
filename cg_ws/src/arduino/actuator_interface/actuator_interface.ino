@@ -64,10 +64,10 @@ bool valid5;
 
 // Instantiate publishers and subscribers
 rcl_subscription_t cmd_sub;
-rcl_publisher_t debug_msg_pub;
+rcl_publisher_t feedback_pub;
 
 std_msgs__msg__Int64 cmd_msg;
-std_msgs__msg__Int64 debug_msg;
+std_msgs__msg__Int64 feedback_msg;
 int64_t iter = 0;
 
 bool cmd_msg_received = false;
@@ -163,12 +163,12 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       uint8_t term_byte = 0;
   
       // [Steer 1 Encoder, Steer 2 Encoder, Tool Encoder Value, Drive 1 Speed, Drive 2 Speed, Drive Delta Pos Front, Drive Delta Pos Rear, Term Byte]
-      debug_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
+      feedback_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
       
     } else {
-      debug_msg.data = 666;
+      feedback_msg.data = 666;
     }
-    RCSOFTCHECK(rcl_publish(&debug_msg_pub, &debug_msg, NULL));
+    RCSOFTCHECK(rcl_publish(&feedback_pub, &feedback_msg, NULL));
   }
 }
 
@@ -212,7 +212,7 @@ void setup() {
     &debug_msg_pub,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
-    "arduino_debug"));
+    "arduino_feedback"));
 
   // create timer,
   RCCHECK(rclc_timer_init_default(
