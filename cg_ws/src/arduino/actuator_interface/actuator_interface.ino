@@ -23,17 +23,13 @@
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
-#define BYTE_TO_QPPS_SPD_SCALE 25  // Reduce max speed from what was calibrated
-#define BYTE_TO_QPPS_POS_SCALE 21
-#define BYTE_TO_QP_POS_SCALE 21
-#define BYTE_TO_QPPS_ZERO_OFFSET 127
-#define BYTE_TO_QP_TOOL_SCALE -588
-#define QP_TO_BYTE_STEER_SCALE 22
-#define QP_TO_BYTE_STEER_OFFSET 127
-#define QP_TO_BYTE_DRIVE_SCALE 25 // DOUBLE CHECK VALUE FROM LIMITING
-#define QP_TO_BYTE_DRIVE_OFFSET 127 
-#define QP_TO_BYTE_TOOL_SCALE 22
-#define QP_TO_BYTE_TOOL_OFFSET 588 // DOUBLE CHECK VALUE FROM LIMITING
+#define BYTE_TO_QPPS_DRIVE_SCALE 25  // Drive Scale 
+#define BYTE_TO_QP_STEER_SCALE 22 // Steer Scale
+#define BYTE_TO_QPPS_DRIVE_STEER_OFFSET 127 // 
+
+#define BYTE_TO_QP_TOOL_SCALE -588 // Tool Scale
+#define BYTE_TO_QP_TOOL_OFFSET 0 // Tool offset 
+
 
 
 #define POSN_CTRL_ACCEL_QPPS 600
@@ -110,15 +106,15 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       // Command RoboClaws
       int drive_cmd_raw = cmd_msg.data & 0xFF; // First byte indicates drive command in range [0, 255]
       if (abs(drive_cmd_raw - 127) <= 1) drive_cmd_raw = 127;  // Fix to zero when close to zero
-      int drive_cmd = byte_to_qpps(drive_cmd_raw, BYTE_TO_QPPS_SPD_SCALE, BYTE_TO_QPPS_ZERO_OFFSET); 
+      int drive_cmd = byte_to_qpps(drive_cmd_raw, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET); 
 
       int steer_cmd_raw = (cmd_msg.data >> 8) & 0xFF; // Second byte indicates steer command in range [0, 255]
       if (abs(steer_cmd_raw - 127) <= 1) steer_cmd_raw = 127;  // Fix to zero when close to zero
-      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QP_POS_SCALE, BYTE_TO_QPPS_ZERO_OFFSET);
+      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       int tool_cmd_raw = (cmd_msg.data >> 16) & 0xFF; // Third byte indicates tool height command in range [0, 255]
       if (abs(tool_cmd_raw) <= 1) tool_cmd_raw = 0;  // Fix to zero when close to zero
-      int tool_cmd = byte_to_qpps(tool_cmd_raw, BYTE_TO_QP_TOOL_SCALE, 0);
+      int tool_cmd = byte_to_qpps(tool_cmd_raw, BYTE_TO_QP_TOOL_SCALE, BYTE_TO_QP_TOOL_OFFSET);
 
       // Send Mobility Commands
       for (int i = 0; i < NUM_ROBOCLAWS_MOBILITY; ++i) {
@@ -134,24 +130,24 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       // Read Encoder Values
       // Read Steer 1 Encoder Value
       int32_t R1enc2 = roboclaws_mobility[0].ReadEncM2(ROBOCLAW_ADDRESS, &status1, &valid1);
-      uint8_t R1enc2Scale = int32_to_byte(R1enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
+      uint8_t R1enc2Scale = int32_to_byte(R1enc2, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       // Read Steer 2 Encoder Value 
       int32_t R2enc2 = roboclaws_mobility[1].ReadEncM2(ROBOCLAW_ADDRESS, &status2, &valid2);
-      uint8_t R2enc2Scale = int32_to_byte(R2enc2, QP_TO_BYTE_STEER_SCALE, QP_TO_BYTE_STEER_OFFSET);
+      uint8_t R2enc2Scale = int32_to_byte(R2enc2, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       // Read Tool Encoder Value 
       int32_t R3enc1 = roboclaws_tool[0].ReadEncM1(ROBOCLAW_ADDRESS, &status3, &valid3);
-      uint8_t R3enc1Scale = int32_to_byte(R3enc1, QP_TO_BYTE_TOOL_SCALE, QP_TO_BYTE_TOOL_OFFSET);
+      uint8_t R3enc1Scale = int32_to_byte(R3enc1, BYTE_TO_QP_TOOL_SCALE, BYTE_TO_QP_TOOL_OFFSET);
 
       // Read Speed Values
       // Read Drive 1 Speed
       int32_t R1spd1 = roboclaws_mobility[0].ReadSpeedM1(ROBOCLAW_ADDRESS, &status4, &valid4);
-      uint8_t R1spd1Scale = int32_to_byte(R1spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
+      uint8_t R1spd1Scale = int32_to_byte(R1spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       // Read Drive 2 Speed 
       int32_t R2spd1 = roboclaws_mobility[1].ReadSpeedM1(ROBOCLAW_ADDRESS, &status5, &valid5);
-      uint8_t R2spd1Scale = int32_to_byte(R2spd1, QP_TO_BYTE_DRIVE_SCALE, QP_TO_BYTE_DRIVE_OFFSET);
+      uint8_t R2spd1Scale = int32_to_byte(R2spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       // Drive delta position front
       uint8_t drive_delta_pos_front = 0;
