@@ -45,7 +45,7 @@ First, make sure Docker and Docker Compose are installed.
 
 1. Windows/MacOS only: if not already running, start the Docker daemon by opening the Docker Desktop application (the Docker daemon should already be accessible for Linux-based systems).
 
-2. The first time you use the image, you need to build the image. There are currently two images you can build, differing only on hardware access given to the resulting container. Specify the desired service in the following commands by replacing `cg-dev` with the desired service name:
+2. The first time you use the image, you need to build the image. There are currently two images you can build, differing only on hardware access given to the resulting container. Specify the desired service in the following commands by replacing `cg-dev` with the desired service name. Both services use the same VNC port so can be viewed the same way, but cannot both be running at the same time (because the ports will conflict).
 > - PERSONAL LAPTOP: `cg-dev` enables device-only access meaning the only devices that will be accessible by the container must be specified in the service or loaded with a separate script. This is the safest option and should be used for team laptop development.
 > - XAVIER: `cg-dev-hw` is the full hardware access service meaning the container can access ALL hardware devices and drivers on the machine. This container uses `privileged=true` and mounts the full `/dev/` directory to the container. Full hardware access is less secure so should only be used for the robot hardware i.e. the Xavier computer.
 
