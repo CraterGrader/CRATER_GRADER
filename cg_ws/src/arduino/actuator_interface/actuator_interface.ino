@@ -110,7 +110,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 
       int steer_cmd_raw = (cmd_msg.data >> 8) & 0xFF; // Second byte indicates steer command in range [0, 255]
       if (abs(steer_cmd_raw - 127) <= 1) steer_cmd_raw = 127;  // Fix to zero when close to zero
-      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QPPS_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
+      int steer_cmd = byte_to_qpps(steer_cmd_raw, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
       int tool_cmd_raw = (cmd_msg.data >> 16) & 0xFF; // Third byte indicates tool height command in range [0, 255]
       if (abs(tool_cmd_raw) <= 1) tool_cmd_raw = 0;  // Fix to zero when close to zero
@@ -205,7 +205,7 @@ void setup() {
 
   // create publishers
   RCCHECK(rclc_publisher_init_default(
-    &debug_msg_pub,
+    &feedback_pub,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
     "arduino_feedback"));
