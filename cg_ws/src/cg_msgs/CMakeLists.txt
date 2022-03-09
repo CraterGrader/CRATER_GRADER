@@ -8,7 +8,7 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   # Add custom interfaces here
   "msg/ActuatorCommand.idl"
-  "msg/ArduinoFeedback.idl"
+  "msg/EncoderTelemetry.idl"
 
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs

@@ -23,7 +23,7 @@ private:
 
   // Reading commands from arduino
   rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr ard_sub_;
-  rclcpp::Publisher<cg_msgs::msg::EncoderTelemetry>::SharedPtr ard_pub_;
+  rclcpp::Publisher<cg_msgs::msg::EncoderTelemetry>::SharedPtr enc_pub_;
   #define QP_TO_BYTE_STEER_SCALE (22)
   #define QP_TO_BYTE_STEER_OFFSET (127)
   #define QP_TO_BYTE_DRIVE_SCALE (25) // DOUBLE CHECK VALUE FROM LIMITING
