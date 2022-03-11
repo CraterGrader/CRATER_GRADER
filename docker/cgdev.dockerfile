@@ -98,13 +98,9 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-joy
 # ---------------------------------------------------------
 
-# -------- Python Packages --------------------------------
-# Install additional custom packages
-RUN pip3 install \
-  pyserial
-
-# Specify Python Path
-RUN export PYTHONPATH=/opt/conda/envs/cg/lib/python3.8/site-packages:$PYTHONPATH
+# -------- rosdep --------------------------------
+# Install dependencies specified in package.xml
+RUN rosdep install --from-paths src --ignore-src -r -y
 # ---------------------------------------------------------
 
 

@@ -29,16 +29,15 @@ class dwm1001_localizer(Node):
         """
         Initialize the node, open serial port
         """        
-        # Init node
+        # Initialize node
         super().__init__('DWM1001_RTLS_Node')
 
-        # allow serial port to be detected by user
-        # NOTE: USB is assumed to be connected to ttyACM0. If not, need to modified it.
+        # Allow serial port to be detected by user
         # os.popen("sudo chmod 777 /dev/ttyACM0", "w")  
         
         self.multipleTags = BeaconMultiTag()
         self.pub_tags = self.create_publisher( BeaconMultiTag, "/dwm1001/multiTags", 10) 
-        timer_period = 0.001 # 10Hz
+        timer_period = 0.01 # 100Hz
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
         
@@ -68,21 +67,21 @@ class dwm1001_localizer(Node):
             bytesize = serial.SEVENBITS
         )
 
-        # close the serial port in case the previous run didn't closed it properly
+        # Close the serial port in case the previous run didn't closed it properly
         self.serialPortDWM1001.close()
-        # sleep for one sec
+        # Sleep for one sec
         time.sleep(1)
-        # open serial port
+        # Open serial port
         self.serialPortDWM1001.open()
 
-        # check if the serial port is opened
+        # Check if the serial port is opened
         if(self.serialPortDWM1001.isOpen()):
             self.get_logger().info("Port opened: "+ str(self.serialPortDWM1001.name) )
-            # start sending commands to the board so we can initialize the board
+            # Start sending commands to the board so we can initialize the board
             self.initializeDWM1001API()
             # give some time to DWM1001 to wake up
             time.sleep(2)
-            # send command lec, so we can get positions is CSV format
+            # Send command lec, so we can get positions is CSV format
             self.serialPortDWM1001.write(DWM1001_API_COMMANDS.LEC)
             self.serialPortDWM1001.write(DWM1001_API_COMMANDS.SINGLE_ENTER)
             self.get_logger().info("Reading DWM1001 coordinates and process them!")
@@ -95,76 +94,68 @@ class dwm1001_localizer(Node):
         self.get_logger().info("Processing Tag Callback")
         try:
 
-            # read everything from serial port
+            # Read everything from serial port
             serialReadLine = self.serialPortDWM1001.read_until()
 
-            try:
-                # Publish the Raw Pose Data directly from the USB                     
-                self.publishTagPositions(serialReadLine)    
+            # Publish the Raw Pose Data directly from the USB                     
+            self.publishTagPositions(serialReadLine)    
 
-                ############### Kalman Filter ###############
-                # Use Kalman filter to process the data and publish it 
-                serDataList = [x.strip() for x in serialReadLine.strip().split(b',')]
+            ############### Kalman Filter ###############
+            # Use Kalman filter to process the data and publish it 
+            serDataList = [x.strip() for x in serialReadLine.strip().split(b',')]
 
-                # If getting a tag position
-                if b"POS" in serDataList[0] :
-                    
-                    try:
-                        tag_id = int(serDataList[1])  # IDs in 0 - 15
-                        tag_macID = str(serDataList[2], 'UTF8')
-                        t_pose_x = float(serDataList[3])
-                        t_pose_y = float(serDataList[4])
-                        t_pose_z = float(serDataList[5])   
-                    except:
-                        self.get_logger().info("Failed to parse tag data!")
-                        return
-
-                    # To use this raw pose of DWM1001 as a measurement data in KF
-                    t_pose_list = [t_pose_x, t_pose_y, t_pose_z]
-
-                    # Discard the pose data from USB if there exists "nan" in the values
-                    if(np.isnan(t_pose_list).any()):
-                        self.get_logger().info("Serial data include Nan!")
-                        return
-                    else:
-                        t_pose_xyz = np.array(t_pose_list) # numpy array
-
-                    t_pose_xyz.shape = (len(t_pose_xyz), 1)    # force to be a column vector                                       
-
-                    if tag_macID not in self.kalman_list: 
-
-                        self.kalman_list.append(tag_macID)
-
-                        # Suppose constant velocity motion model is used (x,y,z and velocities in 3D)
-                        A = np.zeros((6,6))
-                        H = np.zeros((3, 6))  # measurement (x,y,z without velocities) 
-
-                        # For constant acceleration model, define the place holders as follows:
-                        # A = np.zeros((9,9)) 
-                        # H = np.zeros((3, 9)) 
-
-                        self.kalman_list[tag_id] = kf(A, H, tag_macID) # create KF object for tag id
-                    
-                    if self.kalman_list[tag_id].isKalmanInitialized == False:  
-                        # Initialize the Kalman by asigning required parameters
-                        # This should be done only once for each tags
-                        A, B, H, Q, R, P_0, x_0  = initConstVelocityKF() # for const velocity model
-                        # A, B, H, Q, R, P_0, x_0  = initConstAccelerationKF() # for const acceleration model
-                        
-                        self.kalman_list[tag_id].assignSystemParameters(A, B, H, Q, R, P_0, x_0)  # [tag_id]
-                        self.kalman_list[tag_id].isKalmanInitialized = True                            
+            # If getting a tag position
+            if b"POS" in serDataList[0] :
                 
-                    self.kalman_list[tag_id].performKalmanFilter(t_pose_xyz, 0)  
-                    t_pose_vel_kf = self.kalman_list[tag_id].x_m  # state vector contains both pose and velocities data
-                    t_pose_kf = t_pose_vel_kf[0:3]  # extract only position data (x,y,z)
+                try:
+                    tag_id = int(serDataList[1])  # IDs in 0 - 15
+                    tag_macID = str(serDataList[2], 'UTF8')
+                    t_pose_x = float(serDataList[3])
+                    t_pose_y = float(serDataList[4])
+                    t_pose_z = float(serDataList[5])   
+                except:
+                    self.get_logger().info("Failed to parse tag data!")
+                    return
 
-                    self.publishTagPoseKF(tag_id, tag_macID, t_pose_kf)
+                # To use this raw pose of DWM1001 as a measurement data in KF
+                t_pose_list = [t_pose_x, t_pose_y, t_pose_z]
 
+                # Discard the pose data from USB if there exists "nan" in the values
+                if(np.isnan(t_pose_list).any()):
+                    self.get_logger().info("Serial data include Nan!")
+                    return
+
+                t_pose_xyz = np.array(t_pose_list)
+                t_pose_xyz.shape = (len(t_pose_xyz), 1)    # force to be a column vector                                       
+
+                if tag_macID not in self.kalman_list: 
+
+                    self.kalman_list.append(tag_macID)
+
+                    # Suppose constant velocity motion model is used (x,y,z and velocities in 3D)
+                    A = np.zeros((6,6))
+                    H = np.zeros((3, 6))  # Measurement (x,y,z without velocities) 
+
+                    # For constant acceleration model, define the place holders as follows:
+                    # A = np.zeros((9,9)) 
+                    # H = np.zeros((3, 9)) 
+
+                    self.kalman_list[tag_id] = kf(A, H, tag_macID) # Create KF object for tag id
+                
+                if self.kalman_list[tag_id].isKalmanInitialized == False:  
+                    # Initialize the Kalman by asigning required parameters
+                    # This should be done only once for each tags
+                    A, B, H, Q, R, P_0, x_0  = initConstVelocityKF() # Constant velocity model
+                    # A, B, H, Q, R, P_0, x_0  = initConstAccelerationKF() # Constant acceleration model
                     
-                ############### Kalman Filter ###############
+                    self.kalman_list[tag_id].assignSystemParameters(A, B, H, Q, R, P_0, x_0) 
+                    self.kalman_list[tag_id].isKalmanInitialized = True                            
+            
+                self.kalman_list[tag_id].performKalmanFilter(t_pose_xyz, 0)  
+                t_pose_vel_kf = self.kalman_list[tag_id].x_m  # State vector contains both pose and velocities data
+                t_pose_kf = t_pose_vel_kf[0:3]  # Extract position data (x,y,z)
 
-            except IndexError:
-                self.get_logger().info("Found index error in the network array!DO SOMETHING!")
+                self.publishTagPoseKF(tag_id, tag_macID, t_pose_kf)
 
         except KeyboardInterrupt:
             self.get_logger().info("Quitting DWM1001 Shell Mode and closing port, allow 1 second for UWB recovery")
@@ -186,6 +177,7 @@ class dwm1001_localizer(Node):
             tag_id = str(ser_pose_data[1], 'UTF8')  # IDs in 0 - 15
             tag_macID = str(ser_pose_data[2], 'UTF8')
 
+            # Try to cast parsed tag ID to integer. If fails, then there is a mistiming with the beacon, should self-correct
             try:
                 tag_id = int(tag_id)
             except:
@@ -201,7 +193,7 @@ class dwm1001_localizer(Node):
             ps.pose.orientation.z = 0.0
             ps.pose.orientation.w = 1.0
             ps.header.stamp = self.get_clock().now().to_msg()   
-            ps.header.frame_id = tag_macID # TODO: Currently, MAC ID of the Tag is set as a frame ID 
+            ps.header.frame_id = tag_macID 
 
             raw_pose_xzy = [ps.pose.position.x, ps.pose.position.y, ps.pose.position.z]
 
@@ -220,7 +212,7 @@ class dwm1001_localizer(Node):
 
             if tag_id not in self.topics:
                 self.topics[tag_id] = self.create_publisher( PoseStamped, "/dwm1001/id_" + tag_macID + "/pose", 10) 
-                self.multipleTags.TagsList.append(tag) # append custom Tags into the multiple tag msgs
+                self.multipleTags.TagsList.append(tag) # Append custom Tags into the multiple tag msgs
                         
             # Publish only pose data without "NAN"
             if(np.isnan(raw_pose_xzy).any()): 
@@ -245,7 +237,7 @@ class dwm1001_localizer(Node):
         ps.pose.orientation.z = 0.0
         ps.pose.orientation.w = 1.0
         ps.header.stamp = self.get_clock().now().to_msg()   
-        ps.header.frame_id = id_str # use MAC ID of the Tag as a frame ID for ROS
+        ps.header.frame_id = id_str
 
         if id_int not in self.topics_kf:
             self.topics_kf[id_int] = self.create_publisher( PoseStamped, "/dwm1001/id_" + str(id_str) + "/pose_kf", 10) 

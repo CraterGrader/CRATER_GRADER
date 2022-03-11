@@ -5,6 +5,8 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
+
+    # Load rtls parameters
     uwb_beacon_rtls_params =  os.path.join(
         get_package_share_directory('uwb_beacon_rtls'),
         'config',

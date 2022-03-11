@@ -2,5 +2,6 @@ uwb_beacon_rtls_node:
   ros__parameters:
     beacon_port: '/dev/ttyACM0'
     beacon_verbose: False
-    tag_names: ['Tag1']
+    tag_names: 
+      - '8795'
     

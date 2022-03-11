@@ -8,6 +8,8 @@ module cg_msgs {
 
       string tag_id;
 
+      // Cartesian position of tag wrt defined coordinate system 
+      // (defined in RTLS Manager Android application)
       double pose_x;
       double pose_y;
       double pose_z;
