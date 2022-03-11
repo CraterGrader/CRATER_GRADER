@@ -24,14 +24,16 @@ private:
   // Reading commands from arduino
   rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr ard_sub_;
   rclcpp::Publisher<cg_msgs::msg::EncoderTelemetry>::SharedPtr enc_pub_;
-  #define QP_TO_BYTE_STEER_SCALE (22)
-  #define QP_TO_BYTE_STEER_OFFSET (127)
-  #define QP_TO_BYTE_DRIVE_SCALE (25) // DOUBLE CHECK VALUE FROM LIMITING
-  #define QP_TO_BYTE_DRIVE_OFFSET (127) 
-  #define QP_TO_BYTE_TOOL_SCALE (22)
-  #define QP_TO_BYTE_TOOL_OFFSET (588) // DOUBLE CHECK VALUE FROM LIMITING
-  #define QP_TO_BYTE_DELTA_POS_SCALE (10)  // Drive Scale 
-  #define QP_TO_BYTE_DELTA_POS_OFFSET (127) // 
+
+  // declare parameters 
+  int QP_TO_BYTE_STEER_SCALE_;
+  int QP_TO_BYTE_STEER_OFFSET_;
+  int QP_TO_BYTE_DRIVE_SCALE_;
+  int QP_TO_BYTE_DRIVE_OFFSET_;
+  int QP_TO_BYTE_TOOL_SCALE_;
+  int QP_TO_BYTE_TOOL_OFFSET_;
+  int QP_TO_BYTE_DELTA_POS_SCALE_;
+  int QP_TO_BYTE_DELTA_POS_OFFSET_;
   
   /* Message data */
   cg_msgs::msg::ActuatorCommand actuator_cmd_;
