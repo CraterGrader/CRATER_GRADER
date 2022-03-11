@@ -6,6 +6,7 @@ cd "${SCRIPT_DIR}/../"
 DEVICES=(
   "/dev/cg_dev/tty_arduino"
   "/dev/cg_dev/tty_uwb1"
+  "/dev/cg_dev/tty_imu"
 )
 
 # docker-compose down
