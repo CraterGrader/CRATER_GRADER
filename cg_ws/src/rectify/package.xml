@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>tagbearing</name>
+  <name>rectify</name>
   <version>0.0.0</version>
-  <description>Essential nodes for teleoperation of CraterGrader</description>
+  <description>Image rectification node</description>
   <maintainer email="ryanlee@andrew.cmu.edu">Ryan Lee</maintainer>
   <license>TODO</license>
 
@@ -11,6 +11,9 @@
 
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>OpenCV</depend>
+  <depend>image_transport</depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

@@ -17,5 +17,5 @@ apriltag:
             debug: 1                # write additional debugging images to current working directory
 
             tag_ids: [0]            # tag IDs for which to publish transform
-            tag_frames: ['test']   # optional frame names
-            tag_sizes: [0.1]      # optional tag-specific edge size
+            #tag_frames: ['test']   # optional frame names
+            #tag_sizes: [0.1]      # optional tag-specific edge size

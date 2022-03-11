@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/image.hpp>
+#include <std_msgs/msg/float64.hpp>
 #include <apriltag_msgs/msg/april_tag_detection.hpp>
 #include <apriltag_msgs/msg/april_tag_detection_array.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
@@ -14,6 +15,8 @@
 #include <apriltag.h>
 
 #include <Eigen/Core>
+
+#include <math.h>
 
 
 class AprilTagNode : public rclcpp::Node {
@@ -44,6 +47,7 @@ private:
     const image_transport::CameraSubscriber sub_cam;
     const rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr pub_tf;
     const rclcpp::Publisher<apriltag_msgs::msg::AprilTagDetectionArray>::SharedPtr pub_detections;
+    const rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_bearing;
 
     void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci);
 

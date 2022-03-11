@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(tagbearing)
+project(rectify)
 
 # Default to C++20
 if(NOT CMAKE_CXX_STANDARD)
@@ -24,14 +24,15 @@ find_package(image_transport REQUIRED)
 include_directories(include)
 
 # build nodes
-add_executable(tagbearing_node src/tagbearing_main.cpp
-  src/tagbearing_node.cpp
+add_executable(rectify_node src/rectify_main.cpp
+  src/rectify_node.cpp
 )
-ament_target_dependencies(tagbearing_node
+ament_target_dependencies(rectify_node
   rclcpp
   rclcpp_components
   sensor_msgs
   cv_bridge
+  OpenCV
   image_transport
 )
 
@@ -42,7 +43,7 @@ endif()
 
 
 # Install targets
-install(TARGETS tagbearing_node
+install(TARGETS rectify_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -3,11 +3,10 @@
 import cv2
 import numpy as np
 import os
-import glob
 
 # Defining the dimensions of checkerboard
-CHECKERBOARD = (6, 9)
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+CHECKERBOARD = (9, 11)
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1)
 
 # Creating vector to store vectors of 3D points for each checkerboard image
 objpoints = []
@@ -30,18 +29,21 @@ cal_cam_data = os.path.join(os.path.dirname(
 if not os.path.exists(cal_cam_data):
   os.makedirs(cal_cam_data)
 
+# Read from the camera
+cap = cv2.VideoCapture(2)
 
 # Extracting path of individual image stored in a given directory
-images = glob.glob('data_dirold/*.png')
-for fname in images[2:4]:
-  img = cv2.imread(fname)
+print("\nTo take picture, click on video and press 'SPACE' (may lag after pressing)")
+print("To quit, press 'ESC'\n")
+
+while(True):
+  _, img = cap.read()
   gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   cv2.imshow('Camera', img)
-  print("\nTo take picture, click on video and press 'SPACE' (may lag after pressing)")
-  print("To quit, press 'ESC'\n")
+  img_cp = img.copy()
 
   # Wait for user input
-  k = cv2.waitKey(0)
+  k = cv2.waitKey(1)
   if k % 256 == 27:  # ESC pressed
     print("Escape hit, closing...")
     break
@@ -75,7 +77,9 @@ for fname in images[2:4]:
 
       if k % 256 == 110:  # n pressed
         print("'n' pressed, skipping image...")
-        break
+        print("\nTo take picture, click on video and press 'SPACE' (may lag after pressing)")
+        print("To quit, press 'ESC'\n")
+        continue
 
       elif k % 256 == 121:  # y pressed
         print("Saving image data and file...")
@@ -85,11 +89,15 @@ for fname in images[2:4]:
 
         # Save file
         img_name = "cal_cam_{:03d}.png".format(img_counter)
-        cv2.imwrite(cal_cam_data + img_name, img)
+        cv2.imwrite(cal_cam_data + img_name, img_cp)
         print(f"{img_name} written!")
         img_counter += 1
+        print("\nTo take picture, click on video and press 'SPACE' (may lag after pressing)")
+        print("To quit, press 'ESC'\n")
     else:
       print("Corners not found, skipping image...")
+      print("\nTo take picture, click on video and press 'SPACE' (may lag after pressing)")
+      print("To quit, press 'ESC'\n")
 cv2.destroyAllWindows()
 
 # h, w = img.shape[:2]
