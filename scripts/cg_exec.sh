@@ -4,8 +4,8 @@ cd "${SCRIPT_DIR}/../"
 
 # Add device names here
 DEVICES=(
-  "/dev/ttyACM0"
-  "/dev/ttyUSB0"
+  "/dev/cg_dev/tty_arduino"
+  "/dev/cg_dev/tty_uwb1"
 )
 
 # docker-compose down
@@ -22,7 +22,7 @@ for device in "${DEVICES[@]}"; do
   fi
 done
 
-docker-compose up -d
+docker-compose up -d cg-dev
 
 cp "${SCRIPT_DIR}/docker-compose.yml" "${DOCKER_COMPOSE_FILE}"
 rm -f "${SCRIPT_DIR}/docker-compose.yml"
