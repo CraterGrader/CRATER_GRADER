@@ -25,13 +25,21 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   );
 
   // Load Parameters 
+  this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE");
   this->get_parameter("QP_TO_BYTE_STEER_SCALE", QP_TO_BYTE_STEER_SCALE_);
+  this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET");
   this->get_parameter("QP_TO_BYTE_STEER_OFFSET", QP_TO_BYTE_STEER_OFFSET_);
+  this->declare_parameter<int>("QP_TO_BYTE_DRIVE_SCALE");
   this->get_parameter("QP_TO_BYTE_DRIVE_SCALE", QP_TO_BYTE_DRIVE_SCALE_);
+  this->declare_parameter<int>("QP_TO_BYTE_DRIVE_OFFSET");
   this->get_parameter("QP_TO_BYTE_DRIVE_OFFSET", QP_TO_BYTE_DRIVE_OFFSET_);
+  this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE");
   this->get_parameter("QP_TO_BYTE_TOOL_SCALE", QP_TO_BYTE_TOOL_SCALE_);
+  this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET");
   this->get_parameter("QP_TO_BYTE_TOOL_OFFSET", QP_TO_BYTE_TOOL_OFFSET_);
+  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_SCALE");
   this->get_parameter("QP_TO_BYTE_DELTA_POS_SCALE", QP_TO_BYTE_DELTA_POS_SCALE_);
+  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET");
   this->get_parameter("QP_TO_BYTE_DELTA_POS_OFFSET", QP_TO_BYTE_DELTA_POS_OFFSET_);
 
 }

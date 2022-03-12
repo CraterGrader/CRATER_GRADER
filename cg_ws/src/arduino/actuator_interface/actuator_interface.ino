@@ -170,7 +170,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
       feedback_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
       
     } else {
-      feedback_msg.data = 666;
+      feedback_msg.data = 0;
     }
     RCSOFTCHECK(rcl_publish(&feedback_pub, &feedback_msg, NULL));
   }

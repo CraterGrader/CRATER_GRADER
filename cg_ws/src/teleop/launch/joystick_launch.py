@@ -41,7 +41,7 @@ def generate_launch_description():
         Node(
             package='arduino',
             executable='serial_interface_node',
-            name='serial_interface_node'
+            name='serial_interface_node',
             parameters=[scale_offset_params]
         ),
         Node(
