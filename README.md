@@ -45,9 +45,13 @@ First, make sure Docker and Docker Compose are installed.
 
 1. Windows/MacOS only: if not already running, start the Docker daemon by opening the Docker Desktop application (the Docker daemon should already be accessible for Linux-based systems).
 
-2. The first time you use the image, you need to build the image. Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-30 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
+2. The first time you use the image, you need to build the image. There are currently two images you can build, differing only on hardware access given to the resulting container. Specify the desired service in the following commands by replacing `cg-dev` with the desired service name. Both services use the same VNC port so can be viewed the same way, but cannot both be running at the same time (because the ports will conflict).
+> - PERSONAL LAPTOP: `cg-dev` enables device-only access meaning the only devices that will be accessible by the container must be specified in the service or loaded with a separate script. This is the safest option and should be used for team laptop development.
+> - XAVIER: `cg-dev-hw` is the full hardware access service meaning the container can access ALL hardware devices and drivers on the machine. This container uses `privileged=true` and mounts the full `/dev/` directory to the container. Full hardware access is less secure and inadvertent commmands could potentially cause significant harm to the host device, so this service should only be used for the robot hardware i.e. the Xavier computer.
+
+Note that building only needs to be done if you want to update the image. This step will likely take the longest to run; typically 5-30 minutes. Subsequent builds will likely be much shorter because of docker's cache system.
   ```
-  docker-compose build
+  docker-compose build cg-dev
   ```
 
 3. Docker does not have an automatic garbage collection, so every time we build an image more disk space may continue to be taken up by dangling images. To remove any dangling images, run the following command. For more information, see [What are Docker \<none\>:\<none\> images?](https://projectatomic.io/blog/2015/07/what-are-docker-none-none-images/)
@@ -58,16 +62,16 @@ First, make sure Docker and Docker Compose are installed.
 
 4. Bring the image up in the background. It will be running, but we won't attach to it yet. If you'd like, you can check the result of this step by running `docker-compose ps` before and/or after the command to see the container status. You can also view the container status with the docker desktop app.
   ```
-  docker-compose up -d
+  docker-compose up -d cg-dev
   ```
 
-5. Attach to a shell in the image. You will now be in the container.
+5. Attach to a shell in the image. You will now enter the container.
   ```
   docker-compose exec cg-dev zsh
   ```
 > - To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 6 (you can simply re-attach when you want, by running step 4 again after exiting)
 
-6. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
+6. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. Note that this command does not need a specified service; the command will bring all active services down. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
   ```
   docker-compose down
   ```

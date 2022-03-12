@@ -1,2 +1,3 @@
 # Ignore all code in `docker/.vim/` directory when calculating repository language statistics
-docker/.vim/* linguist-vendored
+docker/.vim/** linguist-vendored
+cg_ws/src/drivers/imu/vectornav/** linguist-vendored
