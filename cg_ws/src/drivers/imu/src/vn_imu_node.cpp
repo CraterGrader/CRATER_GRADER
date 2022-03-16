@@ -57,8 +57,8 @@ void VnImuNode::timerCallback() {
   // Set orientation
   tf2::Quaternion q;
   q.setRPY(
-    M_PI/180.0*vs_data_register.yawPitchRoll[2],
-    M_PI/180.0*vs_data_register.yawPitchRoll[1],
+    M_PI/180.0*vs_data_register.yawPitchRoll[2] - orientation_zero_offsets_.x,
+    M_PI/180.0*vs_data_register.yawPitchRoll[1] - orientation_zero_offsets_.y,
     0.0  // Intentionally ignore yaw assuming no magnetometer data on the moon, and set to zero
   );
   q.normalize();
@@ -68,14 +68,14 @@ void VnImuNode::timerCallback() {
   msg.header.frame_id = "imu";
 
   // Set linear acceleration
-  msg.linear_acceleration.x = vs_data_register.accel[0];
-  msg.linear_acceleration.y = vs_data_register.accel[1];
-  msg.linear_acceleration.z = vs_data_register.accel[2];
+  msg.linear_acceleration.x = vs_data_register.accel[0] - linear_acc_zero_offsets_.x;
+  msg.linear_acceleration.y = vs_data_register.accel[1] - linear_acc_zero_offsets_.y;
+  msg.linear_acceleration.z = vs_data_register.accel[2] - linear_acc_zero_offsets_.z;
 
   // Set angular velocity
-  msg.angular_velocity.x = vs_data_register.gyro[0];
-  msg.angular_velocity.y = vs_data_register.gyro[1];
-  msg.angular_velocity.z = vs_data_register.gyro[2];
+  msg.angular_velocity.x = vs_data_register.gyro[0] - angular_vel_zero_offsets_.x;
+  msg.angular_velocity.y = vs_data_register.gyro[1] - angular_vel_zero_offsets_.y;
+  msg.angular_velocity.z = vs_data_register.gyro[2] - angular_vel_zero_offsets_.z;
 
   // TODO the IMU message also has fields for covariance matrix values, ideally we should be setting these fields as well
   // The IMU message defaults to "zero" covariance matrices which means "unknown covariance"
