@@ -53,6 +53,8 @@ void VnImuNode::timerCallback() {
   sensor_msgs::msg::Imu msg;
   // Read IMU data
   auto vs_data_register = vs_.readYawPitchRollMagneticAccelerationAndAngularRates();
+  msg.header.stamp = this->get_clock()->now();
+  msg.header.frame_id = "imu_link";
 
   // Set orientation
   tf2::Quaternion q;
@@ -63,24 +65,26 @@ void VnImuNode::timerCallback() {
   );
   q.normalize();
   msg.orientation = tf2::toMsg(q);
-
-  msg.header.stamp = this->get_clock()->now();
-  msg.header.frame_id = "imu";
+  msg.orientation_covariance[0] = orientation_variances_.x;
+  msg.orientation_covariance[4] = orientation_variances_.y;
+  msg.orientation_covariance[8] = orientation_variances_.z;
 
   // Set linear acceleration
   msg.linear_acceleration.x = vs_data_register.accel[0] - linear_acc_zero_offsets_.x;
   msg.linear_acceleration.y = vs_data_register.accel[1] - linear_acc_zero_offsets_.y;
   msg.linear_acceleration.z = vs_data_register.accel[2] - linear_acc_zero_offsets_.z;
+  msg.linear_acceleration_covariance[0] = linear_acc_variances_.x;
+  msg.linear_acceleration_covariance[4] = linear_acc_variances_.y;
+  msg.linear_acceleration_covariance[8] = linear_acc_variances_.z;
 
   // Set angular velocity
   msg.angular_velocity.x = vs_data_register.gyro[0] - angular_vel_zero_offsets_.x;
   msg.angular_velocity.y = vs_data_register.gyro[1] - angular_vel_zero_offsets_.y;
   msg.angular_velocity.z = vs_data_register.gyro[2] - angular_vel_zero_offsets_.z;
+  msg.angular_velocity_covariance[0] = angular_vel_variances_.x;
+  msg.angular_velocity_covariance[4] = angular_vel_variances_.y;
+  msg.angular_velocity_covariance[8] = angular_vel_variances_.z;
 
-  // TODO the IMU message also has fields for covariance matrix values, ideally we should be setting these fields as well
-  // The IMU message defaults to "zero" covariance matrices which means "unknown covariance"
-  // If we want to use open-source ROS packages for localization, we may need to estimate the covariance
-  // and set the values accordingly
   imu_pub_->publish(msg);
 
   // Broadcast TF for visualization
