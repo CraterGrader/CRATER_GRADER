@@ -6,13 +6,17 @@ imu_node:
     publish_viz: false
     zero_offset: # Constant offset to be subtracted from raw measurements
       linear_acc: # m/s^2
-        x: 0
-        y: 0
+        x: 0.0
+        y: 0.0
         z: 0.3
       angular_vel: # rad/s
-        x: 0
-        y: 0
-        z: 0
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      orientation: # rad
+        x: 0.0
+        y: 0.0
+        z: 0.0
     variance: # Measurement variance values (squared RMS)
       linear_acc: # m/s^2
         x: 0.00017424
@@ -23,6 +27,6 @@ imu_node:
         y: 5.86756e-07
         z: 5.29984e-07
       orientation: # rad
-        roll: 4.1822e-09
-        pitch: 5.2720e-09
-        yaw: 1000 # Really large number because we are not using it. Parameters in robot_localization should be set properly so that yaw gets ignored
+        x: 4.1822e-09
+        y: 5.2720e-09
+        z: 1000.0 # Really large number because we are not using it. Parameters in robot_localization should be set properly so that yaw gets ignored

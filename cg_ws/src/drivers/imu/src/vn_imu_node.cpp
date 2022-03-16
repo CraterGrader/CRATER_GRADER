@@ -21,6 +21,15 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
   this->get_parameter("pub_freq", freq);
   this->declare_parameter<bool>("publish_viz", false);
   this->get_parameter("publish_viz", publish_viz_);
+
+  // Load zero offsets and variances
+  loadParamToVector3("zero_offset.linear_acc", linear_acc_zero_offsets_);
+  loadParamToVector3("zero_offset/angular_vel", angular_vel_zero_offsets_);
+  loadParamToVector3("zero_offset/orientation", orientation_zero_offsets_);
+  loadParamToVector3("variance/linear_acc", linear_acc_variances_);
+  loadParamToVector3("variance/angular_vel", angular_vel_variances_);
+  loadParamToVector3("variance/orientation", orientation_variances_);
+
   try {
     vs_.connect(device_name, baud_rate);
   } catch (const vn::not_found & e) {
@@ -90,6 +99,16 @@ void VnImuNode::timerCallback() {
     transform_stamped.transform.translation.z = 1;
     viz_tf_broadcaster_->sendTransform(transform_stamped);
   }
+}
+
+void VnImuNode::loadParamToVector3(const std::string & param_name,
+    geometry_msgs::msg::Vector3 & v) {
+  this->declare_parameter<double>(param_name+".x", 0.0);
+  this->get_parameter(param_name+".x", v.x);
+  this->declare_parameter<double>(param_name+".y", 0.0);
+  this->get_parameter(param_name+".y", v.y);
+  this->declare_parameter<double>(param_name+".z", 0.0);
+  this->get_parameter(param_name+".z", v.z);
 }
 
 }  // namespace imu
