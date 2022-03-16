@@ -24,11 +24,11 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
 
   // Load zero offsets and variances
   loadParamToVector3("zero_offset.linear_acc", linear_acc_zero_offsets_);
-  loadParamToVector3("zero_offset/angular_vel", angular_vel_zero_offsets_);
-  loadParamToVector3("zero_offset/orientation", orientation_zero_offsets_);
-  loadParamToVector3("variance/linear_acc", linear_acc_variances_);
-  loadParamToVector3("variance/angular_vel", angular_vel_variances_);
-  loadParamToVector3("variance/orientation", orientation_variances_);
+  loadParamToVector3("zero_offset.angular_vel", angular_vel_zero_offsets_);
+  loadParamToVector3("zero_offset.orientation", orientation_zero_offsets_);
+  loadParamToVector3("variance.linear_acc", linear_acc_variances_);
+  loadParamToVector3("variance.angular_vel", angular_vel_variances_);
+  loadParamToVector3("variance.orientation", orientation_variances_);
 
   try {
     vs_.connect(device_name, baud_rate);
