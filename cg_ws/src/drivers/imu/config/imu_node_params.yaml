@@ -4,3 +4,29 @@ imu_node:
     baud_rate: 115200
     pub_freq: 20  # Publishing frequency in Hz
     publish_viz: false
+    zero_offset: # Constant offset to be subtracted from raw measurements
+      linear_acc: # m/s^2
+        x: 0.0
+        y: 0.0
+        z: 0.3
+      angular_vel: # rad/s
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      orientation: # rad
+        x: 0.0
+        y: 0.0
+        z: 0.0
+    variance: # Measurement variance values (squared RMS)
+      linear_acc: # m/s^2
+        x: 0.00017424
+        y: 0.00019044
+        z: 0.0003294225
+      angular_vel: # rad/s
+        x: 1.1881e-06
+        y: 5.86756e-07
+        z: 5.29984e-07
+      orientation: # rad
+        x: 4.1822e-09
+        y: 5.2720e-09
+        z: 1000.0 # Really large number because we are not using it. Parameters in robot_localization need to be set properly so that yaw gets ignored
