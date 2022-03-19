@@ -96,7 +96,8 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
-  ros-$ROS_DISTRO-realsense2-camera
+  ros-$ROS_DISTRO-realsense2-camera \
+  ros-$ROS_DISTRO-robot-localization
 # ---------------------------------------------------------
 
 # -------- Container entrypoint ---------------------------
