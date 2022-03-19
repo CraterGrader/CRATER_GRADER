@@ -94,10 +94,14 @@ RUN conda init bash \
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
-  ros-$ROS_DISTRO-plotjuggler-ros \
-  ros-$ROS_DISTRO-joy \
-  ros-$ROS_DISTRO-realsense2-camera
+  ros-$ROS_DISTRO-joy
+# ros-$ROS_DISTRO-plotjuggler-ros \
+# ros-$ROS_DISTRO-realsense2-camera
 # ---------------------------------------------------------
+
+WORKDIR /root/src_pkgs
+# RUN 
+# apt install libqtav-dev
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
