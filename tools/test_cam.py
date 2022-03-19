@@ -3,6 +3,11 @@ import numpy as np
 
 # Read from the camera
 cap = cv2.VideoCapture(2)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+# Set to YUYV to match the default on the usb_cam
+fourcc_cap = cv2.VideoWriter_fourcc(*'YUYV')
+cap.set(cv2.CAP_PROP_FOURCC, fourcc_cap)
 
 # Setup data collection
 cv2.namedWindow('Camera')
@@ -11,26 +16,22 @@ cv2.namedWindow('Camera')
 _, img = cap.read()
 h,  w = img.shape[:2]
 
-# Pinhole Camera Matrix
-#mtx = np.array([[268.40353417,   0.,         313.35770022],
-# [  0.,         268.76205534, 220.56018606],
-# [  0.,           0.,           1.        ]])
-
-# Fisheye Camera Matrix
-K = np.array([[269.41299877,   0.,         311.52540063],
- [  0.,         269.60663548, 220.38433628],
- [  0.,           0.,           1.        ]]
+#  Camera Matrix
+#K = np.array([[ 409.1290686,     0.,          643.89251127],
+# [   0.,          413.02239353,  323.71161516],
+# [   0.,            0.,            1.        ]]
+#)
+K = np.array([[ 359.23290304,    0.,          629.64159832],
+ [   0.,          359.26041139,  321.40026019],
+ [   0.,            0.,            1.        ]]
 )
 
-# Pinholee Distortion Matrix
-#dist = np.array([[-2.99931927e-01,  8.02614220e-02, 
-#-2.06435047e-04, -3.69570374e-04,  -8.67699358e-03]])
-
-# Fisheye Distortion Matrix
-D = np.array([[-0.04884999],
-    [ 0.01215806],
-    [-0.01517078],
-    [ 0.00470384]])
+# Distortion Matrix
+#D = np.array([[-0.2345347,   0.03759927, -0.00127342, -0.00107534, -0.00219268]])
+D = np.array([[ -4.20510300e-02],
+ [ -3.43845925e-03],
+ [ -7.62396222e-04],
+ [ -9.83326585e-06]])
 
 while(True):
     ret, img = cap.read()

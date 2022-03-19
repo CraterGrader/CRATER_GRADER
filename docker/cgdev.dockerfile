@@ -97,7 +97,7 @@ RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
-  ros-$ROS_DISTRO-plotjuggler-ros \
+  #ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   # For Image processing
  # ros-$ROS_DISTRO-cv-bridge \

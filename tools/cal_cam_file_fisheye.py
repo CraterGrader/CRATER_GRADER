@@ -9,8 +9,10 @@ import glob
 # Defining the dimensions of checkerboard
 CHECKERBOARD = (9, 11)
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+#calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC + \
+#  cv2.fisheye.CALIB_CHECK_COND + cv2.fisheye.CALIB_FIX_SKEW
 calibration_flags = cv2.fisheye.CALIB_RECOMPUTE_EXTRINSIC + \
-  cv2.fisheye.CALIB_CHECK_COND + cv2.fisheye.CALIB_FIX_SKEW
+                    cv2.fisheye.CALIB_FIX_SKEW
 
 # Creating vector to store vectors of 3D points for each checkerboard image
 objpoints = []

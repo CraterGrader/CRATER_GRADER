@@ -46,15 +46,14 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
   : Node("apriltag", "apriltag", options.use_intra_process_comms(true)),
     // parameter
     td(apriltag_detector_create()),
-    tag_family(declare_parameter<std::string>("family", "Standard41h12")),
-    tag_edge_size(declare_parameter<double>("size", 0.1)),
+    tag_family(declare_parameter<std::string>("family", "36h11")),
+    tag_edge_size(declare_parameter<double>("size", 2.0)),
     max_hamming(declare_parameter<int>("max_hamming", 0)),
-    z_up(declare_parameter<bool>("z_up", true)),
+    z_up(declare_parameter<bool>("z_up", false)),
     // topics
     sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
     pub_tf(create_publisher<tf2_msgs::msg::TFMessage>("/tf", rclcpp::QoS(100))),
-    pub_detections(create_publisher<apriltag_msgs::msg::AprilTagDetectionArray>("detections", rclcpp::QoS(1))),
-    pub_bearing(create_publisher<std_msgs::msg::Float64>("/bearing", rclcpp::QoS(10)))
+    pub_detections(create_publisher<apriltag_msgs::msg::AprilTagDetectionArray>("detections", rclcpp::QoS(1)))
 {
     td->quad_decimate = declare_parameter<float>("decimate", 1.0);
     td->quad_sigma =    declare_parameter<float>("blur", 0.0);
@@ -148,15 +147,6 @@ void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_i
         getPose(*(det->H), tf.transform, tag_sizes.count(det->id) ? tag_sizes.at(det->id) : tag_edge_size);
 
         tfs.transforms.push_back(tf);
-
-        // Bearing estimate
-        std_msgs::msg::Float64 bearing_msg;
-        double x_pos = (double)tf.transform.translation.x;
-        double z_pos = (double)tf.transform.translation.z;
-        bearing_msg.data = -atan2(x_pos,z_pos)*180/M_PI;
-    
-        // Publish bearing calculation
-        pub_bearing->publish(bearing_msg);
     }
 
     pub_detections->publish(msg_detections);

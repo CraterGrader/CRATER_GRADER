@@ -31,6 +31,12 @@ if not os.path.exists(cal_cam_data):
 
 # Read from the camera
 cap = cv2.VideoCapture(2)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+# Set to YUYV to match the default on the usb_cam
+fourcc_cap = cv2.VideoWriter_fourcc(*'YUYV')
+cap.set(cv2.CAP_PROP_FOURCC, fourcc_cap)
+print(cap.get(cv2.CAP_PROP_FOURCC))
 
 # Extracting path of individual image stored in a given directory
 print("\nTo take picture, click on video and press 'SPACE' (may lag after pressing)")
