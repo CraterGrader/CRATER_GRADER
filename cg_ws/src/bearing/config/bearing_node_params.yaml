@@ -1,0 +1,8 @@
+teleop_node:
+  ros__parameters:
+    # Bearing Estimation Parameters
+    box_width: 7.5  # Sandbox length perpendicular to GHC roll-up gates
+    box_length: 7.5  # Sandbox width parallel to GHC roll-up gates
+    box_height: 1 # Sandbox height from ground plane
+    mounting_height: 1 # Height of top edge from the ground plane
+    tag_size: 0.3 # Size of apriltag's inner box

@@ -60,6 +60,7 @@ RUN conda init zsh \
 # Needed for colcon build
 RUN sudo apt-get install -y ros-$ROS_DISTRO-image-transport \
   ros-$ROS_DISTRO-cv-bridge \
+  ros-$ROS_DISTRO-camera-info-manager \
   ros-$ROS_DISTRO-apriltag
 
 # Automatically build cg_ws packages
@@ -97,18 +98,13 @@ RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
-  #ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   # For Image processing
- # ros-$ROS_DISTRO-cv-bridge \
   ros-$ROS_DISTRO-image-tools \
- # ros-$ROS_DISTRO-image-transport \
   ros-$ROS_DISTRO-image-transport-plugins \
   ros-$ROS_DISTRO-image-pipeline \
   ros-$ROS_DISTRO-camera-calibration-parsers \
-  ros-$ROS_DISTRO-camera-info-manager \
   ros-$ROS_DISTRO-launch-testing-ament-cmake \
- # ros-$ROS_DISTRO-apriltag \
   ros-$ROS_DISTRO-usb-cam
 
 # ---------------------------------------------------------

@@ -164,7 +164,8 @@ bool UsbCamNode::take_and_send_image()
 
   // CV Bridge Image pointer to access input image message
   cv_bridge::CvImagePtr cv_ptr;
-  // Copy the input message to a cv pointer
+
+  // Copy the input message to a cv pointer with RGB 8-bit encoding
   cv_ptr = cv_bridge::toCvCopy(*img_, sensor_msgs::image_encodings::RGB8);
   
   // Define variables for calculating
@@ -173,9 +174,8 @@ bool UsbCamNode::take_and_send_image()
   cv::Mat dst;
   cv::Mat map1;
   cv::Mat map2;
-  //RCLCPP_INFO(this->get_logger(), "I heard: '%f,  %c'", src.at<float>(0,0,0), img_->data[0]);
 
-  // Undistort the image
+  // Undistort the image using fisheye model
   cv::fisheye::initUndistortRectifyMap(K, D, R, K, dim, CV_16SC2, map1, map2);
   cv::remap(src, dst, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
@@ -184,12 +184,10 @@ bool UsbCamNode::take_and_send_image()
   out_msg.header   = img_->header; // Same timestamp and tf frame as input image
   out_msg.encoding = "rgb8"; // Same type as maps
   out_msg.image    = dst; // Set image to undistorted cv::Mat
-  // Values are floats
   
   // Get output image message - dereferenced
   img_->data = out_msg.toImageMsg()->data;
 
-  // RCLCPP_INFO(img_->data.size() << " " << img_->width << " " << img_->height << " " << img_->step);
   auto ci = std::make_unique<sensor_msgs::msg::CameraInfo>(cinfo_->getCameraInfo());
   ci->header = img_->header;
   image_pub_->publish(*img_, *ci);
