@@ -19,14 +19,14 @@ find_package(sensor_msgs REQUIRED)
 include_directories(include)
 
 # build nodes
-# add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
-#   src/point_cloud_registration_node.cpp
-# )
-# ament_target_dependencies(point_cloud_registration
-#   rclcpp
-#   rclcpp_components
-#   sensor_msgs
-# )
+add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
+  src/point_cloud_registration_node.cpp
+)
+ament_target_dependencies(point_cloud_registration
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -35,9 +35,9 @@ endif()
 
 
 # Install targets
-# install(TARGETS point_cloud_registration
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(TARGETS point_cloud_registration
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 # Install directories
 install(DIRECTORY include/${PROJECT_NAME}/
