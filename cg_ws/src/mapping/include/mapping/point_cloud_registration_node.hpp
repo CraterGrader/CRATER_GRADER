@@ -19,13 +19,12 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */
-  // Callback for joystick input
   void timerCallback();
   void rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 };
 
 
-}  // namespace teleop
+}  // namespace mapping
 }  // namespace cg
 
 #endif  // MAPPING__POINT_CLOUD_REGISTRATION_NODE_HPP
