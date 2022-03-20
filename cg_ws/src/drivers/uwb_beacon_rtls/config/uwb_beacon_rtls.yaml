@@ -2,6 +2,13 @@ uwb_beacon_rtls_node:
   ros__parameters:
     beacon_port: '/dev/ttyACM0'
     beacon_verbose: False
-    tag_names: 
+    tag_ids: 
       - '8795'
-    
+      - '0000'
+    tag_transforms: "[ [1,2,3], [1,2,3] ]"
+    positional_rms: 0.012
+    publish_raw_tags: False
+    publish_ekf_tags: False
+    raw_topic: '/uwb_beacon/raw_tags'
+    ekf_topic: '/uwb_beacon/ekf_tags'
+    fused_pose_topic: '/uwb_beacon/fused_pose'
