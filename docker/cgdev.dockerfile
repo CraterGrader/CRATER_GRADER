@@ -91,13 +91,20 @@ RUN conda init bash \
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
+# Run the following with DEBIAN_FRONTEND=noninteractive to avoid prompt for keyboard language
+# https://askubuntu.com/questions/876240/how-to-automate-setting-up-of-keyboard-configuration-package
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   ros-$ROS_DISTRO-realsense2-camera \
-  ros-$ROS_DISTRO-robot-localization
+  ros-$ROS_DISTRO-robot-localization \
+  libpcl-dev \
+  ros-$ROS_DISTRO-pcl-conversions \
+  ros-$ROS_DISTRO-pcl-ros \
+  ros-$ROS_DISTRO-pcl-msgs
 # ---------------------------------------------------------
 
 # -------- Container entrypoint ---------------------------
