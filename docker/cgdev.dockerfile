@@ -49,7 +49,30 @@ RUN apt-get update && apt-get install -y \
   tmux \
   iputils-ping \
   tree
+# ---------------------------------------------------------
 
+# -------- VNC GUI Configuration --------------------------
+# Install vnc, xvfb for VNC configuration, fluxbox for window managment
+RUN apt-get install -y x11vnc xvfb fluxbox
+
+# Setup a VNC password
+RUN  mkdir ~/.vnc\
+  && x11vnc -storepasswd cratergrader ~/.vnc/passwd
+
+# Start the VNC server
+RUN echo "export DISPLAY=:20" >> ~/.zshrc \
+  && echo "export DISPLAY=:20" >> ~/.bashrc
+
+# Always try to start windows management in background to be ready for VNC
+RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc \
+  && echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
+
+# Clean up unnecessary output files
+RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
+  && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
+# ---------------------------------------------------------
+
+# -------- Setup CraterGrader environment packages --------
 # Setup conda environment
 COPY --from=conda_setup /opt/conda/ /opt/conda/
 COPY environment.yml /root/
@@ -105,8 +128,11 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-image-pipeline \
   ros-$ROS_DISTRO-camera-calibration-parsers \
   ros-$ROS_DISTRO-launch-testing-ament-cmake \
-  ros-$ROS_DISTRO-usb-cam
+  ros-$ROS_DISTRO-usb-cam \
 
+  ros-$ROS_DISTRO-plotjuggler-ros \
+  ros-$ROS_DISTRO-joy \
+  ros-$ROS_DISTRO-realsense2-camera
 # ---------------------------------------------------------
 
 # -------- Container entrypoint ---------------------------

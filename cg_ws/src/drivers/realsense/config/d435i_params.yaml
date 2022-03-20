@@ -1,0 +1,54 @@
+camera:
+    camera:
+      ros__parameters:
+
+        ###### Parameters below are set for team RealSense use.
+        # Full design doc: https://docs.google.com/document/d/1tAVGqHS5lSfpPyG7R2rneph2jFr8ycn5qpuouTwiMsk/edit?usp=sharing
+        # More info on RealSense ROS2 parameters: https://index.ros.org/r/realsense2_camera/
+        # More info on RealSense hardware components: https://www.intelrealsense.com/depth-camera-d435/
+        ######
+
+        # Device Configuration
+        initial_reset: false # refresh the connection on startup
+        device_type: d435i # Make sure we're connecting to the correct device type        
+        
+        # Point cloud
+        enable_pointcloud: true # True to turn on the point cloud
+        pointcloud_qos: "SENSOR_DATA" # Use 'Best Effort' publishing
+        filters: colorizer # Applies RGB normalization coloring to depth image
+        pointcloud.stream_filter: 0 # = 0 Allows any filter for streaming point cloud
+        pointcloud_stream_format_filter: 0 # = 0 Allows any filter format for streaming point cloud
+        pointcloud_texture_index: 0 # = 0 Allows any texture for streaming point cloud
+        pointcloud_texture_stream: RS2_STREAM_COLOR # = RS2_STREAM_COLOR is the default
+
+        # Data sources 
+        enable_depth: true # True to allow depth processing; necessary for point cloud
+        enable_color: false # True to allow rgb image processing; not necessary for point cloud
+
+        enable_infra: false # True to allow joint infrared imaging; not necessary for point cloud
+        enable_infra1: false # True to allow infrared processing on imager cam 1; not necessary for point cloud
+        enable_infra2: false # True to allow infrared processing on imager cam 2; not necessary for point cloud
+
+        enable_fisheye: false # True to allow fisheye cam processing; not necessary for point cloud
+        enable_fisheye1: false # True to allow fisheye processing on imager cam 1; not necessary for point cloud
+        enable_fisheye2: false # True to allow fisheye processing on imager cam 1; not necessary for point cloud
+  
+        enable_gyro: false # True to enable gyro data; not necessary for point cloud
+        enable_accel: false # True to enable accel data; not necessary for point cloud
+        enable_pose: false # True to enable pose data; not necessary for point cloud
+        
+        enable_sync: false # True to sync sensor frames (e.g. ir, rgb, depth); not necessary for point cloud
+        align_depth: false # True to publish additional alignment between rgb and depth images; not necessary for point cloud
+        enable_confidence: false # Additional parameter from rqt_reconfigurel; not necessary for point cloud
+
+        # Source settings
+        color_fps: 30.0 # Set frame rate for rgb images, seemingly no effect if enable_color=false
+        color_height: 480 # Set image height for rgb images, seemingly no effect if enable_color=false
+        color_width: 640 # Set image width for rgb images, seemingly no effect if enable_color=false
+        color_qos: "SENSOR_DATA" # Set ROS2 Quality of Service for color data, "SENSOR_DATA" here maps to "Best Effort" in ROS2, seemingly no effect if enable_color=false
+
+        depth_fps: 30.0 # Set frame rate for depth images/processing, 30.0 observed to give ~14fps point cloud frame rate
+        depth_height: 480 # Set frame height for depth images, 480 observed to give ~14fps point cloud frame rate
+        depth_width: 640 # Set frame width for depth images, 640 observed to give ~14fps point cloud frame rate
+        depth_qos: "SENSOR_DATA" # Set ROS2 Quality of Service for depth data, "SENSOR_DATA" here maps to "Best Effort" in ROS2
+        
