@@ -2,6 +2,7 @@
 #define IMU__VN_IMU_NODE_HPP
 
 #include <rclcpp/rclcpp.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include "vn/sensors.h"
@@ -26,7 +27,16 @@ private:
   /* Callbacks */
   void timerCallback();
 
+  void loadParamToVector3(const std::string & param_name,
+      geometry_msgs::msg::Vector3 & v);
+
   bool publish_viz_;
+  geometry_msgs::msg::Vector3 linear_acc_zero_offsets_;
+  geometry_msgs::msg::Vector3 angular_vel_zero_offsets_;
+  geometry_msgs::msg::Vector3 orientation_zero_offsets_;
+  geometry_msgs::msg::Vector3 linear_acc_variances_;
+  geometry_msgs::msg::Vector3 angular_vel_variances_;
+  geometry_msgs::msg::Vector3 orientation_variances_;
 };
 
 
