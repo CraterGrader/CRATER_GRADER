@@ -24,10 +24,10 @@ if(BUILD_TESTING)
 endif()
 
 # Install Directories
-install(DIRECTORIES launch
+install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
-install(DIRECTORIES config
+install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
 
