@@ -24,22 +24,21 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
     "/encoder_telemetry", 1
   );
 
-  // Load Parameters 
-  this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE");
+  this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE", 22);
   this->get_parameter("QP_TO_BYTE_STEER_SCALE", QP_TO_BYTE_STEER_SCALE_);
-  this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET");
+  this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET", 127);
   this->get_parameter("QP_TO_BYTE_STEER_OFFSET", QP_TO_BYTE_STEER_OFFSET_);
-  this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_SCALE");
+  this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_SCALE", 25);
   this->get_parameter("QPPS_TO_BYTE_DRIVE_SCALE", QPPS_TO_BYTE_DRIVE_SCALE_);
-  this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_OFFSET");
+  this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_OFFSET", 127);
   this->get_parameter("QPPS_TO_BYTE_DRIVE_OFFSET", QPPS_TO_BYTE_DRIVE_OFFSET_);
-  this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE");
+  this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE", 22);
   this->get_parameter("QP_TO_BYTE_TOOL_SCALE", QP_TO_BYTE_TOOL_SCALE_);
-  this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET");
+  this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET", 588);
   this->get_parameter("QP_TO_BYTE_TOOL_OFFSET", QP_TO_BYTE_TOOL_OFFSET_);
-  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_SCALE");
+  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_SCALE", 10);
   this->get_parameter("QP_TO_BYTE_DELTA_POS_SCALE", QP_TO_BYTE_DELTA_POS_SCALE_);
-  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET");
+  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET", 127);
   this->get_parameter("QP_TO_BYTE_DELTA_POS_OFFSET", QP_TO_BYTE_DELTA_POS_OFFSET_);
 
 }
