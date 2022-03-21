@@ -167,7 +167,7 @@ class dwm1001_localizer(Node):
 
         #Fuse data for single pose estimate
         fused_position = [sum(sub_list) / len(sub_list) for sub_list in zip(*detected_poses)]
-        self.publish_fused_position(self, fused_position, "dwm1001")
+        self.publish_fused_position(fused_position, "dwm1001")
 
 
     def publish_fused_position(self, pos, frame_id):
