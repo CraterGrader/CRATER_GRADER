@@ -167,7 +167,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
     uint8_t term_byte = 0;
 
     // [Steer 1 Encoder, Steer 2 Encoder, Tool Encoder Value, Drive 1 Speed, Drive 2 Speed, Drive Delta Pos Front, Drive Delta Pos Rear, Term Byte]
-    feedback_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
+    feedback_msg.data = (static_cast<uint64_t>(term_byte) << 56) | (static_cast<uint64_t>(drive_delta_pos_rear) << 48) |(static_cast<uint64_t>(drive_delta_pos_front) << 40) | (static_cast<uint64_t>(R2spd1Scale) << 32) | (static_cast<uint64_t>(R1spd1Scale) << 24) | (static_cast<uint64_t>(R3enc1Scale) << 16) | (static_cast<uint64_t>(R2enc2Scale) << 8) | static_cast<uint64_t>(R1enc2Scale);
 
     RCSOFTCHECK(rcl_publish(&feedback_pub, &feedback_msg, NULL));
 
