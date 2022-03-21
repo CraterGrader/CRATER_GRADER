@@ -18,7 +18,7 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
 
   // Arduino feedback
   ard_sub_ = this->create_subscription<std_msgs::msg::Int64>(
-    "/arduino_feedback", 1, std::bind(&SerialInterfaceNode::ardCallback, this, std::placeholders::_1)
+    "/arduino_feedback", 1, std::bind(&SerialInterfaceNode::ardFbCallback, this, std::placeholders::_1)
   );
   enc_pub_ = this->create_publisher<cg_msgs::msg::EncoderTelemetry>(
     "/encoder_telemetry", 1
@@ -30,7 +30,7 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET");
   this->get_parameter("QP_TO_BYTE_STEER_OFFSET", QP_TO_BYTE_STEER_OFFSET_);
   this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_SCALE");
-  this->get_parameter("QPPS_TO_BYTE_DRIVE_SCALE", QPPS_TO_BYTE_DRIVE_SCALE);
+  this->get_parameter("QPPS_TO_BYTE_DRIVE_SCALE", QPPS_TO_BYTE_DRIVE_SCALE_);
   this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_OFFSET");
   this->get_parameter("QPPS_TO_BYTE_DRIVE_OFFSET", QPPS_TO_BYTE_DRIVE_OFFSET_);
   this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE");
