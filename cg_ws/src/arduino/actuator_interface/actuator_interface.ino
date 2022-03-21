@@ -23,14 +23,12 @@
 #define BYTE_TO_QPPS_DRIVE_SCALE 25  // Drive Scale 
 #define BYTE_TO_QP_STEER_SCALE 22 // Steer Scale
 #define BYTE_TO_QPPS_DRIVE_STEER_OFFSET 127 // 
-#define BYTE_TO_QPPS_DELTA_POS_SCALE 10  // Drive Scale 
-#define BYTE_TO_QPPS_DELTA_POS_OFFSET 127 // 
+#define BYTE_TO_QP_DELTA_POS_SCALE 10  // Drive Scale 
+#define BYTE_TO_QP_DELTA_POS_OFFSET 127 // 
 
 
 #define BYTE_TO_QP_TOOL_SCALE -588 // Tool Scale
 #define BYTE_TO_QP_TOOL_OFFSET 0 // Tool offset 
-
-
 
 #define POSN_CTRL_ACCEL_QPPS 600
 #define POSN_CTRL_DECCEL_QPPS 600
@@ -47,16 +45,16 @@ rcl_node_t node;
 rcl_timer_t timer;
 
 //Used for validating data stream from roboclaws to Due 
-uint8_t status1;
-bool valid1;
-uint8_t status2;
-bool valid2;
-uint8_t status3;
-bool valid3;
-uint8_t status4;
-bool valid4;
-uint8_t status5;
-bool valid5;
+uint8_t rc_0_steer_status; //Steer 1
+bool rc_0_steer_valid; //Steer 1
+uint8_t rc_1_steer_status; //Steer 2
+bool rc_1_steer_valid; //Steer 2
+uint8_t rc_2_tool_status; //Tool 
+bool rc_2_tool_valid; //Tool
+uint8_t rc_0_drive_status; //Drive 1
+bool rc_0_drive_valid; //Drive 1
+uint8_t rc_1_drive_status; //Drive 2
+bool rc_1_drive_valid; //Drive 2
 
 // Instantiate publishers and subscribers
 rcl_subscription_t cmd_sub;
@@ -131,49 +129,49 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
         roboclaws_tool[i].SpeedAccelDeccelPositionM1(ROBOCLAW_ADDRESS, TOOL_CTRL_ACCEL_QPPS, TOOL_CTRL_SPD_QPPS, TOOL_CTRL_DECCEL_QPPS, tool_cmd, 1);
       }
 
-      // Read Encoder Values
-      // Read Steer 1 Encoder Value
-      int32_t R1enc2 = roboclaws_mobility[0].ReadEncM2(ROBOCLAW_ADDRESS, &status1, &valid1);
-      uint8_t R1enc2Scale = int32_to_byte(R1enc2, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
+    } // if (cmd_msg_received)
 
-      // Read Steer 2 Encoder Value 
-      int32_t R2enc2 = roboclaws_mobility[1].ReadEncM2(ROBOCLAW_ADDRESS, &status2, &valid2);
-      uint8_t R2enc2Scale = int32_to_byte(R2enc2, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
+    // Read Encoder Values
+    // Read Steer 1 Encoder Value
+    int32_t R1enc2 = roboclaws_mobility[0].ReadEncM2(ROBOCLAW_ADDRESS, &rc_0_steer_status, &rc_0_steer_valid);
+    uint8_t R1enc2Scale = int32_to_byte(R1enc2, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
-      // Read Tool Encoder Value 
-      int32_t R3enc1 = roboclaws_tool[0].ReadEncM1(ROBOCLAW_ADDRESS, &status3, &valid3);
-      uint8_t R3enc1Scale = int32_to_byte(R3enc1, BYTE_TO_QP_TOOL_SCALE, BYTE_TO_QP_TOOL_OFFSET);
+    // Read Steer 2 Encoder Value 
+    int32_t R2enc2 = roboclaws_mobility[1].ReadEncM2(ROBOCLAW_ADDRESS, &rc_1_steer_status, &rc_1_steer_valid);
+    uint8_t R2enc2Scale = int32_to_byte(R2enc2, BYTE_TO_QP_STEER_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
-      // Read Speed Values
-      // Read Drive 1 Speed
-      int32_t R1spd1 = roboclaws_mobility[0].ReadSpeedM1(ROBOCLAW_ADDRESS, &status4, &valid4);
-      uint8_t R1spd1Scale = int32_to_byte(R1spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
+    // Read Tool Encoder Value 
+    int32_t R3enc1 = roboclaws_tool[0].ReadEncM1(ROBOCLAW_ADDRESS, &rc_2_tool_status, &rc_2_tool_valid);
+    uint8_t R3enc1Scale = int32_to_byte(R3enc1, BYTE_TO_QP_TOOL_SCALE, BYTE_TO_QP_TOOL_OFFSET);
 
-      // Read Drive 2 Speed 
-      int32_t R2spd1 = roboclaws_mobility[1].ReadSpeedM1(ROBOCLAW_ADDRESS, &status5, &valid5);
-      uint8_t R2spd1Scale = int32_to_byte(R2spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
+    // Read Speed Values
+    // Read Drive 1 Speed
+    int32_t R1spd1 = roboclaws_mobility[0].ReadSpeedM1(ROBOCLAW_ADDRESS, &rc_0_drive_status, &rc_0_drive_valid);
+    uint8_t R1spd1Scale = int32_to_byte(R1spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
-      // Drive delta position front
-      deltaPosM1Curr = roboclaws_mobility[0].ReadEncM1(ROBOCLAW_ADDRESS, &status1, &valid1);
-      uint8_t drive_delta_pos_front = int32_to_byte(deltaPosM1Curr-deltaPosM1Last, BYTE_TO_QPPS_DELTA_POS_SCALE, BYTE_TO_QPPS_DELTA_POS_OFFSET);
-      deltaPosM1Last = deltaPosM1Curr;
+    // Read Drive 2 Speed 
+    int32_t R2spd1 = roboclaws_mobility[1].ReadSpeedM1(ROBOCLAW_ADDRESS, &rc_1_drive_status, &rc_1_drive_valid);
+    uint8_t R2spd1Scale = int32_to_byte(R2spd1, BYTE_TO_QPPS_DRIVE_SCALE, BYTE_TO_QPPS_DRIVE_STEER_OFFSET);
 
-      // Drive delta position rear
-      deltaPosM2Curr = roboclaws_mobility[1].ReadEncM1(ROBOCLAW_ADDRESS, &status1, &valid1);
-      uint8_t drive_delta_pos_rear = int32_to_byte(deltaPosM2Curr - deltaPosM2Last, BYTE_TO_QPPS_DELTA_POS_SCALE, BYTE_TO_QPPS_DELTA_POS_OFFSET);
-      deltaPosM2Last = deltaPosM2Curr;
+    // Drive delta position front
+    deltaPosM1Curr = roboclaws_mobility[0].ReadEncM1(ROBOCLAW_ADDRESS, &rc_0_drive_status, &rc_0_drive_valid);
+    uint8_t drive_delta_pos_front = int32_to_byte(deltaPosM1Curr-deltaPosM1Last, BYTE_TO_QP_DELTA_POS_SCALE, BYTE_TO_QP_DELTA_POS_OFFSET);
+    deltaPosM1Last = deltaPosM1Curr;
 
-      // Terminal byte (limit switches, heartbeat, etc.)
-      uint8_t term_byte = 0;
-  
-      // [Steer 1 Encoder, Steer 2 Encoder, Tool Encoder Value, Drive 1 Speed, Drive 2 Speed, Drive Delta Pos Front, Drive Delta Pos Rear, Term Byte]
-      feedback_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
-      
-    } else {
-      feedback_msg.data = 0;
-    }
+    // Drive delta position rear
+    deltaPosM2Curr = roboclaws_mobility[1].ReadEncM1(ROBOCLAW_ADDRESS, &rc_1_drive_status, &rc_1_drive_valid);
+    uint8_t drive_delta_pos_rear = int32_to_byte(deltaPosM2Curr - deltaPosM2Last, BYTE_TO_QP_DELTA_POS_SCALE, BYTE_TO_QP_DELTA_POS_OFFSET);
+    deltaPosM2Last = deltaPosM2Curr;
+
+    // Terminal byte (limit switches, heartbeat, etc.)
+    uint8_t term_byte = 0;
+
+    // [Steer 1 Encoder, Steer 2 Encoder, Tool Encoder Value, Drive 1 Speed, Drive 2 Speed, Drive Delta Pos Front, Drive Delta Pos Rear, Term Byte]
+    feedback_msg.data = ((uint64_t)term_byte << 56) | ((uint64_t)drive_delta_pos_rear << 48) |((uint64_t)drive_delta_pos_front << 40) | ((uint64_t)R2spd1Scale << 32) | ((uint64_t)R1spd1Scale << 24) | ((uint64_t)R3enc1Scale << 16) | ((uint64_t)R2enc2Scale << 8) | (uint64_t)R1enc2Scale;
+
     RCSOFTCHECK(rcl_publish(&feedback_pub, &feedback_msg, NULL));
-  }
+
+  } // if (timer != NULL)
 }
 
 // Converts a byte [0, 255] to the appropriate QPPS value

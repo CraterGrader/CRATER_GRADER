@@ -28,8 +28,8 @@ private:
   // declare parameters 
   int QP_TO_BYTE_STEER_SCALE_;
   int QP_TO_BYTE_STEER_OFFSET_;
-  int QP_TO_BYTE_DRIVE_SCALE_;
-  int QP_TO_BYTE_DRIVE_OFFSET_;
+  int QPPS_TO_BYTE_DRIVE_SCALE_;
+  int QPPS_TO_BYTE_DRIVE_OFFSET_;
   int QP_TO_BYTE_TOOL_SCALE_;
   int QP_TO_BYTE_TOOL_OFFSET_;
   int QP_TO_BYTE_DELTA_POS_SCALE_;
@@ -45,7 +45,7 @@ private:
   // Callback for actuator command
   void cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg);
   // Callback for arduino feedback
-  void ardCallback(const std_msgs::msg::Int64::SharedPtr msg);
+  void ardFbCallback(const std_msgs::msg::Int64::SharedPtr msg);
 
   /* Helper functions */
   /**
