@@ -11,6 +11,11 @@ def generate_launch_description():
         'config',
         'teleop_node_params.yaml'
     )
+    scale_offset_params =  os.path.join(
+        get_package_share_directory('arduino'),
+        'config',
+        'scale_offset_params.yaml'
+    )
 
     with open(
         os.path.join(get_package_share_directory('arduino'),
@@ -36,7 +41,8 @@ def generate_launch_description():
         Node(
             package='arduino',
             executable='serial_interface_node',
-            name='serial_interface_node'
+            name='serial_interface_node',
+            parameters=[scale_offset_params]
         ),
         Node(
             package='micro_ros_agent',

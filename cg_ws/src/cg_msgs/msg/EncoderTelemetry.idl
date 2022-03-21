@@ -1,0 +1,42 @@
+#include "std_msgs/msg/Header.idl"
+
+module cg_msgs {
+  module msg {
+    struct EncoderTelemetry {
+      std_msgs::msg::Header header;
+
+      // Steer position front
+      @default (value = 0)
+      long steer_pos_front;
+
+      // Steer position rear
+      @default (value = 0)
+      long steer_pos_rear;
+
+      // Tool position
+      @default (value = 0)
+      long tool_pos;
+      
+      // Drive velocity front
+      @default (value = 0)
+      long drive_vel_front;
+
+      // Drive velocity rear
+      @default (value = 0)
+      long drive_vel_rear;
+
+      // Drive delta position front
+      @default (value = 0)
+      long drive_delta_front;
+
+      // Drive delta position rear
+      @default (value = 0)
+      long drive_delta_rear;
+
+      // Terminal byte (limit switches, heartbeat, etc.)
+      @default (value = 0)
+      long term_byte;
+
+    };
+  };
+};
