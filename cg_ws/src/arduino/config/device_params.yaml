@@ -1,3 +1,3 @@
 arduino_node:
   ros__parameters:
-    arduino_port: '/dev/ttyACM0'
+    arduino_port: '/dev/cg_dev/tty_arduino'
