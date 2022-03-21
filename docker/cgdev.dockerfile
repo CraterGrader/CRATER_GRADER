@@ -88,13 +88,13 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-realsense2-camera
 
 # Automatically build cg_ws packages
-# WORKDIR /root/cg_ws_autobuild/
-# COPY cg_ws/src/ /root/cg_ws_autobuild/src/
-# RUN conda init bash \
-#   && . /root/.bashrc \
-#   && conda activate cg \
-#   && . /opt/ros/$ROS_DISTRO/setup.sh \
-#   && colcon build
+WORKDIR /root/cg_ws_autobuild/
+COPY cg_ws/src/ /root/cg_ws_autobuild/src/
+RUN conda init bash \
+  && . /root/.bashrc \
+  && conda activate cg \
+  && . /opt/ros/$ROS_DISTRO/setup.sh \
+  && colcon build
 # ---------------------------------------------------------
 
 # -------- Container entrypoint ---------------------------
