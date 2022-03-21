@@ -56,7 +56,7 @@ private:
    * @param zero_offset The offset used for original conversion to a byte.
    * @return long The converted original value.
    */
-  long byte_to_qpps(const int val, const int scale, const int zero_offset);
+  long byte_to_qpps(const int &val, const int &scale, const int &zero_offset);
 };
 
 }  // namespace arduino

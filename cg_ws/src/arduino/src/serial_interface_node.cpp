@@ -70,31 +70,31 @@ void SerialInterfaceNode::ardFbCallback(const std_msgs::msg::Int64::SharedPtr ms
 
   // Steer position front
   int steer_pos_front_byte = ard_feedback_.data & 0xFF; // First byte
-  enc_telemetry_.steer_pos_front = SerialInterfaceNode::byte_to_qpps(steer_pos_front_byte, QP_TO_BYTE_STEER_SCALE_, QP_TO_BYTE_STEER_OFFSET_);
+  enc_telemetry_.steer_pos_front = byte_to_qpps(steer_pos_front_byte, QP_TO_BYTE_STEER_SCALE_, QP_TO_BYTE_STEER_OFFSET_);
 
   // Steer position rear
   int steer_pos_rear_byte = (ard_feedback_.data >> 8) & 0xFF; // Second byte
-  enc_telemetry_.steer_pos_rear = SerialInterfaceNode::byte_to_qpps(steer_pos_rear_byte, QP_TO_BYTE_STEER_SCALE_, QP_TO_BYTE_STEER_OFFSET_);
+  enc_telemetry_.steer_pos_rear = byte_to_qpps(steer_pos_rear_byte, QP_TO_BYTE_STEER_SCALE_, QP_TO_BYTE_STEER_OFFSET_);
 
   // Tool position
   int tool_pos_byte = (ard_feedback_.data >> 16) & 0xFF; // Third byte
-  enc_telemetry_.tool_pos = SerialInterfaceNode::byte_to_qpps(tool_pos_byte, QP_TO_BYTE_TOOL_SCALE_, QP_TO_BYTE_TOOL_OFFSET_);
+  enc_telemetry_.tool_pos = byte_to_qpps(tool_pos_byte, QP_TO_BYTE_TOOL_SCALE_, QP_TO_BYTE_TOOL_OFFSET_);
   
   // Drive velocity front
   int drive_vel_front_byte = (ard_feedback_.data >> 24) & 0xFF; // Fourth byte
-  enc_telemetry_.drive_vel_front = SerialInterfaceNode::byte_to_qpps(drive_vel_front_byte, QPPS_TO_BYTE_DRIVE_SCALE_, QPPS_TO_BYTE_DRIVE_OFFSET_);
+  enc_telemetry_.drive_vel_front = byte_to_qpps(drive_vel_front_byte, QPPS_TO_BYTE_DRIVE_SCALE_, QPPS_TO_BYTE_DRIVE_OFFSET_);
 
   // Drive velocity rear
   int drive_vel_rear_byte = (ard_feedback_.data >> 32) & 0xFF; // Fifth byte
-  enc_telemetry_.drive_vel_rear = SerialInterfaceNode::byte_to_qpps(drive_vel_rear_byte, QPPS_TO_BYTE_DRIVE_SCALE_, QPPS_TO_BYTE_DRIVE_OFFSET_);
+  enc_telemetry_.drive_vel_rear = byte_to_qpps(drive_vel_rear_byte, QPPS_TO_BYTE_DRIVE_SCALE_, QPPS_TO_BYTE_DRIVE_OFFSET_);
 
   // Drive delta position front
   int drive_delta_pos_front = (ard_feedback_.data >> 40) & 0xFF;
-  enc_telemetry_.drive_delta_front = SerialInterfaceNode::byte_to_qpps(drive_delta_pos_front, QP_TO_BYTE_DELTA_POS_SCALE_, QP_TO_BYTE_DELTA_POS_OFFSET_); // Sixth byte
+  enc_telemetry_.drive_delta_front = byte_to_qpps(drive_delta_pos_front, QP_TO_BYTE_DELTA_POS_SCALE_, QP_TO_BYTE_DELTA_POS_OFFSET_); // Sixth byte
 
   // Drive delta position rear
   int drive_delta_pos_rear = (ard_feedback_.data >> 48) & 0xFF;
-  enc_telemetry_.drive_delta_rear = SerialInterfaceNode::byte_to_qpps(drive_delta_pos_rear, QP_TO_BYTE_DELTA_POS_SCALE_, QP_TO_BYTE_DELTA_POS_OFFSET_);  // Seventh byte
+  enc_telemetry_.drive_delta_rear = byte_to_qpps(drive_delta_pos_rear, QP_TO_BYTE_DELTA_POS_SCALE_, QP_TO_BYTE_DELTA_POS_OFFSET_);  // Seventh byte
 
   // Terminal byte (limit switches, heartbeat, etc.)
   enc_telemetry_.term_byte = (ard_feedback_.data >> 56) & 0xFF; // Eighth byte
@@ -104,7 +104,7 @@ void SerialInterfaceNode::ardFbCallback(const std_msgs::msg::Int64::SharedPtr ms
   enc_pub_->publish(enc_telemetry_);
 }
 
-long SerialInterfaceNode::byte_to_qpps(const int val, const int scale, const int zero_offset)
+long SerialInterfaceNode::byte_to_qpps(const int &val, const int &scale, const int &zero_offset)
 {
   return (val - zero_offset) * scale;
 }
