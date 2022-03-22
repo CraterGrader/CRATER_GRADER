@@ -1,3 +1,7 @@
 cmdmux_node:
   ros__parameters:
-    
+    default_mode: 0
+    idle_mode: 0
+    autograder_mode: 1
+    full_autonomy_mode: 2
+    full_teleop_mode: 3
