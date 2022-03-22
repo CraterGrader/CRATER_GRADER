@@ -14,9 +14,7 @@ from rclpy.node import Node
 import numpy as np
 import time, serial, yaml, os
 from .dwm1001_apiCommands import DWM1001_API_COMMANDS
-from .KalmanFilter import KalmanFilter as kf
 from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
-from .Helpers_KF import initConstVelocityKF 
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -28,22 +26,6 @@ class dwm1001_localizer(Node):
         """        
         # Initialize node
         super().__init__('uwb_beacon_rtls')
-        
-        timer_period = 0.01 # 100Hz
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        
-        self.kalman_list = {} 
-
-        self.get_logger().info("Getting parameters:")
-
-        self.declare_parameter('beacon_verbose', False)
-        self.beacon_verbose = self.get_parameter('beacon_verbose').get_parameter_value().bool_value
-
-        self.declare_parameter('publish_raw_tags', False)
-        self.publish_raw_tags = self.get_parameter('publish_raw_tags').get_parameter_value().bool_value
-
-        self.declare_parameter('publish_ekf_tags', False)
-        self.publish_ekf_tags = self.get_parameter('publish_ekf_tags').get_parameter_value().bool_value
 
         uwb_tag_data_path =  os.path.join(
             get_package_share_directory('uwb_beacon_rtls'),
@@ -56,6 +38,16 @@ class dwm1001_localizer(Node):
             stream,
             Loader=yaml.SafeLoader
             )
+        
+        self.declare_parameter('beacon_hz', False)
+        self.beacon_hz = self.get_parameter('beacon_hz').get_parameter_value().double_value
+        self.timer = self.create_timer(self.beacon_hz, self.timer_callback)
+        
+        self.declare_parameter('beacon_verbose', False)
+        self.beacon_verbose = self.get_parameter('beacon_verbose').get_parameter_value().bool_value
+
+        self.declare_parameter('publish_raw_tags', False)
+        self.publish_raw_tags = self.get_parameter('publish_raw_tags').get_parameter_value().bool_value
 
         self.tag_ids = tag_params['tag_ids']
 
@@ -70,16 +62,9 @@ class dwm1001_localizer(Node):
         self.declare_parameter('raw_topic', 'raw_pose')
         self.raw_topic = self.get_parameter('raw_topic').get_parameter_value().string_value
         if self.publish_raw_tags:
-            self.ekf_publishers = {}
-            for tag_id in self.tag_ids:
-                self.ekf_publishers[tag_id] = self.create_publisher( Pose, self.raw_topic + tag_id, 10) 
-
-        self.declare_parameter('ekf_topic', 'ekf_pose')
-        self.ekf_topic = self.get_parameter('ekf_topic').get_parameter_value().string_value
-        if self.publish_ekf_tags:
             self.raw_publishers = {}
             for tag_id in self.tag_ids:
-                self.raw_publishers[tag_id] = self.create_publisher( Pose, self.ekf_topic + tag_id, 10) 
+                self.raw_publishers[tag_id] = self.create_publisher( Pose, self.raw_topic + tag_id, 10) 
 
         self.declare_parameter('fused_pose_topic', 'fuse_pose')
         self.fused_pose_topic = self.get_parameter('fused_pose_topic').get_parameter_value().string_value
@@ -115,20 +100,14 @@ class dwm1001_localizer(Node):
 
     def timer_callback(self):
 
-        detected_poses = []
-
-        seen = []
-
         #TODO: Test output type for multiple tags to determine how to get this right.
+        detected_poses = []
         for n in range(len(self.tag_ids)):
 
-            self.get_logger().info(f"Looking for: {n}")
+            if self.beacon_verbose:
+                self.get_logger().info(f"Looking for TagID: {n}")
 
             serialReadLine = self.serialPortDWM1001.read_until()
-
-            # Publish the Raw Pose Data      
-            if self.publish_raw_tags:
-                self.publishTagPositions(serialReadLine)    
 
             serDataList = [x.strip() for x in serialReadLine.strip().split(b',')]
 
@@ -141,73 +120,46 @@ class dwm1001_localizer(Node):
                     t_pose_y = float(serDataList[4])
                     t_pose_z = float(serDataList[5])   
                 except:
-                    self.get_logger().info("Failed to parse tag data!")
+                    if self.beacon_verbose:
+                        self.get_logger().info("Failed to parse tag data: ")
                     continue
-
-                if tag_id not in self.tag_ids:
+                
+                if self.beacon_verbose and tag_id not in self.tag_ids:
                     self.get_logger().info(f"Got an unknown tag_id: {tag_id}")
                     continue
-                else:
-                    self.get_logger().info(f"Got an known tag_id: {tag_id}")
 
-                if tag_id in seen:
+                if tag_id in detected_poses:
                     continue
-                else:
-                    seen.append(tag_id)
 
-                # To use this raw pose of DWM1001 as a measurement data in KF
+                # To use this raw pose of DWM1001 as a measurement data
                 t_pose_xyz =  np.array([t_pose_x, t_pose_y, t_pose_z]).T
-
-                if self.publish_raw_tags:
-                    self.publishTagPose(tag_id, t_pose_xyz, self.raw_publishers[tag_id])    
 
                 # Discard the pose data from USB if there exists "nan" in the values
                 if(np.isnan(t_pose_xyz).any()):
-                    self.get_logger().info("Serial data include Nan!")
+                    if self.beacon_verbose:
+                        self.get_logger().info("Serial data include Nan!")
                     continue
 
-                #Instantiate Kalman Element
-                if tag_id not in self.kalman_list: 
+                if self.publish_raw_tags:
+                    self.publishTagPose(tag_id, t_pose_xyz - np.array(self.tag_transforms[tag_id]), self.raw_publishers[tag_id])    
 
-                    # Assume constant velocity motion model
-                    A = np.zeros((6,6))
-                    H = np.zeros((3, 6))  # Measurement (x,y,z without velocities) 
+                detected_poses[tag_id] = t_pose_xyz - np.array(self.tag_transforms[tag_id])
+        
+        if len(detected_poses) == 0:
+            if self.beacon_verbose:
+                self.get_logger().info(f"No pose detections found")
+            return
 
-                    self.kalman_list[tag_id] = kf(A, H, tag_id) # Create KF object for tag id
-                
-                if self.kalman_list[tag_id].isKalmanInitialized == False:  
-
-                    # Initialize the Kalman by asigning required parameters
-                    A, B, H, Q, R, P_0, x_0  = initConstVelocityKF() # Constant velocity model
-                    
-                    self.kalman_list[tag_id].assignSystemParameters(A, B, H, Q, R, P_0, x_0) 
-                    self.kalman_list[tag_id].isKalmanInitialized = True                            
-            
-                self.kalman_list[tag_id].performKalmanFilter(t_pose_xyz, 0)  
-                t_pose_vel_kf = self.kalman_list[tag_id].x_m  # State vector contains both pose and velocities data
+        #Fuse data for single pose estimate output
+        fused_position = np.average(detected_poses, axis=0)
+        self.get_logger().info(str(fused_position))
+        self.publishTagPose(fused_position, "dwm1001", self.fused_pub)
 
 
-                self.get_logger().info(str(t_pose_vel_kf[0:3][0]))
-
-                detected_poses.append(t_pose_vel_kf[0:3][0] - np.array(self.tag_transforms[tag_id]))
-                
-                if self.publish_ekf_tags:
-                    self.publishTagPose(tag_id, t_pose_vel_kf[0:3], self.ekf_publishers[tag_id])
-
-        #Fuse data for single pose estimate
-        if len(detected_poses) > 0:
-            self.get_logger().info(str(detected_poses))
-            fused_position = np.average(detected_poses, axis=0)
-            self.get_logger().info(str(fused_position))
-            self.publish_fused_position(fused_position, "dwm1001")
-        else:
-            self.get_logger().info(f"Not enough detections for a fused pose")
-
-
-    def publish_fused_position(self, pos, frame_id):
+    def publishTagPose(self, pos, frame_id, publisher):
         """
-        Publish Fused Position
-        :param: [Double] kfPoseData, String frame_id
+        Publish Position using provided publisher
+        :param: [Double] PoseData, String frame_id
         :returns: none
         """
 
@@ -230,29 +182,6 @@ class dwm1001_localizer(Node):
                                 0.0,0.0,0.0,1.0,0.0,0.0,
                                 0.0,0.0,0.0,0.0,1.0,0.0,
                                 0.0,0.0,0.0,0.0,0.0,1.0]
-
-        self.fused_pub.publish(ps)
-
-    
-    # Publish Tag positions using KF 
-    def publishTagPose(self, tag_id, PoseData, publisher):
-        """
-        Publish EKF Pose
-        :param: String tag_id, String id_str, [Double] kfPoseData 
-        :returns: none
-        """
-
-        ps = PoseWithCovarianceStamped()
-        ps.pose.pose.position.x = float(PoseData[0])
-        ps.pose.pose.position.y = float(PoseData[1])
-        ps.pose.pose.position.z = float(PoseData[2])
-        ps.pose.pose.orientation.x = 0.0
-        ps.pose.pose.orientation.y = 0.0
-        ps.pose.pose.orientation.z = 0.0
-        ps.pose.pose.orientation.w = 1.0
-        ps.header.stamp = self.get_clock().now().to_msg()   
-        ps.header.frame_id = str(tag_id)
-
         publisher.publish(ps)
             
 
