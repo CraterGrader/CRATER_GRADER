@@ -1,5 +1,6 @@
 #include "motion_control/odom_node.hpp"
 #include <math.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 namespace cg {
 namespace odom {
@@ -94,10 +95,12 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   odom_msg_.pose.pose.position.z = 0;
 
   // rpy
-  odom_msg_.pose.pose.orientation.x = 0;
-  odom_msg_.pose.pose.orientation.y = 0;
-  odom_msg_.pose.pose.orientation.z = prev_heading_ + (delta_t_*odom_msg_.twist.twist.angular.z);
-  odom_msg_.pose.pose.orientation.w = 1 ;
+  tf2::Quaternion q;
+  q.setRPY(0, 0, prev_heading_ + (delta_t_*odom_msg_.twist.twist.angular.z));
+  odom_msg_.pose.pose.orientation.x = q.x();
+  odom_msg_.pose.pose.orientation.y = q.y();
+  odom_msg_.pose.pose.orientation.z = q.z();
+  odom_msg_.pose.pose.orientation.w = q.w();
 
   // POSE COVARIANCE
   odom_msg_.pose.covariance[0] = pose_cov_x_;
