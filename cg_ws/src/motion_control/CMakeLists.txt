@@ -14,6 +14,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
 
 # Find package header files
@@ -24,8 +25,18 @@ add_executable(cmd_mux src/cmd_mux_main.cpp
   src/cmd_mux_node.cpp
 )
 ament_target_dependencies(cmd_mux
+rclcpp
+std_msgs
+nav_msgs
+cg_msgs
+)
+add_executable(odom_node src/odom_main.cpp
+  src/odom_node.cpp
+)
+ament_target_dependencies(odom_node
   rclcpp
   std_msgs
+  nav_msgs
   cg_msgs
 )
 
@@ -37,6 +48,9 @@ endif()
 
 # Install targets
 install(TARGETS cmd_mux
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS odom_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

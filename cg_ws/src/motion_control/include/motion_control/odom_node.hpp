@@ -29,9 +29,27 @@ private:
   double prev_heading_;
   double delta_t_;
   double tlast_;
-  double tcurr_;
 
-} // class OdomNode
+  /* Parameters */  
+  double half_wheel_base_m_;
+  double qp_steer_to_radian_;
+  double qp_drive_to_pos_m_;
+  double qpps_drive_to_speed_ms_;
+
+  double pose_cov_x_;
+  double pose_cov_y_;
+  double pose_cov_z_;
+  double pose_cov_r_;
+  double pose_cov_p_;
+  double pose_cov_yaw_;
+  double twist_cov_x_;
+  double twist_cov_y_;
+  double twist_cov_z_;
+  double twist_cov_r_;
+  double twist_cov_p_;
+  double twist_cov_yaw_;
+
+}; // class OdomNode
 
 } // namespace odom
 } // namespace cg

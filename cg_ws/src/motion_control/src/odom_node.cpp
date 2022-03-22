@@ -13,35 +13,61 @@ OdomNode::OdomNode() : Node("odom_node") {
     "/encoder_telemetry", 1, std::bind(&OdomNode::odomCallback, this, std::placeholders::_1)
   );
   // Load parameters 
-  this->declare_parameter<int>("half_wheel_base_m", 0.2775);
+  this->declare_parameter<double>("half_wheel_base_m", 0.2775);
   this->get_parameter("half_wheel_base_m", half_wheel_base_m_);
-  this->declare_parameter<int>("qp_steer_to_radian", 0.000099223014335);
+  this->declare_parameter<double>("qp_steer_to_radian", 0.000099223014335);
   this->get_parameter("qp_steer_to_radian", qp_steer_to_radian_);
-  this->declare_parameter<int>("qp_drive_to_pos_m", 0.0008298755187);
+  this->declare_parameter<double>("qp_drive_to_pos_m", 0.0008298755187);
   this->get_parameter("qp_drive_to_pos_m", qp_drive_to_pos_m_);
-  this->declare_parameter<int>("qpps_drive_to_speed_ms", 0.0008298755187);
+  this->declare_parameter<double>("qpps_drive_to_speed_ms", 0.0008298755187);
   this->get_parameter("qpps_drive_to_speed_ms", qpps_drive_to_speed_ms_);
+
+  // position covariance
+  this->declare_parameter<double>("pose_cov_x", 1);
+  this->get_parameter("pose_cov_x", pose_cov_x_);
+  this->declare_parameter<double>("pose_cov_y", 1);
+  this->get_parameter("pose_cov_y", pose_cov_y_);
+  this->declare_parameter<double>("pose_cov_z", 1);
+  this->get_parameter("pose_cov_z", pose_cov_z_);
+  this->declare_parameter<double>("pose_cov_r", 1);
+  this->get_parameter("pose_cov_r", pose_cov_r_);
+  this->declare_parameter<double>("pose_cov_p", 1);
+  this->get_parameter("pose_cov_p", pose_cov_p_);
+  this->declare_parameter<double>("pose_cov_yaw", 1);
+  this->get_parameter("pose_cov_yaw", pose_cov_yaw_);
+
+  // velocity covariance
+  this->declare_parameter<double>("twist_cov_x", 1);
+  this->get_parameter("twist_cov_x", twist_cov_x_);
+  this->declare_parameter<double>("twist_cov_y", 1);
+  this->get_parameter("twist_cov_y", twist_cov_y_);
+  this->declare_parameter<double>("twist_cov_z", 1);
+  this->get_parameter("twist_cov_z", twist_cov_z_);
+  this->declare_parameter<double>("twist_cov_r", 1);
+  this->get_parameter("twist_cov_r", twist_cov_r_);
+  this->declare_parameter<double>("twist_cov_p", 1);
+  this->get_parameter("twist_cov_p", twist_cov_p_);
+  this->declare_parameter<double>("twist_cov_yaw", 1);
+  this->get_parameter("twist_cov_yaw", twist_cov_yaw_);
 
   // TODO: INITALIZE VARIABLES
   prev_x_ = 0;
   prev_y_ = 0;
   prev_heading_ = 0;
-  tlast_ = 0;
-  tcurr_ = 0;
+  tlast_ = this->get_clock()->now().seconds();
 }
 
 void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
 
-  data = msg->data;
+  float pos_delta = qp_drive_to_pos_m_*(msg->drive_delta_front - msg->drive_delta_rear)/2; // flip if the direction is wrong
+  float steer_angle = qp_steer_to_radian_*(msg->steer_pos_rear - msg->steer_pos_front)/2; // flip this sign if the steer is reversed 
+  float drive_velocity = qpps_drive_to_speed_ms_*(msg->drive_vel_front - msg->drive_vel_rear)/2; // flip this sign if the drive velocity is reversed 
 
-  float pos_delta = qp_drive_to_pos_m_*(data.drive_delta_front-data.drive_delta_rear)/2; // flip if the direction is wrong
-  float steer_angle = qp_steer_to_radian_*(data.steer_pos_rear-data.steer_pos_front)/2; // flip this sign if the steer is reversed 
-  float drive_velocity = qpps_drive_to_speed_ms_*(data.drive_vel_front-data.drive_vel_rear)/2; // flip this sign if the drive velocity is reversed 
+  delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)  - tlast_;
 
-  t_curr_ = data.header.stamp;
-  delta_t_ = t_curr_ - t_last_;
-
-  // TODO: ASK RUSSELL about odom_msg_.header.frame_id and odom_msg_.child_frame_id
+  // Set up frames for odom and base_link
+  odom_msg_.child_frame_id = "base_link";
+  odom_msg_.header.frame_id = "odom";
 
   // vel
   odom_msg_.twist.twist.linear.x = drive_velocity*cos(prev_heading_+steer_angle);
@@ -53,9 +79,13 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   odom_msg_.twist.twist.angular.y = 0;
   odom_msg_.twist.twist.angular.z = drive_velocity*cos(steer_angle)/half_wheel_base_m_;
 
-  // parameter
-  // TODO: find a way to display covariance
-  // odom_msg_.twist.covariance = float64[36] covariance
+  // TWIST COVARIANCE
+  odom_msg_.twist.covariance[0] = twist_cov_x_;
+  odom_msg_.twist.covariance[7] = twist_cov_y_;
+  odom_msg_.twist.covariance[14] = twist_cov_z_; 
+  odom_msg_.twist.covariance[21] = twist_cov_r_;
+  odom_msg_.twist.covariance[28] = twist_cov_p_;
+  odom_msg_.twist.covariance[35] = twist_cov_yaw_;  
 
   // pos
   odom_msg_.pose.pose.position.x = prev_x_ + (pos_delta * cos(prev_heading_+steer_angle));
@@ -63,22 +93,26 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   odom_msg_.pose.pose.position.z = 0;
 
   // rpy
-  odom_msg_.pose.pose.quaternion.x = 0;
-  odom_msg_.pose.pose.quaternion.y = 0;
-  odom_msg_.pose.pose.quaternion.z = prev_heading_ + (delta_t_*odom_msg_.twist.twist.angular.z);
-  odom_msg_.pose.pose.quaternion.w = 1 ;
+  odom_msg_.pose.pose.orientation.x = 0;
+  odom_msg_.pose.pose.orientation.y = 0;
+  odom_msg_.pose.pose.orientation.z = prev_heading_ + (delta_t_*odom_msg_.twist.twist.angular.z);
+  odom_msg_.pose.pose.orientation.w = 1 ;
 
-  // parameter
-  // TODO: find a way to display covariance
-  // odom_msg_.pose.covariance = float64[36] covariance
+  // POSE COVARIANCE
+  odom_msg_.pose.covariance[0] = pose_cov_x_;
+  odom_msg_.pose.covariance[7] = pose_cov_y_;
+  odom_msg_.pose.covariance[14] = pose_cov_z_; 
+  odom_msg_.pose.covariance[21] = pose_cov_r_;
+  odom_msg_.pose.covariance[28] = pose_cov_p_;
+  odom_msg_.pose.covariance[35] = pose_cov_yaw_;   
 
   prev_x_ = odom_msg_.pose.pose.position.x;
   prev_y_ = odom_msg_.pose.pose.position.y;
-  prev_heading_ = odom_msg_.pose.pose.quaternion.z;
+  prev_heading_ = odom_msg_.pose.pose.orientation.z;
 
   odom_msg_.header.stamp = this->get_clock()->now();
 
-  t_last_ = data.header.stamp;
+  tlast_ = msg->header.stamp.sec+msg->header.stamp.nanosec*1e-9;
 
   odom_pub_->publish(odom_msg_);
 }
