@@ -2,10 +2,6 @@ uwb_beacon_rtls_node:
   ros__parameters:
     beacon_port: '/dev/cg_dev/tty_uwb1'
     beacon_verbose: False
-    tag_ids: 
-      - '8795'
-      - '0000'
-    tag_transforms: "[ [1,2,3], [1,2,3] ]"
     positional_rms: 0.012
     publish_raw_tags: False
     publish_ekf_tags: False
