@@ -1,3 +1,6 @@
 odom_node:
   ros__parameters:
-    
+    half_wheel_base_m: 0.2775
+    qp_steer_to_radian: 0.000099223014335
+    qp_drive_to_pos_m: 0.0008298755187
+    qpps_drive_to_speed_ms: 0.0008298755187
