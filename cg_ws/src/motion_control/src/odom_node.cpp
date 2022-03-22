@@ -50,10 +50,15 @@ OdomNode::OdomNode() : Node("odom_node") {
   this->declare_parameter<double>("twist_cov_yaw", 1);
   this->get_parameter("twist_cov_yaw", twist_cov_yaw_);
 
-  // TODO: INITALIZE VARIABLES
+  // INITALIZE VARIABLES
   prev_x_ = 0;
   prev_y_ = 0;
   prev_heading_ = 0;
+
+  // Set up frames for odom and base_link
+  odom_msg_.child_frame_id = "base_link";
+  odom_msg_.header.frame_id = "odom";
+
   tlast_ = this->get_clock()->now().seconds();
 }
 
@@ -64,10 +69,6 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   float drive_velocity = qpps_drive_to_speed_ms_*(msg->drive_vel_front - msg->drive_vel_rear)/2; // flip this sign if the drive velocity is reversed 
 
   delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)  - tlast_;
-
-  // Set up frames for odom and base_link
-  odom_msg_.child_frame_id = "base_link";
-  odom_msg_.header.frame_id = "odom";
 
   // vel
   odom_msg_.twist.twist.linear.x = drive_velocity*cos(prev_heading_+steer_angle);
