@@ -64,11 +64,7 @@ class dwm1001_localizer(Node):
         if self.publish_raw_tags:
             self.raw_publishers = {}
             for tag_id in self.tag_ids:
-                self.raw_publishers[tag_id] = self.create_publisher( Pose, self.raw_topic + tag_id, 10) 
-
-        self.declare_parameter('fused_pose_topic', 'fuse_pose')
-        self.fused_pose_topic = self.get_parameter('fused_pose_topic').get_parameter_value().string_value
-        self.fused_pub = self.create_publisher( PoseWithCovarianceStamped, self.fused_pose_topic, 10) 
+                self.raw_publishers[tag_id] = self.create_publisher( PoseWithCovarianceStamped, self.raw_topic + "tag_" + str(tag_id), 10) 
 
         self.declare_parameter('beacon_port', 'ttyACM0')
         self.dwm_port = self.get_parameter('beacon_port').get_parameter_value().string_value
@@ -100,8 +96,7 @@ class dwm1001_localizer(Node):
 
     def timer_callback(self):
 
-        #TODO: Test output type for multiple tags to determine how to get this right.
-        detected_poses = []
+        detected_poses = {}
         for n in range(len(self.tag_ids)):
 
             if self.beacon_verbose:
@@ -132,7 +127,7 @@ class dwm1001_localizer(Node):
                     continue
 
                 # To use this raw pose of DWM1001 as a measurement data
-                t_pose_xyz =  np.array([t_pose_x, t_pose_y, t_pose_z]).T
+                t_pose_xyz =  np.array([t_pose_x, t_pose_y, t_pose_z])
 
                 # Discard the pose data from USB if there exists "nan" in the values
                 if(np.isnan(t_pose_xyz).any()):
@@ -141,19 +136,18 @@ class dwm1001_localizer(Node):
                     continue
 
                 if self.publish_raw_tags:
-                    self.publishTagPose(tag_id, t_pose_xyz - np.array(self.tag_transforms[tag_id]), self.raw_publishers[tag_id])    
+                    self.publishTagPose(t_pose_xyz - np.array(self.tag_transforms[tag_id]), "uwb_tag_" + str(tag_id), self.raw_publishers[tag_id])    
 
+                assert t_pose_xyz.shape == np.array(self.tag_transforms[tag_id]).shape
                 detected_poses[tag_id] = t_pose_xyz - np.array(self.tag_transforms[tag_id])
         
+        if self.beacon_verbose:
+            self.get_logger().info(f"Got tags: {list(detected_poses.keys())}")
+
         if len(detected_poses) == 0:
             if self.beacon_verbose:
                 self.get_logger().info(f"No pose detections found")
             return
-
-        #Fuse data for single pose estimate output
-        fused_position = np.average(detected_poses, axis=0)
-        self.get_logger().info(str(fused_position))
-        self.publishTagPose(fused_position, "dwm1001", self.fused_pub)
 
 
     def publishTagPose(self, pos, frame_id, publisher):
