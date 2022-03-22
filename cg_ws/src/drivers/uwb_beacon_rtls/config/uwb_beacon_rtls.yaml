@@ -4,6 +4,6 @@ uwb_beacon_rtls_node:
     beacon_verbose: False
     positional_rms: 0.012
     beacon_hz: 0.01
-    publish_raw_tags: False
-    raw_topic: '/uwb_beacon/raw_tags'
+    publish_raw_tags: True
+    raw_topic: '/uwb_beacon/raw_tags/'
     fused_pose_topic: '/uwb_beacon/fused_pose'
