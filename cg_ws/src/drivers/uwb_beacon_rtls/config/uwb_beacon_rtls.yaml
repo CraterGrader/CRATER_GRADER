@@ -2,6 +2,8 @@ uwb_beacon_rtls_node:
   ros__parameters:
     beacon_port: '/dev/cg_dev/tty_uwb1'
     beacon_verbose: False
-    tag_names: 
-      - '8795'
-    
+    positional_rms: 0.012
+    beacon_hz: 0.01
+    publish_raw_tags: False
+    raw_topic: '/uwb_beacon/raw_tags'
+    fused_pose_topic: '/uwb_beacon/fused_pose'
