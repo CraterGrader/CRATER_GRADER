@@ -6,7 +6,7 @@ namespace teleop {
 TeleopNode::TeleopNode() : Node("teleop_node") {
   // Initialize publishers and subscribers
   cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
-    "/actuator_cmd", 1
+    "/teleop_cmd", 1
   );
   joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
     "/joy", 1, std::bind(&TeleopNode::joyCallback, this, std::placeholders::_1)
