@@ -3,7 +3,7 @@
 FROM continuumio/miniconda3 as conda_setup
 
 # Use ros as the base image
-FROM ros:galactic as ros_base
+FROM ros:foxy as ros_base
 ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
 # ---------------------------------------------------------
 
