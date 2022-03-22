@@ -1,0 +1,24 @@
+#include "std_msgs/msg/Header.idl"
+
+module cg_msgs {
+  module msg {
+    struct BeaconTag {
+      
+      std_msgs::msg::Header header;
+
+      string tag_id;
+
+      // Cartesian position of tag wrt defined coordinate system 
+      // (defined in RTLS Manager Android application)
+      double pose_x;
+      double pose_y;
+      double pose_z;
+
+      double orientation_x;
+      double orientation_y;
+      double orientation_z;
+      double orientation_w;
+
+    };
+  };
+};

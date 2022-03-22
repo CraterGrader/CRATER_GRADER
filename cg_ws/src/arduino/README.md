@@ -35,11 +35,11 @@ If Docker container is brought down and restarted, need to rerun steps from `sou
 
 ## Testing Communication with Due
 
-Verify that the Due is readable from within the Docker container, e.g it exists at `/dev/ttyACM0` inside the container.
+Verify that the Due is readable from within the Docker container, e.g it exists at `/dev/cg_dev/tty_aruino` inside the container.
 
 Upload the micro-ros_publisher example to the Due.
 
-In the Docker container, run `ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM0 -v6`. You should start to see several `send_message` and `recv_message` debug messages printed to console.
+In the Docker container, run `ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/cg_dev/tty_arduino -v6`. You should start to see several `send_message` and `recv_message` debug messages printed to console.
 
 Run `ros2 topic list`. You should be able to see the topic `/micro_ros_arduino_node_publisher`. Echo the topic and verify that data is being received from the Due.
 

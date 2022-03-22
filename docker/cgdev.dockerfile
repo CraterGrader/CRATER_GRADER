@@ -94,6 +94,7 @@ COPY cg_ws/src/ /root/cg_ws_autobuild/src/
 RUN conda init bash \
   && . /root/.bashrc \
   && conda activate cg \
+  && rosdep install --from-paths src --ignore-src -r -y \
   && . /opt/ros/$ROS_DISTRO/setup.sh \
   && colcon build
 # ---------------------------------------------------------
