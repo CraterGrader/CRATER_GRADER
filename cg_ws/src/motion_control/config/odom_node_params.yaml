@@ -1,0 +1,19 @@
+odom_node:
+  ros__parameters:
+    half_wheel_base_m: 0.2775
+    qp_steer_to_radian: 0.000099223014335
+    qp_drive_to_pos_m: 0.0008298755187
+    qpps_drive_to_speed_ms: 0.0008298755187
+    pose_cov_x: 1
+    pose_cov_y: 1 
+    pose_cov_z: 1
+    pose_cov_r: 1
+    pose_cov_p: 1
+    pose_cov_yaw: 1
+    twist_cov_x: 1
+    twist_cov_y: 1
+    twist_cov_z: 1
+    twist_cov_r: 1
+    twist_cov_p: 1
+    twist_cov_yaw: 1
+    

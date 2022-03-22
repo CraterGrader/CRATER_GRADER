@@ -64,14 +64,19 @@ Note that building only needs to be done if you want to update the image. This s
   ```
   docker-compose up -d cg-dev
   ```
+  
+5. In order to connect with all devices in the docker container without providing excessive privleges to the container, the udev rules for the devices must be symlinked to a custom directory. This can occur using the following script (Note: this script requires root access, eg. must be run with `sudo`)
+  ```
+  source set-udev-rules.sh
+  ```
 
-5. Attach to a shell in the image. You will now enter the container.
+6. Attach to a shell in the image. You will now enter the container.
   ```
   docker-compose exec cg-dev zsh
   ```
 > - To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 6 (you can simply re-attach when you want, by running step 4 again after exiting)
 
-6. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. Note that this command does not need a specified service; the command will bring all active services down. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
+7. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. Note that this command does not need a specified service; the command will bring all active services down. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
   ```
   docker-compose down
   ```

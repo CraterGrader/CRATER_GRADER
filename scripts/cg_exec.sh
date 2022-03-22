@@ -4,8 +4,9 @@ cd "${SCRIPT_DIR}/../"
 
 # Add device names here
 DEVICES=(
-  "/dev/ttyACM0"
-  "/dev/ttyUSB0"
+  "/dev/cg_dev/tty_arduino"
+  "/dev/cg_dev/tty_uwb1"
+  "/dev/cg_dev/tty_imu"
 )
 
 # docker-compose down
