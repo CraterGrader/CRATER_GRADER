@@ -4,15 +4,15 @@ odom_node:
     qp_steer_to_radian: 0.00007632539564 
     qp_drive_to_pos_m: 0.00008298755187
     qpps_drive_to_speed_ms: 0.00008298755187
-    pose_cov_x: 1.0
-    pose_cov_y: 1.0
-    pose_cov_z: 1.0
-    pose_cov_r: 1.0
-    pose_cov_p: 1.0
-    pose_cov_yaw: 1.0
-    twist_cov_x: 1.0
-    twist_cov_y: 1.0
-    twist_cov_z: 1.0
-    twist_cov_r: 1.0
-    twist_cov_p: 1.0
-    twist_cov_yaw: 1.0
+    pose_cov_x: 0.1
+    pose_cov_y: 0.1
+    pose_cov_z: 0.1
+    pose_cov_r: 0.1
+    pose_cov_p: 0.1
+    pose_cov_yaw: 0.1
+    twist_cov_x: 0.1
+    twist_cov_y: 0.1
+    twist_cov_z: 0.1
+    twist_cov_r: 0.1
+    twist_cov_p: 0.1
+    twist_cov_yaw: 0.1
