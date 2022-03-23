@@ -72,14 +72,14 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)  - tlast_;
 
   // vel
-  odom_msg_.twist.twist.linear.x = drive_velocity*cos(prev_heading_+steer_angle);
-  odom_msg_.twist.twist.linear.y = drive_velocity*sin(prev_heading_+steer_angle);
+  odom_msg_.twist.twist.linear.x = drive_velocity * cos(steer_angle) * cos(prev_heading_);
+  odom_msg_.twist.twist.linear.y = drive_velocity * cos(steer_angle) * sin(prev_heading_);
   odom_msg_.twist.twist.linear.z = 0;
 
   // omega
   odom_msg_.twist.twist.angular.x = 0;
   odom_msg_.twist.twist.angular.y = 0;
-  odom_msg_.twist.twist.angular.z = drive_velocity*cos(steer_angle)/half_wheel_base_m_;
+  odom_msg_.twist.twist.angular.z = drive_velocity*sin(steer_angle)/half_wheel_base_m_;
 
   // TWIST COVARIANCE
   odom_msg_.twist.covariance[0] = twist_cov_x_;
@@ -90,13 +90,14 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   odom_msg_.twist.covariance[35] = twist_cov_yaw_;  
 
   // pos
-  odom_msg_.pose.pose.position.x = prev_x_ + (pos_delta * cos(prev_heading_+steer_angle));
-  odom_msg_.pose.pose.position.y = prev_y_ + (pos_delta * sin(prev_heading_+steer_angle));
+  odom_msg_.pose.pose.position.x = prev_x_ + (pos_delta * cos(steer_angle) * cos(prev_heading_));
+  odom_msg_.pose.pose.position.y = prev_y_ + (pos_delta * cos(steer_angle) * sin(prev_heading_));
   odom_msg_.pose.pose.position.z = 0;
 
   // rpy
   tf2::Quaternion q;
-  q.setRPY(0, 0, prev_heading_ + (delta_t_*odom_msg_.twist.twist.angular.z));
+  prev_heading_ += (delta_t_ * odom_msg_.twist.twist.angular.z);
+  q.setRPY(0, 0, prev_heading_);
   odom_msg_.pose.pose.orientation.x = q.x();
   odom_msg_.pose.pose.orientation.y = q.y();
   odom_msg_.pose.pose.orientation.z = q.z();
@@ -112,7 +113,6 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
 
   prev_x_ = odom_msg_.pose.pose.position.x;
   prev_y_ = odom_msg_.pose.pose.position.y;
-  prev_heading_ = odom_msg_.pose.pose.orientation.z;
 
   odom_msg_.header.stamp = this->get_clock()->now();
 
