@@ -20,12 +20,18 @@ def generate_launch_description():
       package='robot_localization',
       executable='ekf_node',
       name='ekf_odom_node',
-      parameters=[ekf_odom_params]
+      parameters=[ekf_odom_params],
+      remappings=[
+        ('odometry/filtered', 'odometry/filtered/ekf_odom_node')
+      ]
     ),
     Node(
       package='robot_localization',
       executable='ekf_node',
       name='ekf_global_node',
-      parameters=[ekf_global_params]
+      parameters=[ekf_global_params],
+      remappings=[
+        ('odometry/filtered', 'odometry/filtered/ekf_global_node')
+      ]
     )
   ])
