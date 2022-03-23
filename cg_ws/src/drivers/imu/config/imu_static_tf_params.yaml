@@ -1,8 +1,8 @@
 imu_static_transform_publisher:
   ros__parameters:
-    x: '0'
+    x: '0.12702'
     y: '0'
-    z: '0'
+    z: '-0.01331'
     roll: '3.14159265359'
     pitch: '0'
     yaw: '0'
