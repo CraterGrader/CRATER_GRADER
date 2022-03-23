@@ -65,9 +65,9 @@ OdomNode::OdomNode() : Node("odom_node") {
 
 void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
 
-  float pos_delta = qp_drive_to_pos_m_*(msg->drive_delta_front - msg->drive_delta_rear)/2; // flip if the direction is wrong
-  float steer_angle = qp_steer_to_radian_*(msg->steer_pos_rear - msg->steer_pos_front)/2; // flip this sign if the steer is reversed 
-  float drive_velocity = qpps_drive_to_speed_ms_*(msg->drive_vel_front - msg->drive_vel_rear)/2; // flip this sign if the drive velocity is reversed 
+  float pos_delta = -qp_drive_to_pos_m_*(msg->drive_delta_front - msg->drive_delta_rear)/2; // flip if the direction is wrong
+  float steer_angle = -qp_steer_to_radian_*(msg->steer_pos_rear - msg->steer_pos_front)/2; // flip this sign if the steer is reversed 
+  float drive_velocity = -qpps_drive_to_speed_ms_*(msg->drive_vel_front - msg->drive_vel_rear)/2; // flip this sign if the drive velocity is reversed 
 
   delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)  - tlast_;
 
