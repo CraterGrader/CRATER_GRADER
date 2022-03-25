@@ -1,0 +1,7 @@
+uwb_beacon_rtls_node:
+  ros__parameters:
+    beacon_port: '/dev/cg_dev/tty_uwb1'
+    beacon_verbose: False
+    tag_names: 
+      - '8795'
+    

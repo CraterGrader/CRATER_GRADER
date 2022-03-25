@@ -3,7 +3,7 @@
 FROM continuumio/miniconda3 as conda_setup
 
 # Use ros as the base image
-FROM ros:galactic as ros_base
+FROM ros:foxy as ros_base
 ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
 # ---------------------------------------------------------
 
@@ -85,6 +85,13 @@ RUN sudo apt-get install -y ros-$ROS_DISTRO-image-transport \
   ros-$ROS_DISTRO-cv-bridge \
   ros-$ROS_DISTRO-camera-info-manager \
   ros-$ROS_DISTRO-apriltag
+  
+# Install additional custom packages
+RUN apt-get update && apt-get install -y \
+  ros-$ROS_DISTRO-rviz2 \
+  ros-$ROS_DISTRO-plotjuggler-ros \
+  ros-$ROS_DISTRO-joy \
+  ros-$ROS_DISTRO-realsense2-camera
 
 # Automatically build cg_ws packages
 WORKDIR /root/cg_ws_autobuild/
@@ -92,6 +99,7 @@ COPY cg_ws/src/ /root/cg_ws_autobuild/src/
 RUN conda init bash \
   && . /root/.bashrc \
   && conda activate cg \
+  && rosdep install --from-paths src --ignore-src -r -y \
   && . /opt/ros/$ROS_DISTRO/setup.sh \
   && colcon build
 # ---------------------------------------------------------
@@ -129,7 +137,6 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-camera-calibration-parsers \
   ros-$ROS_DISTRO-launch-testing-ament-cmake \
   ros-$ROS_DISTRO-usb-cam \
-
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   ros-$ROS_DISTRO-realsense2-camera
