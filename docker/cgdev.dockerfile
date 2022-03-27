@@ -92,6 +92,11 @@ RUN conda init bash && . /root/.bashrc && conda activate cg
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
+# Some useful debugging packages
+RUN apt-get update && apt-get install -y \
+  && ros-$ROS_DISTRO-rqt-reconfigure \
+  && ros-$ROS_DISTRO-rqt-graph
+
 # Run the following with DEBIAN_FRONTEND=noninteractive to avoid prompt for keyboard language
 # https://askubuntu.com/questions/876240/how-to-automate-setting-up-of-keyboard-configuration-package
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
