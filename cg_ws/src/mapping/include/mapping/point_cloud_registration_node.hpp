@@ -15,12 +15,12 @@ public:
 private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr terrain_raw_map_pub_;
-  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr raw_points_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_points_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */
   void timerCallback();
-  void rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+  void filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 };
 
 
