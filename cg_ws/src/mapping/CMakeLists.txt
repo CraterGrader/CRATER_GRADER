@@ -28,6 +28,14 @@ ament_target_dependencies(point_cloud_registration
   sensor_msgs
 )
 
+add_executable(terrain_filtering src/terrain_filtering_main.cpp
+  src/terrain_filtering_node.cpp
+)
+ament_target_dependencies(terrain_filtering
+  rclcpp
+  sensor_msgs
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
@@ -36,6 +44,10 @@ endif()
 
 # Install targets
 install(TARGETS point_cloud_registration
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS terrain_filtering
   DESTINATION lib/${PROJECT_NAME}
 )
 
