@@ -20,6 +20,7 @@ camera:
         pointcloud_stream_format_filter: 0 # = 0 Allows any filter format for streaming point cloud
         pointcloud_texture_index: 0 # = 0 Allows any texture for streaming point cloud
         pointcloud_texture_stream: RS2_STREAM_COLOR # = RS2_STREAM_COLOR is the default
+        decimation_filter: true
 
         # Data sources 
         enable_depth: true # True to allow depth processing; necessary for point cloud
@@ -44,11 +45,11 @@ camera:
         # Source settings
         color_fps: 30.0 # Set frame rate for rgb images, seemingly no effect if enable_color=false
         color_height: 480 # Set image height for rgb images, seemingly no effect if enable_color=false
-        color_width: 640 # Set image width for rgb images, seemingly no effect if enable_color=false
+        color_width: 848 # Set image width for rgb images, seemingly no effect if enable_color=false
         color_qos: "SENSOR_DATA" # Set ROS2 Quality of Service for color data, "SENSOR_DATA" here maps to "Best Effort" in ROS2, seemingly no effect if enable_color=false
 
         depth_fps: 30.0 # Set frame rate for depth images/processing, 30.0 observed to give ~14fps point cloud frame rate
         depth_height: 480 # Set frame height for depth images, 480 observed to give ~14fps point cloud frame rate
-        depth_width: 640 # Set frame width for depth images, 640 observed to give ~14fps point cloud frame rate
+        depth_width: 848 # Set frame width for depth images, 640 observed to give ~14fps point cloud frame rate
         depth_qos: "SENSOR_DATA" # Set ROS2 Quality of Service for depth data, "SENSOR_DATA" here maps to "Best Effort" in ROS2
         
