@@ -19,13 +19,14 @@ camera:
         pointcloud_qos: "SENSOR_DATA" # Use 'Best Effort' publishing
         filters: decimation # Subsamples the point cloud 
         decimation.filter_magnitude: 8 # The filter run on kernel sizes [2x2] to [8x8] pixels. For patches sized 2 and 3 the median depth value is selected. For larger kernels, 4-8 pixels, the mean depth is used due to performance considerations. More info: https://dev.intelrealsense.com/docs/post-processing-filters
-        clip_distance: 3.0 # Remove from the depth image all values above a given value (meters), set negative to turn off clipping. More info: https://dev.intelrealsense.com/docs/ros-wrapper
+        clip_distance: 2.0 # Remove from the depth image all values above a given value (meters), set negative to turn off clipping. More info: https://dev.intelrealsense.com/docs/ros-wrapper
         # 'colorizer' filter applies RGB normalization coloring to depth image, and 
         pointcloud.stream_filter: 0 # = 0 Allows any filter for streaming point cloud
         pointcloud_stream_format_filter: 0 # = 0 Allows any filter format for streaming point cloud
         pointcloud_texture_index: 0 # = 0 Allows any texture for streaming point cloud
         pointcloud_texture_stream: RS2_STREAM_COLOR # = RS2_STREAM_COLOR is the default
         
+        odom_frame_id: "map"
 
         # Data sources 
         enable_depth: true # True to allow depth processing; necessary for point cloud
