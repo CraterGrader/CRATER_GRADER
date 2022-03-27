@@ -1,4 +1,7 @@
 #include "mapping/point_cloud_registration_node.hpp"
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/registration/icp.h>
 
 namespace cg {
 namespace mapping {

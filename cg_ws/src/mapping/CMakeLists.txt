@@ -15,6 +15,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(pcl_ros REQUIRED)
 
 include_directories(include)
 
@@ -25,6 +26,7 @@ add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
 ament_target_dependencies(point_cloud_registration
   rclcpp
   rclcpp_components
+  pcl_ros
   sensor_msgs
 )
 
