@@ -13,7 +13,7 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node") {
     "/terrain/filtered", 1
   );
   raw_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/camera/depth/color/points", 1, std::bind(&TerrainFilteringNode::rawPointsCallback, this, std::placeholders::_1)
+    "/camera/depth/color/points", rclcpp::SensorDataQoS(), std::bind(&TerrainFilteringNode::rawPointsCallback, this, std::placeholders::_1)
   );
 }
 

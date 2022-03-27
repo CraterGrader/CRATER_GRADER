@@ -9,7 +9,7 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() : Node("point_cloud_reg
     "/terrain/raw_map", 1
   );
   filtered_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/terrain/filtered", 1, std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
+    "/terrain/filtered", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
   );
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100),
