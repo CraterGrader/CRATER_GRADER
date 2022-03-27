@@ -14,8 +14,8 @@ echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc
 echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc
 
 # Source cg_ws overlay packages
-echo 'source /root/cg_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
-echo 'source /root/cg_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
+# echo 'source /root/cg_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
+# echo 'source /root/cg_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
 
 # Start new shells in the cg conda environment
 echo "conda activate cg" >> ~/.zshrc
