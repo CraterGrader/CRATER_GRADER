@@ -88,7 +88,7 @@ RUN conda init zsh \
 #   && conda activate cg \
 #   && . /opt/ros/$ROS_DISTRO/setup.sh \
 #   && colcon build
-RUN conda init bash && conda activate cg
+RUN conda init bash && . /root/.bashrc && conda activate cg
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
