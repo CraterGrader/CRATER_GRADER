@@ -2,11 +2,11 @@
 
 module cg_msgs {
   module msg {
-    struct EncoderTelemetry {
+    struct Slip {
       std_msgs::msg::Header header;
 
       // Slip percentage
-      @default (value = 0)
+      @default (value = 0.0)
       float slip;
 
 

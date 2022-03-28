@@ -13,7 +13,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='localization',
-            executable='slip_estimate',
+            executable='slip_estimate_node',
             name='slip_estimate_node',
             parameters=[slip_params]
         )

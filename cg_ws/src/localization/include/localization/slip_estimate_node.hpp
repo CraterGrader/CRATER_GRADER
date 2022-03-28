@@ -2,8 +2,8 @@
 
 #include<chrono>
 #include <rclcpp/rclcpp.hpp>
-#include <cg_msgs/msg/slip.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <cg_msgs/msg/slip.hpp>
 
 namespace cg {
 namespace slip {
@@ -27,13 +27,11 @@ private:
   bool enc_init = false;
 
   /* Callbacks */
-  void slipCallback(
-      const nav_msgs::msg::Odometry::ConstSharedPtr& enc_msg,
-      const nav_msgs::msg::Odometry::ConstSharedPtr& odom_msg);
+  void slipCallback();
   void odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom_msg);
   void encCallback(const nav_msgs::msg::Odometry::SharedPtr enc_msg);
 
-  timer_ = this->create_wall_timer(
+  rclcpp::TimerBase::SharedPtr timer_ = this->create_wall_timer(
     std::chrono::milliseconds(50),
     std::bind(&SlipEstimateNode::slipCallback, this));
 
