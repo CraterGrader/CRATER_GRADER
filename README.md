@@ -64,14 +64,19 @@ Note that building only needs to be done if you want to update the image. This s
   ```
   docker-compose up -d cg-dev
   ```
+  
+5. In order to connect with all devices in the docker container without providing excessive privleges to the container, the udev rules for the devices must be symlinked to a custom directory. This can occur using the following script (Note: this script requires root access, eg. must be run with `sudo`)
+  ```
+  source set-udev-rules.sh
+  ```
 
-5. Attach to a shell in the image. You will now enter the container.
+6. Attach to a shell in the image. You will now enter the container.
   ```
   docker-compose exec cg-dev zsh
   ```
 > - To exit the shell when you're done doing in the container, just type `exit` on the command prompt. The docker image will stay active in the background until you do step 6 (you can simply re-attach when you want, by running step 4 again after exiting)
 
-6. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. Note that this command does not need a specified service; the command will bring all active services down. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
+7. You generally don't need to shut down the docker container, but if you won't be using it for a while and/or to save resources use while not using it you can use the following command. Note that this command does not need a specified service; the command will bring all active services down. To re-start the container up again, simply begin with step 4 (i.e. no need to re-build unless dockerfile/etc. changes were made).
   ```
   docker-compose down
   ```
@@ -82,6 +87,29 @@ Note that building only needs to be done if you want to update the image. This s
   3) Connect to the VNC server address (search in the VNC client application for `localhost:5901`)
   4) When prompted, enter the VNC server password (for now, `cratergrader`)
   5) Start gui appliation in the Docker container, either in VNC window or original container terminal; best practice is to use the original terminal you entered the container from (e.g. `ros2 run rviz2 rviz2`, `ros2 run plotjuggler plotjuggler`, etc.)
+
+
+### Running the CraterGrader worksystem
+
+To run the `teleop` node, with joystick controller and drive output:
+
+- `ros2 launch teleop joystick_launch.py`
+
+To launch the UltraWideband beacons node:
+
+- `ros2 launch uwb_beacon_rtls.launch.py`
+
+To launch the IMU node:
+
+- `ros2 launch imu_launch.py`
+
+To launch the realsense:
+
+- `ros2 launch realsense realsense_launch.py`
+
+To launch robot_localization 
+
+- `ros2 launch localization ekf_localization.launch.py`
 
 
 ## Other Notes/Tips

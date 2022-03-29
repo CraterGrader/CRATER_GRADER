@@ -1,0 +1,15 @@
+#include "std_msgs/msg/Header.idl"
+
+module cg_msgs {
+  module msg {
+    struct Slip {
+      std_msgs::msg::Header header;
+
+      // Slip percentage
+      @default (value = 0.0)
+      float slip;
+
+
+    };
+  };
+};

@@ -57,11 +57,13 @@ void VnImuNode::timerCallback() {
   msg.header.frame_id = "imu_link";
 
   // Set orientation
+  RCLCPP_INFO(this->get_logger(), "%f", vs_data_register.yawPitchRoll[0]);
   tf2::Quaternion q;
   q.setRPY(
     M_PI/180.0*vs_data_register.yawPitchRoll[2] - orientation_zero_offsets_.x,
     M_PI/180.0*vs_data_register.yawPitchRoll[1] - orientation_zero_offsets_.y,
-    0.0  // Intentionally ignore yaw assuming no magnetometer data on the moon, and set to zero
+    // 0.0  // Intentionally ignore yaw assuming no magnetometer data on the moon, and set to zero
+    M_PI/180.0*vs_data_register.yawPitchRoll[0] - orientation_zero_offsets_.z
   );
   q.normalize();
   msg.orientation = tf2::toMsg(q);
