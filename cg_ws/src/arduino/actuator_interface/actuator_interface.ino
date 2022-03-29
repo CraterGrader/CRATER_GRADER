@@ -7,10 +7,11 @@
 #include <rclc/executor.h>
 #include <cmath>
 #include <std_msgs/msg/int64.h>
+#include <std_msgs/msg/int8.h>
 #include "RoboClaw.h"
 
 // NUM_HANDLES must be updated to reflect total number of subscribers + publishers
-#define NUM_HANDLES 2
+#define NUM_HANDLES 3 // two subscribers, one publisher
 
 #define LED_PIN 13
 #define LOOP_PERIOD_MS 10
@@ -22,9 +23,9 @@
 
 #define BYTE_TO_QPPS_DRIVE_SCALE 25  // Drive Scale 
 #define BYTE_TO_QP_STEER_SCALE 22 // Steer Scale
-#define BYTE_TO_QPPS_DRIVE_STEER_OFFSET 127 // 
+#define BYTE_TO_QPPS_DRIVE_STEER_OFFSET 127
 #define BYTE_TO_QP_DELTA_POS_SCALE 10  // Drive Scale 
-#define BYTE_TO_QP_DELTA_POS_OFFSET 127 // 
+#define BYTE_TO_QP_DELTA_POS_OFFSET 127
 
 
 #define BYTE_TO_QP_TOOL_SCALE -588 // Tool Scale
@@ -57,9 +58,11 @@ uint8_t rc_1_drive_status; //Drive 2
 bool rc_1_drive_valid; //Drive 2
 
 // Instantiate publishers and subscribers
+rcl_subscription_t reset_sub;
 rcl_subscription_t cmd_sub;
 rcl_publisher_t feedback_pub;
 
+std_msgs__msg__Int8 reset_msg;
 std_msgs__msg__Int64 cmd_msg;
 std_msgs__msg__Int64 feedback_msg;
 
@@ -98,6 +101,19 @@ void cmd_callback(const void * msgin)
   const std_msgs__msg__Int64 * msg = (const std_msgs__msg__Int64 *)msgin;
   cmd_msg = *msg;
   cmd_msg_received = true;
+}
+
+void (*resetFunc)(void) = 0; // declare reset fuction at address 0, see https://arduinogetstarted.com/faq/how-to-reset-arduino-by-programming
+
+void reset_callback(const void *msgin)
+{
+  const std_msgs__msg__Int8 *msg = (const std_msgs__msg__Int8 *)msgin;
+  reset_msg = *msg;
+
+  // If value is 1, then reset for the motion control system
+  if reset_msg.data == 1 {
+      resetFunc(); // call reset function
+  }
 }
 
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
@@ -203,6 +219,14 @@ void setup() {
   // create node
   RCCHECK(rclc_node_init_default(&node, "arduino_actuator_interface_node", "", &support));
 
+  // Subscribe to message for resetting arduino
+  RCCHECK(rclc_subscription_init_default(
+      &reset_sub,
+      &node,
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int8),
+      "reset_arduino"));
+
+  // Subscribe to commands for actuators
   RCCHECK(rclc_subscription_init_default(
     &cmd_sub,
     &node,
@@ -229,6 +253,7 @@ void setup() {
   RCCHECK(rclc_executor_init(&executor, &support.context, NUM_HANDLES, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_sub, &cmd_msg, &cmd_callback, ON_NEW_DATA));
+  RCCHECK(rclc_executor_add_subscription(&executor, &reset_sub, &reset_msg, &reset_callback, ON_NEW_DATA));
 
   // Set up RoboClaws
   for (auto & roboclaw : roboclaws_mobility) {

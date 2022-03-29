@@ -6,7 +6,7 @@ namespace arduino {
 SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   // Initialize publishers and subscribers
   reset_pub_ = this->create_publisher<std_msgs::msg::Int8>(
-      "/reset_arduino", rclcpp::QoS(rclcpp::KeepLast(10)).reliable().transient_local()); // Create with reliable reliability and transient local durability, see https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_qos.html#section-gsg-qos-durability
+      "/reset_arduino", rclcpp::QoS(rclcpp::KeepLast(10)).reliable()); // Create with reliable reliability and volatile durability, see https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_qos.html#section-gsg-qos-durability
   cmd_pub_ = this->create_publisher<std_msgs::msg::Int64>(
     "/arduino_cmd", 1
   );
