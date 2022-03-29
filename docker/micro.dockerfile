@@ -1,11 +1,11 @@
 # -------- Build on existing docker images ----------------
 # Get conda files
-FROM continuumio/miniconda3:latest as conda_setup
+# FROM continuumio/miniconda3:latest as conda_setup
 
 # Use ros as the base image
 # FROM ros:foxy as ros_base
-FROM microros/micro-ros-agent:foxy as ros_base
-ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
+FROM microros/micro-ros-agent:galactic as ros_base
+# ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
 # ---------------------------------------------------------
 
 # -------- Environment configuration ----------------------
@@ -54,32 +54,32 @@ RUN apt-get update && apt-get install -y \
 
 # -------- VNC GUI Configuration --------------------------
 # Install vnc, xvfb for VNC configuration, fluxbox for window managment
-RUN apt-get install -y x11vnc xvfb fluxbox
+# RUN apt-get install -y x11vnc xvfb fluxbox
 
-# Setup a VNC password
-RUN  mkdir ~/.vnc\
-  && x11vnc -storepasswd cratergrader ~/.vnc/passwd
+# # Setup a VNC password
+# RUN  mkdir ~/.vnc\
+#   && x11vnc -storepasswd cratergrader ~/.vnc/passwd
 
-# Start the VNC server
-RUN echo "export DISPLAY=:20" >> ~/.zshrc \
-  && echo "export DISPLAY=:20" >> ~/.bashrc
+# # Start the VNC server
+# RUN echo "export DISPLAY=:20" >> ~/.zshrc \
+#   && echo "export DISPLAY=:20" >> ~/.bashrc
 
-# Always try to start windows management in background to be ready for VNC
-RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc \
-  && echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
+# # Always try to start windows management in background to be ready for VNC
+# RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc \
+#   && echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
 
-# Clean up unnecessary output files
-RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
-  && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
+# # Clean up unnecessary output files
+# RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
+#   && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
 # ---------------------------------------------------------
 
 # -------- Setup CraterGrader environment packages --------
 # Setup conda environment
-COPY --from=conda_setup /opt/conda/ /opt/conda/
-COPY environment.yml /root/
-RUN conda init zsh && conda init bash \
-  && conda env create --name cg -f /root/environment.yml --force \
-  && rm -f /root/environment.yml
+# COPY --from=conda_setup /opt/conda/ /opt/conda/
+# COPY environment.yml /root/
+# RUN conda init zsh && conda init bash \
+#   && conda env create --name cg -f /root/environment.yml --force \
+#   && rm -f /root/environment.yml
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
@@ -104,9 +104,9 @@ RUN conda init zsh && conda init bash \
 #   ros-$ROS_DISTRO-rqt-reconfigure
 
 # For additional colcon build
-WORKDIR /root/CRATER_GRADER/cg_ws
-COPY cg_ws/src/ /root/CRATER_GRADER/cg_ws/src/
-RUN rosdep install --from-paths src --ignore-src -r -y
+# WORKDIR /root/CRATER_GRADER/cg_ws
+# COPY cg_ws/src/ /root/CRATER_GRADER/cg_ws/src/
+# RUN rosdep install --from-paths src --ignore-src -r -y
 
 # Automatically build cg_ws packages
 # RUN rosdep install --from-paths src --ignore-src -r -y
@@ -122,11 +122,11 @@ RUN rosdep install --from-paths src --ignore-src -r -y
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
-COPY docker/cgdev_entrypoint.sh /
-RUN chmod +x /cgdev_entrypoint.sh
+COPY docker/micro_entrypoint.sh /
+RUN chmod +x /micro_entrypoint.sh
 
 # Make entry
 WORKDIR /root/CRATER_GRADER/cg_ws/
-ENTRYPOINT ["/cgdev_entrypoint.sh"]
+ENTRYPOINT ["/micro_entrypoint.sh"]
 CMD ["zsh"]
 # ---------------------------------------------------------
