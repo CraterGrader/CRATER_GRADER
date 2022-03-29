@@ -90,6 +90,8 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rqt-graph \
   ros-$ROS_DISTRO-rqt-reconfigure
 
+# For additional colcon build, we need: rosdep install --from-paths src --ignore-src -r -y
+
 # Automatically build cg_ws packages
 # RUN rosdep install --from-paths src --ignore-src -r -y
 # COPY cg_ws/src/ /root/cg_ws_autobuild/src/
@@ -100,7 +102,6 @@ RUN apt-get update && apt-get install -y \
 #   && . /opt/ros/$ROS_DISTRO/setup.sh
 #  && colcon build
 # ---------------------------------------------------------
-RUN conda init bash
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
