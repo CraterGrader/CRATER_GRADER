@@ -100,7 +100,7 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rqt-graph \
   ros-$ROS_DISTRO-rqt-reconfigure
 # ---------------------------------------------------------
-RUN conda init bash
+# RUN conda init bash
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
