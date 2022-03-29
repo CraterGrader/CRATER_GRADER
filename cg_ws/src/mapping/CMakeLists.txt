@@ -1,0 +1,67 @@
+cmake_minimum_required(VERSION 3.8)
+project(mapping)
+
+# Default to C++20
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 20)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(pcl_ros REQUIRED)
+
+include_directories(include)
+
+# build nodes
+add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
+  src/point_cloud_registration_node.cpp
+)
+ament_target_dependencies(point_cloud_registration
+  rclcpp
+  rclcpp_components
+  pcl_ros
+  sensor_msgs
+)
+
+add_executable(terrain_filtering src/terrain_filtering_main.cpp
+  src/terrain_filtering_node.cpp
+)
+ament_target_dependencies(terrain_filtering
+  rclcpp
+  sensor_msgs
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+
+# Install targets
+install(TARGETS point_cloud_registration
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS terrain_filtering
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install directories
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION include/${PROJECT_NAME}
+)
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+install(DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+ament_package()
