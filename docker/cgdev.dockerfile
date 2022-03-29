@@ -1,6 +1,6 @@
 # -------- Build on existing docker images ----------------
 # Get conda files
-FROM continuumio/miniconda3 as conda_setup
+FROM continuumio/miniconda3:latest as conda_setup
 
 # Use ros as the base image
 FROM ros:foxy as ros_base
@@ -100,6 +100,7 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rqt-graph \
   ros-$ROS_DISTRO-rqt-reconfigure
 # ---------------------------------------------------------
+RUN conda init bash
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
