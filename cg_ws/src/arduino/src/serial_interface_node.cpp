@@ -5,6 +5,8 @@ namespace arduino {
 
 SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   // Initialize publishers and subscribers
+  reset_pub_ = this->create_publisher<std_msgs::msg::Int8>(
+      "/reset_arduino", rclcpp::QoS(rclcpp::KeepLast(10)).reliable().transient_local()); // Create with reliable reliability and transient local durability, see https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_qos.html#section-gsg-qos-durability
   cmd_pub_ = this->create_publisher<std_msgs::msg::Int64>(
     "/arduino_cmd", 1
   );
@@ -41,6 +43,10 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET", 127);
   this->get_parameter("QP_TO_BYTE_DELTA_POS_OFFSET", QP_TO_BYTE_DELTA_POS_OFFSET_);
 
+  // Reset the arduino on start up
+  reset_arduino_val_.data = 1;
+  reset_pub_->publish(reset_arduino_val_);
+  reset_arduino_val_.data = 0; // Immediately set reset to zero so we can't accidentally reset again
 }
 
 void SerialInterfaceNode::timerCallback() {

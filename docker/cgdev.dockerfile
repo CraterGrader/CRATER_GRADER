@@ -1,6 +1,6 @@
 # -------- Build on existing docker images ----------------
 # Get conda files
-FROM continuumio/miniconda3 as conda_setup
+FROM continuumio/miniconda3:latest as conda_setup
 
 # Use ros as the base image
 FROM ros:foxy as ros_base
@@ -86,18 +86,21 @@ RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   ros-$ROS_DISTRO-realsense2-camera \
-  ros-$ROS_DISTRO-robot-localization
+  ros-$ROS_DISTRO-robot-localization \
+  ros-$ROS_DISTRO-rqt-graph \
+  ros-$ROS_DISTRO-rqt-reconfigure
 
 # Automatically build cg_ws packages
-WORKDIR /root/cg_ws_autobuild/
-COPY cg_ws/src/ /root/cg_ws_autobuild/src/
-RUN conda init bash \
-  && . /root/.bashrc \
-  && conda activate cg \
-  && rosdep install --from-paths src --ignore-src -r -y \
-  && . /opt/ros/$ROS_DISTRO/setup.sh \
-  && colcon build
+# RUN rosdep install --from-paths src --ignore-src -r -y
+# COPY cg_ws/src/ /root/cg_ws_autobuild/src/
+# RUN conda init bash \
+#   && . /root/.bashrc \
+#   && conda activate cg \
+#   && rosdep install --from-paths src --ignore-src -r -y \
+#   && . /opt/ros/$ROS_DISTRO/setup.sh
+#  && colcon build
 # ---------------------------------------------------------
+RUN conda init bash
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint

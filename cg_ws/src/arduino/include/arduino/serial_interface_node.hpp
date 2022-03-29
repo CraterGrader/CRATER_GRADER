@@ -3,6 +3,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int64.hpp>
+#include <std_msgs/msg/int8.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
 
@@ -17,6 +18,7 @@ public:
 private:
   /* Publishers and Subscribers */
   // Sending commands to arduino
+  rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr reset_pub_;
   rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr cmd_pub_;
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
@@ -25,7 +27,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr ard_sub_;
   rclcpp::Publisher<cg_msgs::msg::EncoderTelemetry>::SharedPtr enc_pub_;
 
-  // declare parameters 
+  // declare parameters
   int QP_TO_BYTE_STEER_SCALE_;
   int QP_TO_BYTE_STEER_OFFSET_;
   int QPPS_TO_BYTE_DRIVE_SCALE_;
@@ -36,6 +38,7 @@ private:
   int QP_TO_BYTE_DELTA_POS_OFFSET_;
   
   /* Message data */
+  std_msgs::msg::Int8 reset_arduino_val_; // 1 --> reset, all other values ignored
   cg_msgs::msg::ActuatorCommand actuator_cmd_;
   std_msgs::msg::Int64 ard_feedback_;
   cg_msgs::msg::EncoderTelemetry enc_telemetry_;
