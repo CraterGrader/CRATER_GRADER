@@ -76,26 +76,12 @@ RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
 # Setup conda environment
 COPY --from=conda_setup /opt/conda/ /opt/conda/
 COPY environment.yml /root/
-RUN conda init zsh \
+RUN conda init zsh && conda init bash \
   && conda env create --name cg -f /root/environment.yml --force \
   && rm -f /root/environment.yml
-
-# Automatically build cg_ws packages
-# WORKDIR /root/cg_ws_autobuild/
-# COPY cg_ws/src/ /root/cg_ws_autobuild/src/
-# RUN conda init bash \
-#   && . /root/.bashrc \
-#   && conda activate cg \
-#   && . /opt/ros/$ROS_DISTRO/setup.sh \
-#   && colcon build
-RUN conda init bash && . /root/.bashrc && conda activate cg
 # ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
-# Some useful debugging packages
-RUN apt-get update && apt-get install -y \
-  && ros-$ROS_DISTRO-rqt-reconfigure \
-  && ros-$ROS_DISTRO-rqt-graph
 
 # Run the following with DEBIAN_FRONTEND=noninteractive to avoid prompt for keyboard language
 # https://askubuntu.com/questions/876240/how-to-automate-setting-up-of-keyboard-configuration-package
@@ -110,7 +96,9 @@ RUN apt-get update && apt-get install -y \
   libpcl-dev \
   ros-$ROS_DISTRO-pcl-conversions \
   ros-$ROS_DISTRO-pcl-ros \
-  ros-$ROS_DISTRO-pcl-msgs
+  ros-$ROS_DISTRO-pcl-msgs \
+  ros-$ROS_DISTRO-rqt-graph \
+  ros-$ROS_DISTRO-rqt-reconfigure
 # ---------------------------------------------------------
 
 # -------- Container entrypoint ---------------------------
