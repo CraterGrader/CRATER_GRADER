@@ -1,8 +1,23 @@
-teleop_node:
+bearing_node:
   ros__parameters:
-    # Bearing Estimation Parameters
-    box_width: 7.5  # Sandbox length perpendicular to GHC roll-up gates
-    box_length: 7.5  # Sandbox width parallel to GHC roll-up gates
-    box_height: 1 # Sandbox height from ground plane
-    mounting_height: 1 # Height of top edge from the ground plane
-    tag_size: 0.3 # Size of apriltag's inner box
+    # Positions relative to worksite frame
+    tags:
+      position: # m
+        x: ['3.81', '7.62', '3.81', '0']
+        y: ['7.3152', '3.6576', '0', '3.6576']
+        z: ['0.7508', '0.7508', '0.7508', '0.7508']
+      orientation: # rad
+        x: ['1.5708', '1.5708', '1.5708', '1.5708']
+        y: ['0', '0', '0', '0']
+        z: ['0', '-1.5708', '3.1416', '1.5708']
+    base_cam_tf:
+      position: # m
+        x: '0.191'
+        y: '-0.0347'
+        z: '0.437'
+      orientation: # rad
+        x: '-1.5708'
+        y: '0'
+        z: '-1.5708'
+    pub_freq: 5
+    publish_viz: true

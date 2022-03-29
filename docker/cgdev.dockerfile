@@ -79,19 +79,23 @@ COPY environment.yml /root/
 RUN conda init zsh \
   && conda env create --name cg -f /root/environment.yml --force \
   && rm -f /root/environment.yml
-
-# Needed for colcon build
-RUN sudo apt-get install -y ros-$ROS_DISTRO-image-transport \
-  ros-$ROS_DISTRO-cv-bridge \
-  ros-$ROS_DISTRO-camera-info-manager \
-  ros-$ROS_DISTRO-apriltag
-  
+ 
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
-  ros-$ROS_DISTRO-realsense2-camera
+  ros-$ROS_DISTRO-realsense2-camera \
+  ros-$ROS_DISTRO-image-tools \
+  ros-$ROS_DISTRO-image-transport \
+  ros-$ROS_DISTRO-image-transport-plugins \
+  ros-$ROS_DISTRO-image-pipeline \
+  ros-$ROS_DISTRO-camera-calibration-parsers \
+  ros-$ROS_DISTRO-launch-testing-ament-cmake \
+  ros-$ROS_DISTRO-usb-cam \
+  ros-$ROS_DISTRO-cv-bridge \
+  ros-$ROS_DISTRO-camera-info-manager \
+  ros-$ROS_DISTRO-apriltag
 
 # Automatically build cg_ws packages
 WORKDIR /root/cg_ws_autobuild/
@@ -104,42 +108,9 @@ RUN conda init bash \
   && colcon build
 # ---------------------------------------------------------
 
-# -------- VNC GUI Configuration --------------------------
-# Install vnc, xvfb for VNC configuration, fluxbox for window managment
-RUN apt-get install -y x11vnc xvfb fluxbox
-
-# Setup a VNC password
-RUN  mkdir ~/.vnc\
-  && x11vnc -storepasswd cratergrader ~/.vnc/passwd
-
-# Start the VNC server
-RUN echo "export DISPLAY=:20" >> ~/.zshrc \
-  && echo "export DISPLAY=:20" >> ~/.bashrc
-
-# Always try to start windows management in background to be ready for VNC
-RUN echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.zshrc \
-  && echo "( fluxbox > /dev/null 2>&1 & )" >> ~/.bashrc
-
-# Clean up unnecessary output files
-RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
-  && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
-# ---------------------------------------------------------
 
 # -------- Custom and transient packages ------------------
-# Install additional custom packages
-RUN apt-get update && apt-get install -y \
-  ros-$ROS_DISTRO-rviz2 \
-  ros-$ROS_DISTRO-joy \
-  # For Image processing
-  ros-$ROS_DISTRO-image-tools \
-  ros-$ROS_DISTRO-image-transport-plugins \
-  ros-$ROS_DISTRO-image-pipeline \
-  ros-$ROS_DISTRO-camera-calibration-parsers \
-  ros-$ROS_DISTRO-launch-testing-ament-cmake \
-  ros-$ROS_DISTRO-usb-cam \
-  ros-$ROS_DISTRO-plotjuggler-ros \
-  ros-$ROS_DISTRO-joy \
-  ros-$ROS_DISTRO-realsense2-camera
+
 # ---------------------------------------------------------
 
 # -------- Container entrypoint ---------------------------
