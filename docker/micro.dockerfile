@@ -3,7 +3,8 @@
 FROM continuumio/miniconda3:latest as conda_setup
 
 # Use ros as the base image
-FROM ros:foxy as ros_base
+# FROM ros:foxy as ros_base
+FROM microros/micro-ros-agent:galactic as ros_base
 ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
 # ---------------------------------------------------------
 
@@ -27,19 +28,19 @@ RUN echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
 
 # -------- System and non-transient packages --------------
 # Automatically setup and build MicroROS packages
-WORKDIR /root/microros_ws_autobuild
-RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
-  && apt-get update && rosdep update \
-  && rosdep install --from-path src --ignore-src -y \
-  && . /opt/ros/$ROS_DISTRO/setup.sh \
-  && colcon build \
-  && . install/local_setup.sh \
-  && ros2 run micro_ros_setup create_firmware_ws.sh host \
-  && ros2 run micro_ros_setup build_firmware.sh \
-  && . install/local_setup.sh \
-  && ros2 run micro_ros_setup create_agent_ws.sh \
-  && ros2 run micro_ros_setup build_agent.sh \
-  && . install/local_setup.sh
+# WORKDIR /root/microros_ws_autobuild
+# RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
+#   && apt-get update && rosdep update \
+#   && rosdep install --from-path src --ignore-src -y \
+#   && . /opt/ros/$ROS_DISTRO/setup.sh \
+#   && colcon build \
+#   && . install/local_setup.sh \
+#   && ros2 run micro_ros_setup create_firmware_ws.sh host \
+#   && ros2 run micro_ros_setup build_firmware.sh \
+#   && . install/local_setup.sh \
+#   && ros2 run micro_ros_setup create_agent_ws.sh \
+#   && ros2 run micro_ros_setup build_agent.sh \
+#   && . install/local_setup.sh
 
 # Install system packages "starter pack"
 RUN apt-get update && apt-get install -y \
@@ -74,21 +75,21 @@ RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
 
 # -------- Setup CraterGrader environment packages --------
 # Setup conda environment
-COPY --from=conda_setup /opt/conda/ /opt/conda/
-COPY environment.yml /root/
-RUN conda init zsh \
-  && conda env create --name cg -f /root/environment.yml --force \
-  && rm -f /root/environment.yml
+# COPY --from=conda_setup /opt/conda/ /opt/conda/
+# COPY environment.yml /root/
+# RUN conda init zsh && conda init bash \
+#   && conda env create --name cg -f /root/environment.yml --force \
+#   && rm -f /root/environment.yml
 
 # Install additional custom packages
-RUN apt-get update && apt-get install -y \
-  ros-$ROS_DISTRO-rviz2 \
-  ros-$ROS_DISTRO-plotjuggler-ros \
-  ros-$ROS_DISTRO-joy \
-  ros-$ROS_DISTRO-realsense2-camera \
-  ros-$ROS_DISTRO-robot-localization \
-  ros-$ROS_DISTRO-rqt-graph \
-  ros-$ROS_DISTRO-rqt-reconfigure
+# RUN apt-get update && apt-get install -y \
+#   ros-$ROS_DISTRO-rviz2 \
+#   ros-$ROS_DISTRO-plotjuggler-ros \
+#   ros-$ROS_DISTRO-joy \
+#   ros-$ROS_DISTRO-realsense2-camera \
+#   ros-$ROS_DISTRO-robot-localization \
+#   ros-$ROS_DISTRO-rqt-graph \
+#   ros-$ROS_DISTRO-rqt-reconfigure
 
 # For additional colcon build
 WORKDIR /root/CRATER_GRADER/cg_ws
@@ -108,11 +109,11 @@ RUN rosdep install --from-paths src --ignore-src -r -y
 
 # -------- Container entrypoint ---------------------------
 # Setup entrypoint
-COPY docker/cgdev_entrypoint.sh /
-RUN chmod +x /cgdev_entrypoint.sh
+COPY docker/micro_entrypoint.sh /
+RUN chmod +x /micro_entrypoint.sh
 
 # Make entry
 WORKDIR /root/CRATER_GRADER/cg_ws/
-ENTRYPOINT ["/cgdev_entrypoint.sh"]
+ENTRYPOINT ["/micro_entrypoint.sh"]
 CMD ["zsh"]
 # ---------------------------------------------------------

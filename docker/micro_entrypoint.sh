@@ -6,8 +6,8 @@ echo 'source /opt/ros/$ROS_DISTRO/setup.zsh' >> /root/.zshrc
 echo 'source /opt/ros/$ROS_DISTRO/setup.bash' >> /root/.bashrc
 
 # Source microROS overlay packages
-echo 'source /root/microros_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
-echo 'source /root/microros_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
+# echo 'source /root/microros_ws_autobuild/install/local_setup.zsh' >> /root/.zshrc
+# echo 'source /root/microros_ws_autobuild/install/local_setup.bash' >> /root/.bashrc
 
 # Fix zsh autocomplete for ROS2 packages
 echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc
@@ -21,8 +21,8 @@ echo 'source /root/CRATER_GRADER/cg_ws/install/local_setup.zsh > /dev/null 2>&1'
 echo 'source /root/CRATER_GRADER/cg_ws/install/local_setup.bash > /dev/null 2>&1' >> ~/.bashrc
 
 # Start new shells in the cg conda environment
-echo "conda activate cg" >> ~/.zshrc
-echo "conda activate cg" >> ~/.bashrc
+# echo "conda activate cg" >> ~/.zshrc
+# echo "conda activate cg" >> ~/.bashrc
 
 # Welcome message
 echo "figlet -f slant 'CraterGrader'" >> ~/.zshrc
