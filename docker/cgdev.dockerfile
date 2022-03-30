@@ -6,20 +6,20 @@ FROM continuumio/miniconda3:4.10.3p1 as conda_setup
 FROM microros/micro-ros-agent:foxy as ros_base
 ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
 
-# Automatically setup and build MicroROS packages from source, no longer needed but kept in case microros docker image fails
-# WORKDIR /root/microros_ws_autobuild
-# RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
-#   && apt-get update && rosdep update \
-#   && rosdep install --from-path src --ignore-src -y \
-#   && . /opt/ros/$ROS_DISTRO/setup.sh \
-#   && colcon build \
-#   && . install/local_setup.sh \
-#   && ros2 run micro_ros_setup create_firmware_ws.sh host \
-#   && ros2 run micro_ros_setup build_firmware.sh \
-#   && . install/local_setup.sh \
-#   && ros2 run micro_ros_setup create_agent_ws.sh \
-#   && ros2 run micro_ros_setup build_agent.sh \
-#   && . install/local_setup.sh
+### Automatically setup and build MicroROS packages from source, no longer needed but kept in case microros docker image fails
+## WORKDIR /root/microros_ws_autobuild
+## RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
+##   && apt-get update && rosdep update \
+##   && rosdep install --from-path src --ignore-src -y \
+##   && . /opt/ros/$ROS_DISTRO/setup.sh \
+##   && colcon build \
+##   && . install/local_setup.sh \
+##   && ros2 run micro_ros_setup create_firmware_ws.sh host \
+##   && ros2 run micro_ros_setup build_firmware.sh \
+##   && . install/local_setup.sh \
+##   && ros2 run micro_ros_setup create_agent_ws.sh \
+##   && ros2 run micro_ros_setup build_agent.sh \
+##   && . install/local_setup.sh
 # ---------------------------------------------------------
 
 # -------- Base environment configuration ----------------------
@@ -80,27 +80,27 @@ RUN conda init zsh && conda init bash \
 # Run the following with DEBIAN_FRONTEND=noninteractive to avoid prompt for keyboard language, see https://askubuntu.com/questions/876240/how-to-automate-setting-up-of-keyboard-configuration-package
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   keyboard-configuration \
-  ros-$ROS_DISTRO-rviz2
-  # ros-$ROS_DISTRO-rqt-graph \
-  # ros-$ROS_DISTRO-rqt-reconfigure \
-  # ros-$ROS_DISTRO-plotjuggler-ros \
-  # ros-$ROS_DISTRO-joy \
-  # ros-$ROS_DISTRO-realsense2-camera \
-  # ros-$ROS_DISTRO-robot-localization \
-  # libpcl-dev \
-  # ros-$ROS_DISTRO-pcl-conversions \
-  # ros-$ROS_DISTRO-pcl-ros \
-  # ros-$ROS_DISTRO-pcl-msgs \
-  # ros-$ROS_DISTRO-image-tools \
-  # ros-$ROS_DISTRO-image-transport \
-  # ros-$ROS_DISTRO-image-transport-plugins \
-  # ros-$ROS_DISTRO-image-pipeline \
-  # ros-$ROS_DISTRO-camera-calibration-parsers \
-  # ros-$ROS_DISTRO-launch-testing-ament-cmake \
-  # ros-$ROS_DISTRO-usb-cam \
-  # ros-$ROS_DISTRO-cv-bridge \
-  # ros-$ROS_DISTRO-camera-info-manager \
-  # ros-$ROS_DISTRO-apriltag
+  ros-$ROS_DISTRO-rviz2 \
+  ros-$ROS_DISTRO-rqt-graph \
+  ros-$ROS_DISTRO-rqt-reconfigure \
+  ros-$ROS_DISTRO-plotjuggler-ros \
+  ros-$ROS_DISTRO-joy \
+  ros-$ROS_DISTRO-realsense2-camera \
+  ros-$ROS_DISTRO-robot-localization \
+  libpcl-dev \
+  ros-$ROS_DISTRO-pcl-conversions \
+  ros-$ROS_DISTRO-pcl-ros \
+  ros-$ROS_DISTRO-pcl-msgs \
+  ros-$ROS_DISTRO-image-tools \
+  ros-$ROS_DISTRO-image-transport \
+  ros-$ROS_DISTRO-image-transport-plugins \
+  ros-$ROS_DISTRO-image-pipeline \
+  ros-$ROS_DISTRO-camera-calibration-parsers \
+  ros-$ROS_DISTRO-launch-testing-ament-cmake \
+  ros-$ROS_DISTRO-usb-cam \
+  ros-$ROS_DISTRO-cv-bridge \
+  ros-$ROS_DISTRO-camera-info-manager \
+  ros-$ROS_DISTRO-apriltag
 
 # Prep for colcon build, but don't build anything yet
 WORKDIR /root/CRATER_GRADER/cg_ws

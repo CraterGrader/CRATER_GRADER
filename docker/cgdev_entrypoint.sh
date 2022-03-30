@@ -26,8 +26,8 @@ echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc
 echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc
 
 # Try sourcing cg_ws packages
-echo 'source /root/CRATER_GRADER/cg_ws/install/setup.zsh > /dev/null 2>&1' >> ~/.zshrc
-echo 'source /root/CRATER_GRADER/cg_ws/install/setup.bash > /dev/null 2>&1' >> ~/.bashrc
+echo 'source /root/CRATER_GRADER/cg_ws/install/local_setup.zsh > /dev/null 2>&1' >> ~/.zshrc
+echo 'source /root/CRATER_GRADER/cg_ws/install/local_setup.bash > /dev/null 2>&1' >> ~/.bashrc
 
 # Start new shells in the cg conda environment
 echo "conda activate cg" >> ~/.zshrc
