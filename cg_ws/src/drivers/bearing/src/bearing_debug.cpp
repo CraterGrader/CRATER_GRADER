@@ -12,7 +12,7 @@ namespace bearing {
 class BearingDebugNode : public rclcpp::Node {
 public:
   BearingDebugNode() : Node("bearing_debug_node"),
-    sub_cam(image_transport::create_camera_subscription(this, "image",
+    sub_cam(image_transport::create_camera_subscription(this, "/image_raw",
       std::bind(&BearingDebugNode::onCamera, this, std::placeholders::_1, std::placeholders::_2),
       declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)) {
     
