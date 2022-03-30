@@ -26,7 +26,7 @@ public:
 private:
   // const image_transport::CameraSubscriber sub_cam;
   // void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
-  void onCamera(const sensor_msgs::msg::Image::SharedPtr& msg) {
+  void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg) {
     std_msgs::msg::String str_msg;
     str_msg.data = "Image received";
     debug_pub_->publish(str_msg);
