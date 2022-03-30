@@ -32,7 +32,7 @@ private:
     debug_pub_->publish(str_msg);
   }
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr debug_pub_;
-  rclcpp::Subscriber<sensor_msgs::msg::Image>::SharedPtr img_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr img_sub_;
 };
 
 } // namespace bearing
