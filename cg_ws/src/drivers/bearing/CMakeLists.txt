@@ -51,7 +51,7 @@ endif()
 
 
 # Install targets
-install(TARGETS bearing_node
+install(TARGETS bearing_node bearing_debug_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
