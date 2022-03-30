@@ -57,7 +57,6 @@ void VnImuNode::timerCallback() {
   msg.header.frame_id = "imu_link";
 
   // Set orientation
-  RCLCPP_INFO(this->get_logger(), "%f", vs_data_register.yawPitchRoll[0]);
   tf2::Quaternion q;
   q.setRPY(
     M_PI/180.0*vs_data_register.yawPitchRoll[2] - orientation_zero_offsets_.x,
