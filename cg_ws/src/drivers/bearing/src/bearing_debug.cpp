@@ -11,24 +11,28 @@ namespace bearing {
 
 class BearingDebugNode : public rclcpp::Node {
 public:
-  BearingDebugNode() : Node("bearing_debug_node"),
-    sub_cam(image_transport::create_camera_subscription(this, "/image_raw",
-      std::bind(&BearingDebugNode::onCamera, this, std::placeholders::_1, std::placeholders::_2),
-      declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)) {
-    
+  BearingDebugNode() : Node("bearing_debug_node") {
+    // sub_cam(image_transport::create_camera_subscription(this, "/image_raw",
+    //   std::bind(&BearingDebugNode::onCamera, this, std::placeholders::_1, std::placeholders::_2),
+    //   declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)) {
+    img_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
+      "/image_raw", rclcpp::SensorDataQoS(), std::bind(&BearingDebugNode::onCamera, this, std::placeholders::_1)
+    );
     debug_pub_ = this->create_publisher<std_msgs::msg::String>(
       "/bearing_debug", 1
     );
     
   }
 private:
-  const image_transport::CameraSubscriber sub_cam;
-  void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
+  // const image_transport::CameraSubscriber sub_cam;
+  // void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
+  void onCamera(const sensor_msgs::msg::Image::SharedPt& msg) {
     std_msgs::msg::String str_msg;
     str_msg.data = "Image received";
     debug_pub_->publish(str_msg);
   }
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr debug_pub_;
+  rclcpp::Subscriber<sensor_msgs::msg::Image>::SharedPtr img_sub_;
 };
 
 } // namespace bearing
