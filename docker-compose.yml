@@ -1,30 +1,43 @@
 version: "3.9"
 services:
   cg-dev:
+    image: p84514faf325/cratergrader:cg-311-v1.0.0
+    devices:
+      - /dev/input/:/dev/input/
+    volumes:
+      - .:/root/CRATER_GRADER
+    ports:
+      - 5901:5900 # <external port>:<container port>
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag
+  cg-dev-addon:
     build:
       context: ./
-      dockerfile: ./docker/cgdev.dockerfile
+      dockerfile: ./docker/addon.dockerfile
       network: host
-    devices:
-      - /dev/video0:/dev/video0
-      - /dev/video1:/dev/video1
-      - /dev/video2:/dev/video2
-      - /dev/video3:/dev/video3
-    volumes:  
+    volumes:
       - .:/root/CRATER_GRADER
     ports:
       - 5901:5900 # <external port>:<container port>
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
   cg-dev-hw:
-    build:
-      context: ./
-      dockerfile: ./docker/cgdev.dockerfile
-      network: host
+    image: p84514faf325/cratergrader:cg-311-v1.0.0
     privileged: true
     volumes:
       - .:/root/CRATER_GRADER
       - /dev/:/dev/
+    ports:
+      - 5901:5900 # <external port>:<container port>
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag
+  cg-dev-full-build:
+    build:
+      context: ./
+      dockerfile: ./docker/cgdev.dockerfile
+      network: host
+    volumes:
+      - .:/root/CRATER_GRADER
     ports:
       - 5901:5900 # <external port>:<container port>
     tty: true # use terminal, i.e. the `-t` flag
