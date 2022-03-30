@@ -149,7 +149,7 @@ void BearingNode::timerCallback() {
     bearing.pose.pose.orientation.w = q.w();
 
     bearing.header.stamp = this->get_clock()->now();
-    bearing.header.frame_id = "bearing";
+    bearing.header.frame_id = "map";
 
     bearing.pose.covariance =  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
