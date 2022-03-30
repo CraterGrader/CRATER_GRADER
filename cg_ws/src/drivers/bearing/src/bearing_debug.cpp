@@ -12,7 +12,7 @@ class BearingDebugNode : public rclcpp::Node {
 public:
   BearingDebugNode() : Node("bearing_debug_node"),
     sub_cam(image_transport::create_camera_subscription(this, "image",
-      std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2),
+      std::bind(&BearingDebugNode::onCamera, this, std::placeholders::_1, std::placeholders::_2),
       declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)) {
     
     debug_pub_ = this->create_publisher<std_msgs::msg::String>(

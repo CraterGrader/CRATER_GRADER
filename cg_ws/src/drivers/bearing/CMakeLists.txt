@@ -12,6 +12,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(image_transport REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -38,6 +39,7 @@ add_executable(bearing_debug_node src/bearing_debug.cpp)
 ament_target_dependencies(bearing_debug_node
   rclcpp
   rclcpp_components
+  image_transport
   std_msgs
   sensor_msgs
 )
