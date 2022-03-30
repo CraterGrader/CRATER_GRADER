@@ -33,6 +33,13 @@ ament_target_dependencies(bearing_node
   tf2
   tf2_ros
 )
+add_executable(bearing_debug_node src/bearing_debug.cpp)
+ament_target_dependencies(bearing_debug_node
+  rclcpp
+  rclcpp_components
+  std_msgs
+  sensor_msgs
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
