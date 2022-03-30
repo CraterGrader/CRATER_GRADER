@@ -13,6 +13,8 @@ BearingNode::BearingNode() : Node("bearing_node") {
     "/bearing", 1
   );
 
+  full_tf_pub_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+
   // Create listener
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -22,6 +24,7 @@ BearingNode::BearingNode() : Node("bearing_node") {
     std::chrono::milliseconds(1000/pub_freq),
     std::bind(&BearingNode::timerCallback, this)
   );
+  RCLCPP_INFO(this->get_logger(), "Node started");
 }
 
 void BearingNode::timerCallback() {
@@ -47,7 +50,7 @@ void BearingNode::timerCallback() {
   tf2::Transform tf_map_to_link;
 
   // Get overall transform from map to base link
-  geometry_msgs::msg::Transform map_to_link;
+  geometry_msgs::msg::TransformStamped map_to_link;
 
   // Look up for the transformation from tag to base_link
   for (int i = 0; i < 4; i++) {
@@ -61,14 +64,14 @@ void BearingNode::timerCallback() {
 
     // Get camera to tag transform - matters the most, needs to not only include most recent transform
     try {
-      rclcpp::Time now = this->get_clock()->now();
+      //rclcpp::Time now = this->get_clock()->now();
       cam_to_tag = tf_buffer_->lookupTransform(
         toCamera, fromTag,
         tf2::TimePointZero);
-      rclcpp::Time tf_time = cam_to_tag.header.stamp;
-      if (tf_time < now_time - 0.05) {
-        continue;
-      }
+      //rclcpp::Time tf_time = cam_to_tag.header.stamp;
+      //if (tf_time < now_time - 0.05) {
+       // continue;
+      //}
     } catch (tf2::TransformException & ex) {
       continue;
     }
@@ -97,17 +100,23 @@ void BearingNode::timerCallback() {
     tf2::fromMsg(map_to_tag.transform, tf_map_to_tag);
 
     // Likely source of error
-    tf_map_to_link = tf_map_to_tag * tf_tag_to_link;
+    tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
+
+     // Publish overall tf for testing
+    map_to_link.header.stamp = this->get_clock()->now();
+    map_to_link.header.frame_id = fromMap;
+    map_to_link.child_frame_id = "baseL";
+    map_to_link.transform = toMsg(tf_map_to_link);
+
+    // Send the transformation
+    full_tf_pub_->sendTransform(map_to_link);
 
     // Get Yaw
     double roll, pitch, yaw;
     tf_map_to_link.getBasis().getRPY(roll, pitch, yaw);
-    RCLCPP_INFO(this->get_logger(), "The yaw is %f", yaw);
 
     // Calculate and append bearing
-    RCLCPP_INFO(this->get_logger(), "%f\n", yaw * 180 / 3.1416);
-
-    bearings.push_back(yaw * 180/3.1416);
+    bearings.push_back(yaw);
 
     // Get cartesian distance from camera to tag for weighting
     tag_dist_to_cam.push_back(sqrt(pow(cam_to_tag.transform.translation.x,2) + 
@@ -122,17 +131,22 @@ void BearingNode::timerCallback() {
   for (int j = 0; j < (int)bearings.size(); j++) {
     weighted_bearing = bearings[j] * 1/tag_dist_to_cam[j];
     total_dist += 1/tag_dist_to_cam[j];
-    RCLCPP_INFO(this->get_logger(), "I heard: '%f and %f'", weighted_bearing, total_dist);
   }
+  // Note bearing - comment out after final product
+  RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 90 / 3.1416);
+
   if (bearings.size() > 0) {
     bearing.pose.pose.position.x = 0.0;
     bearing.pose.pose.position.y = 0.0;
     bearing.pose.pose.position.z = 0.0;
 
-    bearing.pose.pose.orientation.x = 0.0;
-    bearing.pose.pose.orientation.y = 0.0;
-    bearing.pose.pose.orientation.z = (float)(weighted_bearing / total_dist);
-    bearing.pose.pose.orientation.w = 1.0;
+    // Convert yaw back into a quarternion for orientation
+    tf2::Quaternion q;
+    q.setRPY(0, 0, weighted_bearing);
+    bearing.pose.pose.orientation.x = q.x();
+    bearing.pose.pose.orientation.y = q.y();
+    bearing.pose.pose.orientation.z = q.z();
+    bearing.pose.pose.orientation.w = q.w();
 
     bearing.header.stamp = this->get_clock()->now();
     bearing.header.frame_id = "bearing";
@@ -142,7 +156,7 @@ void BearingNode::timerCallback() {
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.5};
 
     // Publish the estimated bearing
     bearing_pub_->publish(bearing);
