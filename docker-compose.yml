@@ -26,11 +26,30 @@ services:
       - 5901:5900 # <external port>:<container port>
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
-  cg-dev-micro:
+  cg-dev-check-build:
     build:
       context: ./
-      dockerfile: ./docker/micro.dockerfile
+      dockerfile: ./docker/cgdev.dockerfile
       network: host
+    volumes:
+      - .:/root/CRATER_GRADER
+    ports:
+      - 5901:5900 # <external port>:<container port>
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag
+  cg-dev-addon:
+    build:
+      context: ./
+      dockerfile: ./docker/addon.dockerfile
+      network: host
+    volumes:
+      - .:/root/CRATER_GRADER
+    ports:
+      - 5901:5900 # <external port>:<container port>
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag
+  cg-dev-test:
+    image: p84514faf325/cratergrader:test-v1.0.0
     volumes:
       - .:/root/CRATER_GRADER
     ports:
