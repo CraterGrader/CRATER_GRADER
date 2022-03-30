@@ -51,6 +51,16 @@ RUN apt-get update && apt-get install -y \
   tree
 # ---------------------------------------------------------
 
+# -------- Setup CraterGrader environment packages --------
+# Setup conda environment
+COPY --from=conda_setup /opt/conda/ /opt/conda/
+COPY environment.yml /root/
+RUN conda init zsh && conda init bash \
+  && conda env create --name cg -f /root/environment.yml --force \
+  && rm -f /root/environment.yml
+
+# ---------------------------------------------------------
+
 # -------- VNC GUI Configuration --------------------------
 # Install vnc, xvfb for VNC configuration, fluxbox for window managment
 RUN apt-get install -y x11vnc xvfb fluxbox
@@ -72,15 +82,6 @@ RUN echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.zshrc \
   && echo "rm -f /root/CRATER_GRADER/cg_ws/nohup.out" >> ~/.bashrc
 # ---------------------------------------------------------
 
-# -------- Setup CraterGrader environment packages --------
-# Setup conda environment
-COPY --from=conda_setup /opt/conda/ /opt/conda/
-COPY environment.yml /root/
-RUN conda init zsh && conda init bash \
-  && conda env create --name cg -f /root/environment.yml --force \
-  && rm -f /root/environment.yml
-# ---------------------------------------------------------
-
 # -------- Custom and transient packages ------------------
 
 # Run the following with DEBIAN_FRONTEND=noninteractive to avoid prompt for keyboard language
@@ -89,6 +90,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
 # Install additional custom packages
 RUN apt-get update && apt-get install -y \
   ros-$ROS_DISTRO-rviz2 \
+  ros-$ROS_DISTRO-joy \
+  # For Image processing
+  ros-$ROS_DISTRO-image-tools \
+  ros-$ROS_DISTRO-image-transport-plugins \
+  ros-$ROS_DISTRO-image-pipeline \
+  ros-$ROS_DISTRO-camera-calibration-parsers \
+  ros-$ROS_DISTRO-launch-testing-ament-cmake \
+  ros-$ROS_DISTRO-image-transport \
+  ros-$ROS_DISTRO-cv-bridge \
+  ros-$ROS_DISTRO-camera-info-manager \
+  ros-$ROS_DISTRO-apriltag \
   ros-$ROS_DISTRO-plotjuggler-ros \
   ros-$ROS_DISTRO-joy \
   ros-$ROS_DISTRO-realsense2-camera \

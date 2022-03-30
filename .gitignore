@@ -8,7 +8,11 @@ cg_ws/log/
 # VNC
 cg_ws/nohup.out
 
+# Tools
+tools/cal_cam_data/
+
 # Other
 *.DS_Store
-*__pycache__/
-*.vscode
+__pycache__/
+cg_ws/.vscode/
+.vscode/
