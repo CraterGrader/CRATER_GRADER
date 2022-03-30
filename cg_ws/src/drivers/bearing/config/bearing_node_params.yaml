@@ -19,5 +19,5 @@ bearing_node:
         x: '-1.5708'
         y: '0'
         z: '-1.5708'
-    pub_freq: 30
+    pub_freq: 10
     publish_viz: false
