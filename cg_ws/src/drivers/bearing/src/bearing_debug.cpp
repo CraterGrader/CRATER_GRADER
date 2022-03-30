@@ -5,7 +5,10 @@
 #include <image_transport/camera_subscriber.hpp>
 #include <std_msgs/msg/string.hpp>
 
-class BearingDebugNode {
+namespace cg {
+namespace bearing {
+
+class BearingDebugNode : public rclcpp::Node {
 public:
   BearingDebugNode() : Node("bearing_debug_node"),
     sub_cam(image_transport::create_camera_subscription(this, "image",
@@ -26,6 +29,9 @@ private:
   }
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr debug_pub_;
 };
+
+} // namespace bearing
+} // namespace cg
 
 int main(int argc, char * argv[]) {
     rclcpp::init(argc, argv);
