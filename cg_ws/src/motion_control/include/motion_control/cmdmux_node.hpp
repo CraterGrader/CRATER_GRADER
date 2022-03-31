@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int8.hpp>
+#include <cg_msgs/msg/mux_mode.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 
 // TODO: rename /teleop_cmd topic
@@ -19,6 +20,7 @@ private:
   rclcpp::Publisher<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_pub_;
 
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr mode_sub_;
+  rclcpp::Subscription<cg_msgs::msg::MuxMode>::SharedPtr mode_sub_TEST_;
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr teleop_sub_;
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr autonomy_sub_;
 
