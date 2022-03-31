@@ -2,6 +2,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 namespace cg {
 namespace mapping {
@@ -28,7 +29,8 @@ void PointCloudRegistrationNode::timerCallback() {
 }
 
 void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
-  // TODO
+  // Convert sensor_msgs::msg::PointCloud2 to pcl::PointCloud<T>
+  pcl::fromROSMsg (*msg, *new_point_cloud_);
 }
 
 }  // namespace mapping
