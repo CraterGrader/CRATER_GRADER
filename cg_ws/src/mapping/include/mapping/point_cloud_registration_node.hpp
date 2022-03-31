@@ -1,6 +1,8 @@
 #ifndef MAPPING__POINT_CLOUD_REGISTRATION_NODE_HPP
 #define MAPPING__POINT_CLOUD_REGISTRATION_NODE_HPP
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
@@ -21,6 +23,8 @@ private:
   /* Callbacks */
   void timerCallback();
   void filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_ptr_;
 };
 
 
