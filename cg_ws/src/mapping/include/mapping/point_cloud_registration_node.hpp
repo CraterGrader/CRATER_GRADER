@@ -3,6 +3,7 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/registration/icp.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
@@ -24,7 +25,9 @@ private:
   void timerCallback();
   void filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_ptr_;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr new_point_cloud_;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_map_;
+  pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp_;
 };
 
 
