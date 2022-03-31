@@ -6,7 +6,10 @@
 namespace cg {
 namespace mapping {
 
-PointCloudRegistrationNode::PointCloudRegistrationNode() : Node("point_cloud_registration_node") {
+PointCloudRegistrationNode::PointCloudRegistrationNode() :
+    Node("point_cloud_registration_node"),
+    new_point_cloud_(new pcl::PointCloud<pcl::PointXYZ>),
+    point_cloud_map_(new pcl::PointCloud<pcl::PointXYZ>) {
   // Initialize publishers and subscribers
   terrain_raw_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/terrain/raw_map", 1
