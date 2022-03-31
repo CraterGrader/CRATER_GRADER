@@ -10,7 +10,7 @@ CmdMuxNode::CmdMuxNode() : Node("cmd_mux") {
       "/actuator_cmd", 1);
 
   // Multiplexer mode number
-  mode_sub_ = this->create_subscription<std_msgs::msg::Int8>(
+  mode_sub_ = this->create_subscription<cg_msgs::msg::MuxMode>(
       "/mux_mode", 1, std::bind(&CmdMuxNode::modeCallback, this, std::placeholders::_1));
 
   // Teleop and autonomy control messages
@@ -27,19 +27,8 @@ CmdMuxNode::CmdMuxNode() : Node("cmd_mux") {
 
 
   /* Load parameters */
-  // Initialize the currenet mode to the default mode
-  this->declare_parameter<int>("default_mode", 0);
-  this->get_parameter("default_mode", curr_mode_);
-
-  // Set values for other modes based on config file
-  this->declare_parameter<int>("idle_mode", 0);
-  this->get_parameter("idle_mode", idle_mode_);
-  this->declare_parameter<int>("autograder_mode", 1);
-  this->get_parameter("autograder_mode", autograder_mode_);
-  this->declare_parameter<int>("full_autonomy_mode", 2);
-  this->get_parameter("full_autonomy_mode", full_autonomy_mode_);
-  this->declare_parameter<int>("full_teleop_mode", 3);
-  this->get_parameter("full_teleop_mode", full_teleop_mode_);
+  // Initialize the current mode to the default mode
+  curr_mode_ = cg_msgs::msg::MuxMode::IDLE;
 }
 
 void CmdMuxNode::timerCallback()
@@ -57,7 +46,7 @@ void CmdMuxNode::timerCallback()
   }
 }
 
-void CmdMuxNode::modeCallback(const std_msgs::msg::Int8::SharedPtr msg)
+void CmdMuxNode::modeCallback(const cg_msgs::msg::MuxMode::SharedPtr msg)
 {
 
   // Check for valid input
