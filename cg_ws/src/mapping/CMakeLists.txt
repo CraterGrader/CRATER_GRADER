@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(localization)
+project(mapping)
 
 # Default to C++20
 if(NOT CMAKE_CXX_STANDARD)
@@ -10,34 +10,48 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Find dependencies
+# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(nav_msgs REQUIRED)
-find_package(cg_msgs)
+find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(pcl_ros REQUIRED)
 
-# Find package head files
 include_directories(include)
 
-# Build nodes
-add_executable(slip_estimate_node src/slip_estimate_main.cpp
-  src/slip_estimate_node.cpp
+# build nodes
+add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
+  src/point_cloud_registration_node.cpp
 )
-ament_target_dependencies(slip_estimate_node
-rclcpp
-cg_msgs
-nav_msgs
+ament_target_dependencies(point_cloud_registration
+  rclcpp
+  rclcpp_components
+  pcl_ros
+  sensor_msgs
 )
 
-# Code Testing
+add_executable(terrain_filtering src/terrain_filtering_main.cpp
+  src/terrain_filtering_node.cpp
+)
+ament_target_dependencies(terrain_filtering
+  rclcpp
+  sensor_msgs
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+
 # Install targets
-install(TARGETS slip_estimate_node
-  DESTINATION lib/${PROJECT_NAME})
+install(TARGETS point_cloud_registration
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS terrain_filtering
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 # Install directories
 install(DIRECTORY include/${PROJECT_NAME}/
@@ -50,5 +64,4 @@ install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}/
 )
 
-# Create the package
 ament_package()

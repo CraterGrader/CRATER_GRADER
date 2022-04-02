@@ -89,6 +89,29 @@ Note that building only needs to be done if you want to update the image. This s
   5) Start gui appliation in the Docker container, either in VNC window or original container terminal; best practice is to use the original terminal you entered the container from (e.g. `ros2 run rviz2 rviz2`, `ros2 run plotjuggler plotjuggler`, etc.)
 
 
+### Running the CraterGrader worksystem
+
+To run the `teleop` node, with joystick controller and drive output:
+
+- `ros2 launch teleop joystick_launch.py`
+
+To launch the UltraWideband beacons node:
+
+- `ros2 launch uwb_beacon_rtls.launch.py`
+
+To launch the IMU node:
+
+- `ros2 launch imu_launch.py`
+
+To launch the realsense:
+
+- `ros2 launch realsense realsense_launch.py`
+
+To launch robot_localization 
+
+- `ros2 launch localization ekf_localization.launch.py`
+
+
 ## Other Notes/Tips
 - To completely remove _all docker related files from your system_ (e.g. to clear up resources), use the following command. Only non-active containers will be removed (i.e. containers that are "down"; any containers that are "up" will not be affected). Note that this command will clear the Docker build cache, so you will need to re-build any removed images afterwards. See the Docker documentation for more information about [pruning to reclaim space](https://docs.docker.com/config/pruning/), and/or [managing file system storage for Mac](https://docs.docker.com/desktop/mac/space/).
   ```

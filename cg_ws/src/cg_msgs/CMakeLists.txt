@@ -11,6 +11,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/BeaconTag.idl"
   "msg/BeaconMultiTag.idl"
   "msg/EncoderTelemetry.idl"
+  "msg/Slip.idl"
 
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs

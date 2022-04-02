@@ -1,9 +1,11 @@
 # ROS2 workspace build files 
-cg_ws/build/
-cg_ws/install/
-cg_ws/log/
-bags/
-bag/
+*build/
+*install/
+*log/
+
+# Bag files
+*bags/
+*bag/
 
 # VNC
 cg_ws/nohup.out
