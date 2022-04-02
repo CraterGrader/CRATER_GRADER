@@ -1,5 +1,5 @@
 # -------- Build on existing docker images ----------------
-FROM p84514faf325/cratergrader:cg-311-v1.0.0 as cg_base
+FROM p84514faf325/cratergrader:main as cg_base
 # ---------------------------------------------------------
 
 # -------- Install additional packages --------------------
