@@ -111,7 +111,7 @@ void reset_callback(const void *msgin)
   reset_msg = *msg;
 
   // If value is 1, then reset for the motion control system
-  if reset_msg.data == 1 {
+  if (reset_msg.data == 1) {
       resetFunc(); // call reset function
   }
 }
