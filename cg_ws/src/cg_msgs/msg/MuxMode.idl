@@ -5,6 +5,7 @@ module cg_msgs {
       const uint8 AUTOGRADER = 1;
       const uint8 FULL_AUTONOMY = 2;
       const uint8 FULL_TELEOP = 3;
+      const uint8 HIGHEST_VALID_MODE = 3;
     };
     struct MuxMode {
       @default(value = 0)

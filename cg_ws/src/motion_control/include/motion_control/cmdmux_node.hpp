@@ -1,7 +1,6 @@
 #pragma once 
 
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/int8.hpp>
 #include <cg_msgs/msg/mux_mode.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 

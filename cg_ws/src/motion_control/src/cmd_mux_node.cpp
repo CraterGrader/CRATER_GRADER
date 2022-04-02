@@ -37,7 +37,7 @@ void CmdMuxNode::timerCallback()
   RCLCPP_INFO(this->get_logger(), "Current multiplexer mode: %d", curr_mode_);
 
   // Publish last message when in Idle mode
-  if (curr_mode_ == idle_mode_)
+  if (curr_mode_ == cg_msgs::msg::MuxMode::IDLE)
   {
     // Publish last message, with wheel velocity set to zero
     last_cmd_.header.stamp = this->get_clock()->now();
@@ -50,7 +50,7 @@ void CmdMuxNode::modeCallback(const cg_msgs::msg::MuxMode::SharedPtr msg)
 {
 
   // Check for valid input
-  if (curr_mode_ != idle_mode_ && curr_mode_ != autograder_mode_ && curr_mode_ != full_autonomy_mode_ && curr_mode_ != full_teleop_mode_)
+  if (curr_mode_ > cg_msgs::msg::MuxMode::HIGHEST_VALID_MODE)
   {
     // Warn about invalid mode input
     RCLCPP_WARN(this->get_logger(), "Unsupported multiplexer mode request: %d", curr_mode_);
@@ -58,18 +58,19 @@ void CmdMuxNode::modeCallback(const cg_msgs::msg::MuxMode::SharedPtr msg)
   }
 
   // Set the current mode using the incoming mode number
-  curr_mode_ = msg->data;
+  curr_mode_ = msg->mode;
 }
 
 void CmdMuxNode::teleopCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {
 
   // Handle message based on current multiplexer mode
-  if (curr_mode_ == idle_mode_) {
+  if (curr_mode_ == cg_msgs::msg::MuxMode::IDLE)
+  {
     // Publish last message only, with wheel velocity set to zero
     cmd_msg_ = last_cmd_;
     cmd_msg_.wheel_velocity = 0;
   }
-  else if (curr_mode_ == autograder_mode_)
+  else if (curr_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Use only the wheel velocity and steering position inputs
     cmd_msg_.wheel_velocity = msg->wheel_velocity;
@@ -80,12 +81,13 @@ void CmdMuxNode::teleopCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr m
     asyncPublishAutograder();
     return;
   }
-  else if (curr_mode_ == full_autonomy_mode_)
+  else if (curr_mode_ == cg_msgs::msg::MuxMode::FULL_AUTONOMY)
   {
     // Don't publish anything
     return;
   }
-  else if (curr_mode_ == full_teleop_mode_) {
+  else if (curr_mode_ == cg_msgs::msg::MuxMode::FULL_TELEOP)
+  {
     // Use the command message directly
     cmd_msg_ = *msg;
   }
@@ -102,13 +104,13 @@ void CmdMuxNode::autonomyCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr
 {
 
   // Handle message based on current multiplexer mode
-  if (curr_mode_ == idle_mode_)
+  if (curr_mode_ == cg_msgs::msg::MuxMode::IDLE)
   {
     // Publish last message only, with wheel velocity set to zero
     cmd_msg_ = last_cmd_;
     cmd_msg_.wheel_velocity = 0;
   }
-  else if (curr_mode_ == autograder_mode_)
+  else if (curr_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Use only the tool position
     cmd_msg_.tool_position = msg->tool_position;
@@ -118,12 +120,12 @@ void CmdMuxNode::autonomyCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr
     asyncPublishAutograder();
     return;
   }
-  else if (curr_mode_ == full_autonomy_mode_)
+  else if (curr_mode_ == cg_msgs::msg::MuxMode::FULL_AUTONOMY)
   {
     // Use the command message directly
     cmd_msg_ = *msg;
   }
-  else if (curr_mode_ == full_teleop_mode_)
+  else if (curr_mode_ == cg_msgs::msg::MuxMode::FULL_TELEOP)
   {
     // Don't publish anything
     return;
