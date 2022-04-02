@@ -4,7 +4,11 @@ First ensure that you install the Due board using the Board Manager within Ardui
 
 Download the precompiiled library and add it to Arduino IDE by following these instructions https://github.com/micro-ROS/micro_ros_arduino/tree/galactic#how-to-use-the-precompiled-library
 
-Apply the following patch listed under Patch SAMD. The `ARDUINO_PATH` that they refer to is most likely located at `$HOME/.arduino15/packages/arduino`. https://github.com/micro-ROS/micro_ros_arduino/tree/galactic#patch-samd
+Apply the following patch listed under Patch SAMD: https://github.com/micro-ROS/micro_ros_arduino/tree/galactic#patch-samd. The `ARDUINO_PATH` that they refer to is most likely located at the following:
+- On GNU/Linux: ~/.arduino15/packages/
+- On Windows: %AppData%\Arduino15\packages\
+- On macOS: ~/Library/Arduino15/packages/
+More information about where cores are installed: https://support.arduino.cc/hc/en-us/articles/360012076960-Where-are-the-installed-cores-located-
 
 Open Arduino IDE (close and re-open if already open). Go to Tools -> Board -> Arduino ARM and set the board to Arduino Due  (Programming Port)
 
