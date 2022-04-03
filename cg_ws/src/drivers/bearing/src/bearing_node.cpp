@@ -43,13 +43,16 @@ void BearingNode::timerCallback() {
 
   // Frames to be used
   std::string fromTag_base = "april_tag";
-  std::string toLink = "base_link";
+  std::string toLink = "rob_base_link";
 
   // Static frames to be used - TODO: Move this out of a callback to improve speed
   // Not sure if good idea as launch file opens node in random order
   std::string fromMap = "tag_map";
   std::string toCamera = "camera";
   std::string toTag_base = "tag";
+
+  // Bearing published to robot base link for robot localization
+  std::string robot_frame = "base_link";
   
   // Store bearing estimates and distances
   std::vector<double> bearings;
@@ -169,7 +172,7 @@ void BearingNode::timerCallback() {
     bearing.pose.pose.orientation.w = q.w();
 
     bearing.header.stamp = this->get_clock()->now();
-    bearing.header.frame_id = "base_link";
+    bearing.header.frame_id = robot_frame;
 
     bearing.pose.covariance =  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,

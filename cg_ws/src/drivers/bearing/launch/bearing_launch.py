@@ -69,7 +69,7 @@ def generate_launch_description():
                         bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['z'],
                         bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['y'],
                         bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['x'],
-                        'base_link', 
+                        'rob_base_link', 
                         'camera']
         ),
         Node(
