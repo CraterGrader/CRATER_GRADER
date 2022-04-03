@@ -25,12 +25,23 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
 }
 
 void PointCloudRegistrationNode::timerCallback() {
-  // TODO
+  icp_.setInputSource(new_point_cloud_);
+  icp_.setInputTarget(point_cloud_map_);
+  pcl::PointCloud<pcl::PointXYZ> fused_cloud;
+  icp_.align(fused_cloud);
+  if (icp_.hasConverged()) {
+    point_cloud_map_ = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>(fused_cloud);
+    sensor_msgs::msg::PointCloud2 point_cloud_map_msg;
+    pcl::toROSMsg(*point_cloud_map_, point_cloud_map_msg);
+    terrain_raw_map_pub_->publish(point_cloud_map_msg);
+  } else {
+    RCLCPP_WARN(this->get_logger(), "ICP Failed Convergence");
+  }
 }
 
 void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
   // Convert sensor_msgs::msg::PointCloud2 to pcl::PointCloud<T>
-  pcl::fromROSMsg (*msg, *new_point_cloud_);
+  pcl::fromROSMsg(*msg, *new_point_cloud_);
 }
 
 }  // namespace mapping
