@@ -28,6 +28,9 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr new_point_cloud_;
   pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_map_;
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp_;
+
+  bool initial_data_received_;
+  bool new_data_received_;
 };
 
 
