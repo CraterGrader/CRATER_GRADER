@@ -15,10 +15,11 @@ camera:
         device_type: d435i # Make sure we're connecting to the correct device type        
         
         # Point cloud
-        enable_pointcloud: true # True to turn on the point cloud
+        pointcloud.enable: true # True to turn on the point cloud
         pointcloud_qos: "SENSOR_DATA" # Use 'Best Effort' publishing
         filters: decimation # Subsamples the point cloud 
-        decimation.filter_magnitude: 8 # The filter run on kernel sizes [2x2] to [8x8] pixels. For patches sized 2 and 3 the median depth value is selected. For larger kernels, 4-8 pixels, the mean depth is used due to performance considerations. More info: https://dev.intelrealsense.com/docs/post-processing-filters
+        decimation_filter.enable: true
+        decimation_filter.filter_magnitude: 8 # The filter run on kernel sizes [2x2] to [8x8] pixels. For patches sized 2 and 3 the median depth value is selected. For larger kernels, 4-8 pixels, the mean depth is used due to performance considerations. More info: https://dev.intelrealsense.com/docs/post-processing-filters
         clip_distance: 2.0 # Remove from the depth image all values above a given value (meters), set negative to turn off clipping. More info: https://dev.intelrealsense.com/docs/ros-wrapper
         # 'colorizer' filter applies RGB normalization coloring to depth image, and 
         pointcloud.stream_filter: 0 # = 0 Allows any filter for streaming point cloud
