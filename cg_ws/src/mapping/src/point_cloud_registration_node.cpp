@@ -35,10 +35,10 @@ void PointCloudRegistrationNode::timerCallback() {
   if (new_data_received_) {
     icp_.setInputSource(new_point_cloud_);
     icp_.setInputTarget(point_cloud_map_);
-    pcl::PointCloud<pcl::PointXYZ> fused_cloud;
-    icp_.align(fused_cloud);
+    pcl::PointCloud<pcl::PointXYZ> registered_cloud;
+    icp_.align(registered_cloud);  // TODO insert initial transform guess here?
     if (icp_.hasConverged()) {
-      point_cloud_map_ = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>(fused_cloud);
+      *point_cloud_map_ += registered_cloud;
       RCLCPP_INFO(this->get_logger(), "ICP Converged");
     } else {
       RCLCPP_WARN(this->get_logger(), "ICP Failed Convergence");
