@@ -31,6 +31,8 @@ private:
 
   bool initial_data_received_;
   bool new_data_received_;
+
+  int icp_max_iters_;
 };
 
 

@@ -25,6 +25,10 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
     std::chrono::milliseconds(100),
     std::bind(&PointCloudRegistrationNode::timerCallback, this)
   );
+
+  // Load parameters
+  this->declare_parameter<int>("icp_max_iters", 50);
+  this->get_parameter("icp_max_iters", icp_max_iters_);
 }
 
 void PointCloudRegistrationNode::timerCallback() {
