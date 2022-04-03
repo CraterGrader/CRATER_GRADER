@@ -29,6 +29,8 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   // Load parameters
   this->declare_parameter<int>("icp_max_iters", 50);
   this->get_parameter("icp_max_iters", icp_max_iters_);
+
+  icp_.setMaximumIterations(icp_max_iters_);
 }
 
 void PointCloudRegistrationNode::timerCallback() {
