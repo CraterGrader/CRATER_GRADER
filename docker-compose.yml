@@ -6,7 +6,7 @@ services:
       dockerfile: ./docker/cgdev.dockerfile
       network: host
     devices:
-      - /dev/video4:/dev/video4
+      - /dev/video2:/dev/video2
       - /dev/video3:/dev/video3
     volumes:  
       - .:/root/CRATER_GRADER
