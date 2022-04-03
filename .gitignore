@@ -1,7 +1,9 @@
 # ROS2 workspace build files 
-cg_ws/build/
-cg_ws/install/
-cg_ws/log/
+*build/
+*install/
+*log/
+
+# Bag files
 *bags/
 *bag/
 
