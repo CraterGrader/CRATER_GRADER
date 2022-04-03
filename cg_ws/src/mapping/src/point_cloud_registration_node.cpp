@@ -45,7 +45,8 @@ void PointCloudRegistrationNode::timerCallback() {
     icp_.align(*registered_cloud);  // TODO insert initial transform guess here?
     if (icp_.hasConverged()) {
       RCLCPP_INFO(this->get_logger(), "ICP Converged");
-      Eigen::Matrix4f registered_cloud_transform = icp_.getFinalTransformation();
+      Eigen::Matrix4d registered_cloud_transform = icp_.getFinalTransformation().cast<double>();
+      std::cout << registered_cloud_transform << std::endl;
       pcl::transformPointCloud(*new_point_cloud_, *registered_cloud, registered_cloud_transform);
       *point_cloud_map_ += *registered_cloud;
 
