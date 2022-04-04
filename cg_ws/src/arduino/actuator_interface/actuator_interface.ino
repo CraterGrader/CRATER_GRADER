@@ -16,7 +16,6 @@
 #define CONNECTED_TO_AGENT_PIN 12
 long int last_recv_msg_time; // Time when last message was received from arduino_cmd topic
 #define RECV_MSG_CONNECTION_TIMEOUT_SEC 20 // Threshold time for detecting a dis-connection, must be greater than the attachment time (observed to be ~10sec for one publisher, one subscriber, and one timer callback)
-bool need_to_connect = true;
 
 #define LOOP_PERIOD_MS 10
 // TIMER_TIMEOUT_MS appears to control the publishing period
@@ -90,16 +89,24 @@ RoboClaw roboclaws_tool[] = {
 int roboclaw_signs[] = {
   -1, 1
 };
-
+rcl_ret_t rc;
 void destroy_entities()
 {
   // Clear all node artifacts so a new attachment attempt can be made
-  rcl_publisher_fini(&feedback_pub, &node);
-  rcl_subscription_fini(&cmd_sub, &node);
-  rcl_node_fini(&node);
-  rcl_timer_fini(&timer);
-  rclc_executor_fini(&executor);
-  rclc_support_fini(&support);
+  rc = rclc_executor_fini(&executor);
+  rc += rcl_publisher_fini(&feedback_pub, &node);
+  rc += rcl_timer_fini(&timer);
+  rc += rcl_subscription_fini(&cmd_sub, &node);
+  rc += rcl_node_fini(&node);
+  rc += rclc_support_fini(&support);
+
+ if (rc != RCL_RET_OK) {
+   for (int i = 0; i <= 21; i++) {
+      digitalWrite(ERROR_PIN, !digitalRead(ERROR_PIN));
+      digitalWrite(CONNECTED_TO_AGENT_PIN, !digitalRead(CONNECTED_TO_AGENT_PIN));
+      delay(50);
+    }
+  }
 }
 
 void error_loop() {
@@ -114,6 +121,7 @@ void error_loop() {
     destroy_entities();
     delay(100); // Short delay to ensure all entities are fully destroyed before making next attempt
     
+    last_recv_msg_time = millis();
     // Try to make connection again
     start_uros_node();
 }
@@ -129,8 +137,16 @@ void cmd_callback(const void * msgin)
 
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
 {
+
+  // Check for timeout
+  if ((millis() - last_recv_msg_time) / 1000.0 >= RECV_MSG_CONNECTION_TIMEOUT_SEC)
+  {
+    // Signal for the error and run the error loop
+    digitalWrite(ERROR_PIN, HIGH);
+    error_loop();
+  }
+
   // Connection is good
-  need_to_connect = false;
   digitalWrite(CONNECTED_TO_AGENT_PIN, HIGH); // Turn on agent connection pin
   digitalWrite(ERROR_PIN, LOW); // Turn on error pin
 
@@ -220,15 +236,14 @@ int8_t int32_to_byte(const int32_t &val, const int &scale, const int &zero_offse
 }
 
 void start_uros_node(){
+
   // Indicator led for attachment attempt
   for (int i = 0; i <= 7; i++) {
-      // Error signal
-      digitalWrite(CONNECTED_TO_AGENT_PIN, !digitalRead(CONNECTED_TO_AGENT_PIN));
-      delay(100);
+   digitalWrite(CONNECTED_TO_AGENT_PIN, !digitalRead(CONNECTED_TO_AGENT_PIN));
+    delay(100);   
   }
 
   // Start the attachment attempt
-  need_to_connect = true;
   last_recv_msg_time = millis();
   
   set_microros_transports();
@@ -238,6 +253,7 @@ void start_uros_node(){
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
   // create node
+  last_recv_msg_time = millis();
   RCCHECK(rclc_node_init_default(&node, "arduino_actuator_interface_node", "", &support));
 
   // create subscribers
@@ -255,6 +271,7 @@ void start_uros_node(){
             "arduino_feedback"));
 
   // create timer
+  last_recv_msg_time = millis();
   RCCHECK(rclc_timer_init_default(
             &timer,
             &support,
@@ -264,6 +281,7 @@ void start_uros_node(){
   cmd_msg.data = 0;
 
   // create executor
+  last_recv_msg_time = millis();
   RCCHECK(rclc_executor_init(&executor, &support.context, NUM_HANDLES, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
   RCCHECK(rclc_executor_add_subscription(&executor, &cmd_sub, &cmd_msg, &cmd_callback, ON_NEW_DATA));
@@ -275,6 +293,8 @@ void start_uros_node(){
   for (auto & roboclaw : roboclaws_tool) {
     roboclaw.begin(38400);
   }
+
+  last_recv_msg_time = millis();
 }
 
 void setup() {
@@ -290,18 +310,12 @@ void setup() {
   start_uros_node();
 }
 
+
 void loop() {
 
   // TODO: seems to enter error loop immediately when trying to re-attach after sitting for a long time
   // try using rmw_uros_ping_agent to check connection to agent, see https://micro.ros.org/docs/tutorials/programming_rcl_rclc/micro-ROS/
 
-  // Use loop if we need to connect or within dis-connection threshold 
-  if (need_to_connect || (millis() - last_recv_msg_time)/1000 < RECV_MSG_CONNECTION_TIMEOUT_SEC) {
-    delay(LOOP_PERIOD_MS);
-    RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(LOOP_PERIOD_MS)));
-  } else {
-    // Signal for the error and run the error loop
-    digitalWrite(ERROR_PIN, HIGH);
-    error_loop();
-  }
+  delay(LOOP_PERIOD_MS);
+  rclc_executor_spin_some(&executor, RCL_MS_TO_NS(LOOP_PERIOD_MS));
 }
