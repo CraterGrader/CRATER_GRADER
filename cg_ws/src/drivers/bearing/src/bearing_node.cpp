@@ -117,7 +117,7 @@ void BearingNode::timerCallback() {
     // Likely source of error
     tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
 
-     // Publish overall tf - TESTING
+    // Publish overall tf - TESTING
     map_to_link.header.stamp = this->get_clock()->now();
     map_to_link.header.frame_id = fromMap;
     map_to_link.child_frame_id = "baseL";
@@ -138,19 +138,21 @@ void BearingNode::timerCallback() {
       pow(cam_to_tag.transform.translation.y,2) + 
       pow(cam_to_tag.transform.translation.z,2)));
   }
-
-  // Calculated a form of weighted average using distance from camera to tag
-  double weighted_bearing = 0;
-  double total_dist = 0;
-
-  for (int j = 0; j < (int)bearings.size(); j++) {
-    weighted_bearing = bearings[j] * 1/tag_dist_to_cam[j];
-    total_dist += 1/tag_dist_to_cam[j];
-  }
-  // Note bearing - comment out after final product
-  RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 90 / 3.1416);
-
   if (bearings.size() > 0) {
+    // Calculated a form of weighted average using distance from camera to tag
+    double weighted_bearing = 0;
+    double inv_total_dist = 0;
+
+    for (int j = 0; j < (int)bearings.size(); j++) {
+      weighted_bearing += bearings[j] * 1/tag_dist_to_cam[j];
+      inv_total_dist += 1/tag_dist_to_cam[j];
+    }
+    weighted_bearing /= inv_total_dist;
+    weighted_bearing += M_PI/2;
+
+    // Note bearing - comment out after final product
+    RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 180 / M_PI);
+
     double avg_bearing;
     this->rolling_avg.push_back(weighted_bearing);
     if (this->rolling_avg.size() > (long unsigned int)rolling_avg_buffer) {
