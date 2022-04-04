@@ -85,7 +85,7 @@ bool cmd_msg_received = false;
 #define ROBOCLAW_ADDRESS 0x80
 #define NUM_ROBOCLAWS_MOBILITY 2
 #define NUM_ROBOCLAWS_TOOL 1
-#define ROBOCLAW_READ_TIMEOUT_USEC 1000 //10000, lower = faster loop
+#define ROBOCLAW_READ_TIMEOUT_USEC 1000 // lower = faster loop
 RoboClaw roboclaws_mobility[] = {
   RoboClaw(&Serial1, ROBOCLAW_READ_TIMEOUT_USEC), // Pins 18(Tx) and 19(Rx) on the Due
   RoboClaw(&Serial2, ROBOCLAW_READ_TIMEOUT_USEC) // Pins 16(Tx) and 17(Rx) on the Due
@@ -227,8 +227,7 @@ bool create_entities()
       ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
       "arduino_cmd"));
 
-  // create timer,
-//  const unsigned int timer_period_ms = 1000;
+  // create timer
   const unsigned int timer_period_ms = 10;
   RCCHECK(rclc_timer_init_default(
       &timer,
@@ -278,35 +277,33 @@ void setup()
   }
 }
 
+uint32_t delay_ms = 500; // short delay to blink the red LED while trying to connect
 void loop()
 {
-//  uint32_t delay = 100000;
-  uint32_t delay_ms = 500;
+  // Keep trying to connect by pinging the MicroROS agent
   if (RMW_RET_OK == rmw_uros_ping_agent(50, 2))
-//  if (RMW_RET_OK == rmw_uros_ping_agent(1, 10))
   {
-//    delay = 500000;
-//    delay_ms = 500;
+    // Use flag to see if entities need to be created
     if (!micro_ros_init_successful)
     {
       create_entities();
     }
     else
     {
-      digitalWrite(CONN_PIN, HIGH);
-      digitalWrite(LED_PIN, LOW);
+      // Main loop to run the MicroROS node
+      digitalWrite(CONN_PIN, HIGH); // Green LED on
+      digitalWrite(LED_PIN, LOW); // Red LED off
       rclc_executor_spin_some(&executor, RCL_MS_TO_NS(1));
-//      rclc_executor_spin(&executor);
     }
   }
   else {
+    // Destroy entities if there is not connection to the agent
     if (micro_ros_init_successful)
     {
       destroy_entities();
-      digitalWrite(CONN_PIN, LOW);
+      digitalWrite(CONN_PIN, LOW); // Green LED off
     }
-    digitalWrite(LED_PIN, !digitalRead(LED_PIN));
-//  delayMicroseconds(delay);
+    digitalWrite(LED_PIN, !digitalRead(LED_PIN)); // Blink red LED while trying to connect
     delay(delay_ms);
   }
 }
