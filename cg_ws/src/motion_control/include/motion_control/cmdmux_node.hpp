@@ -35,14 +35,6 @@ private:
 
   /* Variables */
   uint8_t curr_mode_;
-  cg_msgs::msg::ActuatorCommand last_cmd_;
-
-  // Autograder boolean flags
-  bool autograder_teleop_received_;
-  bool autograder_autonomy_received_;
-
-  /* Helpers */
-  void asyncPublishAutograder();
 
 }; // class CmdMuxNode
 
