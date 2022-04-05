@@ -30,6 +30,12 @@ private:
   // Timer callback
   void timerCallback();
 
+  // Stores moving average
+  std::vector<double> rolling_avg;
+
+  double tf_discard_time;
+  int rolling_avg_buffer;
+
   rclcpp::TimerBase::SharedPtr timer_{nullptr};
   std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
   std::unique_ptr<tf2_ros::TransformBroadcaster> full_tf_pub_;
