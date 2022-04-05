@@ -136,7 +136,7 @@ class dwm1001_localizer(Node):
                     continue
 
                 if self.publish_raw_tags:
-                    self.publishTagPose(t_pose_xyz - np.array(self.tag_transforms[tag_id]), "uwb_tag_" + str(tag_id), self.raw_publishers[tag_id])    
+                    self.publishTagPose(t_pose_xyz - np.array(self.tag_transforms[tag_id]), "map", self.raw_publishers[tag_id])    
 
                 assert t_pose_xyz.shape == np.array(self.tag_transforms[tag_id]).shape
                 detected_poses[tag_id] = t_pose_xyz - np.array(self.tag_transforms[tag_id])
@@ -173,9 +173,9 @@ class dwm1001_localizer(Node):
         ps.pose.covariance = [self.positional_rms,0.0,0.0,0.0,0.0,0.0,
                                 0.0,self.positional_rms,0.0,0.0,0.0,0.0,
                                 0.0,0.0,self.positional_rms,0.0,0.0,0.0,
-                                0.0,0.0,0.0,1.0,0.0,0.0,
-                                0.0,0.0,0.0,0.0,1.0,0.0,
-                                0.0,0.0,0.0,0.0,0.0,1.0]
+                                0.0,0.0,0.0,0.0,0.0,0.0,
+                                0.0,0.0,0.0,0.0,0.0,0.0,
+                                0.0,0.0,0.0,0.0,0.0,0.0]
         publisher.publish(ps)
             
 
