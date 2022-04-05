@@ -1,6 +1,8 @@
 #ifndef IMU__IMU_BASE_LINK_CONVERSION_NODE_HPP
 #define IMU__IMU_BASE_LINK_CONVERSION_NODE_HPP
 
+#include <Eigen/Eigen>
+#include <Eigen/Geometry>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -25,6 +27,19 @@ private:
   /* Callbacks */
   void imuLinkImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
   void timerCallback();
+
+  /* Transform helper functions */
+  // Most of this copied from http://docs.ros.org/en/noetic/api/imu_transformer/html/tf2__sensor__msgs_8h_source.html
+  void doTransform(
+    const sensor_msgs::msg::Imu &imu_in,
+    sensor_msgs::msg::Imu &imu_out,
+    const geometry_msgs::msg::TransformStamped &t_in
+  ) const;
+  void transformCovariance(
+    const std::vector<double> &in,
+    std::vector<double> &out,
+    const Eigen::Quaternion<double> &r
+  ) const;
 
   sensor_msgs::msg::Imu imu_link_msg_;
   geometry_msgs::msg::TransformStamped base_link_imu_link_tf_;

@@ -1,4 +1,5 @@
 #include <tf2/transform_datatypes.h>
+#include <tf2_ros/buffer_interface.h>
 #include "imu/imu_base_link_conversion_node.hpp"
 
 namespace cg {
@@ -50,7 +51,33 @@ void ImuBaseLinkConversionNode::timerCallback() {
   // double roll, pitch, yaw;
   // tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
   // RCLCPP_INFO(this->get_logger(), "%f, %f, %f", roll, pitch, yaw);
+  try {
+    sensor_msgs::msg::Imu base_link_msg;
+    doTransform(imu_link_msg_, base_link_msg, base_link_imu_link_tf_);
+    base_link_imu_pub_->publish(base_link_msg);
+  } catch (tf2::TransformException &ex) {
+    RCLCPP_WARN(
+      this->get_logger(), "Could not transform Imu msg with error: %s", ex.what()
+    );
+  }
 }
+
+void ImuBaseLinkConversionNode::doTransform(
+    const sensor_msgs::msg::Imu &imu_in,
+    sensor_msgs::msg::Imu &imu_out,
+    const geometry_msgs::msg::TransformStamped &t_in
+) const {
+  imu_out.header = t_in.header;
+}
+
+void ImuBaseLinkConversionNode::transformCovariance(
+    const std::vector<double> &in,
+    std::vector<double> &out,
+    const Eigen::Quaternion<double> &r
+) const {
+  // TODO
+}
+
 
 }  // namespace imu
 }  // namespace cg
