@@ -39,7 +39,7 @@ class dwm1001_localizer(Node):
             Loader=yaml.SafeLoader
             )
         
-        self.declare_parameter('beacon_hz', False)
+        self.declare_parameter('beacon_hz', 10)
         self.beacon_hz = self.get_parameter('beacon_hz').get_parameter_value().double_value
         self.timer = self.create_timer(self.beacon_hz, self.timer_callback)
         
