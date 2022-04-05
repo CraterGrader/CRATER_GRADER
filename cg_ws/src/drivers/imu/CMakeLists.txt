@@ -39,6 +39,16 @@ target_link_libraries(
   imu_node
   libvncxx
 )
+add_executable(imu_base_link_conversion_node src/imu_base_link_conversion_main.cpp
+  src/imu_base_link_conversion_node.cpp
+)
+ament_target_dependencies(imu_base_link_conversion_node
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  tf2
+  tf2_ros
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -47,6 +57,9 @@ endif()
 
 # Install targets
 install(TARGETS imu_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS imu_base_link_conversion_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
