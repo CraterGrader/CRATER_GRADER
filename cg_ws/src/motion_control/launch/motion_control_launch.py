@@ -18,12 +18,12 @@ def generate_launch_description():
     )
 
     # Also bring up the teleop launch file, expect that teleop launch file to handle parameters
-    # included_launch = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         os.path.join(get_package_share_directory(
-    #             'teleop'), 'launch/joystick_launch.py')
-    #     )
-    # )
+    included_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory(
+                'teleop'), 'launch/joystick_launch.py')
+        )
+    )
 
     return LaunchDescription([
         Node(
@@ -38,5 +38,5 @@ def generate_launch_description():
             name='cmd_mux',
             parameters=[cmdmux_params]
         ),
-        # included_launch
+        included_launch
     ])

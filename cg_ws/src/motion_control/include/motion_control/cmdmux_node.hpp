@@ -34,7 +34,7 @@ private:
   void timerCallback(); // For looping publish in idle mode
 
   /* Variables */
-  uint8_t curr_mode_;
+  uint8_t curr_mux_mode_;
 
 }; // class CmdMuxNode
 

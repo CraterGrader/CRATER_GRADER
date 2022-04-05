@@ -26,16 +26,16 @@ CmdMuxNode::CmdMuxNode() : Node("cmd_mux") {
   );
 
   // Initialize the current mode to the default mode
-  curr_mode_ = cg_msgs::msg::MuxMode::IDLE;
+  curr_mux_mode_ = cg_msgs::msg::MuxMode::IDLE;
 }
 
 void CmdMuxNode::timerCallback()
 {
   // Report the current mode
-  RCLCPP_INFO(this->get_logger(), "Current multiplexer mode: %d", curr_mode_);
+  RCLCPP_INFO(this->get_logger(), "Current multiplexer mode: %d", curr_mux_mode_);
 
   // Handle message based on current multiplexer mode
-  if (curr_mode_ == cg_msgs::msg::MuxMode::IDLE)
+  if (curr_mux_mode_ == cg_msgs::msg::MuxMode::IDLE)
   {
     // Publish last message, with wheel velocity set to zero
     cmd_msg_.wheel_velocity = 0;
@@ -63,19 +63,19 @@ void CmdMuxNode::modeCallback(const cg_msgs::msg::MuxMode::SharedPtr msg)
   }
 
   // Set the current mode using the incoming mode number
-  curr_mode_ = msg->mode;
+  curr_mux_mode_ = msg->mode;
 }
 
 void CmdMuxNode::teleopCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {
 
   // Handle message based on current multiplexer mode
-  if (curr_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
+  if (curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Update only the wheel velocity and steering position inputs
     cmd_msg_.wheel_velocity = msg->wheel_velocity;
     cmd_msg_.steer_position = msg->steer_position;
   }
-  else if (curr_mode_ == cg_msgs::msg::MuxMode::FULL_TELEOP)
+  else if (curr_mux_mode_ == cg_msgs::msg::MuxMode::FULL_TELEOP)
   {
     // Update the command message directly
     cmd_msg_ = *msg;
@@ -86,12 +86,12 @@ void CmdMuxNode::autonomyCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr
 {
 
   // Handle message based on current multiplexer mode
-  if (curr_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
+  if (curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Update only the tool position
     cmd_msg_.tool_position = msg->tool_position;
   }
-  else if (curr_mode_ == cg_msgs::msg::MuxMode::FULL_AUTONOMY)
+  else if (curr_mux_mode_ == cg_msgs::msg::MuxMode::FULL_AUTONOMY)
   {
     // Update the command message directly
     cmd_msg_ = *msg;
