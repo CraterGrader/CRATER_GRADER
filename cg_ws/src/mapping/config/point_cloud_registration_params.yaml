@@ -1,0 +1,4 @@
+point_cloud_registration_node:
+  ros__parameters:
+    icp_max_iters: 50  # Max iterations for ICP
+    voxel_filter_size: 0.001  # Voxel side length for downsampling [m]

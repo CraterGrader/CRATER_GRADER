@@ -1,6 +1,9 @@
 #ifndef MAPPING__POINT_CLOUD_REGISTRATION_NODE_HPP
 #define MAPPING__POINT_CLOUD_REGISTRATION_NODE_HPP
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/registration/icp.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
@@ -21,6 +24,16 @@ private:
   /* Callbacks */
   void timerCallback();
   void filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr new_point_cloud_;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_map_;
+  pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp_;
+
+  bool initial_data_received_;
+  bool new_data_received_;
+
+  int icp_max_iters_;
+  float voxel_filter_size_;
 };
 
 
