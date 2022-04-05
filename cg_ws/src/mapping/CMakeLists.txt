@@ -16,6 +16,13 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+
 
 include_directories(include)
 
@@ -35,7 +42,15 @@ add_executable(terrain_filtering src/terrain_filtering_main.cpp
 )
 ament_target_dependencies(terrain_filtering
   rclcpp
+  rclcpp_components
   sensor_msgs
+  tf2_ros
+  tf2
+  geometry_msgs
+  pcl_ros
+  tf2_eigen
+  tf2_geometry_msgs
+  tf2_sensor_msgs
 )
 
 if(BUILD_TESTING)
