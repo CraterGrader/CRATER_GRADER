@@ -16,14 +16,14 @@ ImuBaseLinkConversionNode::ImuBaseLinkConversionNode() : Node("imu_base_link_con
     std::chrono::milliseconds(50),
     std::bind(&ImuBaseLinkConversionNode::timerCallback, this)
   );
-  std::unique_ptr<tf2_ros::Buffer> tf_buffer = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
+  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   std::string target_frame = "base_link";
   std::string source_frame = "imu_link";
   while (rclcpp::ok()) {
     try {
-      base_link_imu_link_tf_ = tf_buffer->lookupTransform(
+      base_link_imu_link_tf_ = tf_buffer_->lookupTransform(
         target_frame, source_frame, tf2::TimePointZero
       );
       break;

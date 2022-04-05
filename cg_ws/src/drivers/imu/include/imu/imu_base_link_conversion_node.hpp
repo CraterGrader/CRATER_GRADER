@@ -20,6 +20,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr base_link_imu_pub_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_link_imu_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
 
   /* Callbacks */
   void imuLinkImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
