@@ -51,8 +51,8 @@ void BearingNode::timerCallback() {
   std::string toCamera = "camera";
   std::string toTag_base = "tag";
 
-  // Bearing published to robot base link for robot localization
-  std::string robot_frame = "base_link";
+  // Bearing published relative to map frame
+  std::string tf_map_frame = "map";
   
   // Store bearing estimates and distances
   std::vector<double> bearings;
@@ -174,7 +174,7 @@ void BearingNode::timerCallback() {
     bearing.pose.pose.orientation.w = q.w();
 
     bearing.header.stamp = this->get_clock()->now();
-    bearing.header.frame_id = robot_frame;
+    bearing.header.frame_id = tf_map_frame;
 
     bearing.pose.covariance =  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
