@@ -18,7 +18,7 @@ ImuBaseLinkConversionNode::ImuBaseLinkConversionNode() : Node("imu_base_link_con
 }
 
 void ImuBaseLinkConversionNode::imuLinkImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg) {
-  // TODO
+  imu_link_msg_ = *msg;
 }
 
 void ImuBaseLinkConversionNode::timerCallback() {

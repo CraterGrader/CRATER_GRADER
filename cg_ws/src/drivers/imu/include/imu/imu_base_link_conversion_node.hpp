@@ -21,6 +21,8 @@ private:
   /* Callbacks */
   void imuLinkImuCallback(const sensor_msgs::msg::Imu::SharedPtr msg);
   void timerCallback();
+
+  sensor_msgs::msg::Imu imu_link_msg_;
 };
 
 
