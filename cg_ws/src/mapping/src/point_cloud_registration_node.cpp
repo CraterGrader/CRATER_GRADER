@@ -3,6 +3,7 @@
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/voxel_grid.h>
 
 namespace cg {
 namespace mapping {
@@ -29,6 +30,8 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   // Load parameters
   this->declare_parameter<int>("icp_max_iters", 50);
   this->get_parameter("icp_max_iters", icp_max_iters_);
+  this->declare_parameter<float>("voxel_filter_size", 0.001);
+  this->get_parameter("voxel_filter_size", voxel_filter_size_);
 
   icp_.setMaximumIterations(icp_max_iters_);
 }
@@ -55,6 +58,15 @@ void PointCloudRegistrationNode::timerCallback() {
     }
     new_data_received_ = false;
   }
+  RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
+  // Downsample
+  pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
+  voxel_grid.setInputCloud(point_cloud_map_);
+  voxel_grid.setLeafSize(voxel_filter_size_, voxel_filter_size_, voxel_filter_size_);
+  voxel_grid.filter(*point_cloud_map_);
+  RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
+
+  // Convert map to sensor_msgs::msg::PointCloud2 and publish message
   sensor_msgs::msg::PointCloud2 point_cloud_map_msg;
   pcl::toROSMsg(*point_cloud_map_, point_cloud_map_msg);
   terrain_raw_map_pub_->publish(point_cloud_map_msg);

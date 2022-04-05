@@ -33,6 +33,7 @@ private:
   bool new_data_received_;
 
   int icp_max_iters_;
+  float voxel_filter_size_;
 };
 
 
