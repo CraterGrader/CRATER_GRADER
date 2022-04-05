@@ -40,6 +40,12 @@ void CmdMuxNode::timerCallback()
     // Publish last message, with wheel velocity set to zero
     cmd_msg_.wheel_velocity = 0;
   } 
+
+  // Clamp commands
+  cmd_msg_.wheel_velocity = std::max(-100.0, std::min(cmd_msg_.wheel_velocity, 100.0)); // [-100.0, 100.0]
+  cmd_msg_.steer_position = std::max(-100.0, std::min(cmd_msg_.steer_position, 100.0)); // [-100.0, 100.0]
+  cmd_msg_.tool_position = std::max(0.0, std::min(cmd_msg_.tool_position, 100.0)); // [0.0, 100.0]
+
   // Publish the message
   cmd_msg_.header.stamp = this->get_clock()->now();
   cmd_pub_->publish(cmd_msg_); // Keep using the same message, so last message is retained unless changed
