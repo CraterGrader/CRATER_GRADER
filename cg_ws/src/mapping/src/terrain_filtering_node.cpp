@@ -1,14 +1,19 @@
 #include "mapping/terrain_filtering_node.hpp"
 
-
 namespace cg {
 namespace mapping {
 
-TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node") {
+TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
+  // create ptr to listener 
+  tfListener_ = std::make_shared<tf2_ros::TransformListener>(tfBuffer);
+
+  // Parameters 
+  source_frame_ = "camera_depth_optical_frame";
+  // source_frame_ = "base_link";
+  // target_frame_ = "odom";
+  target_frame_ = "camera_link";  
+  
   // Initialize publishers and subscribers
-
-  RCLCPP_INFO(this->get_logger(), "constructor");
-
   filtered_points_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/terrain/filtered", 1
   );
@@ -18,14 +23,34 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node") {
 }
 
 void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
-  // TODO
+  try {
+    geometry_msgs::msg::TransformStamped transformStamped;
+    transformStamped = tfBuffer.lookupTransform(target_frame_, source_frame_, msg->header.stamp);
+    RCLCPP_INFO(this->get_logger(), "transformStamped"); 
 
-  RCLCPP_INFO(this->get_logger(), "Publishing");
+    // // remove testing transform and replce with transformstamped when appropriate
+    // geometry_msgs::msg::TransformStamped transformTest;
+    // transformTest.transform.translation.x = 1;
+    // transformTest.transform.translation.y = 0;
+    // transformTest.transform.translation.z = 0;
+    
+    cloud_in_ = *msg;
+        
+    tf2::doTransform(cloud_in_, cloud_out_, transformStamped);
+    cloud_out_.header.frame_id = target_frame_;
 
-  // go through all points and remove points 
+    // do pcl_ros/filters/boxfilter with some boundaries
+    // modify cloud_out in place 
 
+    
 
-
+    filtered_points_pub_->publish(cloud_out_);
+    
+    } 
+  catch (tf2::TransformException &ex) {
+    RCLCPP_WARN(this->get_logger(),"%s", ex.what());
+    }
+  
 }
 
 }  // namespace mapping
