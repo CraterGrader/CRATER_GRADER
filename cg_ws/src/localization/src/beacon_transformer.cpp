@@ -44,6 +44,7 @@ void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCova
     if (got_tf)
     {
       tf2::doTransform(updated_pose_0_, updated_pose_0_, tag_0_transformStamped);
+      updated_pose_0_.header.frame_id = "map";
       tag_0_pub_->publish(updated_pose_0_);
     }
     else if (got_imu) {
@@ -69,7 +70,8 @@ void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCova
     if (got_tf)
     {
       tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
-      tag_0_pub_->publish(updated_pose_1_);
+      updated_pose_1_.header.frame_id = "map";
+      tag_1_pub_->publish(updated_pose_1_);
     }
     else if (got_imu) {
 
@@ -96,8 +98,8 @@ void BeaconTransformer::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_
 // Update tf transforms 
 void BeaconTransformer::tf_Callback() 
 {        
-  tf_update(tag_0_frame, base_link_frame, tag_0_transformStamped);
-  tf_update(tag_0_frame, base_link_frame, tag_1_transformStamped);
+  tf_update(base_link_frame, tag_0_frame, tag_0_transformStamped);
+  tf_update(base_link_frame, tag_1_frame, tag_1_transformStamped);
   got_tf = true;
 }
 
