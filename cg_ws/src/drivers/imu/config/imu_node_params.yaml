@@ -19,8 +19,7 @@ imu_node:
         z: 0.0
     variance: # Measurement variance values (squared RMS)
       linear_acc: # m/s^2
-        # x: 0.00017424
-        x: 1
+        x: 0.00017424
         y: 0.00019044
         z: 0.0003294225
       angular_vel: # rad/s
