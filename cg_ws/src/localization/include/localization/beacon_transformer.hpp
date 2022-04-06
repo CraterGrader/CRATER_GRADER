@@ -45,12 +45,14 @@ private:
     std::string tag_0_frame = "uwb_tag_0";
     std::string tag_1_frame = "uwb_tag_1";
     std::string base_link_frame = "base_link";
+    std::string map_frame = "map";
 
     geometry_msgs::msg::PoseWithCovarianceStamped updated_pose_0_;
     geometry_msgs::msg::PoseWithCovarianceStamped updated_pose_1_;
     sensor_msgs::msg::Imu imu_last;
     geometry_msgs::msg::TransformStamped tag_0_transformStamped;
     geometry_msgs::msg::TransformStamped tag_1_transformStamped;
+    geometry_msgs::msg::TransformStamped base_link_transform;
     bool got_imu{false};
 
 };

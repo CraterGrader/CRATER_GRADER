@@ -33,5 +33,9 @@ def generate_launch_description():
       remappings=[
         ('odometry/filtered', 'odometry/filtered/ekf_global_node')
       ]
-    )
+    ),
+    Node(
+            package='localization',
+            executable='beacon_transformer',
+            name='beacon_transformer')
   ])
