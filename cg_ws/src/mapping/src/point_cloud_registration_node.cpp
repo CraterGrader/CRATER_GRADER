@@ -18,9 +18,8 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   terrain_raw_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/terrain/raw_map", 1
   );
-  // TODO change topic subscription back to /terrain/filtered
   filtered_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/camera/depth/color/points", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
+    "/terrain/filtered", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
   );
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100),
