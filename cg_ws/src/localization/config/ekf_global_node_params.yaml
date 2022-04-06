@@ -186,7 +186,7 @@ ekf_global_node:
     imu0_remove_gravitational_acceleration: true
 
     # Beacons
-    pose0: uwb_beacon/base_link_transformed/tag_0
+    pose0: uwb_beacon/rawtags_/tag_0
     pose0_config: [
       true, true, true,
       false, false, false,
@@ -200,19 +200,19 @@ ekf_global_node:
     pose0_relative: false
     pose0_rejection_threshold: 2.0
 
-    pose1: uwb_beacon/base_link_transformed/tag_1
-    pose1_config: [
-      true, true, true,
-      false, false, false,
-      false, false, false,
-      false, false, false,
-      false, false, false
-    ]
-    pose1_queue_size: 5
-    pose1_nodelay: true
-    pose1_differential: false
-    pose1_relative: false
-    pose1_rejection_threshold: 2.0
+    # pose1: uwb_beacon/base_link_transformed/tag_1
+    # pose1_config: [
+    #   true, true, true,
+    #   false, false, false,
+    #   false, false, false,
+    #   false, false, false,
+    #   false, false, false
+    # ]
+    # pose1_queue_size: 5
+    # pose1_nodelay: true
+    # pose1_differential: false
+    # pose1_relative: false
+    # pose1_rejection_threshold: 2.0
 
     # # Suncam
     # pose2: suncam/heading
