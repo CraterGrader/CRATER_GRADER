@@ -3,7 +3,7 @@ realsense_static_transform_publisher:
     x: '0.25565'
     y: '0.01745'
     z: '0.38277'
-    roll: '-1.867'
+    roll: '-2.2'
     pitch: '0.0'
     yaw: '-1.5708'
     parent_frame_id: base_link
