@@ -5,7 +5,8 @@ namespace mapping {
 
 TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
   // create ptr to listener 
-  tfListener_ = std::make_shared<tf2_ros::TransformListener>(tfBuffer);
+  tfBuffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  tfListener_ = std::make_shared<tf2_ros::TransformListener>(*tfBuffer_);
 
   // Parameters 
   // source_frame_ = "camera_depth_optical_frame";
@@ -25,7 +26,7 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
 void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
   try {
     geometry_msgs::msg::TransformStamped transformStamped;
-    transformStamped = tfBuffer.lookupTransform(target_frame_, source_frame_, msg->header.stamp);
+    transformStamped = tfBuffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
     RCLCPP_INFO(this->get_logger(), "transformStamped"); 
 
     // // remove testing transform and replce with transformstamped when appropriate
