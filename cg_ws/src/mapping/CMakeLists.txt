@@ -35,6 +35,8 @@ ament_target_dependencies(point_cloud_registration
   rclcpp_components
   pcl_ros
   sensor_msgs
+  tf2
+  tf2_ros
 )
 
 add_executable(terrain_filtering src/terrain_filtering_main.cpp

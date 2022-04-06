@@ -18,16 +18,21 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   terrain_raw_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/terrain/raw_map", 1
   );
-  // TODO change topic subscription back to /terrain/filtered
   filtered_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/camera/depth/color/points", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
+    "/terrain/filtered", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
   );
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100),
     std::bind(&PointCloudRegistrationNode::timerCallback, this)
   );
+  tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   // Load parameters
+  this->declare_parameter<std::string>("source_frame", "map");
+  this->get_parameter("source_frame", source_frame_);
+  this->declare_parameter<std::string>("target_frame", "base_link");
+  this->get_parameter("target_frame", target_frame_);
   this->declare_parameter<int>("icp_max_iters", 50);
   this->get_parameter("icp_max_iters", icp_max_iters_);
   this->declare_parameter<float>("voxel_filter_size", 0.001);
