@@ -27,6 +27,10 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   );
 
   // Load parameters
+  this->declare_parameter<std::string>("source_frame", "map");
+  this->get_parameter("source_frame", source_frame_);
+  this->declare_parameter<std::string>("target_frame", "base_link");
+  this->get_parameter("target_frame", target_frame_);
   this->declare_parameter<int>("icp_max_iters", 50);
   this->get_parameter("icp_max_iters", icp_max_iters_);
   this->declare_parameter<float>("voxel_filter_size", 0.001);

@@ -32,6 +32,8 @@ private:
   bool initial_data_received_;
   bool new_data_received_;
 
+  std::string source_frame_;
+  std::string target_frame_;
   int icp_max_iters_;
   float voxel_filter_size_;
 };
