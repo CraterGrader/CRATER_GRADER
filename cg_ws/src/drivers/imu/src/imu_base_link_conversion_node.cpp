@@ -42,15 +42,6 @@ void ImuBaseLinkConversionNode::imuLinkImuCallback(const sensor_msgs::msg::Imu::
 }
 
 void ImuBaseLinkConversionNode::timerCallback() {
-  // tf2::Quaternion q(
-  //   imu_link_msg_.orientation.x,
-  //   imu_link_msg_.orientation.y,
-  //   imu_link_msg_.orientation.z,
-  //   imu_link_msg_.orientation.w
-  // );
-  // double roll, pitch, yaw;
-  // tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
-  // RCLCPP_INFO(this->get_logger(), "%f, %f, %f", roll, pitch, yaw);
   try {
     sensor_msgs::msg::Imu base_link_msg;
     doTransform(imu_link_msg_, base_link_msg, base_link_imu_link_tf_);
@@ -68,14 +59,49 @@ void ImuBaseLinkConversionNode::doTransform(
     const geometry_msgs::msg::TransformStamped &t_in
 ) const {
   imu_out.header = t_in.header;
+  // Discard translation, only use orientation for IMU transform
+  Eigen::Quaternion<double> r(
+    t_in.transform.rotation.w,
+    t_in.transform.rotation.x,
+    t_in.transform.rotation.y,
+    t_in.transform.rotation.z
+  );
+  Eigen::Transform<double,3,Eigen::Affine> t(r);
+
+  Eigen::Vector3d vel = t * Eigen::Vector3d(
+    imu_in.angular_velocity.x,
+    imu_in.angular_velocity.y,
+    imu_in.angular_velocity.z
+  );
+  imu_out.angular_velocity.x = vel.x();
+  imu_out.angular_velocity.y = vel.y();
+  imu_out.angular_velocity.z = vel.z();
+
+  transformCovariance(imu_in.angular_velocity_covariance, imu_out.angular_velocity_covariance, r);
+
+  Eigen::Quaternion<double> orientation = r * Eigen::Quaternion<double>(
+    imu_in.orientation.w,
+    imu_in.orientation.x,
+    imu_in.orientation.y,
+    imu_in.orientation.z
+  ) * r.inverse();
+
+  imu_out.orientation.w = orientation.w();
+  imu_out.orientation.x = orientation.x();
+  imu_out.orientation.y = orientation.y();
+  imu_out.orientation.z = orientation.z();
+
+  transformCovariance(imu_in.orientation_covariance, imu_out.orientation_covariance, r);
 }
 
 void ImuBaseLinkConversionNode::transformCovariance(
-    const std::vector<double> &in,
-    std::vector<double> &out,
+    const std::array<double, 9> &in,
+    std::array<double, 9> &out,
     const Eigen::Quaternion<double> &r
 ) const {
-  // TODO
+  Eigen::Map<const Eigen::Matrix<double, 3, 3, Eigen::RowMajor> > cov_in(in.data());
+  Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor> > cov_out(out.data());
+  cov_out = r * cov_in * r.inverse();
 }
 
 

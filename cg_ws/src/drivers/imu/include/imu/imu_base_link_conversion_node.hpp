@@ -36,8 +36,8 @@ private:
     const geometry_msgs::msg::TransformStamped &t_in
   ) const;
   void transformCovariance(
-    const std::vector<double> &in,
-    std::vector<double> &out,
+    const std::array<double, 9> &in,
+    std::array<double, 9> &out,
     const Eigen::Quaternion<double> &r
   ) const;
 
