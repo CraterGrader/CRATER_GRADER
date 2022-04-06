@@ -6,6 +6,8 @@
 #include <pcl/registration/icp.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 
 namespace cg {
 namespace mapping {
@@ -20,6 +22,8 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr terrain_raw_map_pub_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_points_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   /* Callbacks */
   void timerCallback();
