@@ -26,7 +26,6 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
   try {
     geometry_msgs::msg::TransformStamped transformStamped;
     transformStamped = tfBuffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
-    RCLCPP_INFO(this->get_logger(), "transformStamped"); 
 
     cloud_in_ = *msg;
         
