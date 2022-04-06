@@ -163,30 +163,30 @@ bool UsbCamNode::take_and_send_image()
   }
 
   // CV Bridge Image pointer to access input image message
-  //cv_bridge::CvImagePtr cv_ptr;
+  // cv_bridge::CvImagePtr cv_ptr;
 
-  // Copy the input message to a cv pointer with RGB 8-bit encoding
-  //cv_ptr = cv_bridge::toCvCopy(*img_, sensor_msgs::image_encodings::RGB8);
+  // // Copy the input message to a cv pointer with RGB 8-bit encoding
+  // cv_ptr = cv_bridge::toCvCopy(*img_, sensor_msgs::image_encodings::RGB8);
   
-  // Define variables for calculating
-  //cv::Size dim(img_->width, img_->height);
-  //cv::Mat src = cv_ptr->image;
-  //cv::Mat dst;
-  //cv::Mat map1;
-  //cv::Mat map2;
+  // // Define variables for calculating
+  // cv::Size dim(img_->width, img_->height);
+  // cv::Mat src = cv_ptr->image;
+  // cv::Mat dst;
+  // cv::Mat map1;
+  // cv::Mat map2;
 
-  // Undistort the image using fisheye model
-  //cv::fisheye::initUndistortRectifyMap(K, D, R, K, dim, CV_16SC2, map1, map2);
-  //cv::remap(src, dst, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+  // // Undistort the image using fisheye model
+  // cv::fisheye::initUndistortRectifyMap(K, D, R, K, dim, CV_16SC2, map1, map2);
+  // cv::remap(src, dst, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
-  // Create the output image
-  //cv_bridge::CvImage out_msg;
-  //out_msg.header   = img_->header; // Same timestamp and tf frame as input image
-  //out_msg.encoding = "rgb8"; // Same type as maps
-  //out_msg.image    = dst; // Set image to undistorted cv::Mat
+  // // Create the output image
+  // cv_bridge::CvImage out_msg;
+  // out_msg.header   = img_->header; // Same timestamp and tf frame as input image
+  // out_msg.encoding = "rgb8"; // Same type as maps
+  // out_msg.image    = dst; // Set image to undistorted cv::Mat
   
-  // Get output image message - dereferenced
-  //img_->data = out_msg.toImageMsg()->data;
+  // // Get output image message - dereferenced
+  // img_->data = out_msg.toImageMsg()->data;
 
   auto ci = std::make_unique<sensor_msgs::msg::CameraInfo>(cinfo_->getCameraInfo());
   ci->header = img_->header;
