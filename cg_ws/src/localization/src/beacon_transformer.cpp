@@ -40,7 +40,6 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
 void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_0_ = *beacon_msg;
-    updated_pose_1_.header.frame_id = "map";
     if (got_tf)
     {
       tag_0_transformStamped.transform.rotation = base_link_transform.transform.rotation;
@@ -57,7 +56,6 @@ void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCova
 void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_1_ = *beacon_msg;
-    updated_pose_1_.header.frame_id = "map";
     if (got_tf)
     {
       tag_1_transformStamped.transform.rotation = base_link_transform.transform.rotation;
@@ -82,7 +80,7 @@ void BeaconTransformer::tf_Callback()
 {        
   tf_update(base_link_frame, tag_0_frame, tag_0_transformStamped);
   tf_update(base_link_frame, tag_1_frame, tag_1_transformStamped);
-  tf_update(map_frame, base_link_frame, tag_1_transformStamped);
+  tf_update(map_frame, base_link_frame, base_link_transform);
   got_tf = true;
 }
 
