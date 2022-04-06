@@ -186,7 +186,7 @@ ekf_global_node:
     # imu0_remove_gravitational_acceleration: true
 
     # Beacons
-    pose0: uwb_beacon/raw_tags/tag_0
+    pose0: tag_0_updated
     pose0_config: [
       true, true, true,
       false, false, false,
@@ -200,7 +200,7 @@ ekf_global_node:
     pose0_relative: false
     pose0_rejection_threshold: 2.0
 
-    pose1: uwb_beacon/raw_tags/tag_1
+    pose1: tag_1_updated
     pose1_config: [
       true, true, true,
       false, false, false,
