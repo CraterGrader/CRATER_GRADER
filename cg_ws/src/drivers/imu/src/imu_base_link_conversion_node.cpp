@@ -59,7 +59,7 @@ void ImuBaseLinkConversionNode::doTransform(
     const geometry_msgs::msg::TransformStamped &t_in
 ) const {
   imu_out.header = t_in.header;
-  imu_out.header.frame_id = "odom";
+  imu_out.header.frame_id = "base_link";
   imu_out.header.stamp = imu_in.header.stamp;
 
   // Discard translation, only use orientation for IMU transform
