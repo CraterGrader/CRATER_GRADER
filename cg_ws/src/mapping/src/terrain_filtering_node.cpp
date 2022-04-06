@@ -6,7 +6,7 @@ namespace mapping {
 TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
   // create ptr to listener 
   tfBuffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-  tfListener_ = std::make_shared<tf2_ros::TransformListener>(tfBuffer_);
+  tfListener_ = std::make_shared<tf2_ros::TransformListener>(*tfBuffer_);
 
   // Parameters 
   // source_frame_ = "camera_depth_optical_frame";
