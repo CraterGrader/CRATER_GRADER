@@ -8,11 +8,11 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
   tfListener_ = std::make_shared<tf2_ros::TransformListener>(tfBuffer);
 
   // Parameters 
-  source_frame_ = "camera_depth_optical_frame";
-  // source_frame_ = "base_link";
-  // target_frame_ = "odom";
-  target_frame_ = "camera_link";  
-  
+  // source_frame_ = "camera_depth_optical_frame";
+  // target_frame_ = "camera_link";
+  source_frame_ = "base_link";
+  target_frame_ = "odom";
+
   // Initialize publishers and subscribers
   filtered_points_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/terrain/filtered", 1
