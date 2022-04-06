@@ -18,7 +18,7 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
     "/terrain/raw_map", 1
   );
   filtered_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/terrain/filtered", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
+    "/camera/depth/color/points", rclcpp::SensorDataQoS(), std::bind(&PointCloudRegistrationNode::filteredPointsCallback, this, std::placeholders::_1)
   );
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100),
@@ -28,9 +28,9 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   // Load parameters
-  this->declare_parameter<std::string>("source_frame", "map");
+  this->declare_parameter<std::string>("source_frame", "realsense_frame");
   this->get_parameter("source_frame", source_frame_);
-  this->declare_parameter<std::string>("target_frame", "realsense_frame");
+  this->declare_parameter<std::string>("target_frame", "map");
   this->get_parameter("target_frame", target_frame_);
   this->declare_parameter<int>("icp_max_iters", 50);
   this->get_parameter("icp_max_iters", icp_max_iters_);
@@ -45,6 +45,7 @@ void PointCloudRegistrationNode::timerCallback() {
     RCLCPP_WARN(this->get_logger(), "Waiting for initial point cloud data");
     return;
   }
+
   if (new_data_received_) {
 
     geometry_msgs::msg::TransformStamped tf;
@@ -73,7 +74,6 @@ void PointCloudRegistrationNode::timerCallback() {
       std::cout << registered_cloud_transform << std::endl;
       pcl::transformPointCloud(*new_point_cloud_, *registered_cloud, registered_cloud_transform);
       *point_cloud_map_ += *registered_cloud;
-
     } else {
       RCLCPP_WARN(this->get_logger(), "ICP Failed Convergence");
     }
@@ -90,6 +90,7 @@ void PointCloudRegistrationNode::timerCallback() {
   // Convert map to sensor_msgs::msg::PointCloud2 and publish message
   sensor_msgs::msg::PointCloud2 point_cloud_map_msg;
   pcl::toROSMsg(*point_cloud_map_, point_cloud_map_msg);
+  point_cloud_map_msg.header.frame_id = target_frame_;
   terrain_raw_map_pub_->publish(point_cloud_map_msg);
   RCLCPP_INFO(this->get_logger(), "Published map");
 }
@@ -98,7 +99,16 @@ void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::
   // Convert sensor_msgs::msg::PointCloud2 to pcl::PointCloud<T>
   pcl::fromROSMsg(*msg, *new_point_cloud_);
   if (point_cloud_map_->size() == 0) {
-    pcl::fromROSMsg(*msg, *point_cloud_map_);
+    try {
+      geometry_msgs::msg::TransformStamped transform_stamped = tf_buffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
+      std::cout << tf2::transformToEigen(transform_stamped).matrix().cast<float>() << std::endl;
+      pcl::transformPointCloud(*new_point_cloud_, *point_cloud_map_, tf2::transformToEigen(transform_stamped).matrix().cast<float>());
+    } catch (tf2::TransformException &ex) {
+      RCLCPP_WARN(this->get_logger(), "Could not lookupTransform from source %s to target %s: %s",
+        source_frame_.c_str(), target_frame_.c_str(), ex.what()
+      );
+    }
+
   } else {
     new_data_received_ = true;
   }
