@@ -17,7 +17,7 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
     "/uwb_beacon/raw_tags/tag_1", 10, std::bind(&BeaconTransformer::beacon_callback_1, this, _1));
 
   imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
-    "/imu/data", 10, std::bind(&BeaconTransformer::imu_callback, this, _1));
+    "/imu/data/base_link", 10, std::bind(&BeaconTransformer::imu_callback, this, _1));
       
   tag_1_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
   "/uwb_beacon/base_link_transformed/tag_0", 1);
