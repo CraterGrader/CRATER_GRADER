@@ -33,7 +33,6 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_map_;
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp_;
 
-  bool initial_data_received_;
   bool new_data_received_;
 
   std::string source_frame_;

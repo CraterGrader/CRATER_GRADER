@@ -12,7 +12,6 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
     Node("point_cloud_registration_node"),
     new_point_cloud_(new pcl::PointCloud<pcl::PointXYZ>),
     point_cloud_map_(new pcl::PointCloud<pcl::PointXYZ>),
-    initial_data_received_(false),
     new_data_received_(false) {
   // Initialize publishers and subscribers
   terrain_raw_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
@@ -42,7 +41,7 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
 }
 
 void PointCloudRegistrationNode::timerCallback() {
-  if (!initial_data_received_) {
+  if (point_cloud_map_->size() == 0) {
     RCLCPP_WARN(this->get_logger(), "Waiting for initial point cloud data");
     return;
   }
@@ -81,9 +80,8 @@ void PointCloudRegistrationNode::timerCallback() {
 void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
   // Convert sensor_msgs::msg::PointCloud2 to pcl::PointCloud<T>
   pcl::fromROSMsg(*msg, *new_point_cloud_);
-  if (!initial_data_received_) {
+  if (point_cloud_map_->size() == 0) {
     pcl::fromROSMsg(*msg, *point_cloud_map_);
-    initial_data_received_ = true;
   } else {
     new_data_received_ = true;
   }
