@@ -33,6 +33,11 @@ def generate_launch_description():
       name='imu_node',
       parameters=[imu_params_path]
     ),
+    Node(
+      package='imu',
+      executable='imu_base_link_conversion_node',
+      name='imu_base_link_conversion_node'
+    ),
     # Static tf publisher
     # Order of args is [x, y, z, yaw, pitch, roll, parent_frame, child_frame]
     # http://docs.ros.org/en/foxy/Tutorials/Tf2/Writing-A-Tf2-Static-Broadcaster-Cpp.html#the-proper-way-to-publish-static-transforms
