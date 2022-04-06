@@ -79,6 +79,18 @@ void ImuBaseLinkConversionNode::doTransform(
 
   transformCovariance(imu_in.angular_velocity_covariance, imu_out.angular_velocity_covariance, r);
 
+  Eigen::Vector3d acc = t * Eigen::Vector3d(
+    imu_in.linear_acceleration.x,
+    imu_in.linear_acceleration.y,
+    imu_in.linear_acceleration.z
+  );
+  imu_out.linear_acceleration.x = acc.x();
+  imu_out.linear_acceleration.y = acc.y();
+  imu_out.linear_acceleration.z = acc.z();
+
+  transformCovariance(imu_in.angular_velocity_covariance, imu_out.angular_velocity_covariance, r);
+
+
   Eigen::Quaternion<double> orientation = r * Eigen::Quaternion<double>(
     imu_in.orientation.w,
     imu_in.orientation.x,
