@@ -20,10 +20,10 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
     "/imu/data", 10, std::bind(&BeaconTransformer::imu_callback, this, _1));
       
   tag_1_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
-  "/tag_1_updated", 1);
+  "/uwb_beacon/base_link_transformed/tag_0", 1);
 
   tag_0_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
-  "/tag_0_updated", 1);
+  "/uwb_beacon/base_link_transformed/tag_1", 1);
 
   int pub_freq{100};
   tf_timer_ = this->create_wall_timer(
@@ -40,53 +40,35 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
 void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_0_ = *beacon_msg;
-
+    updated_pose_1_.header.frame_id = "map";
     if (got_tf)
     {
+      tag_0_transformStamped.transform.rotation = base_link_transform.transform.rotation;
       tf2::doTransform(updated_pose_0_, updated_pose_0_, tag_0_transformStamped);
-      updated_pose_0_.header.frame_id = "map";
       tag_0_pub_->publish(updated_pose_0_);
     }
     else if (got_imu) {
-
-      // Flip IMU 180 and then set orientation to tag
-      Eigen::Quaternion<double> r(0.0, 1.0, 0.0, 0.0);
-      Eigen::Quaternion<double> imu_flipped_orientation = r * Eigen::Quaternion<double>(
-        imu_last.orientation.w, imu_last.orientation.x, imu_last.orientation.y, imu_last.orientation.z) * r.inverse();
-
-      updated_pose_0_.pose.pose.orientation.w = imu_flipped_orientation.w();
-      updated_pose_0_.pose.pose.orientation.x = imu_flipped_orientation.x();
-      updated_pose_0_.pose.pose.orientation.y = imu_flipped_orientation.y();
-      updated_pose_0_.pose.pose.orientation.z = imu_flipped_orientation.z();
+      tag_0_transformStamped.transform.rotation = imu_last.orientation;
+      tf2::doTransform(updated_pose_0_, updated_pose_0_, tag_0_transformStamped);
       tag_0_pub_->publish(updated_pose_0_);
     }
-
 }
 
 void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_1_ = *beacon_msg;
-
+    updated_pose_1_.header.frame_id = "map";
     if (got_tf)
     {
+      tag_1_transformStamped.transform.rotation = base_link_transform.transform.rotation;
       tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
-      updated_pose_1_.header.frame_id = "map";
       tag_1_pub_->publish(updated_pose_1_);
     }
     else if (got_imu) {
-
-      // Flip IMU 180 and then set orientation to tag
-      Eigen::Quaternion<double> r(0.0, 1.0, 0.0, 0.0);
-      Eigen::Quaternion<double> imu_flipped_orientation = r * Eigen::Quaternion<double>(
-        imu_last.orientation.w, imu_last.orientation.x, imu_last.orientation.y, imu_last.orientation.z) * r.inverse();
-
-      updated_pose_1_.pose.pose.orientation.w = imu_flipped_orientation.w();
-      updated_pose_1_.pose.pose.orientation.x = imu_flipped_orientation.x();
-      updated_pose_1_.pose.pose.orientation.y = imu_flipped_orientation.y();
-      updated_pose_1_.pose.pose.orientation.z = imu_flipped_orientation.z();
+      tag_1_transformStamped.transform.rotation = imu_last.orientation;
+      tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
       tag_1_pub_->publish(updated_pose_1_);
     }
-
 }
 
 void BeaconTransformer::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg)
@@ -100,6 +82,7 @@ void BeaconTransformer::tf_Callback()
 {        
   tf_update(base_link_frame, tag_0_frame, tag_0_transformStamped);
   tf_update(base_link_frame, tag_1_frame, tag_1_transformStamped);
+  tf_update(map_frame, base_link_frame, tag_1_transformStamped);
   got_tf = true;
 }
 
