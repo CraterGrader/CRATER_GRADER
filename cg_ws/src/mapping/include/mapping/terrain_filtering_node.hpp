@@ -25,7 +25,7 @@ public:
   TerrainFilteringNode();
 
   /* Create Buffer and TF Listener PTR */
-  tf2_ros::Buffer tfBuffer = tf2_ros::Buffer(this->get_clock());
+  std::unique_ptr<tf2_ros::Buffer> tfBuffer_;
   std::shared_ptr<tf2_ros::TransformListener> tfListener_;
 
   /* Variables */
