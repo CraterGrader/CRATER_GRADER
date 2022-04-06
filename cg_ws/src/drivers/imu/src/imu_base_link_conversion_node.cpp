@@ -59,6 +59,8 @@ void ImuBaseLinkConversionNode::doTransform(
     const geometry_msgs::msg::TransformStamped &t_in
 ) const {
   imu_out.header = t_in.header;
+  imu_out.header.stamp = imu_in.header.stamp;
+
   // Discard translation, only use orientation for IMU transform
   Eigen::Quaternion<double> r(
     t_in.transform.rotation.w,
@@ -88,7 +90,7 @@ void ImuBaseLinkConversionNode::doTransform(
   imu_out.linear_acceleration.y = acc.y();
   imu_out.linear_acceleration.z = acc.z();
 
-  transformCovariance(imu_in.angular_velocity_covariance, imu_out.angular_velocity_covariance, r);
+  transformCovariance(imu_in.linear_acceleration_covariance, imu_out.linear_acceleration_covariance, r);
 
 
   Eigen::Quaternion<double> orientation = r * Eigen::Quaternion<double>(
