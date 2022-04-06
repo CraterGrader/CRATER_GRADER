@@ -23,7 +23,6 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
 
-
 include_directories(include)
 
 # build nodes
@@ -37,6 +36,7 @@ ament_target_dependencies(point_cloud_registration
   sensor_msgs
   tf2
   tf2_ros
+  tf2_eigen
 )
 
 add_executable(terrain_filtering src/terrain_filtering_main.cpp

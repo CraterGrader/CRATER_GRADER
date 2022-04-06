@@ -8,6 +8,8 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
+#include <Eigen/Geometry>
+#include <tf2_eigen/tf2_eigen.h>
 
 namespace cg {
 namespace mapping {
@@ -39,6 +41,7 @@ private:
   std::string target_frame_;
   int icp_max_iters_;
   float voxel_filter_size_;
+  Eigen::Affine3d matrix_;
 };
 
 

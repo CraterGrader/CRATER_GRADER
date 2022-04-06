@@ -46,10 +46,27 @@ void PointCloudRegistrationNode::timerCallback() {
     return;
   }
   if (new_data_received_) {
+
+    geometry_msgs::msg::TransformStamped tf;
+    try {
+      tf = tf_buffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
+    }
+
+    catch (tf2::TransformException &ex){
+      tf.transform.translation.x = 0;
+      tf.transform.translation.y = 0;
+      tf.transform.translation.z = 0;
+      tf.transform.rotation.x = 0;
+      tf.transform.rotation.y = 0;
+      tf.transform.rotation.z = 0;
+      tf.transform.rotation.w = 1;
+    }
+
     icp_.setInputSource(new_point_cloud_);
     icp_.setInputTarget(point_cloud_map_);
     pcl::PointCloud<pcl::PointXYZ>::Ptr registered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    icp_.align(*registered_cloud);  // TODO insert initial transform guess here?
+    matrix_ = tf2::transformToEigen(tf); 
+    icp_.align(*registered_cloud, matrix_.matrix().cast<float>());  
     if (icp_.hasConverged()) {
       RCLCPP_INFO(this->get_logger(), "ICP Converged");
       Eigen::Matrix4d registered_cloud_transform = icp_.getFinalTransformation().cast<double>();
