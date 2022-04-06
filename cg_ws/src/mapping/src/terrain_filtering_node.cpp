@@ -10,7 +10,7 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
   // Parameters 
   // source_frame_ = "camera_depth_optical_frame";
   // target_frame_ = "camera_link";
-  source_frame_ = "base_link";
+  source_frame_ = "realsense_frame";
   target_frame_ = "odom";
 
   // Initialize publishers and subscribers
