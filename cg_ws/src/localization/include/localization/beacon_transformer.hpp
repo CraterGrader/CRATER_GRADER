@@ -11,6 +11,7 @@
 #include <tf2_ros/buffer.h>
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
+#include<math.h>
 
 namespace cg {
 namespace uwb_beacon_rtls {
@@ -25,10 +26,12 @@ private:
     /* Publishers and Subscribers */
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr tag_0_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr tag_1_pub_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr average_tag_pub_;
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr beacon_subscription_0_;
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr beacon_subscription_1_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;
     rclcpp::TimerBase::SharedPtr tf_timer_{nullptr};
+    rclcpp::TimerBase::SharedPtr average_tag_timer_{nullptr};
 
     /* Callbacks */
     void beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg);
@@ -36,6 +39,7 @@ private:
     void imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg);
     void tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform);
     void tf_Callback();
+    void average_Beacon_Callback();
 
     /* Transforms */
     std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
@@ -47,8 +51,13 @@ private:
     std::string base_link_frame = "base_link";
     std::string map_frame = "map";
 
+    geometry_msgs::msg::PoseWithCovarianceStamped raw_pose_0_;
     geometry_msgs::msg::PoseWithCovarianceStamped updated_pose_0_;
+    bool pub_tag_0{false};
     geometry_msgs::msg::PoseWithCovarianceStamped updated_pose_1_;
+    geometry_msgs::msg::PoseWithCovarianceStamped raw_pose_1_;
+    bool pub_tag_1{false};
+    geometry_msgs::msg::PoseWithCovarianceStamped average_pose_;
     sensor_msgs::msg::Imu imu_last;
     geometry_msgs::msg::TransformStamped tag_0_transformStamped;
     geometry_msgs::msg::TransformStamped tag_1_transformStamped;

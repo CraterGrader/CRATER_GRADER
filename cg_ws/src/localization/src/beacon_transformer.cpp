@@ -25,10 +25,18 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
   tag_0_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
   "/uwb_beacon/base_link_transformed/tag_1", 1);
 
+  average_tag_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
+  "/uwb_beacon/average_tag", 1);
+
   int pub_freq{100};
   tf_timer_ = this->create_wall_timer(
     std::chrono::milliseconds(1000/pub_freq),
     std::bind(&BeaconTransformer::tf_Callback, this)
+  );
+
+  average_tag_timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(1000/pub_freq),
+    std::bind(&BeaconTransformer::average_Beacon_Callback, this)
   );
 
   // Tf listeners
@@ -40,11 +48,13 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
 void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_0_ = *beacon_msg;
+    raw_pose_0_ = *beacon_msg;
     if (got_tf)
     {
       tag_0_transformStamped.transform.rotation = base_link_transform.transform.rotation;
       tf2::doTransform(updated_pose_0_, updated_pose_0_, tag_0_transformStamped);
       tag_0_pub_->publish(updated_pose_0_);
+      pub_tag_0 = true;
     }
     else if (got_imu) {
       tag_0_transformStamped.transform.rotation = imu_last.orientation;
@@ -56,17 +66,50 @@ void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCova
 void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_1_ = *beacon_msg;
+    raw_pose_1_ = *beacon_msg;
     if (got_tf)
     {
       tag_1_transformStamped.transform.rotation = base_link_transform.transform.rotation;
       tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
       tag_1_pub_->publish(updated_pose_1_);
+      pub_tag_1 = true;
     }
     else if (got_imu) {
       tag_1_transformStamped.transform.rotation = imu_last.orientation;
       tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
       tag_1_pub_->publish(updated_pose_1_);
     }
+}
+
+void BeaconTransformer::average_Beacon_Callback() 
+{      
+
+  if (pub_tag_1 && pub_tag_0) 
+  {
+    
+    float tag_0_dist  = pow(tag_0_transformStamped.transform.translation.x - base_link_transform.transform.translation.x, 2) +
+      pow(tag_0_transformStamped.transform.translation.y - base_link_transform.transform.translation.y, 2);
+
+    float tag_1_dist = pow(tag_1_transformStamped.transform.translation.x - base_link_transform.transform.translation.x, 2) +
+      pow(tag_1_transformStamped.transform.translation.y - base_link_transform.transform.translation.y, 2);
+
+    float tag_0_weight = (1 - tag_0_dist) / (tag_1_dist + tag_0_dist);
+    float tag_1_weight = 1 - tag_0_weight;
+
+    tag_0_weight = 0.5;
+    tag_1_weight = 0.5;
+
+    average_pose_.header = updated_pose_0_.header;
+
+    average_pose_.pose.pose.position.x = tag_0_weight * (raw_pose_0_.pose.pose.position.x) + tag_1_weight * (raw_pose_1_.pose.pose.position.x);
+    average_pose_.pose.pose.position.y = tag_0_weight * (raw_pose_0_.pose.pose.position.y) + tag_1_weight * (raw_pose_1_.pose.pose.position.y);
+    average_pose_.pose.pose.position.z = tag_0_weight * (raw_pose_0_.pose.pose.position.z) + tag_1_weight * (raw_pose_1_.pose.pose.position.z);
+
+    average_tag_pub_->publish(average_pose_);
+
+  }  
+
+
 }
 
 void BeaconTransformer::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg)
