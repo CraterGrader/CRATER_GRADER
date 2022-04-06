@@ -17,7 +17,7 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
     "/uwb_beacon/raw_tags/tag_1", 10, std::bind(&BeaconTransformer::beacon_callback_1, this, _1));
 
   imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
-    "/imu/data", 10, std::bind(&BeaconTransformer::imu_callback, this, _1));
+    "/imu/data/base_link", 10, std::bind(&BeaconTransformer::imu_callback, this, _1));
       
   tag_1_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
   "/uwb_beacon/base_link_transformed/tag_0", 1);
@@ -40,7 +40,6 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
 void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_0_ = *beacon_msg;
-    updated_pose_1_.header.frame_id = "map";
     if (got_tf)
     {
       tag_0_transformStamped.transform.rotation = base_link_transform.transform.rotation;
@@ -57,7 +56,6 @@ void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCova
 void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg)
 {
     updated_pose_1_ = *beacon_msg;
-    updated_pose_1_.header.frame_id = "map";
     if (got_tf)
     {
       tag_1_transformStamped.transform.rotation = base_link_transform.transform.rotation;
@@ -82,7 +80,7 @@ void BeaconTransformer::tf_Callback()
 {        
   tf_update(base_link_frame, tag_0_frame, tag_0_transformStamped);
   tf_update(base_link_frame, tag_1_frame, tag_1_transformStamped);
-  tf_update(map_frame, base_link_frame, tag_1_transformStamped);
+  tf_update(map_frame, base_link_frame, base_link_transform);
   got_tf = true;
 }
 
