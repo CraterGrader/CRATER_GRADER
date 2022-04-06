@@ -85,7 +85,7 @@ bool cmd_msg_received = false;
 #define ROBOCLAW_ADDRESS 0x80
 #define NUM_ROBOCLAWS_MOBILITY 2
 #define NUM_ROBOCLAWS_TOOL 1
-#define ROBOCLAW_READ_TIMEOUT_USEC 8000 // 8k --> ~3.3hz, lower = faster loop but below 8k observed to not successfully read from the RoboClaws (tested 7k, 6k, 5k, 100)
+#define ROBOCLAW_READ_TIMEOUT_USEC 10000 // 8k --> ~3.3hz, lower = faster loop but below 8k observed to not successfully read from the RoboClaws (tested 7k, 6k, 5k, 100)
 RoboClaw roboclaws_mobility[] = {
   RoboClaw(&Serial1, ROBOCLAW_READ_TIMEOUT_USEC), // Pins 18(Tx) and 19(Rx) on the Due
   RoboClaw(&Serial2, ROBOCLAW_READ_TIMEOUT_USEC) // Pins 16(Tx) and 17(Rx) on the Due
