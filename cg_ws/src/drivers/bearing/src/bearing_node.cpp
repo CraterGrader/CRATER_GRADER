@@ -4,6 +4,7 @@ namespace cg {
 namespace bearing {
 
 BearingNode::BearingNode() : Node("bearing_node") {
+  RCLCPP_INFO(this->get_logger(), "Bearing Node Starting");
   // Publishing frequency for callback function
   int pub_freq;
   this->declare_parameter<int>("pub_freq", 10);
@@ -40,6 +41,7 @@ BearingNode::BearingNode() : Node("bearing_node") {
 void BearingNode::timerCallback() {
   // Radians
   geometry_msgs::msg::PoseWithCovarianceStamped bearing; 
+  RCLCPP_INFO(this->get_logger(), "Timer callback");
 
   // Frames to be used
   std::string fromTag_base = "april_tag";
