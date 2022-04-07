@@ -81,7 +81,7 @@ void AprilTagNode::onCamera(const sensor_msgs::msg::Image & msg_img) {
     //std::memcpy(K.data(), msg_ci->k.data(), 9*sizeof(double));
 
     // convert to 8bit monochrome image
-    const cv::Mat img_uint8 = cv_bridge::toCvShare(msg_img, "mono8")->image;
+    const cv::Mat img_uint8 = cv_bridge::toCvCopy(msg_img, "mono8")->image;
 
     image_u8_t im = {
         .width = img_uint8.cols,
@@ -94,7 +94,7 @@ void AprilTagNode::onCamera(const sensor_msgs::msg::Image & msg_img) {
     zarray_t* detections = apriltag_detector_detect(td, &im);
 
     apriltag_msgs::msg::AprilTagDetectionArray msg_detections;
-    msg_detections.header = msg_img->header;
+    msg_detections.header = msg_img.header;
 
     tf2_msgs::msg::TFMessage tfs;
 
@@ -122,7 +122,7 @@ void AprilTagNode::onCamera(const sensor_msgs::msg::Image & msg_img) {
 
         // 3D orientation and position
         geometry_msgs::msg::TransformStamped tf;
-        tf.header = msg_img->header;
+        tf.header = msg_img.header;
         // set child frame name by generic tag name or configured tag name
         tf.child_frame_id = tag_frames.count(det->id) ? tag_frames.at(det->id) : std::string(det->family->name)+":"+std::to_string(det->id);
         getPose(*(det->H), tf.transform, tag_sizes.count(det->id) ? tag_sizes.at(det->id) : tag_edge_size);
