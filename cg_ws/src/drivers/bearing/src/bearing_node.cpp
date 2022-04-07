@@ -83,15 +83,13 @@ void BearingNode::timerCallback() {
         tf2::TimePointZero);
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.3 seconds old, discard
-      RCLCPP_INFO(this->get_logger(), "Got tag2");
       double dt = (this->get_clock()->now() - tf_time).seconds();
+      RCLCPP_INFO(this->get_logger(), "Time gap was %f", dt);
       if (dt > this->tf_discard_time) {
-        RCLCPP_INFO(this->get_logger(), "Too old");
         continue;
       }
     } catch (tf2::TransformException & ex) {
       if (i == 2) {
-        RCLCPP_INFO(this->get_logger(), "Couldn't detect tag2");
       }
       continue;
     }
@@ -102,7 +100,6 @@ void BearingNode::timerCallback() {
         toLink, fromTag,
         tf2::TimePointZero);
     } catch (tf2::TransformException & ex) {
-      RCLCPP_INFO(this->get_logger(), "tag2Base Link fail");
       continue;
     }
 
@@ -113,7 +110,6 @@ void BearingNode::timerCallback() {
         toTag, fromMap,
         tf2::TimePointZero);
     } catch (tf2::TransformException & ex) {
-      RCLCPP_INFO(this->get_logger(), "map2tag fail");
       continue;
     }
 
