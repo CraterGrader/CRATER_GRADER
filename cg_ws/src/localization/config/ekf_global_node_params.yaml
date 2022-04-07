@@ -214,20 +214,20 @@ ekf_global_node:
     # pose1_relative: false
     # pose1_rejection_threshold: 2.0
 
-    # Suncam
-    pose1: /bearing
-    pose1_config: [
-      false, false, false,
-      false, false, true,
-      false, false, false,
-      false, false, false,
-      false, false, false
-    ]
-    pose1_queue_size: 5
-    pose1_nodelay: false
-    pose1_differential: false
-    pose1_relative: false
-    pose1_rejection_threshold: 2.0
+    # # Suncam
+    # pose1: /bearing
+    # pose1_config: [
+    #   false, false, false,
+    #   false, false, true,
+    #   false, false, false,
+    #   false, false, false,
+    #   false, false, false
+    # ]
+    # pose1_queue_size: 5
+    # pose1_nodelay: false
+    # pose1_differential: false
+    # pose1_relative: false
+    # pose1_rejection_threshold: 2.0
 
     # [ADVANCED] The process noise covariance matrix can be difficult to tune, and can vary for each application, so it is
     # exposed as a configuration parameter. This matrix represents the noise we add to the total error after each
