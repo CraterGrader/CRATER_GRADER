@@ -45,12 +45,12 @@ private:
     const static std::map<std::string, void (*)(apriltag_family_t*)> tag_destroy;
 
     //const image_transport::CameraSubscriber sub_cam;
-    const rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr sub_cam;
+    rclcpp::Subscription<sensor__msgs::msg::Image>::SharedPtr sun_cam;
     const rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr pub_tf;
     const rclcpp::Publisher<apriltag_msgs::msg::AprilTagDetectionArray>::SharedPtr pub_detections;
     const rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_bearing;
 
     //void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci);
-    void onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img);
+    void onCamera(const sensor_msgs::msg::Image & msg_img);
     void getPose(const matd_t& H, geometry_msgs::msg::Transform& t, const double size) const;
 };
