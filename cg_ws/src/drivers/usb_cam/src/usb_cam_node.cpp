@@ -108,13 +108,17 @@ void UsbCamNode::init()
     image_height_, framerate_);
   cam_.get_formats();
 
-  // TODO(lucasw) should this check a little faster than expected frame rate?
-  // TODO(lucasw) how to do small than ms, or fractional ms- std::chrono::nanoseconds?
   const int period_ms = 1000.0 / framerate_;
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(static_cast<int64_t>(period_ms)),
     std::bind(&UsbCamNode::update, this));
   RCLCPP_INFO_STREAM(this->get_logger(), "starting timer " << period_ms);
+
+    // Do calculation beforehand
+  dim.height = image_height_;
+  dim.width = image_width_;
+  cv::fisheye::initUndistortRectifyMap(K, D, R, K, dim, CV_16SC2, map1, map2);
+  out_msg.encoding = "rgb8"; // Same type as maps
 }
 
 void UsbCamNode::get_params()
@@ -161,32 +165,19 @@ bool UsbCamNode::take_and_send_image()
     RCLCPP_ERROR(this->get_logger(), "grab failed");
     return false;
   }
+  // Copy the input message to a cv pointer with RGB 8-bit encoding
+  cv_ptr = cv_bridge::toCvCopy(*img_, sensor_msgs::image_encodings::RGB8);
+  //src = cv_ptr->image;
 
-  // CV Bridge Image pointer to access input image message
-  // cv_bridge::CvImagePtr cv_ptr;
+  // Undistort the image using fisheye model
+  cv::remap(cv_ptr->image, out_msg.image, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
-  // // Copy the input message to a cv pointer with RGB 8-bit encoding
-  // cv_ptr = cv_bridge::toCvCopy(*img_, sensor_msgs::image_encodings::RGB8);
+  // Create the output image
+  out_msg.header   = img_->header; // Same timestamp and tf frame as input image
+  //out_msg.image    = dst; // Set image to undistorted cv::Mat
   
-  // // Define variables for calculating
-  // cv::Size dim(img_->width, img_->height);
-  // cv::Mat src = cv_ptr->image;
-  // cv::Mat dst;
-  // cv::Mat map1;
-  // cv::Mat map2;
-
-  // // Undistort the image using fisheye model
-  // cv::fisheye::initUndistortRectifyMap(K, D, R, K, dim, CV_16SC2, map1, map2);
-  // cv::remap(src, dst, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
-
-  // // Create the output image
-  // cv_bridge::CvImage out_msg;
-  // out_msg.header   = img_->header; // Same timestamp and tf frame as input image
-  // out_msg.encoding = "rgb8"; // Same type as maps
-  // out_msg.image    = dst; // Set image to undistorted cv::Mat
-  
-  // // Get output image message - dereferenced
-  // img_->data = out_msg.toImageMsg()->data;
+  // Get output image message - dereferenced
+  img_->data = out_msg.toImageMsg()->data;
 
   auto ci = std::make_unique<sensor_msgs::msg::CameraInfo>(cinfo_->getCameraInfo());
   ci->header = img_->header;

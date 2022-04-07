@@ -75,6 +75,13 @@ public:
   UsbCam cam_;
 
   // New parameters
+  cv_bridge::CvImagePtr cv_ptr;
+  cv::Mat src;
+  cv::Mat dst;
+  cv::Mat map1;
+  cv::Mat map2;
+  cv_bridge::CvImage out_msg;
+  cv::Size dim;
   cv::Mat K = (cv::Mat1d(3, 3) << 359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.);
   cv::Mat D = (cv::Mat1d(4, 1) << -4.20510300e-02, -3.43845925e-03, -7.62396222e-04, -9.83326585e-06);
   cv::Mat R = (cv::Mat1d(3, 3) << 1., 0., 0., 0., 1., 0., 0., 0., 1.);
