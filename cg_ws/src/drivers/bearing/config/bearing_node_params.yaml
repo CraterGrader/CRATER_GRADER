@@ -19,7 +19,7 @@ bearing_node:
         x: '-1.5708'
         y: '0'
         z: '-1.5708'
-    tf_discard_time: 0.3
+    tf_discard_time: 2
     rolling_avg_buffer: 5
     pub_freq: 10
     publish_viz: false
