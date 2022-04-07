@@ -67,6 +67,8 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     else {
         throw std::runtime_error("Unsupported tag family: "+tag_family);
     }
+
+    K = (cv::Mat(3, 3, 1) << 359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.);
 }
 
 AprilTagNode::~AprilTagNode() {
