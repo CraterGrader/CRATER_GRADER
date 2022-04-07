@@ -3,7 +3,7 @@
       video_device: "/dev/cg_dev/sun_cam"
       framerate: 9.0
       io_method: "mmap"
-      frame_id: "map"
+      frame_id: "camera"
       pixel_format: "yuyv"
       image_width: 1280
       image_height: 720
