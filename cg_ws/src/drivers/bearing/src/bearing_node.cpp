@@ -86,6 +86,7 @@ void BearingNode::timerCallback() {
       RCLCPP_INFO(this->get_logger(), "Got tag2");
       double dt = (this->get_clock()->now() - tf_time).seconds();
       if (dt > this->tf_discard_time) {
+        RCLCPP_INFO(this->get_logger(), "Too old");
         continue;
       }
     } catch (tf2::TransformException & ex) {
@@ -101,6 +102,7 @@ void BearingNode::timerCallback() {
         toLink, fromTag,
         tf2::TimePointZero);
     } catch (tf2::TransformException & ex) {
+      RCLCPP_INFO(this->get_logger(), "tag2Base Link fail");
       continue;
     }
 
@@ -111,6 +113,7 @@ void BearingNode::timerCallback() {
         toTag, fromMap,
         tf2::TimePointZero);
     } catch (tf2::TransformException & ex) {
+      RCLCPP_INFO(this->get_logger(), "map2tag fail");
       continue;
     }
 
