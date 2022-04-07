@@ -4,7 +4,6 @@ namespace cg {
 namespace bearing {
 
 BearingNode::BearingNode() : Node("bearing_node") {
-  RCLCPP_INFO(this->get_logger(), "Bearing Node Starting");
   // Publishing frequency for callback function
   int pub_freq;
   this->declare_parameter<int>("pub_freq", 10);
@@ -41,7 +40,6 @@ BearingNode::BearingNode() : Node("bearing_node") {
 void BearingNode::timerCallback() {
   // Radians
   geometry_msgs::msg::PoseWithCovarianceStamped bearing; 
-  RCLCPP_INFO(this->get_logger(), "Timer callback");
 
   // Frames to be used
   std::string fromTag_base = "april_tag";
@@ -85,11 +83,15 @@ void BearingNode::timerCallback() {
         tf2::TimePointZero);
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.3 seconds old, discard
+      RCLCPP_INFO(this->get_logger(), "Got tag2");
       double dt = (this->get_clock()->now() - tf_time).seconds();
       if (dt > this->tf_discard_time) {
         continue;
       }
     } catch (tf2::TransformException & ex) {
+      if (i == 2) {
+        RCLCPP_INFO(this->get_logger(), "Couldn't detect tag2");
+      }
       continue;
     }
 
