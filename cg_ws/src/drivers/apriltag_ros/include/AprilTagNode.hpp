@@ -36,7 +36,6 @@ private:
     std::unordered_map<int, std::string> tag_frames;
     std::unordered_map<int, double> tag_sizes;
 
-    //Mat3 K;
     Mat3 K;
 
     const bool z_up;

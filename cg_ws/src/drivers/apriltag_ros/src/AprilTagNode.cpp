@@ -51,8 +51,7 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     max_hamming(declare_parameter<int>("max_hamming", 0)),
     z_up(declare_parameter<bool>("z_up", false)),
     // topics
-    //sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
-    sub_cam(image_transport::create_subscription(this, "image_raw", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1), rmw_qos_profile_sensor_data)),
+    sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
     pub_tf(create_publisher<tf2_msgs::msg::TFMessage>("/tf", rclcpp::QoS(100))),
     pub_detections(create_publisher<apriltag_msgs::msg::AprilTagDetectionArray>("detections", rclcpp::QoS(1)))
 {
@@ -89,8 +88,6 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     else {
         throw std::runtime_error("Unsupported tag family: "+tag_family);
     }
-
-    K << 359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.;
 }
 
 AprilTagNode::~AprilTagNode() {
@@ -98,9 +95,9 @@ AprilTagNode::~AprilTagNode() {
     tag_destroy.at(tag_family)(tf);
 }
 
-void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img) {//, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
+void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
     // copy camera intrinsics
-    //std::memcpy(K.data(), msg_ci->k.data(), 9*sizeof(double));
+    std::memcpy(K.data(), msg_ci->k.data(), 9*sizeof(double));
 
     // convert to 8bit monochrome image
     const cv::Mat img_uint8 = cv_bridge::toCvShare(msg_img, "mono8")->image;
