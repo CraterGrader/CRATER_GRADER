@@ -2,16 +2,8 @@
 #include <image_transport/image_transport.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-// default tag families
-//#include <tag16h5.h>
-//#include <tag25h9.h>
-//#include <tag36h11.h>
-//#include <tagCircle21h7.h>
-//#include <tagCircle49h12.h>
-//#include <tagCustom48h12.h>
-#include <tagStandard41h12.h>
-//#include <tagStandard52h13.h>
 
+#include <tagStandard41h12.h>
 #include <Eigen/Dense>
 
 // create and delete functions for default tags
@@ -20,26 +12,12 @@
 
 const std::map<std::string, apriltag_family_t *(*)(void)> AprilTagNode::tag_create =
 {
-    //TAG_CREATE(36h11)
-    //TAG_CREATE(25h9)
-    //TAG_CREATE(16h5)
-    //TAG_CREATE(Circle21h7)
-    //TAG_CREATE(Circle49h12)
-    //TAG_CREATE(Custom48h12)
     TAG_CREATE(Standard41h12)
-    //TAG_CREATE(Standard52h13)
 };
 
 const std::map<std::string, void (*)(apriltag_family_t*)> AprilTagNode::tag_destroy =
 {
-    //TAG_DESTROY(36h11)
-    //TAG_DESTROY(25h9)
-    //TAG_DESTROY(16h5)
-    //TAG_DESTROY(Circle21h7)
-    //TAG_DESTROY(Circle49h12)
-    //TAG_DESTROY(Custom48h12)
     TAG_DESTROY(Standard41h12)
-    //TAG_DESTROY(Standard52h13)
 };
 
 AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
@@ -51,7 +29,8 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     max_hamming(declare_parameter<int>("max_hamming", 0)),
     z_up(declare_parameter<bool>("z_up", false)),
     // topics
-    sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
+    //sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
+    sub_cam = this->create_subscription<std_msgs::msg::Image>("image_raw", 10, std::bind(&AprilTagNode::onCamera, this, _1));
     pub_tf(create_publisher<tf2_msgs::msg::TFMessage>("/tf", rclcpp::QoS(100))),
     pub_detections(create_publisher<apriltag_msgs::msg::AprilTagDetectionArray>("detections", rclcpp::QoS(1)))
 {
@@ -95,9 +74,10 @@ AprilTagNode::~AprilTagNode() {
     tag_destroy.at(tag_family)(tf);
 }
 
-void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
+//void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
+void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img) {
     // copy camera intrinsics
-    std::memcpy(K.data(), msg_ci->k.data(), 9*sizeof(double));
+    //std::memcpy(K.data(), msg_ci->k.data(), 9*sizeof(double));
 
     // convert to 8bit monochrome image
     const cv::Mat img_uint8 = cv_bridge::toCvShare(msg_img, "mono8")->image;
