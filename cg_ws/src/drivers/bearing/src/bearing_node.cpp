@@ -151,7 +151,7 @@ void BearingNode::timerCallback() {
       inv_total_dist += 1/tag_dist_to_cam[j];
     }
     weighted_bearing /= inv_total_dist;
-    weighted_bearing += M_PI/2;
+    //weighted_bearing += M_PI/2;
 
     // Note bearing - comment out after final product
     RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 180 / M_PI);
