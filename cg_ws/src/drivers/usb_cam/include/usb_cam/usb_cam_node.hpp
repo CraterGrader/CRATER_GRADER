@@ -88,7 +88,9 @@ public:
 
   // shared image message
   sensor_msgs::msg::Image::UniquePtr img_;
-  std::shared_ptr<image_transport::CameraPublisher> image_pub_;
+  //std::shared_ptr<image_transport::CameraPublisher> image_pub_;
+  image_transport::ImageTransport it;
+  image_transport::Publisher image_pub_;
   // parameters
   std::string video_device_name_;
   std::string frame_id_;

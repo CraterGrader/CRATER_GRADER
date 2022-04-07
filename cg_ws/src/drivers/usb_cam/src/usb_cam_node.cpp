@@ -172,14 +172,14 @@ bool UsbCamNode::take_and_send_image()
   cv::remap(cv_ptr->image, out_msg.image, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
   // Create the output image
-  out_msg.header   = img_->header; // Same timestamp and tf frame as input image
+  out_msg.header = img_->header; // Same timestamp and tf frame as input image
   
   // Get output image message - dereferenced
   img_->data = out_msg.toImageMsg()->data;
 
-  auto ci = std::make_unique<sensor_msgs::msg::CameraInfo>(cinfo_->getCameraInfo());
-  ci->header = img_->header;
-  image_pub_->publish(*img_, *ci);
+  //auto ci = std::make_unique<sensor_msgs::msg::CameraInfo>(cinfo_->getCameraInfo());
+  //ci->header = img_->header;
+  image_pub_->publish(*img_);//, *ci);
   return true;
 }
 
