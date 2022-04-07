@@ -84,7 +84,7 @@ void BearingNode::timerCallback() {
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.3 seconds old, discard
       double dt = (this->get_clock()->now() - tf_time).seconds();
-      RCLCPP_INFO(this->get_logger(), "Time gap was %f", dt);
+      //RCLCPP_INFO(this->get_logger(), "Time gap was %f", dt);
       if (dt > this->tf_discard_time) {
         continue;
       }
