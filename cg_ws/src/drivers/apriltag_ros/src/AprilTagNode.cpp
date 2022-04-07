@@ -97,8 +97,10 @@ void AprilTagNode::onCamera(const sensor_msgs::msg::Image & msg_img) {
     msg_detections.header = msg_img.header;
 
     tf2_msgs::msg::TFMessage tfs;
+    RCLCPP_INFO(this->get_logger(), "Attempted Tag Detection");
 
     for (int i = 0; i < zarray_size(detections); i++) {
+        RCLCPP_INFO(this->get_logger(), "Tag Detected");
         apriltag_detection_t* det;
         zarray_get(detections, i, &det);
 
