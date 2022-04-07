@@ -35,14 +35,6 @@ ament_target_dependencies(bearing_node
   tf2
   tf2_ros
 )
-add_executable(bearing_debug_node src/bearing_debug.cpp)
-ament_target_dependencies(bearing_debug_node
-  rclcpp
-  rclcpp_components
-  image_transport
-  std_msgs
-  sensor_msgs
-)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -51,7 +43,7 @@ endif()
 
 
 # Install targets
-install(TARGETS bearing_node bearing_debug_node
+install(TARGETS bearing_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
