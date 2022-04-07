@@ -29,6 +29,7 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     max_hamming(declare_parameter<int>("max_hamming", 0)),
     z_up(declare_parameter<bool>("z_up", false)),
     // topics
+    sub_cam(create_subscription<sensor_msgs::msg::Image>("image_raw", rclcpp::QoS(10), std::bind(&AprilTagNode::onCamera, std::placeholders::_1)),
     //sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
     pub_tf(create_publisher<tf2_msgs::msg::TFMessage>("/tf", rclcpp::QoS(100))),
     pub_detections(create_publisher<apriltag_msgs::msg::AprilTagDetectionArray>("detections", rclcpp::QoS(1)))
@@ -66,7 +67,7 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     else {
         throw std::runtime_error("Unsupported tag family: "+tag_family);
     }
-    sub_cam = this->create_subscription<sensor_msgs::msg::Image>("image_raw", 10, std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1));
+    
     K << 359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.;
 }
 
