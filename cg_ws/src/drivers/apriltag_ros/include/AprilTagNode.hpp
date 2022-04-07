@@ -36,8 +36,12 @@ private:
     std::unordered_map<int, std::string> tag_frames;
     std::unordered_map<int, double> tag_sizes;
 
-    Mat3 K; // = {359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.};
-
+    //Mat3 K; // = {359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.};
+    Mat3 K =  {
+        { 359.23290304f, 0.0f, 629.64159832f},
+        { 0.0f, 359.26041139f, 321.40026019f},
+        { 0.0f, 0.0f, 1.0f},
+    };
     const bool z_up;
 
     // function pointer for tag family creation / destruction

@@ -66,8 +66,8 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     else {
         throw std::runtime_error("Unsupported tag family: "+tag_family);
     }
-    sub_cam = this->create_subscription<std_msgs::msg::Image>("image_raw", 10, std::bind(&AprilTagNode::onCamera, this, _1));
-    K = (cv::Mat(3, 3, 1) << 359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.);
+    sub_cam = this->create_subscription<sensor_msgs::msg::Image>("image_raw", 10, std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1));
+    //K = (cv::Mat(3, 3, 1) << 359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.);
 }
 
 AprilTagNode::~AprilTagNode() {
