@@ -107,6 +107,7 @@ void BeaconTransformer::average_Beacon_Callback()
     average_pose_.pose.pose.position.y = tag_0_weight * (raw_pose_0_.pose.pose.position.y) + tag_1_weight * (raw_pose_1_.pose.pose.position.y);
     average_pose_.pose.pose.position.z = tag_0_weight * (raw_pose_0_.pose.pose.position.z) + tag_1_weight * (raw_pose_1_.pose.pose.position.z);
 
+    average_pose_.header.frame_id = "map";
     average_pose_.pose.covariance = raw_pose_0_.pose.covariance;
 
     average_tag_pub_->publish(average_pose_);
