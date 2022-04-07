@@ -67,7 +67,6 @@ void BearingNode::timerCallback() {
 
   // Look up for the transformation from tag to base_link
   for (int i = 0; i < 4; i++) {
-    RCLCPP_INFO(this->get_logger(), "Entered Loop\n");
     // Transform to obtain tf
     geometry_msgs::msg::TransformStamped tag_to_link;
     geometry_msgs::msg::TransformStamped map_to_tag;
