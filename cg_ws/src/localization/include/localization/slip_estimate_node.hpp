@@ -39,8 +39,7 @@ private:
 
   // Moving average filter
   int filter_window_;
-  int filter_window_;
-  list<float> slip_window_;
+  std::list<float> slip_window_;
   float curr_slip_avg_;
 
   /* Callbacks */

@@ -32,16 +32,17 @@ void SlipEstimateNode::updateMovingAverage(){
 
   // Build up the filter
   slip_window_.push_front(curr_raw_slip_);
-  if (slip_window_.size() > filter_window_) {
+  if (static_cast<int>(slip_window_.size()) > filter_window_) {
     slip_window_.pop_back(); // remove oldest value
   }
 
   // Update the filter
-  curr_slip_avg_ = std::accumulate(list.begin(), list.end(), 0.0) / list.size();
+  curr_slip_avg_ = std::accumulate(slip_window_.begin(), slip_window_.end(), 0.0) / slip_window_.size();
 }
 
 void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
 
+  // Calculate current raw slip value
   actual_front_vel_ = static_cast<float>(std::abs(msg->drive_vel_rear));
   actual_rear_vel_ = static_cast<float>(std::abs(msg->drive_vel_front));
   
@@ -55,9 +56,13 @@ void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetr
     curr_raw_slip_ = static_cast<float>(0.0);
   }
 
-  updateMovingAverage(); // call to update curr_avg_
+  // Filter slip estimate with moving average
+  updateMovingAverage(); // call to update curr_slip_avg_
+
+  // Publish the slip estimate
+  slip_msg_.slip = curr_slip_avg_;
   slip_msg_.header.stamp = this->get_clock()->now();
-  slip_pub_->publish(curr_slip_avg_);
+  slip_pub_->publish(slip_msg_);
 
   // Slip is percentage difference between encoder-read velocty and fused odometry velocity.
 }
