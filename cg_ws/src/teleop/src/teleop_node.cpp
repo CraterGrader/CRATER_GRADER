@@ -66,24 +66,31 @@ void TeleopNode::modeCallback(const cg_msgs::msg::MuxMode::SharedPtr msg)
 
 void TeleopNode::actCmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg)
 {
-  // Update the current commands so new teleop inputs will start with existing command state, otherwise this node updates the command state directly
+  // Update drive and steer commands whenever there is no direct control on the those commands
   if (curr_mux_mode_ != cg_msgs::msg::MuxMode::FULL_TELEOP && curr_mux_mode_ != cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Scale from range [-100, 100] % of full scale velocity to joystick value range [-1, 1]
     joy_axis_drive_state_ = std::max(-1.0, std::min(msg->wheel_velocity / 100, 1.0)); // Absolute value should get updated immediately, prior value should have no effect but kept for posterity
     joy_axis_steer_state_ = std::max(-1.0, std::min(msg->steer_position / 100, 1.0)); // Absolute value should get updated immediately, prior value should have no effect but kept for posterity
+  }
+
+  // Update tool position whenever there is no direct control on the tool position
+  if (curr_mux_mode_ != cg_msgs::msg::MuxMode::FULL_TELEOP) {
     joy_tool_height_state_ = msg->tool_position; // Tool will update incrementally starting from this value
   }
 }
 
 void TeleopNode::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
 
-  // Only change command state values if in teleop or autograder mode (still publish a full message for autograder; the tool position is ignored by cmdmux_node)
+  // Change drive and steer in both teleop and autograder modes
   if (curr_mux_mode_ == cg_msgs::msg::MuxMode::FULL_TELEOP || curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     joy_axis_drive_state_ = msg->axes[joy_axis_drive_i_];
     joy_axis_steer_state_ = msg->axes[joy_axis_steer_i_];
+  }
 
+  // Only allow tool to change if in full teleop mode
+  if (curr_mux_mode_ == cg_msgs::msg::MuxMode::FULL_TELEOP) {
     if (joy_tool_pressed_)
     {
       if (msg->buttons[joy_raise_tool_i_] == 0 && msg->buttons[joy_lower_tool_i_] == 0)
