@@ -22,7 +22,7 @@ private:
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr teleop_sub_;
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr autonomy_sub_;
 
-  rclcpp::TimerBase::SharedPtr timer_; // For looping publish in idle mode
+  rclcpp::TimerBase::SharedPtr timer_; // For looping publish
 
   /* Message data */
   cg_msgs::msg::ActuatorCommand cmd_msg_;

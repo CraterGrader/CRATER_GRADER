@@ -13,8 +13,6 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
 
 include_directories(include)
@@ -25,8 +23,6 @@ add_executable(autograder_node src/autograder_main.cpp
 )
 ament_target_dependencies(autograder_node
   rclcpp
-  rclcpp_components
-  sensor_msgs
   cg_msgs
 )
 
