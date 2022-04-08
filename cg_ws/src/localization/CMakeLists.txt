@@ -15,6 +15,15 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(cg_msgs)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(Eigen3)
+
+# Add Eigen3 Library
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 # Find package head files
 include_directories(include)
@@ -29,6 +38,23 @@ cg_msgs
 nav_msgs
 )
 
+# build nodes
+add_executable(beacon_transformer src/beacon_transformer_main.cpp
+  src/beacon_transformer.cpp
+)
+ament_target_dependencies(beacon_transformer
+  rclcpp
+  geometry_msgs
+  sensor_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  Eigen3
+)
+target_link_libraries(
+  beacon_transformer
+)
+
 # Code Testing
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -38,6 +64,11 @@ endif()
 # Install targets
 install(TARGETS slip_estimate_node
   DESTINATION lib/${PROJECT_NAME})
+
+# Install targets
+install(TARGETS beacon_transformer
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 # Install directories
 install(DIRECTORY include/${PROJECT_NAME}/
