@@ -28,7 +28,7 @@ private:
 
   /* Callbacks */
   void slipCallback();
-  void odomCallback(const nav_msgs::msg::Odometry::SharedPtr global_msg);
+  void globalCallback(const nav_msgs::msg::Odometry::SharedPtr global_msg);
   void encCallback(const nav_msgs::msg::Odometry::SharedPtr enc_msg);
 
   rclcpp::TimerBase::SharedPtr timer_ = this->create_wall_timer(
