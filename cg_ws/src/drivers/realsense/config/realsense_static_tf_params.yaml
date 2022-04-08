@@ -1,0 +1,10 @@
+realsense_static_transform_publisher:
+  ros__parameters:
+    x: '0.24734'
+    y: '0.018'
+    z: '0.57861'
+    roll: '-2.3213'
+    pitch: '0.0'
+    yaw: '-1.5708'
+    parent_frame_id: base_link
+    child_frame_id: realsense_frame

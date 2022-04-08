@@ -16,8 +16,8 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
     "/encoder/odom", 1, std::bind(&SlipEstimateNode::encCallback, this, std::placeholders::_1)
   );
 
-  odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    "/odometry/filtered/ekf_odom_node", 1, std::bind(&SlipEstimateNode::odomCallback, this, std::placeholders::_1)
+  global_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+    "/odometry/filtered/ekf_global_node", 1, std::bind(&SlipEstimateNode::globalCallback, this, std::placeholders::_1)
   );
 
 }
@@ -26,26 +26,34 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
 void SlipEstimateNode::slipCallback() {
 
   // If either are not initialized, can't calculate slip
-  if (!odom_init || !enc_init) return;
+  if (!global_init || !enc_init) return;
 
   slip_msg_.header.stamp = this->get_clock()->now();
 
-  // Slip is percentage difference between encoder-read velocty and fused odometry velocity.
-  slip_msg_.slip = 100 * (last_enc_vel_ - last_odom_vel_) / last_odom_vel_;
+  if (last_enc_vel_ != 0.0) 
+  {
+    slip_msg_.slip = 100 * (last_enc_vel_ - last_global_vel_) / last_enc_vel_;
+  }
+  else {
+    slip_msg_.slip = 0;
+  }
 
   slip_pub_->publish(slip_msg_);
+
+  // Slip is percentage difference between encoder-read velocty and fused odometry velocity.
+
 
 }
 
 
-void SlipEstimateNode::odomCallback(
-  const nav_msgs::msg::Odometry::SharedPtr odom_msg) {
+void SlipEstimateNode::globalCallback(
+  const nav_msgs::msg::Odometry::SharedPtr global_msg) {
 
-  last_odom_vel_ = sqrt(
-    pow(odom_msg->twist.twist.linear.x, 2.0) + 
-    pow(odom_msg->twist.twist.linear.y, 2.0));
+  last_global_vel_ = sqrt(
+    pow(global_msg->twist.twist.linear.x, 2.0) + 
+    pow(global_msg->twist.twist.linear.y, 2.0));
 
-  odom_init = true;
+  global_init = true;
 
 }
 

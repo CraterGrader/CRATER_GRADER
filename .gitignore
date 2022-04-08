@@ -1,14 +1,20 @@
 # ROS2 workspace build files 
-cg_ws/build/
-cg_ws/install/
-cg_ws/log/
+*build/
+*install/
+*log/
+
+# Bag files
 *bags/
 *bag/
 
 # VNC
 cg_ws/nohup.out
 
+# Tools
+tools/cal_cam_data/
+
 # Other
 *.DS_Store
-*__pycache__/
-*.vscode
+__pycache__/
+cg_ws/.vscode/
+.vscode/
