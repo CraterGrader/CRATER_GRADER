@@ -26,24 +26,21 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
 
   nonzero_slip_thresh_ = 10; // TODO: set in config file
   filter_window_ = 10; // TODO: set in config file
-  num_elements_ = 0;
-  curr_avg_ = 0;
 }
 
-void SlipEstimateNode::movingAverageFilter(){
+void SlipEstimateNode::updateMovingAverage(){
 
   // Build up the filter
-  if (num_elements_ < filter_window_) {
-    num_elements_ += 1;
+  slip_window_.push_front(curr_raw_slip_);
+  if (slip_window_.size() > filter_window_) {
+    slip_window_.pop_back(); // remove oldest value
   }
 
   // Update the filter
-  curr_avg_ = (curr_avg_ * (num_elements_-1) + raw_slip_) / num_elements_;
+  curr_slip_avg_ = std::accumulate(list.begin(), list.end(), 0.0) / list.size();
 }
 
 void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
-
-  // If either are not initialized, can't calculate slip
 
   actual_front_vel_ = static_cast<float>(std::abs(msg->drive_vel_rear));
   actual_rear_vel_ = static_cast<float>(std::abs(msg->drive_vel_front));
@@ -52,15 +49,15 @@ void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetr
   {
     // Calculate slip if it's above the calculation threshold
     // Expect 0 for no slip, 1 for 100% slip, clamp at zero
-    raw_slip_ = std::max(static_cast<float>(0.0), (actual_rear_vel_ - actual_front_vel_) / actual_rear_vel_);
+    curr_raw_slip_ = std::max(static_cast<float>(0.0), (actual_rear_vel_ - actual_front_vel_) / actual_rear_vel_);
   }
   else {
-    raw_slip_ = static_cast<float>(0.0);
+    curr_raw_slip_ = static_cast<float>(0.0);
   }
 
-  slip_msg_.slip = movingAverageFilter();
+  updateMovingAverage(); // call to update curr_avg_
   slip_msg_.header.stamp = this->get_clock()->now();
-  slip_pub_->publish(slip_msg_);
+  slip_pub_->publish(curr_slip_avg_);
 
   // Slip is percentage difference between encoder-read velocty and fused odometry velocity.
 }
