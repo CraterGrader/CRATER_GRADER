@@ -17,18 +17,18 @@ private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<cg_msgs::msg::Slip>::SharedPtr slip_pub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr enc_sub_;
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_sub_;
 
   /* Message data */
   cg_msgs::msg::Slip slip_msg_;
-  float last_odom_vel_;
-  bool odom_init = false;
+  float last_global_vel_;
+  bool global_init = false;
   float last_enc_vel_;
   bool enc_init = false;
 
   /* Callbacks */
   void slipCallback();
-  void odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom_msg);
+  void odomCallback(const nav_msgs::msg::Odometry::SharedPtr global_msg);
   void encCallback(const nav_msgs::msg::Odometry::SharedPtr enc_msg);
 
   rclcpp::TimerBase::SharedPtr timer_ = this->create_wall_timer(
