@@ -22,13 +22,13 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
 
 
   // Load parameters
-  this->declare_parameter<float>("slip_thresh", 0.6);
+  this->declare_parameter<float>("slip_thresh", 0.3);
   this->get_parameter("slip_thresh", slip_thresh_);
-  this->declare_parameter<float>("half_deadband", 0.1);
+  this->declare_parameter<float>("half_deadband", 0.05);
   this->get_parameter("half_deadband", half_deadband_);
-  this->declare_parameter<int>("design_blade_pos", 10);
+  this->declare_parameter<int>("design_blade_pos", 60);
   this->get_parameter("design_blade_pos", design_blade_pos_);
-  this->declare_parameter<int>("max_des_blade_pos", 100);
+  this->declare_parameter<int>("max_des_blade_pos", 90);
   this->get_parameter("max_des_blade_pos", max_des_blade_pos_);
 }
 
