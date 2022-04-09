@@ -17,6 +17,9 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
   slip_sub_ = this->create_subscription<cg_msgs::msg::Slip>(
     "/slip_estimate", 1, std::bind(&AutoGraderNode::slipCallback, this, std::placeholders::_1));
 
+  mode_sub_ = this->create_subscription<cg_msgs::msg::MuxMode>(
+    "/mux_mode", 1, std::bind(&AutoGraderNode::modeCallback, this, std::placeholders::_1));
+
 
   // Load parameters
   this->declare_parameter<float>("slip_thresh", 0.6);
