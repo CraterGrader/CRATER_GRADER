@@ -26,21 +26,25 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
   this->get_parameter("slip_thresh", slip_thresh_);
   this->declare_parameter<float>("half_deadband", 0.05);
   this->get_parameter("half_deadband", half_deadband_);
-  this->declare_parameter<int>("design_blade_pos", 60);
+  this->declare_parameter<double>("design_blade_pos", 60.0);
   this->get_parameter("design_blade_pos", design_blade_pos_);
-  this->declare_parameter<int>("max_des_blade_pos", 90);
+  this->declare_parameter<double>("max_des_blade_pos", 90.0);
   this->get_parameter("max_des_blade_pos", max_des_blade_pos_);
   RCLCPP_INFO(this->get_logger(), "Using params:");
   RCLCPP_INFO(this->get_logger(), "slip_thresh: %f", slip_thresh_);
   RCLCPP_INFO(this->get_logger(), "half_deadband_: %f", half_deadband_);
-  RCLCPP_INFO(this->get_logger(), "design_blade_pos: %d", design_blade_pos_);
-  RCLCPP_INFO(this->get_logger(), "max_des_blade_pos: %d", max_des_blade_pos_);
+  RCLCPP_INFO(this->get_logger(), "design_blade_pos: %f", design_blade_pos_);
+  RCLCPP_INFO(this->get_logger(), "max_des_blade_pos: %f", max_des_blade_pos_);
+
+  // Initialize the current mode to the default mode, until new message is received
+  curr_mux_mode_ = cg_msgs::msg::MuxMode::IDLE;
+  cmd_msg_.tool_position = design_blade_pos_;
 }
 
 void AutoGraderNode::timerCallback() {
 
     // Continuously publish blade position if in autograder mode
-    if (curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
+  if (curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Pick some safe wheel and steer default commands to have full command message, cmd_mux node should ignore these commands when in autograder mode
     cmd_msg_.wheel_velocity = 0.0; // [-100.0, 100.0]

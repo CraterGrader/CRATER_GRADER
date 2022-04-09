@@ -1,6 +1,6 @@
 autograder_node:
   ros__parameters:
-      slip_thresh: 0.6 # threshold for moving tool down to design or up to maximum position, on [0,1] where 0 := no slip, 1 := 100% slip
-      half_deadband:  0.1 # don't move tool within range of slip_thresh_ +/- half_deadband_
-      design_blade_pos: 60 # blade height for grading design plane, target when slip is at thresh - half_deadband_, on [0,100] where 0:= lowest possible blade position and 100 := highest possible blade position
-      max_des_blade_pos: 100 # maximum desired blade height when slip is at thresh + half_deadband_, on [0,100] where 0:= lowest possible blade position and 100 := highest possible blade position
+      slip_thresh: 0.3 # threshold for moving tool down to design or up to maximum position, on [0,1] where 0 := no slip, 1 := 100% slip
+      half_deadband:  0.05 # don't move tool within range of slip_thresh_ +/- half_deadband_
+      design_blade_pos: 60.0 # blade height for grading design plane, target when slip is at thresh - half_deadband_, on [0.0,100.0] where 0:= lowest possible blade position and 100 := highest possible blade position
+      max_des_blade_pos: 90.0 # maximum desired blade height when slip is at thresh + half_deadband_, on [0.0,100.0] where 0.0:= lowest possible blade position and 100.0 := highest possible blade position

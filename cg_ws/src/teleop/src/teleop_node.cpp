@@ -31,6 +31,9 @@ TeleopNode::TeleopNode() : Node("teleop_node") {
   this->get_parameter("tool_lower", joy_lower_tool_i_);
   this->declare_parameter<int>("tool_increment", 0);
   this->get_parameter("tool_increment", joy_tool_increment_);
+
+  // Initialize the current mode to the default mode, until new message is received
+  curr_mux_mode_ = cg_msgs::msg::MuxMode::IDLE;
 }
 
 void TeleopNode::timerCallback() {

@@ -35,11 +35,9 @@ private:
   /* Parameters */  
   float slip_thresh_;
   float half_deadband_;
-  int design_blade_pos_;
-  int max_des_blade_pos_; 
+  double design_blade_pos_;
+  double max_des_blade_pos_; 
   
-  
-
 }; // class AutoGraderNode
 
 } // namespace planning
