@@ -30,6 +30,11 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
   this->get_parameter("design_blade_pos", design_blade_pos_);
   this->declare_parameter<int>("max_des_blade_pos", 90);
   this->get_parameter("max_des_blade_pos", max_des_blade_pos_);
+  RCLCPP_INFO(this->get_logger(), "Using params:");
+  RCLCPP_INFO(this->get_logger(), "slip_thresh: %f", slip_thresh_);
+  RCLCPP_INFO(this->get_logger(), "half_deadband_: %f", half_deadband_);
+  RCLCPP_INFO(this->get_logger(), "design_blade_pos: %d", design_blade_pos_);
+  RCLCPP_INFO(this->get_logger(), "max_des_blade_pos: %d", max_des_blade_pos_);
 }
 
 void AutoGraderNode::timerCallback() {

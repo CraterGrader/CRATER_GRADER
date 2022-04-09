@@ -1,4 +1,4 @@
-teleop_node:
+autograder_node:
   ros__parameters:
       slip_thresh: 0.6 # threshold for moving tool down to design or up to maximum position, on [0,1] where 0 := no slip, 1 := 100% slip
       half_deadband:  0.1 # don't move tool within range of slip_thresh_ +/- half_deadband_
