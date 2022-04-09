@@ -38,6 +38,10 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   this->get_parameter("voxel_filter_size", voxel_filter_size_);
 
   icp_.setMaximumIterations(icp_max_iters_);
+
+  RCLCPP_INFO(this->get_logger(), "Using parameters: ");
+  RCLCPP_INFO(this->get_logger(), "* icp_max_iters: %d", icp_max_iters_);
+  RCLCPP_INFO(this->get_logger(), "* voxel_filter_size: %f", voxel_filter_size_);
 }
 
 void PointCloudRegistrationNode::timerCallback() {

@@ -1,4 +1,4 @@
-point_cloud_registration_node:
+point_cloud_registration:
   ros__parameters:
     source_frame: realsense_frame
     target_frame: odom
