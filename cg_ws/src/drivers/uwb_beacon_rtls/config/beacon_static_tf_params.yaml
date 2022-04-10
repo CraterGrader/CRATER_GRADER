@@ -2,7 +2,7 @@ beacon_static_transform_publisher:
   ros__parameters:
     beacon_back:
       x: '-0.48761'
-      y: '-0.173'
+      y: '-0.0'
       z: '0.0695'
       roll: '0'
       pitch: '0'

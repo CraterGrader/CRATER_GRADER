@@ -131,14 +131,6 @@ ekf_global_node:
     # For use with bag data
     reset_on_time_jump: true
 
-    initial_state: [
-      0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0
-    ]
-
     # Recall config settings are in the form of:
     # [x, y, z,
     #  roll, pitch, yaw,
@@ -150,19 +142,19 @@ ekf_global_node:
     # odom0: encoder/odom
     # # Only setting velocities (vx, vy, vyaw) to true, as per Configuring robot_localization -> Fusing Unmeasured Variables, available here: 
     # # http://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
-    # odom0_config: [
-    #   false, false, false,
-    #   false, false, false,
-    #   true, true, false,
-    #   false, false, true,
-    #   false, false, false
-    # ]
-    # odom0_queue_size: 2
-    # odom0_nodelay: true
-    # odom0_differential: true
-    # odom0_relative: false
-    # odom0_pose_rejection_threshold: 5.0
-    # odom0_twist_rejection_threshold: 1.0
+    odom0_config: [
+      false, false, false,
+      false, false, false,
+      true, true, false,
+      false, false, true,
+      false, false, false
+    ]
+    odom0_queue_size: 2
+    odom0_nodelay: true
+    odom0_differential: false
+    odom0_relative: false
+    odom0_pose_rejection_threshold: 5.0
+    odom0_twist_rejection_threshold: 1.0
 
     # IMU
     imu0: imu/data/base_link

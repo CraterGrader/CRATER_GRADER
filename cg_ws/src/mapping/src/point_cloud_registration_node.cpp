@@ -89,13 +89,14 @@ void PointCloudRegistrationNode::timerCallback() {
     }
     new_data_received_ = false;
   }
-  // RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
+
   // Downsample
+  RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
   pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
   voxel_grid.setInputCloud(point_cloud_map_);
   voxel_grid.setLeafSize(voxel_filter_size_, voxel_filter_size_, voxel_filter_size_);
   voxel_grid.filter(*point_cloud_map_);
-  // RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
+  RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
 
   // Convert map to sensor_msgs::msg::PointCloud2 and publish message
   sensor_msgs::msg::PointCloud2 point_cloud_map_msg;

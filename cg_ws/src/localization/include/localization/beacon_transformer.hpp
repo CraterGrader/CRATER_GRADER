@@ -37,7 +37,7 @@ private:
     void beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg);
     void beacon_callback_1(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg);
     void imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg);
-    void tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform);
+    bool tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform);
     void tf_Callback();
     void average_Beacon_Callback();
 
