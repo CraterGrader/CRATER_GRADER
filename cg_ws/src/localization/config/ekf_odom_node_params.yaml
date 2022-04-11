@@ -161,8 +161,6 @@ ekf_odom_node:
     odom0_nodelay: true
     odom0_differential: true
     odom0_relative: false
-    odom0_pose_rejection_threshold: 5.0
-    odom0_twist_rejection_threshold: 1.0
 
     # IMU
     imu0: imu/data/base_link
@@ -175,9 +173,6 @@ ekf_odom_node:
     imu0_nodelay: true
     imu0_differential: true
     imu0_relative: false
-    imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-    imu0_twist_rejection_threshold: 0.8                #
-    imu0_linear_acceleration_rejection_threshold: 0.8  #
 
     # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
     # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.

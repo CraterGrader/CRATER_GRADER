@@ -138,10 +138,10 @@ ekf_global_node:
     #  vroll, vpitch, vyaw,
     #  ax, ay, az].
 
-    # # Drive Encoders
-    # odom0: encoder/odom
-    # # Only setting velocities (vx, vy, vyaw) to true, as per Configuring robot_localization -> Fusing Unmeasured Variables, available here: 
-    # # http://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
+    # Drive Encoders
+    odom0: encoder/odom
+    # Only setting velocities (vx, vy, vyaw) to true, as per Configuring robot_localization -> Fusing Unmeasured Variables, available here: 
+    # http://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
     odom0_config: [
       false, false, false,
       false, false, false,
@@ -151,10 +151,8 @@ ekf_global_node:
     ]
     odom0_queue_size: 2
     odom0_nodelay: true
-    odom0_differential: false
+    odom0_differential: true
     odom0_relative: false
-    odom0_pose_rejection_threshold: 5.0
-    odom0_twist_rejection_threshold: 1.0
 
     # IMU
     imu0: imu/data/base_link
@@ -169,9 +167,6 @@ ekf_global_node:
     imu0_nodelay: false
     imu0_differential: false
     imu0_relative: true
-    imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-    imu0_twist_rejection_threshold: 0.8                #
-    imu0_linear_acceleration_rejection_threshold: 0.8  #
 
     # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
     # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
@@ -190,7 +185,6 @@ ekf_global_node:
     pose0_nodelay: true
     pose0_differential: false
     pose0_relative: false
-    pose0_rejection_threshold: 2.0
 
     # pose1: uwb_beacon/base_link_transformed/tag_1
     # pose1_config: [
@@ -219,7 +213,6 @@ ekf_global_node:
     pose1_nodelay: false
     pose1_differential: false
     pose1_relative: false
-    pose1_rejection_threshold: 2.0
 
     # [ADVANCED] The process noise covariance matrix can be difficult to tune, and can vary for each application, so it is
     # exposed as a configuration parameter. This matrix represents the noise we add to the total error after each

@@ -34,6 +34,7 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr new_point_cloud_;
   pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_map_;
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp_;
+  geometry_msgs::msg::TransformStamped tf_;
 
   bool new_data_received_;
 
