@@ -2,7 +2,7 @@ uwb_beacon_rtls_node:
   ros__parameters:
     beacon_port: '/dev/cg_dev/tty_uwb1'
     beacon_verbose: True
-    positional_rms: 0.2
+    positional_rms: 5.0
     beacon_hz: 10
     publish_raw_tags: True
     raw_topic: '/uwb_beacon/raw_tags/'
