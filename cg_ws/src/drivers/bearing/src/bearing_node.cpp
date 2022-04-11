@@ -164,12 +164,13 @@ void BearingNode::timerCallback() {
     RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 180 / M_PI);
 
     double avg_bearing;
-    this->rolling_avg.push_back(weighted_bearing);
+    this->rolling_avg.push_back(std::fmod(weighted_bearing, 2*M_PI));
     if (this->rolling_avg.size() > (long unsigned int)rolling_avg_buffer) {
       this->rolling_avg.erase(rolling_avg.begin());
     }
     avg_bearing = std::accumulate(this->rolling_avg.begin(), 
                     this->rolling_avg.end(), 0.0) / this->rolling_avg.size();
+
 
     bearing.pose.pose.position.x = 0.0;
     bearing.pose.pose.position.y = 0.0;
