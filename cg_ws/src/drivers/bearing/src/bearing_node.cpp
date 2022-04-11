@@ -146,12 +146,19 @@ void BearingNode::timerCallback() {
     double weighted_bearing = 0;
     double inv_total_dist = 0;
 
+    double best_bearing = bearings[0];
+    double min_dist = tag_dist_to_cam[0];
+
     for (int j = 0; j < (int)bearings.size(); j++) {
-      weighted_bearing += bearings[j] * 1/tag_dist_to_cam[j];
-      inv_total_dist += 1/tag_dist_to_cam[j];
+      // weighted_bearing += bearings[j] * 1/tag_dist_to_cam[j];
+      // inv_total_dist += 1/tag_dist_to_cam[j];
+      if (tag_dist_to_cam[j] < min_dist) {
+        best_bearing = bearings[j];
+        min_dist = tag_dist_to_cam[j];
+      }
     }
-    weighted_bearing /= inv_total_dist;
-    //weighted_bearing += M_PI/2;
+    // weighted_bearing /= inv_total_dist;
+    weighted_bearing = best_bearing;
 
     // Note bearing - comment out after final product
     RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 180 / M_PI);
