@@ -42,6 +42,10 @@ private:
   std::string source_frame_;
   std::string target_frame_;
   int icp_max_iters_;
+  double icp_max_correspondence_dist_;
+  double icp_transformation_eps_;
+  double icp_euclidean_fitness_epsilon_;
+  // int icp_min_num_correspondences_;
   float voxel_filter_size_;
   Eigen::Affine3d matrix_;
 };

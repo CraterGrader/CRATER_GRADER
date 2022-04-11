@@ -5,6 +5,11 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
 
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/extract_indices.h>
+
 namespace cg {
 namespace mapping {
 
@@ -32,18 +37,36 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   this->get_parameter("source_frame", source_frame_);
   this->declare_parameter<std::string>("target_frame", "map");
   this->get_parameter("target_frame", target_frame_);
-  this->declare_parameter<int>("icp_max_iters", 50);
+
+  // ICP Params
+  this->declare_parameter<int>("icp_max_iters", 10);
   this->get_parameter("icp_max_iters", icp_max_iters_);
-  this->declare_parameter<float>("voxel_filter_size", 0.001);
+  this->declare_parameter<double>("icp_max_correspondence_dist", std::sqrt(std::numeric_limits<double>::max()));
+  this->get_parameter("icp_max_correspondence_dist", icp_max_correspondence_dist_);
+  this->declare_parameter<double>("icp_transformation_eps", 0.0);
+  this->get_parameter("icp_transformation_eps", icp_transformation_eps_);
+  this->declare_parameter<double>("icp_euclidean_fitness_eps", -std::numeric_limits<double>::max());
+  this->get_parameter("icp_euclidean_fitness_eps", icp_euclidean_fitness_epsilon_);
+  // this->declare_parameter<int>("icp_min_num_correspondences", 3);
+  // this->get_parameter("icp_min_num_correspondences", icp_min_num_correspondences_);
+
+  // Downsampling Params
+  this->declare_parameter<float>("voxel_filter_size", 0.01);
   this->get_parameter("voxel_filter_size", voxel_filter_size_);
 
   icp_.setMaximumIterations(icp_max_iters_);
-  // icp_.setMaxCorrespondenceDistance (0.05);
+  icp_.setMaxCorrespondenceDistance(icp_max_correspondence_dist_);
+  icp_.setTransformationEpsilon(icp_transformation_eps_);
+  icp_.setEuclideanFitnessEpsilon(icp_euclidean_fitness_epsilon_);
+  // icp_.setMin
 
   RCLCPP_INFO(this->get_logger(), "Using parameters: ");
   RCLCPP_INFO(this->get_logger(), "* source_frame: %s", source_frame_.c_str());
   RCLCPP_INFO(this->get_logger(), "* target_frame: %s", target_frame_.c_str());
-  RCLCPP_INFO(this->get_logger(), "* icp_max_iters: %d", icp_max_iters_);
+  RCLCPP_INFO(this->get_logger(), "* icp_max_iters: %d", icp_.getMaximumIterations());
+  RCLCPP_INFO(this->get_logger(), "* icp_max_correspondence_dist: %f", icp_.getMaxCorrespondenceDistance());
+  RCLCPP_INFO(this->get_logger(), "* icp_transformation_eps: %f", icp_.getTransformationEpsilon());
+  RCLCPP_INFO(this->get_logger(), "* icp_euclidean_fitness_eps: %f", icp_.getEuclideanFitnessEpsilon());
   RCLCPP_INFO(this->get_logger(), "* voxel_filter_size: %f", voxel_filter_size_);
 }
 
@@ -59,20 +82,31 @@ void PointCloudRegistrationNode::timerCallback() {
   // return;
 
   if (new_data_received_) {
+    // // Plane removal test
+    // // https://pointclouds.org/documentation/tutorials/planar_segmentation.html
+    // pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    // pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    // // Create the segmentation object
+    // pcl::SACSegmentation<pcl::PointXYZ> seg;
+    // // Optional
+    // seg.setOptimizeCoefficients (true);
+    // // Mandatory
+    // seg.setModelType (pcl::SACMODEL_PLANE);
+    // seg.setMethodType (pcl::SAC_RANSAC);
+    // seg.setDistanceThreshold (0.03);
 
-    // geometry_msgs::msg::TransformStamped tf;
-    // try {
-    //   tf = tf_buffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
-    // }
+    // seg.setInputCloud (new_point_cloud_);
+    // seg.segment (*inliers, *coefficients);
 
-    // catch (tf2::TransformException &ex){
-    //   tf.transform.translation.x = 0;
-    //   tf.transform.translation.y = 0;
-    //   tf.transform.translation.z = 0;
-    //   tf.transform.rotation.x = 0;
-    //   tf.transform.rotation.y = 0;
-    //   tf.transform.rotation.z = 0;
-    //   tf.transform.rotation.w = 1;
+    // if (inliers->indices.size () == 0) {
+    //   RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
+    // } else {
+    //   // https://stackoverflow.com/questions/44921987/removing-points-from-a-pclpointcloudpclpointxyzrgb
+    //   pcl::ExtractIndices<pcl::PointXYZ> extract;
+    //   extract.setInputCloud(new_point_cloud_);
+    //   extract.setIndices(inliers);
+    //   extract.setNegative(true);
+    //   extract.filter(*new_point_cloud_);
     // }
 
     icp_.setInputSource(new_point_cloud_);
@@ -131,6 +165,8 @@ void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::
     new_data_received_ = true;
   }
 }
+
+//BEN COMMENT 
 
 }  // namespace mapping
 }  // namespace cg

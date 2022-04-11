@@ -73,7 +73,7 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
     // Mandatory
     seg.setModelType (pcl::SACMODEL_PLANE);
     seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setDistanceThreshold (0.01);
+    seg.setDistanceThreshold (0.03);
 
     seg.setInputCloud (xyz_filtered_cloud);
     seg.segment (*inliers, *coefficients);
