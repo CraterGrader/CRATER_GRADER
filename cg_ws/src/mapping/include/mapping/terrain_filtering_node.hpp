@@ -17,7 +17,11 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-// #include <pcl_ros.hpp>
+
+// includes for the box filters
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/conversions.h>
 
 namespace cg {
 namespace mapping {
@@ -36,6 +40,7 @@ public:
   std::string target_frame_;
   std::string source_frame_;
   sensor_msgs::msg::PointCloud2 cloud_in_, cloud_out_;
+  sensor_msgs::msg::PointCloud2 box_cloud_out_;
 
   pcl::CropBox<pcl::PointXYZ> crop;
 
