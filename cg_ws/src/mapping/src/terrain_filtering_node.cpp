@@ -1,5 +1,11 @@
 #include "mapping/terrain_filtering_node.hpp"
 
+// TODO DELETE THESE INCLUDES -- TEMPORARY FOR PLANE REMOVAL TEST
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/extract_indices.h>
+
 namespace cg {
 namespace mapping {
 
@@ -39,7 +45,7 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
 
 
     // setup output cloud 
-    pcl::PointCloud<pcl::PointXYZ> xyz_filtered_cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
     // Declare instance of filter:
     pcl::CropBox<pcl::PointXYZ> crop;
@@ -54,10 +60,37 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
     crop.setMax(max_point);
 
     // Filter
-    crop.filter(xyz_filtered_cloud);
+    crop.filter(*xyz_filtered_cloud);
+
+    // TEMPORARY PLANE REMOVAL -- TODO DELETE
+    // https://pointclouds.org/documentation/tutorials/planar_segmentation.html
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    // Create the segmentation object
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    // Optional
+    seg.setOptimizeCoefficients (true);
+    // Mandatory
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setDistanceThreshold (0.01);
+
+    seg.setInputCloud (xyz_filtered_cloud);
+    seg.segment (*inliers, *coefficients);
+
+    if (inliers->indices.size () == 0) {
+      RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
+    } else {
+      // https://stackoverflow.com/questions/44921987/removing-points-from-a-pclpointcloudpclpointxyzrgb
+      pcl::ExtractIndices<pcl::PointXYZ> extract;
+      extract.setInputCloud(xyz_filtered_cloud);
+      extract.setIndices(inliers);
+      extract.setNegative(true);
+      extract.filter(*xyz_filtered_cloud);
+    }
 
     // Convert from pcl::PointCloud<T> back to sensor_msgs::PointCloud2
-    pcl::toROSMsg(xyz_filtered_cloud, box_cloud_out_);
+    pcl::toROSMsg(*xyz_filtered_cloud, box_cloud_out_);
 
     // Publish
     filtered_points_pub_->publish(box_cloud_out_);
