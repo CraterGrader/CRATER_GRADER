@@ -14,6 +14,9 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
+#include <pcl/filters/crop_box.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 // #include <pcl_ros.hpp>
 
 namespace cg {
@@ -34,7 +37,7 @@ public:
   std::string source_frame_;
   sensor_msgs::msg::PointCloud2 cloud_in_, cloud_out_;
 
-  // pcl::CropBox<sensor_msgs::msg::PointCloud2> crop;
+  pcl::CropBox<pcl::PointXYZ> crop;
 
 
 private:
