@@ -4,6 +4,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
+#include <pcl/registration/icp_nl.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/buffer.h>
@@ -34,6 +35,7 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr new_point_cloud_;
   pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud_map_;
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp_;
+  geometry_msgs::msg::TransformStamped tf_;
 
   bool new_data_received_;
 

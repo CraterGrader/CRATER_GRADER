@@ -86,34 +86,30 @@ void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCova
 void BeaconTransformer::average_Beacon_Callback() 
 {      
 
+  float tag_0_weight = 0.5;
+  float tag_1_weight = 0.5;
+
   if (pub_tag_1 && pub_tag_0) 
   {
     
-    float tag_0_dist  = pow(tag_0_transformStamped.transform.translation.x - base_link_transform.transform.translation.x, 2) +
-      pow(tag_0_transformStamped.transform.translation.y - base_link_transform.transform.translation.y, 2);
+    float tag_0_dist  = sqrt(pow(tag_0_transformStamped.transform.translation.x - base_link_transform.transform.translation.x, 2) +
+      pow(tag_0_transformStamped.transform.translation.y - base_link_transform.transform.translation.y, 2));
 
-    float tag_1_dist = pow(tag_1_transformStamped.transform.translation.x - base_link_transform.transform.translation.x, 2) +
-      pow(tag_1_transformStamped.transform.translation.y - base_link_transform.transform.translation.y, 2);
+    float tag_1_dist = sqrt(pow(tag_1_transformStamped.transform.translation.x - base_link_transform.transform.translation.x, 2) +
+      pow(tag_1_transformStamped.transform.translation.y - base_link_transform.transform.translation.y, 2));
 
-    float tag_0_weight = (1 - tag_0_dist) / (tag_1_dist + tag_0_dist);
-    float tag_1_weight = 1 - tag_0_weight;
+    tag_0_weight = (1 - tag_0_dist) / (tag_1_dist + tag_0_dist);
+    tag_1_weight = 1 - tag_0_weight;
 
-    tag_0_weight = 0.5;
-    tag_1_weight = 0.5;
-
-    average_pose_.header = updated_pose_0_.header;
+  }
 
     average_pose_.pose.pose.position.x = tag_0_weight * (raw_pose_0_.pose.pose.position.x) + tag_1_weight * (raw_pose_1_.pose.pose.position.x);
     average_pose_.pose.pose.position.y = tag_0_weight * (raw_pose_0_.pose.pose.position.y) + tag_1_weight * (raw_pose_1_.pose.pose.position.y);
     average_pose_.pose.pose.position.z = tag_0_weight * (raw_pose_0_.pose.pose.position.z) + tag_1_weight * (raw_pose_1_.pose.pose.position.z);
-
+    average_pose_.pose.pose.position.z = 0; // TODO z position is temporarily fixed at 0 until we can get better z estimates 
     average_pose_.header = raw_pose_0_.header;
     average_pose_.pose.covariance = raw_pose_0_.pose.covariance;
-
     average_tag_pub_->publish(average_pose_);
-
-  }  
-
 
 }
 
@@ -126,25 +122,25 @@ void BeaconTransformer::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_
 // Update tf transforms 
 void BeaconTransformer::tf_Callback() 
 {        
-  tf_update(base_link_frame, tag_0_frame, tag_0_transformStamped);
-  tf_update(base_link_frame, tag_1_frame, tag_1_transformStamped);
-  tf_update(map_frame, base_link_frame, base_link_transform);
-  got_tf = true;
-  std::cout << "GOT TF" << std::endl;
+  bool got_tf1 = tf_update(map_frame, tag_0_frame, tag_0_transformStamped);
+  bool got_tf2 = tf_update(map_frame, tag_1_frame, tag_1_transformStamped);
+  bool got_tf3 = tf_update(map_frame, base_link_frame, base_link_transform);
+  got_tf = got_tf1 && got_tf2 && got_tf3;
 }
 
 // Update given tf transform
-void BeaconTransformer::tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform)
+bool BeaconTransformer::tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform)
 {
   try {
     transform = tf_buffer_->lookupTransform(
       toFrameRel, fromFrameRel,
       tf2::TimePointZero);
+      return true;
   } catch (tf2::TransformException & ex) {
     RCLCPP_INFO(
       this->get_logger(), "Could not transform %s to %s: %s",
       toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
-    return;
+    return false;
   }
 }
 

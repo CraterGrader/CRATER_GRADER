@@ -184,7 +184,7 @@ void BearingNode::timerCallback() {
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.1};
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.005};
 
     // Publish the estimated bearing
     bearing_pub_->publish(bearing);
