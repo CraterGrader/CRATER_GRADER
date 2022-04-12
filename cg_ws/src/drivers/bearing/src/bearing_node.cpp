@@ -142,39 +142,34 @@ void BearingNode::timerCallback() {
       pow(cam_to_tag.transform.translation.z,2)));
   }
   if (bearings.size() > 0) {
-    // Calculated a form of weighted average using distance from camera to tag
-    double weighted_bearing = 0;
-    double inv_total_dist = 0;
-
+    // Find the best tag to get angle from
     double best_bearing = bearings[0];
     double min_dist = tag_dist_to_cam[0];
 
     for (int j = 0; j < (int)bearings.size(); j++) {
-      // weighted_bearing += bearings[j] * 1/tag_dist_to_cam[j];
-      // inv_total_dist += 1/tag_dist_to_cam[j];
       if (tag_dist_to_cam[j] < min_dist) {
         best_bearing = bearings[j];
         min_dist = tag_dist_to_cam[j];
       }
     }
-    // weighted_bearing /= inv_total_dist;
-    weighted_bearing = best_bearing;
-    if (weighted_bearing < 0) {
-      weighted_bearing += 2 * M_PI;
-    }
 
     // Note bearing - comment out after final product
-    RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", weighted_bearing * 180 / M_PI);
-    /*
+    RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", best_bearing * 180 / M_PI);
+    
     double avg_bearing;
-    this->rolling_avg.push_back(weighted_bearing);
-    if (this->rolling_avg.size() > (long unsigned int)rolling_avg_buffer) {
-      this->rolling_avg.erase(rolling_avg.begin());
+    double sum_y;
+    double sum_x;
+    
+    // Instead of averaging the bearing, sum the unit vectors
+    this->rolling_sin.push_back(std::sin(best_bearing));
+    this->rolling_cos.push_back(std::cos(best_bearing));
+    if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
+      this->rolling_sin.erase(rolling_sin.begin());
+      this->rolling_cos.erase(rolling_cos.begin());
     }
-    avg_bearing = std::accumulate(this->rolling_avg.begin(), 
-                    this->rolling_avg.end(), 0.0) / this->rolling_avg.size();
-    */
-
+    sum_y = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
+    sum_x = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
+    avg_bearing = std::atan2(sum_y, sum_x);
 
     bearing.pose.pose.position.x = 0.0;
     bearing.pose.pose.position.y = 0.0;
@@ -183,7 +178,7 @@ void BearingNode::timerCallback() {
     // Convert yaw back into a quarternion for orientation
     tf2::Quaternion q;
     //q.setRPY(0, 0, avg_bearing);
-    q.setRPY(0, 0, weighted_bearing);
+    q.setRPY(0, 0, avg_bearing);
     bearing.pose.pose.orientation.x = q.x();
     bearing.pose.pose.orientation.y = q.y();
     bearing.pose.pose.orientation.z = q.z();

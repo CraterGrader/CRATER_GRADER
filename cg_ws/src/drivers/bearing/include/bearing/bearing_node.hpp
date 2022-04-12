@@ -31,7 +31,8 @@ private:
   void timerCallback();
 
   // Stores moving average
-  std::vector<double> rolling_avg;
+  std::vector<double> rolling_sin;
+  std::vector<double> rolling_cos;
 
   double tf_discard_time;
   int rolling_avg_buffer;
