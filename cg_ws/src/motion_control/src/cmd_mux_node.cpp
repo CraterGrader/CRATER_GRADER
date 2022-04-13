@@ -19,7 +19,7 @@ CmdMuxNode::CmdMuxNode() : Node("cmd_mux") {
   autonomy_sub_ = this->create_subscription<cg_msgs::msg::ActuatorCommand>(
       "/autonomy_cmd", 1, std::bind(&CmdMuxNode::autonomyCallback, this, std::placeholders::_1));
 
-  // Timer callback for idle mode
+  // Timer callback
   timer_ = this->create_wall_timer(
       std::chrono::milliseconds(100),
       std::bind(&CmdMuxNode::timerCallback, this)
@@ -39,7 +39,7 @@ void CmdMuxNode::timerCallback()
   {
     // Publish last message, with wheel velocity set to zero
     cmd_msg_.wheel_velocity = 0;
-  } 
+  }
 
   // Clamp commands
   cmd_msg_.wheel_velocity = std::max(-100.0, std::min(cmd_msg_.wheel_velocity, 100.0)); // [-100.0, 100.0]
