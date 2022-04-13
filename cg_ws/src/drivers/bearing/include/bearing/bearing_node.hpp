@@ -34,8 +34,10 @@ private:
   std::vector<double> rolling_sin;
   std::vector<double> rolling_cos;
 
+  int pub_freq;
   double tf_discard_time;
   int rolling_avg_buffer;
+  double bearing_covariance;
 
   rclcpp::TimerBase::SharedPtr timer_{nullptr};
   std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};

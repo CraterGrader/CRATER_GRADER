@@ -5,17 +5,17 @@ namespace bearing {
 
 BearingNode::BearingNode() : Node("bearing_node") {
   // Publishing frequency for callback function
-  int pub_freq;
   this->declare_parameter<int>("pub_freq", 10);
   this->get_parameter("pub_freq", pub_freq);
-
   // Rolling average buffer length for yaw
   this->declare_parameter<int>("rolling_avg_buffer", 5);
   this->get_parameter("rolling_avg_buffer", this->rolling_avg_buffer);
-
   // Time before transforms are considered old and discarded [s]
   this->declare_parameter<double>("tf_discard_time", 0.3);
   this->get_parameter("tf_discard_time", this->tf_discard_time);
+  // Bearing covariance
+  this->declare_parameter<double>("bearing_covariance", 0.005);
+  this->get_parameter("bearing_covariance", this->bearing_covariance);
 
   // Initialize publishers and subscribers
   bearing_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
@@ -121,13 +121,13 @@ void BearingNode::timerCallback() {
     tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
 
     // Publish overall tf - TESTING
-    map_to_link.header.stamp = this->get_clock()->now();
-    map_to_link.header.frame_id = fromMap;
-    map_to_link.child_frame_id = "baseL";
-    map_to_link.transform = toMsg(tf_map_to_link);
+    // map_to_link.header.stamp = this->get_clock()->now();
+    // map_to_link.header.frame_id = fromMap;
+    // map_to_link.child_frame_id = "baseL";
+    // map_to_link.transform = toMsg(tf_map_to_link);
 
     // Send the transformation - TESTING
-    full_tf_pub_->sendTransform(map_to_link);
+    // full_tf_pub_->sendTransform(map_to_link);
 
     // Get Yaw
     double roll, pitch, yaw;
