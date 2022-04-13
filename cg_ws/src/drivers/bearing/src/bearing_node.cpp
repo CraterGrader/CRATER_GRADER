@@ -7,12 +7,15 @@ BearingNode::BearingNode() : Node("bearing_node") {
   // Publishing frequency for callback function
   this->declare_parameter<int>("pub_freq", 10);
   this->get_parameter("pub_freq", pub_freq);
+
   // Rolling average buffer length for yaw
   this->declare_parameter<int>("rolling_avg_buffer", 5);
   this->get_parameter("rolling_avg_buffer", this->rolling_avg_buffer);
+
   // Time before transforms are considered old and discarded [s]
   this->declare_parameter<double>("tf_discard_time", 0.3);
   this->get_parameter("tf_discard_time", this->tf_discard_time);
+
   // Bearing covariance
   this->declare_parameter<double>("bearing_covariance", 0.005);
   this->get_parameter("bearing_covariance", this->bearing_covariance);
@@ -22,7 +25,8 @@ BearingNode::BearingNode() : Node("bearing_node") {
     "/bearing", 1
   );
 
-  full_tf_pub_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+  // For TESTING
+  // full_tf_pub_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 
   // Create listener
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
@@ -58,6 +62,7 @@ void BearingNode::timerCallback() {
   std::vector<double> bearings;
   std::vector<double> tag_dist_to_cam;
 
+  // Declare tf frames
   tf2::Transform tf_tag_to_link;
   tf2::Transform tf_map_to_tag;
   tf2::Transform tf_map_to_link;
@@ -89,8 +94,6 @@ void BearingNode::timerCallback() {
         continue;
       }
     } catch (tf2::TransformException & ex) {
-      if (i == 2) {
-      }
       continue;
     }
 
@@ -156,6 +159,7 @@ void BearingNode::timerCallback() {
     // Note bearing - comment out after final product
     RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", best_bearing * 180 / M_PI);
     
+    // Variables for average bearing over the buffer length
     double avg_bearing;
     double sum_y;
     double sum_x;
@@ -163,36 +167,44 @@ void BearingNode::timerCallback() {
     // Instead of averaging the bearing, sum the unit vectors
     this->rolling_sin.push_back(std::sin(best_bearing));
     this->rolling_cos.push_back(std::cos(best_bearing));
+
+    // Erase the oldest bearing if the buffer is longer than the limit
     if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
     }
+
+    // Average the unit vectors and get angle
     sum_y = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
     sum_x = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
     avg_bearing = std::atan2(sum_y, sum_x);
 
+    // Set the PoseWithCovarianceStamped message's position to 0
     bearing.pose.pose.position.x = 0.0;
     bearing.pose.pose.position.y = 0.0;
     bearing.pose.pose.position.z = 0.0;
 
     // Convert yaw back into a quarternion for orientation
     tf2::Quaternion q;
-    //q.setRPY(0, 0, avg_bearing);
     q.setRPY(0, 0, avg_bearing);
+
+    // Set the quarternion in the message
     bearing.pose.pose.orientation.x = q.x();
     bearing.pose.pose.orientation.y = q.y();
     bearing.pose.pose.orientation.z = q.z();
     bearing.pose.pose.orientation.w = q.w();
 
+    // Set header and frame name
     bearing.header.stamp = this->get_clock()->now();
     bearing.header.frame_id = tf_map_frame;
 
+    // Set covariance
     bearing.pose.covariance =  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.005};
+                                0.0, 0.0, 0.0, 0.0, 0.0, this->bearing_covariance};
 
     // Publish the estimated bearing
     bearing_pub_->publish(bearing);
