@@ -46,6 +46,8 @@ private:
   double icp_transformation_eps_;
   double icp_euclidean_fitness_epsilon_;
   // int icp_min_num_correspondences_;
+  int sor_mean_k_;
+  double sor_stddev_mul_thresh_;
   float voxel_filter_size_;
   Eigen::Affine3d matrix_;
 };

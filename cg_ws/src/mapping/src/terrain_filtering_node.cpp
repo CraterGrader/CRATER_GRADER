@@ -6,6 +6,9 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
 
+// Includes for outlier removal
+#include <pcl/filters/statistical_outlier_removal.h>
+
 namespace cg {
 namespace mapping {
 
@@ -43,6 +46,7 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
 
+    // RCLCPP_INFO(this->get_logger(), "SIZE: %d", temp_cloud->size());
 
     // setup output cloud 
     pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -61,6 +65,14 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
 
     // Filter
     crop.filter(*xyz_filtered_cloud);
+
+    // Statistical outlier removal for salt-and-pepper noise
+    // https://pcl.readthedocs.io/en/latest/statistical_outlier.html
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+    sor.setInputCloud(xyz_filtered_cloud);
+    sor.setMeanK(120);
+    sor.setStddevMulThresh(1.5);
+    sor.filter(*xyz_filtered_cloud);
 
     // TEMPORARY PLANE REMOVAL -- TODO DELETE
     // https://pointclouds.org/documentation/tutorials/planar_segmentation.html

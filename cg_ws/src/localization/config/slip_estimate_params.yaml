@@ -1,0 +1,4 @@
+slip_estimate_node:
+  ros__parameters:
+    nonzero_slip_thresh: 10.0 # Ignore slip under this threshold
+    filter_window: 10 # Number of points for moving average filter

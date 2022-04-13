@@ -24,8 +24,11 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
     "/encoder_telemetry", 1, std::bind(&SlipEstimateNode::slipTelemetryCallback, this, std::placeholders::_1)
   );
 
-  nonzero_slip_thresh_ = 10; // TODO: set in config file
-  filter_window_ = 10; // TODO: set in config file
+  // Load parameters
+  this->declare_parameter<float>("nonzero_slip_thresh", 10.0);
+  this->get_parameter("nonzero_slip_thresh", nonzero_slip_thresh_);
+  this->declare_parameter<int>("filter_window", 10);
+  this->get_parameter("filter_window", filter_window_);
 }
 
 void SlipEstimateNode::updateMovingAverage(){

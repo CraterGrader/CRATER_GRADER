@@ -82,9 +82,9 @@ void PointCloudRegistrationNodeFancy::timerCallback() {
 
     // Remove NaN points from point clouds
     // (this is necessary to avoid a segfault when running ICP)
-    // std::vector<int> nan_idx;
-    // pcl::removeNaNFromPointCloud(source_cloud, source_cloud, nan_idx);
-    // pcl::removeNaNFromPointCloud(target_cloud, target_cloud, nan_idx);
+    std::vector<int> nan_idx;
+    pcl::removeNaNFromPointCloud(source_cloud, source_cloud, nan_idx);
+    pcl::removeNaNFromPointCloud(target_cloud, target_cloud, nan_idx);
 
     // Estimate cloud normals
     std::cout << "Computing source cloud normals\n";
@@ -157,16 +157,19 @@ void PointCloudRegistrationNodeFancy::timerCallback() {
     
     // Compute the transformation matrix for alignment
     Eigen::Matrix4f tform = Eigen::Matrix4f::Identity();
-    tform = computeInitialAlignment (src_keypoints_ptr, src_features_ptr, tar_keypoints_ptr,
-            tar_features_ptr, min_sample_dist, max_correspondence_dist, nr_iters);
+    // tform = computeInitialAlignment (src_keypoints_ptr, src_features_ptr, tar_keypoints_ptr,
+    //         tar_features_ptr, min_sample_dist, max_correspondence_dist, nr_iters);
     
     // Uncomment this code to run ICP 
     // tform = refineAlignment (point_cloud_map_, new_point_cloud_, tform, max_correspondence_distance,
     //         outlier_rejection_threshold, transformation_epsilon, max_iterations);
-  
+
+    tform = refineAlignment (tar_keypoints_xyz, src_keypoints_xyz, tform, max_correspondence_distance,
+            outlier_rejection_threshold, transformation_epsilon, max_iterations);
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>& transformed_cloud = *transformed_cloud_ptr;
-    pcl::transformPointCloud(*point_cloud_map_, transformed_cloud, tform);
+    pcl::transformPointCloud(*new_point_cloud_, transformed_cloud, tform);
     std::cout << "Calculated transformation\n";
 
     *point_cloud_map_ += transformed_cloud;

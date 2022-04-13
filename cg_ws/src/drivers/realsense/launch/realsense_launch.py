@@ -45,5 +45,12 @@ def generate_launch_description():
               realsense_static_tf_params['parent_frame_id'], realsense_static_tf_params['child_frame_id']
           ]
       )
+      # Node(
+      #     package='tf2_ros',
+      #     executable='static_transform_publisher',
+      #     arguments=[
+      #         '0','0','0','0','0','0','camera_depth_optical_frame','realsense_frame'
+      #     ]
+      # )
   ])
 

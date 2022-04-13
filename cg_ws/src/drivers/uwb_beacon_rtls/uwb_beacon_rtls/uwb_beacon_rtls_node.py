@@ -51,10 +51,12 @@ class dwm1001_localizer(Node):
 
         self.tag_ids = tag_params['tag_ids']
 
+        self.tag_names = tag_params['tag_names']
+
         tag_transform_str = tag_params['tag_transforms']
         self.tag_transforms = {}
-        for i, id in enumerate(self.tag_ids):
-            self.tag_transforms[id] = tag_transform_str[i]
+        for i, tid in enumerate(self.tag_ids):
+            self.tag_transforms[tid] = tag_transform_str[i]
 
         self.declare_parameter('positional_rms', 0.0)
         self.positional_rms = self.get_parameter('positional_rms').get_parameter_value().double_value
@@ -64,7 +66,7 @@ class dwm1001_localizer(Node):
         if self.publish_raw_tags:
             self.raw_publishers = {}
             for tag_id in self.tag_ids:
-                self.raw_publishers[tag_id] = self.create_publisher( PoseWithCovarianceStamped, self.raw_topic + "tag_" + str(tag_id), 10) 
+                self.raw_publishers[tag_id] = self.create_publisher( PoseWithCovarianceStamped, self.raw_topic + "tag_" + str(self.tag_names[tag_id]), 10) 
 
         self.declare_parameter('beacon_port', 'ttyACM0')
         self.dwm_port = self.get_parameter('beacon_port').get_parameter_value().string_value
@@ -99,18 +101,16 @@ class dwm1001_localizer(Node):
         detected_poses = {}
         for n in range(len(self.tag_ids)):
 
-            if self.beacon_verbose:
-                self.get_logger().info(f"Looking for TagID: {n}")
-
             serialReadLine = self.serialPortDWM1001.read_until()
 
             serDataList = [x.strip() for x in serialReadLine.strip().split(b',')]
+            # self.get_logger().info(f"Raw Data: {serDataList}")
 
             # If valid tag position
             if b"POS" in serDataList[0]:
                 
                 try:
-                    tag_id = int(serDataList[1])  # IDs in 0 - 15
+                    tag_id = serDataList[2].decode()  # IDs in 0 - 15
                     t_pose_x = float(serDataList[3])
                     t_pose_y = float(serDataList[4])
                     t_pose_z = float(serDataList[5])   

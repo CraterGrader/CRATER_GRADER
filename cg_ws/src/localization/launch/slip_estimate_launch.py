@@ -4,7 +4,7 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    slip_params =  os.path.join(
+    slip_estimate_params =  os.path.join(
         get_package_share_directory('localization'),
         'config',
         'slip_estimate_params.yaml'
@@ -15,6 +15,6 @@ def generate_launch_description():
             package='localization',
             executable='slip_estimate_node',
             name='slip_estimate_node',
-            parameters=[slip_params]
+            parameters=[slip_estimate_params]
         )
     ])

@@ -10,6 +10,9 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/filters/extract_indices.h>
 
+#include <pcl/filters/statistical_outlier_removal.h>
+
+
 namespace cg {
 namespace mapping {
 
@@ -50,6 +53,12 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   // this->declare_parameter<int>("icp_min_num_correspondences", 3);
   // this->get_parameter("icp_min_num_correspondences", icp_min_num_correspondences_);
 
+  // Statistical Outlier Removal Params
+  this->declare_parameter<int>("sor_mean_k", 50);
+  this->get_parameter("sor_mean_k", sor_mean_k_);
+  this->declare_parameter<double>("sor_stddev_mul_thresh", 1.0);
+  this->get_parameter("sor_stddev_mul_thresh", sor_stddev_mul_thresh_);
+
   // Downsampling Params
   this->declare_parameter<float>("voxel_filter_size", 0.01);
   this->get_parameter("voxel_filter_size", voxel_filter_size_);
@@ -67,6 +76,8 @@ PointCloudRegistrationNode::PointCloudRegistrationNode() :
   RCLCPP_INFO(this->get_logger(), "* icp_max_correspondence_dist: %f", icp_.getMaxCorrespondenceDistance());
   RCLCPP_INFO(this->get_logger(), "* icp_transformation_eps: %f", icp_.getTransformationEpsilon());
   RCLCPP_INFO(this->get_logger(), "* icp_euclidean_fitness_eps: %f", icp_.getEuclideanFitnessEpsilon());
+  RCLCPP_INFO(this->get_logger(), "* sor_mean_k: %d", sor_mean_k_);
+  RCLCPP_INFO(this->get_logger(), "* sor_stddev_mul_thresh: %f", sor_stddev_mul_thresh_);
   RCLCPP_INFO(this->get_logger(), "* voxel_filter_size: %f", voxel_filter_size_);
 }
 
@@ -82,32 +93,40 @@ void PointCloudRegistrationNode::timerCallback() {
   // return;
 
   if (new_data_received_) {
-    // // Plane removal test
-    // // https://pointclouds.org/documentation/tutorials/planar_segmentation.html
-    // pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-    // pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-    // // Create the segmentation object
-    // pcl::SACSegmentation<pcl::PointXYZ> seg;
-    // // Optional
-    // seg.setOptimizeCoefficients (true);
-    // // Mandatory
-    // seg.setModelType (pcl::SACMODEL_PLANE);
-    // seg.setMethodType (pcl::SAC_RANSAC);
-    // seg.setDistanceThreshold (0.03);
+    // Plane removal test
+    // https://pointclouds.org/documentation/tutorials/planar_segmentation.html
+    pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+    pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+    // Create the segmentation object
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    // Optional
+    seg.setOptimizeCoefficients (true);
+    // Mandatory
+    seg.setModelType (pcl::SACMODEL_PLANE);
+    seg.setMethodType (pcl::SAC_RANSAC);
+    seg.setDistanceThreshold (0.03);
 
-    // seg.setInputCloud (new_point_cloud_);
-    // seg.segment (*inliers, *coefficients);
+    seg.setInputCloud (new_point_cloud_);
+    seg.segment (*inliers, *coefficients);
 
-    // if (inliers->indices.size () == 0) {
-    //   RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
-    // } else {
-    //   // https://stackoverflow.com/questions/44921987/removing-points-from-a-pclpointcloudpclpointxyzrgb
-    //   pcl::ExtractIndices<pcl::PointXYZ> extract;
-    //   extract.setInputCloud(new_point_cloud_);
-    //   extract.setIndices(inliers);
-    //   extract.setNegative(true);
-    //   extract.filter(*new_point_cloud_);
-    // }
+    if (inliers->indices.size () == 0) {
+      RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
+    } else {
+      // https://stackoverflow.com/questions/44921987/removing-points-from-a-pclpointcloudpclpointxyzrgb
+      pcl::ExtractIndices<pcl::PointXYZ> extract;
+      extract.setInputCloud(new_point_cloud_);
+      extract.setIndices(inliers);
+      extract.setNegative(true);
+      extract.filter(*new_point_cloud_);
+    }
+
+    // Statistical outlier removal for salt-and-pepper noise
+    // https://pcl.readthedocs.io/en/latest/statistical_outlier.html
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+    sor.setInputCloud(new_point_cloud_);
+    sor.setMeanK(sor_mean_k_);
+    sor.setStddevMulThresh(sor_stddev_mul_thresh_);
+    sor.filter(*new_point_cloud_);
 
     icp_.setInputSource(new_point_cloud_);
     icp_.setInputTarget(point_cloud_map_);
@@ -129,12 +148,12 @@ void PointCloudRegistrationNode::timerCallback() {
   }
 
   // Downsample
-  // RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
+  RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
   pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
   voxel_grid.setInputCloud(point_cloud_map_);
   voxel_grid.setLeafSize(voxel_filter_size_, voxel_filter_size_, voxel_filter_size_);
   voxel_grid.filter(*point_cloud_map_);
-  // RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
+  RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
 
   // Convert map to sensor_msgs::msg::PointCloud2 and publish message
   sensor_msgs::msg::PointCloud2 point_cloud_map_msg;
