@@ -8,6 +8,8 @@
 
 // Includes for outlier removal
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/surface/convex_hull.h>
+#include <pcl/segmentation/extract_polygonal_prism_data.h>
 
 namespace cg {
 namespace mapping {
@@ -22,10 +24,33 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
   source_frame_ = "realsense_frame";
   target_frame_ = "map";
 
-  // // Initialize publishers and subscribers
+  // Statistical Outlier Removal Params
+  this->declare_parameter<bool>("use_sor", true);
+  this->get_parameter("use_sor", use_sor_);
+  this->declare_parameter<int>("sor_mean_k", 50);
+  this->get_parameter("sor_mean_k", sor_mean_k_);
+  this->declare_parameter<double>("sor_stddev_mul_thresh", 1.0);
+  this->get_parameter("sor_stddev_mul_thresh", sor_stddev_mul_thresh_);
+
+  // Plane Segmentation Params
+  this->declare_parameter<bool>("use_plane_seg", true);
+  this->get_parameter("use_plane_seg", use_plane_seg_);
+  this->declare_parameter<double>("plane_seg_dist_thresh", 0.03);
+  this->get_parameter("plane_seg_dist_thresh", plane_seg_dist_thresh_);
+
+  // Initialize publishers and subscribers
   filtered_points_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/terrain/filtered", 1
-  );  
+  );
+  plane_points_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
+    "/terrain/filtered_plane", 1
+  );
+  below_points_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
+    "/terrain/filtered_below", 1
+  );
+  above_points_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
+    "/terrain/filtered_above", 1
+  );
   raw_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
     "/camera/depth/color/points", rclcpp::SensorDataQoS(), std::bind(&TerrainFilteringNode::rawPointsCallback, this, std::placeholders::_1)
   );
@@ -68,13 +93,15 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
 
     // Statistical outlier removal for salt-and-pepper noise
     // https://pcl.readthedocs.io/en/latest/statistical_outlier.html
-    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-    sor.setInputCloud(xyz_filtered_cloud);
-    sor.setMeanK(120);
-    sor.setStddevMulThresh(1.5);
-    sor.filter(*xyz_filtered_cloud);
+    if (use_sor_) {
+      pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+      sor.setInputCloud(xyz_filtered_cloud);
+      sor.setMeanK(sor_mean_k_);
+      sor.setStddevMulThresh(sor_stddev_mul_thresh_);
+      sor.filter(*xyz_filtered_cloud);
+    }
 
-    // TEMPORARY PLANE REMOVAL -- TODO DELETE
+    // Plane removal
     // https://pointclouds.org/documentation/tutorials/planar_segmentation.html
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
@@ -85,20 +112,73 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
     // Mandatory
     seg.setModelType (pcl::SACMODEL_PLANE);
     seg.setMethodType (pcl::SAC_RANSAC);
-    seg.setDistanceThreshold (0.03);
+    seg.setDistanceThreshold (plane_seg_dist_thresh_);
 
     seg.setInputCloud (xyz_filtered_cloud);
     seg.segment (*inliers, *coefficients);
+    // for (const auto & c: coefficients->values) {
+    //   std::cout << c << ',' << ' ';
+    // }
+    bool is_plane_facing_up = ((coefficients->values.size() == 4) && (coefficients->values[2] > 0));
+    // std::cout << std::endl;
+    if (use_plane_seg_) {
+      if (inliers->indices.size () == 0) {
+        RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
+      } else {
+        // https://stackoverflow.com/questions/44921987/removing-points-from-a-pclpointcloudpclpointxyzrgb
+        pcl::ExtractIndices<pcl::PointXYZ> extract;
+        extract.setInputCloud(xyz_filtered_cloud);
+        extract.setIndices(inliers);
+        extract.setNegative(true);
+        extract.filter(*xyz_filtered_cloud);
+      }
+    }
 
-    if (inliers->indices.size () == 0) {
-      RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
-    } else {
-      // https://stackoverflow.com/questions/44921987/removing-points-from-a-pclpointcloudpclpointxyzrgb
-      pcl::ExtractIndices<pcl::PointXYZ> extract;
-      extract.setInputCloud(xyz_filtered_cloud);
-      extract.setIndices(inliers);
+    // Test filter out above/below ground points
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud(xyz_filtered_cloud);
+    extract.setIndices(inliers);
+    extract.setNegative(false);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr plane(new pcl::PointCloud<pcl::PointXYZ>);
+    extract.filter(*plane);
+    pcl::ConvexHull<pcl::PointXYZ> hull;
+		hull.setInputCloud(plane);
+    hull.setDimension(2);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr convexHull(new pcl::PointCloud<pcl::PointXYZ>);
+    hull.reconstruct(*convexHull);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr below_ground_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr above_ground_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    if (hull.getDimension()==2) {
+      pcl::ExtractPolygonalPrismData<pcl::PointXYZ> prism;
+      // Below ground points
+			prism.setInputCloud(xyz_filtered_cloud);
+			prism.setInputPlanarHull(convexHull);
+      // First parameter: minimum Z value. Set to 0, segments objects lying on the plane (can be negative).
+			// Second parameter: maximum Z value
+      if (is_plane_facing_up) {
+        prism.setHeightLimits(-0.03f, 10.0f);
+      } else {
+        prism.setHeightLimits(-10.0f, 0.03f);
+      }
+			pcl::PointIndices::Ptr objectIndices(new pcl::PointIndices);
+      prism.segment(*objectIndices);
+
+      extract.setIndices(objectIndices);
       extract.setNegative(true);
-      extract.filter(*xyz_filtered_cloud);
+      extract.filter(*below_ground_cloud);
+
+      // Above ground points
+			prism.setInputCloud(xyz_filtered_cloud);
+			prism.setInputPlanarHull(convexHull);
+      if (is_plane_facing_up) {
+        prism.setHeightLimits(-10.0f, 0.03f);
+      } else {
+        prism.setHeightLimits(-0.03f, 10.0f);
+      }
+      prism.segment(*objectIndices);
+      extract.setIndices(objectIndices);
+      extract.setNegative(true);
+      extract.filter(*above_ground_cloud);
     }
 
     // Convert from pcl::PointCloud<T> back to sensor_msgs::PointCloud2
@@ -106,6 +186,12 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
 
     // Publish
     filtered_points_pub_->publish(box_cloud_out_);
+    pcl::toROSMsg(*below_ground_cloud, box_cloud_out_);
+    below_points_pub_->publish(box_cloud_out_);
+    pcl::toROSMsg(*above_ground_cloud, box_cloud_out_);
+    above_points_pub_->publish(box_cloud_out_);
+    pcl::toROSMsg(*plane, box_cloud_out_);
+    plane_points_pub_->publish(box_cloud_out_);
     } 
   catch (tf2::TransformException &ex) {
     RCLCPP_WARN(this->get_logger(),"%s", ex.what());
