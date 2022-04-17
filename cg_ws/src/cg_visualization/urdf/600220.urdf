@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://600220/meshes/base_link.STL" />
+          filename="package://cg_visualization/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://600220/meshes/base_link.STL" />
+          filename="package://cg_visualization/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
