@@ -6,6 +6,10 @@
 #include <std_msgs/msg/int8.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
+// Diagnostics
+#include <diagnostic_msgs/msg/diagnostic_array.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.hpp>
+#include <diagnostic_msgs/msg/key_value.hpp>
 
 namespace cg {
 namespace arduino {
@@ -20,7 +24,8 @@ private:
   // Sending commands to arduino
   rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr reset_pub_;
   rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr cmd_pub_;
-  rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_sub_;
+  rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr diagnostic_pub_;
+  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr cmd_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   // Reading commands from arduino
@@ -42,6 +47,10 @@ private:
   cg_msgs::msg::ActuatorCommand actuator_cmd_;
   std_msgs::msg::Int64 ard_feedback_;
   cg_msgs::msg::EncoderTelemetry enc_telemetry_;
+
+  /* Diagnostics */
+  diagnostic_msgs::msg::DiagnosticArray dia_array_;
+  diagnostic_msgs::msg::DiagnosticStatus robot_status_;
 
   /* Callbacks */
   void timerCallback();

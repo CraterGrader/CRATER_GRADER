@@ -47,6 +47,22 @@ SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
   reset_arduino_val_.data = 1;
   reset_pub_->publish(reset_arduino_val_);
   reset_arduino_val_.data = 0; // Immediately set reset to zero so we can't accidentally reset again
+
+  // Diagnostics
+  robot_status_.name = "Robot";
+  robot_status_.level = diagnostic_msgs::DiagnosticStatus::OK;
+  robot_status_.message = "Everything seem to be ok.";
+  diagnostic_msgs::KeyValue emergency;
+  emergency_.key = "Emgergencystop hit";
+  emergency_.value = "false";
+  diagnostic_msgs::KeyValue exited_normally;
+  emergency_.key = "Exited normally";
+  emergency_.value = "true";
+
+  robot_status_.values.push_back(emergency);
+  robot_status_.values.push_back(exited_normally);
+
+  dia_array_.status.push_back(robot_status);
 }
 
 void SerialInterfaceNode::timerCallback() {
@@ -64,6 +80,8 @@ void SerialInterfaceNode::timerCallback() {
 
   cmd_msg.data = cmd_data;
   cmd_pub_->publish(cmd_msg);
+
+  diagnostic_pub_.publish(dia_array_);
 }
 
 void SerialInterfaceNode::cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {

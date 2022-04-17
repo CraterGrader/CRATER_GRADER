@@ -8,6 +8,8 @@ services:
       - .:/root/CRATER_GRADER
     ports:
       - 5901:5900 # <external port>:<container port>
+      - 8081:8081 # System monitor server port
+      - 9090:9090 # Websocket
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
   cg-dev-addon:
