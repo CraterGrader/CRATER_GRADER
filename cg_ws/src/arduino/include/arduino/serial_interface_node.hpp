@@ -7,9 +7,11 @@
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
 // Diagnostics
-#include <diagnostic_msgs/msg/diagnostic_array.hpp>
-#include <diagnostic_msgs/msg/diagnostic_status.hpp>
-#include <diagnostic_msgs/msg/key_value.hpp>
+// #include <diagnostic_msgs/msg/diagnostic_array.hpp>
+// #include <diagnostic_msgs/msg/key_value.hpp>
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
+// #include <diagnostic_msgs/msg/diagnostic_status.hpp>
 
 namespace cg {
 namespace arduino {
@@ -22,10 +24,9 @@ public:
 private:
   /* Publishers and Subscribers */
   // Sending commands to arduino
-  rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr reset_pub_;
   rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr cmd_pub_;
-  rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr diagnostic_pub_;
-  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr cmd_sub_;
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostic_pub_;
+  rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   // Reading commands from arduino
@@ -43,14 +44,27 @@ private:
   int QP_TO_BYTE_DELTA_POS_OFFSET_;
   
   /* Message data */
-  std_msgs::msg::Int8 reset_arduino_val_; // 1 --> reset, all other values ignored
   cg_msgs::msg::ActuatorCommand actuator_cmd_;
   std_msgs::msg::Int64 ard_feedback_;
   cg_msgs::msg::EncoderTelemetry enc_telemetry_;
 
   /* Diagnostics */
-  diagnostic_msgs::msg::DiagnosticArray dia_array_;
-  diagnostic_msgs::msg::DiagnosticStatus robot_status_;
+  diagnostic_updater::Updater diagnostic_updater_;
+  void populateDiagnosticsStatus(diagnostic_updater::DiagnosticStatusWrapper &stat); // Function for updating status information
+
+  // Log topic frequency for /actuator_cmd
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> actuator_cmd_freq_;
+  double freq_min_act_cmd_ = 20.0;
+  double freq_max_act_cmd_ = 100.0;
+  double freq_tol_act_cmd_ = 0.1;
+  int freq_window_act_cmd_ = 5;
+
+  // Log topic frequency for /arduino_feedback
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> arduino_feedback_freq_;
+  double freq_min_ard_fdbk_ = 1.0;
+  double freq_max_ard_fdbk_ = 100.0;
+  double freq_tol_ard_fdbk_ = 0.1;
+  int freq_window_ard_fdbk_ = 5;
 
   /* Callbacks */
   void timerCallback();

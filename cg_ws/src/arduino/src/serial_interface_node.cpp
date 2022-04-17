@@ -3,85 +3,74 @@
 namespace cg {
 namespace arduino {
 
-SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node") {
-  // Initialize publishers and subscribers
-  reset_pub_ = this->create_publisher<std_msgs::msg::Int8>(
-      "/reset_arduino", rclcpp::QoS(rclcpp::KeepLast(10)).reliable()); // Create with reliable reliability and volatile durability, see https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_qos.html#section-gsg-qos-durability
-  cmd_pub_ = this->create_publisher<std_msgs::msg::Int64>(
-    "/arduino_cmd", 1
-  );
-  cmd_sub_ = this->create_subscription<cg_msgs::msg::ActuatorCommand>(
-    "/actuator_cmd", 1, std::bind(&SerialInterfaceNode::cmdCallback, this, std::placeholders::_1)
-  );
-  timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(100),
-    std::bind(&SerialInterfaceNode::timerCallback, this)
-  );
+  SerialInterfaceNode::SerialInterfaceNode() : Node("serial_interface_node"), diagnostic_updater_(this)
+  {
+    // Initialize publishers and subscribers
+    cmd_pub_ = this->create_publisher<std_msgs::msg::Int64>(
+        "/arduino_cmd", 1);
+    cmd_sub_ = this->create_subscription<cg_msgs::msg::ActuatorCommand>(
+        "/actuator_cmd", 1, std::bind(&SerialInterfaceNode::cmdCallback, this, std::placeholders::_1));
+    timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(100),
+        std::bind(&SerialInterfaceNode::timerCallback, this));
 
-  // Arduino feedback
-  ard_sub_ = this->create_subscription<std_msgs::msg::Int64>(
-    "/arduino_feedback", 1, std::bind(&SerialInterfaceNode::ardFbCallback, this, std::placeholders::_1)
-  );
-  enc_pub_ = this->create_publisher<cg_msgs::msg::EncoderTelemetry>(
-    "/encoder_telemetry", 1
-  );
+    // Arduino feedback
+    ard_sub_ = this->create_subscription<std_msgs::msg::Int64>(
+        "/arduino_feedback", 1, std::bind(&SerialInterfaceNode::ardFbCallback, this, std::placeholders::_1));
+    enc_pub_ = this->create_publisher<cg_msgs::msg::EncoderTelemetry>(
+        "/encoder_telemetry", 1);
 
-  this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE", 22);
-  this->get_parameter("QP_TO_BYTE_STEER_SCALE", QP_TO_BYTE_STEER_SCALE_);
-  this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET", 127);
-  this->get_parameter("QP_TO_BYTE_STEER_OFFSET", QP_TO_BYTE_STEER_OFFSET_);
-  this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_SCALE", 25);
-  this->get_parameter("QPPS_TO_BYTE_DRIVE_SCALE", QPPS_TO_BYTE_DRIVE_SCALE_);
-  this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_OFFSET", 127);
-  this->get_parameter("QPPS_TO_BYTE_DRIVE_OFFSET", QPPS_TO_BYTE_DRIVE_OFFSET_);
-  this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE", 22);
-  this->get_parameter("QP_TO_BYTE_TOOL_SCALE", QP_TO_BYTE_TOOL_SCALE_);
-  this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET", 588);
-  this->get_parameter("QP_TO_BYTE_TOOL_OFFSET", QP_TO_BYTE_TOOL_OFFSET_);
-  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_SCALE", 10);
-  this->get_parameter("QP_TO_BYTE_DELTA_POS_SCALE", QP_TO_BYTE_DELTA_POS_SCALE_);
-  this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET", 127);
-  this->get_parameter("QP_TO_BYTE_DELTA_POS_OFFSET", QP_TO_BYTE_DELTA_POS_OFFSET_);
+    diagnostic_pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
+        "/diagnostics", 1);
 
-  // Reset the arduino on start up
-  reset_arduino_val_.data = 1;
-  reset_pub_->publish(reset_arduino_val_);
-  reset_arduino_val_.data = 0; // Immediately set reset to zero so we can't accidentally reset again
+    this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE", 22);
+    this->get_parameter("QP_TO_BYTE_STEER_SCALE", QP_TO_BYTE_STEER_SCALE_);
+    this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET", 127);
+    this->get_parameter("QP_TO_BYTE_STEER_OFFSET", QP_TO_BYTE_STEER_OFFSET_);
+    this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_SCALE", 25);
+    this->get_parameter("QPPS_TO_BYTE_DRIVE_SCALE", QPPS_TO_BYTE_DRIVE_SCALE_);
+    this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_OFFSET", 127);
+    this->get_parameter("QPPS_TO_BYTE_DRIVE_OFFSET", QPPS_TO_BYTE_DRIVE_OFFSET_);
+    this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE", 22);
+    this->get_parameter("QP_TO_BYTE_TOOL_SCALE", QP_TO_BYTE_TOOL_SCALE_);
+    this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET", 588);
+    this->get_parameter("QP_TO_BYTE_TOOL_OFFSET", QP_TO_BYTE_TOOL_OFFSET_);
+    this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_SCALE", 10);
+    this->get_parameter("QP_TO_BYTE_DELTA_POS_SCALE", QP_TO_BYTE_DELTA_POS_SCALE_);
+    this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET", 127);
+    this->get_parameter("QP_TO_BYTE_DELTA_POS_OFFSET", QP_TO_BYTE_DELTA_POS_OFFSET_);    
 
-  // Diagnostics
-  robot_status_.name = "Robot";
-  robot_status_.level = diagnostic_msgs::DiagnosticStatus::OK;
-  robot_status_.message = "Everything seem to be ok.";
-  diagnostic_msgs::KeyValue emergency;
-  emergency_.key = "Emgergencystop hit";
-  emergency_.value = "false";
-  diagnostic_msgs::KeyValue exited_normally;
-  emergency_.key = "Exited normally";
-  emergency_.value = "true";
+    // Diagnostics
+    diagnostic_updater_.add("Actuator Command", this, &SerialInterfaceNode::populateDiagnosticsStatus);
+    actuator_cmd_freq_.reset(new diagnostic_updater::HeaderlessTopicDiagnostic("/actuator_cmd", diagnostic_updater_, diagnostic_updater::FrequencyStatusParam(&freq_min_act_cmd_, &freq_max_act_cmd_, freq_tol_act_cmd_, freq_window_act_cmd_)));
+    arduino_feedback_freq_.reset(new diagnostic_updater::HeaderlessTopicDiagnostic("/arduino_feedback", diagnostic_updater_, diagnostic_updater::FrequencyStatusParam(&freq_min_ard_fdbk_, &freq_max_ard_fdbk_, freq_tol_ard_fdbk_, freq_window_ard_fdbk_)));
+    diagnostic_updater_.force_update(); // Force an update to happen immediately
+  }
 
-  robot_status_.values.push_back(emergency);
-  robot_status_.values.push_back(exited_normally);
+  void SerialInterfaceNode::populateDiagnosticsStatus(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "We're up!");
+    stat.add("Custom field", "custom info");
+  }
 
-  dia_array_.status.push_back(robot_status);
-}
+  void SerialInterfaceNode::timerCallback()
+  {
+    auto cmd_msg = std_msgs::msg::Int64();
+    int64_t cmd_data = 0;
+    // Scale wheel velocity in range [-100.0, 100.0] to [0, 255]
+    uint8_t data = static_cast<uint8_t>((actuator_cmd_.wheel_velocity + 100) / 200.0 * 255);
+    cmd_data |= data;
+    // Scale steer position in range [-100.0, 100.0] to [0, 255]
+    data = static_cast<uint8_t>((actuator_cmd_.steer_position + 100) / 200.0 * 255);
+    cmd_data |= (data << 8);
+    // Scale tool position in range [0.0, 100.0] to [0, 255]
+    data = static_cast<uint8_t>((actuator_cmd_.tool_position) / 100.0 * 255);
+    cmd_data |= (data << 16);
 
-void SerialInterfaceNode::timerCallback() {
-  auto cmd_msg = std_msgs::msg::Int64();
-  int64_t cmd_data = 0;
-  // Scale wheel velocity in range [-100.0, 100.0] to [0, 255]
-  uint8_t data = static_cast<uint8_t>((actuator_cmd_.wheel_velocity + 100) / 200.0 * 255);
-  cmd_data |= data;
-  // Scale steer position in range [-100.0, 100.0] to [0, 255]
-  data =  static_cast<uint8_t>((actuator_cmd_.steer_position + 100) / 200.0 * 255);
-  cmd_data |= (data << 8);
-  // Scale tool position in range [0.0, 100.0] to [0, 255]
-  data =  static_cast<uint8_t>((actuator_cmd_.tool_position) / 100.0 * 255);
-  cmd_data |= (data << 16);
-
-  cmd_msg.data = cmd_data;
-  cmd_pub_->publish(cmd_msg);
-
-  diagnostic_pub_.publish(dia_array_);
+    cmd_msg.data = cmd_data;
+    cmd_pub_->publish(cmd_msg);
+    actuator_cmd_freq_->tick(); // Log frequency for diagnostics
+    diagnostic_updater_.force_update(); // Force an update to happen immediately
 }
 
 void SerialInterfaceNode::cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {
@@ -91,6 +80,8 @@ void SerialInterfaceNode::cmdCallback(const cg_msgs::msg::ActuatorCommand::Share
 void SerialInterfaceNode::ardFbCallback(const std_msgs::msg::Int64::SharedPtr msg) {
   // Read in the message
   ard_feedback_ = *msg;
+  arduino_feedback_freq_->tick(); // Log frequency for diagnostics
+  diagnostic_updater_.force_update(); // Force an update to happen immediately
 
   // Steer position front
   int steer_pos_front_byte = ard_feedback_.data & 0xFF; // First byte
