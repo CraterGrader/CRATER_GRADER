@@ -1,4 +1,4 @@
 slip_estimate_node:
   ros__parameters:
-    nonzero_slip_thresh: 10.0 # Ignore slip under this threshold
+    nonzero_slip_thresh: 800.0 # Ignore slip when wheel speed is under this threshold, in units of encoder counts per second (qpps)
     filter_window: 10 # Number of points for moving average filter
