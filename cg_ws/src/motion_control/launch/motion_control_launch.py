@@ -17,6 +17,12 @@ def generate_launch_description():
         'cmdmux_node_params.yaml'
     )
 
+    diagnostic_params = os.path.join(
+        get_package_share_directory('motion_control'),
+        'config',
+        'diagnostic_params.yaml'
+    )
+
     # Also bring up the teleop launch file, expect that teleop launch file to handle parameters
     included_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -36,7 +42,7 @@ def generate_launch_description():
             package='motion_control',
             executable='cmd_mux',
             name='cmd_mux',
-            parameters=[cmdmux_params]
+            parameters=[cmdmux_params, diagnostic_params]
         ),
         included_launch
     ])

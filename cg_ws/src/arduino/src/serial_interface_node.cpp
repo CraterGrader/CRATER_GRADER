@@ -23,6 +23,36 @@ namespace arduino {
     diagnostic_pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
         "/diagnostics", 1);
 
+    /* Parameters */
+    // Diagnostics
+    this->declare_parameter<double>("freq_min_ard_cmd", 1.0);
+    this->get_parameter("freq_min_ard_cmd", freq_min_ard_cmd_);
+    this->declare_parameter<double>("freq_max_ard_cmd", 100.0);
+    this->get_parameter("freq_max_ard_cmd", freq_max_ard_cmd_);
+    this->declare_parameter<double>("freq_tol_ard_cmd", 0.1);
+    this->get_parameter("freq_tol_ard_cmd", freq_tol_ard_cmd_);
+    this->declare_parameter<int>("freq_window_ard_cmd", 5);
+    this->get_parameter("freq_window_ard_cmd", freq_window_ard_cmd_);
+
+    this->declare_parameter<double>("freq_min_ard_fdbk", 1.0);
+    this->get_parameter("freq_min_ard_fdbk", freq_min_ard_fdbk_);
+    this->declare_parameter<double>("freq_max_ard_fdbk", 100.0);
+    this->get_parameter("freq_max_ard_fdbk", freq_max_ard_fdbk_);
+    this->declare_parameter<double>("freq_tol_ard_fdbk", 0.1);
+    this->get_parameter("freq_tol_ard_fdbk", freq_tol_ard_fdbk_);
+    this->declare_parameter<int>("freq_window_ard_fdbk", 5);
+    this->get_parameter("freq_window_ard_fdbk", freq_window_ard_fdbk_);
+
+    this->declare_parameter<double>("freq_min_enc_telem", 1.0);
+    this->get_parameter("freq_min_enc_telem", freq_min_enc_telem_);
+    this->declare_parameter<double>("freq_max_enc_telem", 100.0);
+    this->get_parameter("freq_max_enc_telem", freq_max_enc_telem_);
+    this->declare_parameter<double>("freq_tol_enc_telem", 0.1);
+    this->get_parameter("freq_tol_enc_telem", freq_tol_enc_telem_);
+    this->declare_parameter<int>("freq_window_enc_telem", 5);
+    this->get_parameter("freq_window_enc_telem", freq_window_enc_telem_);
+
+    // Motor controller scaling
     this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE", 22);
     this->get_parameter("QP_TO_BYTE_STEER_SCALE", QP_TO_BYTE_STEER_SCALE_);
     this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET", 127);
@@ -40,17 +70,16 @@ namespace arduino {
     this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_OFFSET", 127);
     this->get_parameter("QP_TO_BYTE_DELTA_POS_OFFSET", QP_TO_BYTE_DELTA_POS_OFFSET_);    
 
-    // Diagnostics
-    diagnostic_updater_.add("Actuator Command", this, &SerialInterfaceNode::populateDiagnosticsStatus);
-    actuator_cmd_freq_.reset(new diagnostic_updater::HeaderlessTopicDiagnostic("/actuator_cmd", diagnostic_updater_, diagnostic_updater::FrequencyStatusParam(&freq_min_act_cmd_, &freq_max_act_cmd_, freq_tol_act_cmd_, freq_window_act_cmd_)));
+    // Initialize Diagnostics
+    diagnostic_updater_.add("serial_interface_node", this, &SerialInterfaceNode::populateDiagnosticsStatus);
+    arduino_cmd_freq_.reset(new diagnostic_updater::HeaderlessTopicDiagnostic("/arduino_cmd", diagnostic_updater_, diagnostic_updater::FrequencyStatusParam(&freq_min_ard_cmd_, &freq_max_ard_cmd_, freq_tol_ard_cmd_, freq_window_ard_cmd_)));
     arduino_feedback_freq_.reset(new diagnostic_updater::HeaderlessTopicDiagnostic("/arduino_feedback", diagnostic_updater_, diagnostic_updater::FrequencyStatusParam(&freq_min_ard_fdbk_, &freq_max_ard_fdbk_, freq_tol_ard_fdbk_, freq_window_ard_fdbk_)));
-    diagnostic_updater_.force_update(); // Force an update to happen immediately
+    encoder_telemetry_freq_.reset(new diagnostic_updater::HeaderlessTopicDiagnostic("/encoder_telemetry", diagnostic_updater_, diagnostic_updater::FrequencyStatusParam(&freq_min_enc_telem_, &freq_max_enc_telem_, freq_tol_enc_telem_, freq_window_enc_telem_)));
   }
 
   void SerialInterfaceNode::populateDiagnosticsStatus(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "We're up!");
-    stat.add("Custom field", "custom info");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "OK");
   }
 
   void SerialInterfaceNode::timerCallback()
@@ -69,8 +98,7 @@ namespace arduino {
 
     cmd_msg.data = cmd_data;
     cmd_pub_->publish(cmd_msg);
-    actuator_cmd_freq_->tick(); // Log frequency for diagnostics
-    diagnostic_updater_.force_update(); // Force an update to happen immediately
+    arduino_cmd_freq_->tick(); // Log frequency for diagnostics
 }
 
 void SerialInterfaceNode::cmdCallback(const cg_msgs::msg::ActuatorCommand::SharedPtr msg) {
@@ -81,7 +109,6 @@ void SerialInterfaceNode::ardFbCallback(const std_msgs::msg::Int64::SharedPtr ms
   // Read in the message
   ard_feedback_ = *msg;
   arduino_feedback_freq_->tick(); // Log frequency for diagnostics
-  diagnostic_updater_.force_update(); // Force an update to happen immediately
 
   // Steer position front
   int steer_pos_front_byte = ard_feedback_.data & 0xFF; // First byte
@@ -117,6 +144,7 @@ void SerialInterfaceNode::ardFbCallback(const std_msgs::msg::Int64::SharedPtr ms
   // Publish the message
   enc_telemetry_.header.stamp = this->get_clock()->now();
   enc_pub_->publish(enc_telemetry_);
+  encoder_telemetry_freq_->tick(); // Log frequency for diagnostics
 }
 
 long SerialInterfaceNode::byte_to_qpps(const int &val, const int &scale, const int &zero_offset)
