@@ -16,6 +16,7 @@ find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(diagnostic_updater REQUIRED)
 
 # Find package header files
 include_directories(include)
@@ -28,6 +29,7 @@ ament_target_dependencies(cmd_mux
 rclcpp
 nav_msgs
 cg_msgs
+diagnostic_updater
 )
 add_executable(odom_node src/odom_main.cpp
   src/odom_node.cpp

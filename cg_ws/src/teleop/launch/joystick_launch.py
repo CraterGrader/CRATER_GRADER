@@ -17,6 +17,12 @@ def generate_launch_description():
         'scale_offset_params.yaml'
     )
 
+    diagnostic_params = os.path.join(
+        get_package_share_directory('arduino'),
+        'config',
+        'diagnostic_params.yaml'
+    )
+
     with open(
         os.path.join(get_package_share_directory('arduino'),
         'config',
@@ -42,7 +48,7 @@ def generate_launch_description():
             package='arduino',
             executable='serial_interface_node',
             name='serial_interface_node',
-            parameters=[scale_offset_params]
+            parameters=[scale_offset_params, diagnostic_params]
         ),
         Node(
             package='micro_ros_agent',
