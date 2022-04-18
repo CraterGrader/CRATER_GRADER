@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://cg_visualization/meshes/base_link.STL" />
+          filename="file:///root/CRATER_GRADER/cg_ws/src/cg_visualization/meshes/600220.STL" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://cg_visualization/meshes/base_link.STL" />
+          filename="file:///root/CRATER_GRADER/cg_ws/src/cg_visualization/meshes/600220.STL" />
       </geometry>
     </collision>
   </link>

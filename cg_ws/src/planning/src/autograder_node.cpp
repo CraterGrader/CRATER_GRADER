@@ -20,6 +20,8 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
   mode_sub_ = this->create_subscription<cg_msgs::msg::MuxMode>(
     "/mux_mode", 1, std::bind(&AutoGraderNode::modeCallback, this, std::placeholders::_1));
 
+  telem_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
+      "/encoder_telemetry", 1, std::bind(&AutoGraderNode::telemCallback, this, std::placeholders::_1));
 
   // Load parameters
   this->declare_parameter<float>("slip_thresh", 0.3);
@@ -59,19 +61,49 @@ void AutoGraderNode::timerCallback() {
   }
 }
 
+void AutoGraderNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
+{
+
+  // Continuously update blade position if in autograder mode
+  if (curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
+  {
+    // Drive control: stay down while driving forward, move up while driving in reverse
+    if (msg->drive_vel_rear < 0)
+    {
+      // Raise target blade position to maximum desired height
+      cmd_msg_.tool_position = max_des_blade_pos_;
+    } else {
+      // Lower target blade position to design plane
+      cmd_msg_.tool_position = design_blade_pos_;
+    }
+  }
+}
+
 void AutoGraderNode::slipCallback(const cg_msgs::msg::Slip::SharedPtr msg) {
 
   // Continuously update blade position if in autograder mode
   if (curr_mux_mode_ == cg_msgs::msg::MuxMode::AUTOGRADER)
   {
     // Bang-bang control: only adjust the blade postion if outside the deadband, if deadband thresholds are not met then do not change blade position
-    if (msg->slip > (slip_thresh_ + half_deadband_)) {
-      // Raise target blade position to maximum desired height
-      cmd_msg_.tool_position = max_des_blade_pos_;
-    } else if (msg->slip < (slip_thresh_ - half_deadband_)) {
-      // Lower target blade position to design plane
-      cmd_msg_.tool_position = design_blade_pos_;
-    }
+    // if (msg->slip > (slip_thresh_ + half_deadband_)) {
+    //   // Raise target blade position to maximum desired height
+    //   cmd_msg_.tool_position = max_des_blade_pos_;
+    // } else if (msg->slip < (slip_thresh_ - half_deadband_)) {
+    //   // Lower target blade position to design plane
+    //   cmd_msg_.tool_position = design_blade_pos_;
+    // }
+
+    // Latching
+  //   if (msg->slip_latch)
+  //   {
+  //     // Raise target blade position to maximum desired height
+  //     cmd_msg_.tool_position = max_des_blade_pos_;
+  //   }
+  //   else
+  //   {
+  //     // Lower target blade position to design plane
+  //     cmd_msg_.tool_position = design_blade_pos_;
+  //   }
   }
 }
 

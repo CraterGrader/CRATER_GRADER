@@ -79,6 +79,11 @@ private:
   const float transformation_epsilon = 0;
   const int max_iterations = 100;
 
+  // Outlier Rejection Parameters
+  int sor_mean_k_;
+  double sor_stddev_mul_thresh_;
+
+
   /* Use SampleConsensusInitialAlignment to find a rough alignment from the source cloud to the target cloud by fin    ding
   * correspondences between two sets of local features
   * Inputs:

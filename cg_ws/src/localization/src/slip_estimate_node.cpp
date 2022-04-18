@@ -170,7 +170,22 @@ void SlipEstimateNode::globalCallback(
     curr_raw_slip_ = static_cast<float>(0.0);
   }
 
+  // Evaluate slip latch conditions
+  if (!slip_latch_) {
+    if (curr_raw_slip_ > slip_latch_thresh_) 
+    {
+      slip_latch_ = true;
+    }
+  }
+  else {
+    if (curr_vel_avg_ > slip_velocity_latch_release_)
+    {
+      slip_latch_ = false;
+    }
+  }
+
   // Publish the slip estimate
+  slip_msg_.slip_latch = slip_latch_;
   slip_msg_.slip = curr_raw_slip_;
   slip_msg_.vel_int = curr_vel_estimate_;
   slip_msg_.vel_avg = curr_vel_avg_;

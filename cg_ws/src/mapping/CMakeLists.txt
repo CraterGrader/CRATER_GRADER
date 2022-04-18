@@ -39,19 +39,19 @@ ament_target_dependencies(point_cloud_registration
   tf2_eigen
 )
 
-# # build nodes
-# add_executable(point_cloud_registration_but_fancier src/point_cloud_registration_main_but_fancier.cpp
-#   src/point_cloud_registration_node_but_fancier.cpp
-# )
-# ament_target_dependencies(point_cloud_registration_but_fancier
-#   rclcpp
-#   rclcpp_components
-#   pcl_ros
-#   sensor_msgs
-#   tf2
-#   tf2_ros
-#   tf2_eigen
-# )
+# build nodes
+add_executable(point_cloud_registration_but_fancier src/point_cloud_registration_main_but_fancier.cpp
+  src/point_cloud_registration_node_but_fancier.cpp
+)
+ament_target_dependencies(point_cloud_registration_but_fancier
+  rclcpp
+  rclcpp_components
+  pcl_ros
+  sensor_msgs
+  tf2
+  tf2_ros
+  tf2_eigen
+)
 
 add_executable(terrain_filtering src/terrain_filtering_main.cpp
   src/terrain_filtering_node.cpp
@@ -80,9 +80,9 @@ install(TARGETS point_cloud_registration
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# install(TARGETS point_cloud_registration_but_fancier
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(TARGETS point_cloud_registration_but_fancier
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(TARGETS terrain_filtering
   DESTINATION lib/${PROJECT_NAME}

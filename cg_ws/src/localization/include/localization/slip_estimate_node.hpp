@@ -50,7 +50,11 @@ private:
   double last_t_;
   double delta_t_;
   int sampler_ = 0;
-  int sampling_steps_ = 10;
+  int sampling_steps_ = 20;
+
+  float slip_latch_thresh_ = 0.7;
+  float slip_velocity_latch_release_ = 2000;
+  bool slip_latch_;
 
   // Velocity estimate moving average filter
   int vel_filter_window_ = 3;
@@ -62,7 +66,7 @@ private:
   void slipCallback();
   void globalCallback(const nav_msgs::msg::Odometry::SharedPtr global_msg);
   void encCallback(const nav_msgs::msg::Odometry::SharedPtr enc_msg);
-  void slipTelemetryCallback(cg_msgs::msg::EncoderTelemetry::SharedPtr msg);
+  void slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg);
 
   // rclcpp::TimerBase::SharedPtr timer_ = this->create_wall_timer(
   //   std::chrono::milliseconds(50),

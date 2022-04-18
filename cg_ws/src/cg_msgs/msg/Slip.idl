@@ -11,6 +11,7 @@ module cg_msgs {
       float vel_int;
       float vel_twst;
       float vel_avg;
+      boolean slip_latch;
 
 
     };
