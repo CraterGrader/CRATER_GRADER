@@ -1,7 +1,7 @@
 serial_interface_node:
   ros__parameters:
     # General params
-    diagnostic_updater.period: 1.0 # Diagnostics publishing rate in seconds [double]
+    diagnostic_updater.period: 0.2 # Diagnostics publishing rate in seconds [double]
 
     # Frequency logging for /arduino_cmd topic
     freq_min_ard_cmd: 1.0 # Minimum allowable frequency [double]

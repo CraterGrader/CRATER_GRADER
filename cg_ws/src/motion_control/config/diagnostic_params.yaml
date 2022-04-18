@@ -1,7 +1,7 @@
 cmd_mux:
   ros__parameters:
     # General params
-    diagnostic_updater.period: 1.0 # Diagnostics publishing rate in seconds [double]
+    diagnostic_updater.period: 0.2 # Diagnostics publishing rate in seconds [double]
 
     # Frequency logging for /actuator_cmd topic
     freq_min_act_cmd: 5.0 # Minimum allowable frequency [double]
