@@ -24,7 +24,7 @@ services:
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
   cg-dev-hw:
-    image: p84514faf325/cratergrader:main
+    image: p84514faf325/cratergrader:cg-338-v1.0.0
     privileged: true
     volumes:
       - .:/root/CRATER_GRADER
