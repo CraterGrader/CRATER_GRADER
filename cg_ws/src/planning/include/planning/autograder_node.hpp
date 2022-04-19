@@ -43,6 +43,9 @@ private:
   double design_blade_pos_;
   double max_des_blade_pos_;
 
+  bool driving_forward_;
+  bool slipping_;
+
 }; // class AutoGraderNode
 
 } // namespace planning

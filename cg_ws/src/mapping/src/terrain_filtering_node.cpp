@@ -11,6 +11,8 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 
+#include <pcl/common/common.h>
+
 namespace cg {
 namespace mapping {
 
@@ -119,8 +121,8 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
     // for (const auto & c: coefficients->values) {
     //   std::cout << c << ',' << ' ';
     // }
-    bool is_plane_facing_up = ((coefficients->values.size() == 4) && (coefficients->values[2] > 0));
-    // std::cout << std::endl;
+    bool is_plane_facing_up = ((coefficients->values.size() == 4) && (coefficients->values[3] > 0));
+    // std::cout << is_plane_facing_up << std::endl;
     if (use_plane_seg_) {
       if (inliers->indices.size () == 0) {
         RCLCPP_WARN (this->get_logger(), "Could not estimate a planar model for the given dataset.");
@@ -155,11 +157,11 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
 			prism.setInputPlanarHull(convexHull);
       // First parameter: minimum Z value. Set to 0, segments objects lying on the plane (can be negative).
 			// Second parameter: maximum Z value
-      if (is_plane_facing_up) {
-        prism.setHeightLimits(-0.03f, 10.0f);
-      } else {
-        prism.setHeightLimits(-10.0f, 0.03f);
-      }
+      // if (is_plane_facing_up) {
+      prism.setHeightLimits(-0.03f, 10.0f);
+      // } else {
+        // prism.setHeightLimits(-10.0f, 0.03f);
+      // }
 			pcl::PointIndices::Ptr objectIndices(new pcl::PointIndices);
       prism.segment(*objectIndices);
 
@@ -170,15 +172,56 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
       // Above ground points
 			prism.setInputCloud(xyz_filtered_cloud);
 			prism.setInputPlanarHull(convexHull);
-      if (is_plane_facing_up) {
-        prism.setHeightLimits(-10.0f, 0.03f);
-      } else {
-        prism.setHeightLimits(-0.03f, 10.0f);
-      }
+      // if (is_plane_facing_up) {
+      prism.setHeightLimits(-10.0f, 0.03f);
+      // } else {
+        // prism.setHeightLimits(-0.03f, 10.0f);
+      // }
       prism.segment(*objectIndices);
       extract.setIndices(objectIndices);
       extract.setNegative(true);
       extract.filter(*above_ground_cloud);
+
+      // TODO size checks
+
+      float avg_above_ground_z = 0;
+      for (const auto & pt : above_ground_cloud->points) {
+        avg_above_ground_z += pt.z / above_ground_cloud->points.size();
+      }
+      float avg_below_ground_z = 0;
+      for (const auto & pt : below_ground_cloud->points) {
+        avg_below_ground_z += pt.z / below_ground_cloud->points.size();
+      }
+      float avg_plane_z = 0;
+      for (const auto & pt : plane->points) {
+        avg_plane_z += pt.z / plane->points.size();
+      }
+      // float below_ground_min_z = below_ground_cloud->points[0].z, below_ground_max_z = above_ground_cloud->points[0].z;
+      // RCLCPP_INFO(this->get_logger(), "Avg Above/Plane/Below Ground Z: %f, %f, %f", avg_above_ground_z, avg_plane_z, avg_below_ground_z);
+      if (avg_plane_z > avg_above_ground_z || avg_plane_z < avg_below_ground_z) {
+        RCLCPP_INFO(this->get_logger(), "Flipped Z");
+        auto temp_cloud = above_ground_cloud;
+        above_ground_cloud = below_ground_cloud;
+        below_ground_cloud = temp_cloud;
+      }
+      // pcl::PointXYZ above_ground_min, above_ground_max;
+      // pcl::PointXYZ below_ground_min, below_ground_max;
+      // pcl::PointXYZ plane_min, plane_max;
+      // above_ground_cloud->is_dense = false;
+      // below_ground_cloud->is_dense = false;
+      // pcl::getMinMax3D(*above_ground_cloud, above_ground_min, above_ground_max);
+      // pcl::getMinMax3D(*below_ground_cloud, below_ground_min, below_ground_max);
+      // pcl::getMinMax3D(*plane, plane_min, plane_max);
+      // RCLCPP_INFO(this->get_logger(), "Above Ground Min: %f,%f,%f", above_ground_min.x, above_ground_min.y, above_ground_min.z);
+      // RCLCPP_INFO(this->get_logger(), "Plane Ground Min: %f,%f,%f", plane_min.x, plane_min.y, plane_min.z);
+      // RCLCPP_INFO(this->get_logger(), "Below Ground Min: %f,%f,%f", below_ground_min.x, below_ground_min.y, below_ground_min.z);
+      // RCLCPP_INFO(this->get_logger(), "Above Ground Max: %f,%f,%f", above_ground_max.x, above_ground_max.y, above_ground_max.z);
+      // RCLCPP_INFO(this->get_logger(), "Plane Ground Max: %f,%f,%f", plane_max.x, plane_max.y, plane_max.z);
+      // RCLCPP_INFO(this->get_logger(), "Below Ground Max: %f,%f,%f", below_ground_max.x, below_ground_max.y, below_ground_max.z);
+      // std::cout << above_ground_max.z << ',' << below_ground_max.z << '\n';
+      // if (above_ground_max.z < below_ground_max.z) {
+      //   RCLCPP_INFO(this->get_logger(), "Flipped Z");
+      // }
     }
 
     // Convert from pcl::PointCloud<T> back to sensor_msgs::PointCloud2

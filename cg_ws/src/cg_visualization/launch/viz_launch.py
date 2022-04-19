@@ -19,5 +19,33 @@ def generate_launch_description():
       output='screen',
       parameters=[{'robot_description': robot_desc}],
       arguments=[urdf]
+    ),
+    Node(
+      package='rviz2',
+      namespace='',
+      executable='rviz2',
+      name='rviz2',
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_main.rviz')]]
+    ),
+    Node(
+      package='rviz2',
+      namespace='',
+      executable='rviz2',
+      name='rviz2',
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_suncam.rviz')]]
+    ),
+    Node(
+      package='rviz2',
+      namespace='',
+      executable='rviz2',
+      name='rviz2',
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_depthcam.rviz')]]
     )
+    # Plotjuggler cannot be placed in a launch file
+    # https://githubhot.com/repo/facontidavide/PlotJuggler/issues/561
+    # Node(
+    #   package='plotjuggler',
+    #   executable='plotjuggler',
+    #   name='plotjuggler'
+    # )
   ])

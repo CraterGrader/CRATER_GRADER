@@ -41,6 +41,8 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
   // Initialize the current mode to the default mode, until new message is received
   curr_mux_mode_ = cg_msgs::msg::MuxMode::IDLE;
   cmd_msg_.tool_position = design_blade_pos_;
+  driving_forward_ = true;
+  slipping_ = false;
 }
 
 void AutoGraderNode::timerCallback() {
@@ -51,7 +53,24 @@ void AutoGraderNode::timerCallback() {
     // Pick some safe wheel and steer default commands to have full command message, cmd_mux node should ignore these commands when in autograder mode
     cmd_msg_.wheel_velocity = 0.0; // [-100.0, 100.0]
     cmd_msg_.steer_position = 0.0; // [-100.0, 100.0]
-        
+
+    // Set the blade height
+    // if (slipping_ || !driving_forward_) {
+    //   // Bring blade up
+    //   cmd_msg_.tool_position = max_des_blade_pos_;
+    // } else {
+    //   // Put blade down
+    //   cmd_msg_.tool_position = design_blade_pos_;
+    // }
+
+    if (!driving_forward_) {
+      // Bring blade up if moving backwards
+      cmd_msg_.tool_position = max_des_blade_pos_;
+    } else {
+      // Put blade down in all other conditions
+      cmd_msg_.tool_position = design_blade_pos_;
+    }
+
     // Clamp blade position to known physical limits
     cmd_msg_.tool_position = std::max(0.0, std::min(cmd_msg_.tool_position, 100.0)); // [0.0, 100.0]
 
@@ -70,11 +89,11 @@ void AutoGraderNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedP
     // Drive control: stay down while driving forward, move up while driving in reverse
     if (msg->drive_vel_rear < 0)
     {
-      // Raise target blade position to maximum desired height
-      cmd_msg_.tool_position = max_des_blade_pos_;
+      // Driving forwards
+      driving_forward_ = false;
     } else {
-      // Lower target blade position to design plane
-      cmd_msg_.tool_position = design_blade_pos_;
+      // Driving backwards
+      driving_forward_ = true;
     }
   }
 }
@@ -93,17 +112,8 @@ void AutoGraderNode::slipCallback(const cg_msgs::msg::Slip::SharedPtr msg) {
     //   cmd_msg_.tool_position = design_blade_pos_;
     // }
 
-    // Latching
-  //   if (msg->slip_latch)
-  //   {
-  //     // Raise target blade position to maximum desired height
-  //     cmd_msg_.tool_position = max_des_blade_pos_;
-  //   }
-  //   else
-  //   {
-  //     // Lower target blade position to design plane
-  //     cmd_msg_.tool_position = design_blade_pos_;
-  //   }
+    // Latching slip detection
+    slipping_ = msg->slip_latch;
   }
 }
 

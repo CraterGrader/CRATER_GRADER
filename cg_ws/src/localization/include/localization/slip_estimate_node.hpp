@@ -50,9 +50,9 @@ private:
   double last_t_;
   double delta_t_;
   int sampler_ = 0;
-  int sampling_steps_ = 20;
+  int sampling_steps_ = 12;
 
-  float slip_latch_thresh_ = 0.7;
+  float slip_latch_thresh_ = 0.8;
   float slip_velocity_latch_release_ = 2000;
   bool slip_latch_;
 
