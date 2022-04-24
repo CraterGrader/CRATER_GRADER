@@ -1,7 +1,6 @@
 #include "localization/slip_estimate_node.hpp"
 #include <math.h>
 
-
 namespace cg {
 namespace slip {
 
@@ -29,6 +28,53 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
   this->get_parameter("nonzero_slip_thresh", nonzero_slip_thresh_);
   // this->declare_parameter<int>("filter_window", 10);
   // this->get_parameter("filter_window", filter_window_);
+
+  // Kalman Filter for velocity estimation
+  // Discrete LTI projectile motion, measuring position only, constant velocity kinematics
+
+  // kf_n_ = 4;
+  // kf_m_ = 2;
+  // kf_dt_ = 1.0 / 18;
+
+  A_(kf_n_, kf_n_); // System dynamics matrix
+  H_(kf_m_, kf_n_); // Measurement observation matrix
+  Q_(kf_n_, kf_n_); // Process noise covariance
+  R_(kf_m_, kf_m_); // Measurement noise covariance
+  P_(kf_n_, kf_n_); // Estimate error covariance
+  RCLCPP_INFO(this->get_logger(), "Initialized");
+  Eigen::VectorXd z_(kf_m_);
+  Eigen::VectorXd xhat_(kf_n_);
+  Eigen::VectorXd x0_(kf_n_);
+
+  // state vector x0 = [x; xdot; y; ydot]
+  A_ << 1, 0, kf_dt_, 0,
+      0, 0, 1, 0,
+      0, 1, 0, kf_dt_,
+      0, 0, 0, 1;
+  H_ << 1, 0, 0, 0,
+      0, 0, 1, 0;
+  // Process uncertainty
+  Q_ << .05, .0, .0, .0,
+      .0, .05, .0, .0,
+      .0, .0, .05, .0,
+      .0, .0, .0, .05;
+  // Measurement uncertainty
+  R_ << 5, .0,
+       .0, 5;
+  // Initially give high uncertainty to unestimated states
+  P_ << .1, .0, .0, .0,
+      .0, .1, 0, .0,
+      .0, 0, 10000, .0,
+      .0, 0, .0, 10000;
+
+  // Construct the filter
+  cg::localization::KalmanFilterLinear kf_vel_tmp_(A_, H_, Q_, R_, P_);
+
+  kf_vel_ = kf_vel_tmp_;
+
+  // Best guess of initial states
+  x0_ << 0, 0, 0, 0; // [x; xdot; y; ydot]
+  kf_vel_.init(x0_);
 }
 
 // void SlipEstimateNode::updateMovingAverage(){
@@ -184,12 +230,20 @@ void SlipEstimateNode::globalCallback(
     }
   }
 
+  // Kalman filter velocity estimate
+  z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
+  kf_vel_.predict();
+  kf_vel_.update(z_);
+  xhat_ = kf_vel_.state().transpose(); // [x; xdot; y; ydot]
+  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0));
+
   // Publish the slip estimate
   slip_msg_.slip_latch = slip_latch_;
   slip_msg_.slip = curr_raw_slip_;
   slip_msg_.vel_int = curr_vel_estimate_;
   slip_msg_.vel_avg = curr_vel_avg_;
   slip_msg_.vel_twst = vel_twst_;
+  slip_msg_.vel_kf = vel_kf_;
   slip_msg_.header.stamp = this->get_clock()->now();
   slip_pub_->publish(slip_msg_);
 }

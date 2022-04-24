@@ -38,6 +38,10 @@ cg_msgs
 nav_msgs
 )
 
+# Add a custom library, and link the library with the executable
+add_library(kalman_filter_linear src/kalman_filter_linear.cpp)
+target_link_libraries(slip_estimate_node kalman_filter_linear)
+
 # build nodes
 add_executable(beacon_transformer src/beacon_transformer_main.cpp
   src/beacon_transformer.cpp

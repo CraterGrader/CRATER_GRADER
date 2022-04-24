@@ -53,15 +53,15 @@ RUN apt-get update && apt-get install -y zsh bash wget \
   # Export MicroROS DDS settings, assumes ROS_LOCALHOST_ONLY != 1
   && echo 'export FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/disable_fastdds_shm.xml' >> /root/.zshrc \
   && echo 'export FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/disable_fastdds_shm.xml' >> /root/.bashrc \
-  # Fix zsh autocomplete for ROS2 packages
-  && echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc \
-  && echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc \
   # Try sourcing cg_ws packages
   && echo 'source /root/CRATER_GRADER/cg_ws/install/setup.zsh > /dev/null 2>&1' >> ~/.zshrc \
   && echo 'source /root/CRATER_GRADER/cg_ws/install/setup.bash > /dev/null 2>&1' >> ~/.bashrc \
+  # Fix zsh autocomplete for ROS2 packages
+  && echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc \
+  && echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc \
+  # Start new shells in the cg conda environment
   && echo '# Conda environment' >> /root/.zshrc \
   && echo '# Conda environment' >> /root/.bashrc \
-  # Start new shells in the cg conda environment
   && echo "conda activate cg" >> ~/.zshrc \
   && echo "conda activate cg" >> ~/.bashrc \
   # Welcome message

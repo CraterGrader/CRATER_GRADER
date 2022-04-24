@@ -8,6 +8,7 @@
 #include <cmath> // std::abs
 #include <algorithm> // std::max
 #include <list> // moving average filter
+#include "localization/kalman_filter_linear.hpp"
 
 namespace cg {
 namespace slip {
@@ -61,6 +62,24 @@ private:
   std::list<float> vel_window_;
   float curr_vel_avg_;
   // float curr_vel_avg_;
+
+  // Kalman filter for velocity estimation
+  int kf_n_ = 4; // Number of states
+  int kf_m_ = 2;            // Number of measurements
+  double kf_dt_ = 1.0 / 18; // Time step, should be ~hz of callback
+  float vel_kf_; // Estimated velocity from Kalman Filter
+
+  Eigen::MatrixXd A_;
+  Eigen::MatrixXd H_;
+  Eigen::MatrixXd Q_;
+  Eigen::MatrixXd R_;
+  Eigen::MatrixXd P_;
+
+  Eigen::VectorXd z_;
+  Eigen::VectorXd xhat_;
+  Eigen::VectorXd x0_;
+
+  cg::localization::KalmanFilterLinear kf_vel_;
 
   /* Callbacks */
   void slipCallback();
