@@ -1,4 +1,13 @@
 slip_estimate_node:
   ros__parameters:
     nonzero_slip_thresh: 800.0 # Ignore slip when wheel speed is under this threshold, in units of encoder counts per second (qpps)
-    filter_window: 10 # Number of points for moving average filter
+    Qx: 0.05 # Process uncertainty for x
+    Qxdot: 5.0 # Process uncertainty for xdot
+    Qy: 0.05 # Process uncertainty for y
+    Qydot: 5.0 # Process uncertainty for ydot
+    Rx: 1.0 # Measurement uncertainty for x
+    Ry: 1.0 # Measurement uncertainty for y
+    Px: 0.1 # Initial estimated uncertainty in x
+    Pxdot: 10000.0 # Initial estimated uncertainty for xdot
+    Py: 0.1 # Initial estimated uncertainty for y
+    Pydot: 10000.0 # Initial estimated uncertainty for ydot

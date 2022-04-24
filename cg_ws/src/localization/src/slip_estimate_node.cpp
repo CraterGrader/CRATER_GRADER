@@ -26,41 +26,58 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
   // Load parameters
   this->declare_parameter<float>("nonzero_slip_thresh", 10.0);
   this->get_parameter("nonzero_slip_thresh", nonzero_slip_thresh_);
-  // this->declare_parameter<int>("filter_window", 10);
-  // this->get_parameter("filter_window", filter_window_);
+
+  this->declare_parameter<float>("Qx", 10.0);
+  this->get_parameter("Qx", Qx_);
+  this->declare_parameter<float>("Qxdot", 10.0);
+  this->get_parameter("Qxdot", Qxdot_);
+  this->declare_parameter<float>("Qy", 10.0);
+  this->get_parameter("Qy", Qy_);
+  this->declare_parameter<float>("Qydot", 10.0);
+  this->get_parameter("Qydot", Qydot_);
+  this->declare_parameter<float>("Rx", 10.0);
+  this->get_parameter("Rx", Rx_);
+  this->declare_parameter<float>("Ry", 10.0);
+  this->get_parameter("Ry", Ry_);
+  this->declare_parameter<float>("Px", 10.0);
+  this->get_parameter("Px", Px_);
+  this->declare_parameter<float>("Pxdot", 10.0);
+  this->get_parameter("Pxdot", Pxdot_);
+  this->declare_parameter<float>("Py", 10.0);
+  this->get_parameter("Py", Py_);
+  this->declare_parameter<float>("Pydot", 10.0);
+  this->get_parameter("Pydot", Pydot_);
 
   // Kalman Filter for velocity estimation
   // Discrete LTI projectile motion, measuring position only, constant velocity kinematics
   Eigen::MatrixXd A_(kf_n_, kf_n_); // System dynamics matrix
-  Eigen::MatrixXd H_(kf_m_, kf_n_);  // Measurement observation matrix
-  Eigen::MatrixXd Q_(kf_n_, kf_n_);   // Process noise covariance
-  Eigen::MatrixXd R_(kf_m_, kf_m_);    // Measurement noise covariance
-  Eigen::MatrixXd P_(kf_n_, kf_n_);     // Estimate error covariance
+  Eigen::MatrixXd H_(kf_m_, kf_n_); // Measurement observation matrix
+  Eigen::MatrixXd Q_(kf_n_, kf_n_); // Process noise covariance
+  Eigen::MatrixXd R_(kf_m_, kf_m_); // Measurement noise covariance
+  Eigen::MatrixXd P_(kf_n_, kf_n_); // Estimate error covariance
 
-  Eigen::VectorXd z_(kf_m_);
-  Eigen::VectorXd xhat_(kf_n_);
   Eigen::VectorXd x0_(kf_n_);
 
   // state vector x0 = [x; xdot; y; ydot]
-  A_ << 1, 0, kf_dt_, 0,
-      0, 0, 1, 0,
-      0, 1, 0, kf_dt_,
-      0, 0, 0, 1;
+  A_ << 1, kf_dt_, 0,   0,
+        0,   1,    0,   0,
+        0,   0,    1, kf_dt_,
+        0,   0,    0,   1;
   H_ << 1, 0, 0, 0,
-      0, 0, 1, 0;
+        0, 0, 1, 0;
   // Process uncertainty
-  Q_ << .05, .0, .0, .0,
-      .0, .05, .0, .0,
-      .0, .0, .05, .0,
-      .0, .0, .0, .05;
+  Q_ << Qx_, .0, .0, .0,
+        .0, Qxdot_, .0, .0,
+        .0, .0, Qy_, .0,
+        .0, .0, .0, Qydot_;
   // Measurement uncertainty
-  R_ << 5, .0,
-       .0, 5;
+  R_ << Rx_, .0,
+        .0, Ry_;
   // Initially give high uncertainty to unestimated states
-  P_ << .1, .0, .0, .0,
-      .0, .1, 0, .0,
-      .0, 0, 10000, .0,
-      .0, 0, .0, 10000;
+  P_ << Px_, .0, .0, .0,
+        .0, Pxdot_, 0, .0,
+        .0, 0, Py_, .0,
+        .0, 0, .0, Pydot_;
 
   // Construct the filter
   cg::localization::KalmanFilterLinear kf_vel_tmp_(A_, H_, Q_, R_, P_);
@@ -174,9 +191,9 @@ void SlipEstimateNode::globalCallback(
   global_init_ = false;
 
   // Only sample every n steps
-  if (sampler_++ % sampling_steps_ != 0) {
-    return;
-  }
+  // if (sampler_++ % sampling_steps_ != 0) {
+  //   return;
+  // }
 
   // Change in time
   delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9) - last_t_;
@@ -226,11 +243,16 @@ void SlipEstimateNode::globalCallback(
   }
 
   // Kalman filter velocity estimate
+  
+  Eigen::VectorXd z_(kf_m_);
   z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
+
   kf_vel_.predict();
   kf_vel_.update(z_);
-  xhat_ = kf_vel_.state().transpose(); // [x; xdot; y; ydot]
-  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0));
+  Eigen::VectorXd xhat_(kf_n_);
+  xhat_ = kf_vel_.state(); // [x; xdot; y; ydot]
+  RCLCPP_INFO(this->get_logger(), "xhat_: %f, %f, %f, %f", xhat_(0), xhat_(1), xhat_(2), xhat_(3));
+  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0)) / 0.00008298755187;
 
   // Publish the slip estimate
   slip_msg_.slip_latch = slip_latch_;
