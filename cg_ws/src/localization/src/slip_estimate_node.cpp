@@ -31,17 +31,12 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
 
   // Kalman Filter for velocity estimation
   // Discrete LTI projectile motion, measuring position only, constant velocity kinematics
+  Eigen::MatrixXd A_(kf_n_, kf_n_); // System dynamics matrix
+  Eigen::MatrixXd H_(kf_m_, kf_n_);  // Measurement observation matrix
+  Eigen::MatrixXd Q_(kf_n_, kf_n_);   // Process noise covariance
+  Eigen::MatrixXd R_(kf_m_, kf_m_);    // Measurement noise covariance
+  Eigen::MatrixXd P_(kf_n_, kf_n_);     // Estimate error covariance
 
-  // kf_n_ = 4;
-  // kf_m_ = 2;
-  // kf_dt_ = 1.0 / 18;
-
-  A_(kf_n_, kf_n_); // System dynamics matrix
-  H_(kf_m_, kf_n_); // Measurement observation matrix
-  Q_(kf_n_, kf_n_); // Process noise covariance
-  R_(kf_m_, kf_m_); // Measurement noise covariance
-  P_(kf_n_, kf_n_); // Estimate error covariance
-  RCLCPP_INFO(this->get_logger(), "Initialized");
   Eigen::VectorXd z_(kf_m_);
   Eigen::VectorXd xhat_(kf_n_);
   Eigen::VectorXd x0_(kf_n_);

@@ -69,11 +69,11 @@ private:
   double kf_dt_ = 1.0 / 18; // Time step, should be ~hz of callback
   float vel_kf_; // Estimated velocity from Kalman Filter
 
-  Eigen::MatrixXd A_;
-  Eigen::MatrixXd H_;
-  Eigen::MatrixXd Q_;
-  Eigen::MatrixXd R_;
-  Eigen::MatrixXd P_;
+  // Eigen::MatrixXd A_;
+  // Eigen::MatrixXd H_;
+  // Eigen::MatrixXd Q_;
+  // Eigen::MatrixXd R_;
+  // Eigen::MatrixXd P_;
 
   Eigen::VectorXd z_;
   Eigen::VectorXd xhat_;

@@ -1,7 +1,10 @@
 #pragma once
 #include <Eigen/Dense>
 
-// Modified from: https://github.com/hmartiro/kalman-cpp
+/*
+ * Modified from: https://github.com/hmartiro/kalman-cpp
+ * Also helpful: https://www.kalmanfilter.net/multiExamples.html
+ */
 
 namespace cg
 {
