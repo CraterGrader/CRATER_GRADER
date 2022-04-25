@@ -23,6 +23,9 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
     "/encoder_telemetry", 1, std::bind(&SlipEstimateNode::slipTelemetryCallback, this, std::placeholders::_1)
   );
 
+  act_sub_ = this->create_subscription<cg_msgs::msg::ActuatorState>(
+      "/actuator/state", 1, std::bind(&SlipEstimateNode::actStateCallback, this, std::placeholders::_1));
+
   // Load parameters
   this->declare_parameter<float>("nonzero_slip_thresh", 10.0);
   this->get_parameter("nonzero_slip_thresh", nonzero_slip_thresh_);
@@ -100,6 +103,11 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
 //   // Update the filter
 //   curr_slip_avg_ = std::accumulate(slip_window_.begin(), slip_window_.end(), 0.0) / slip_window_.size();
 // }
+
+void SlipEstimateNode::actStateCallback(const cg_msgs::msg::ActuatorState::SharedPtr msg)
+{
+  // TODO
+}
 
 void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
 
@@ -252,7 +260,7 @@ void SlipEstimateNode::globalCallback(
   Eigen::VectorXd xhat_(kf_n_);
   xhat_ = kf_vel_.state(); // [x; xdot; y; ydot]
   RCLCPP_INFO(this->get_logger(), "xhat_: %f, %f, %f, %f", xhat_(0), xhat_(1), xhat_(2), xhat_(3));
-  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0)) / 0.00008298755187;
+  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0));// / 0.00008298755187;
 
   // Publish the slip estimate
   slip_msg_.slip_latch = slip_latch_;

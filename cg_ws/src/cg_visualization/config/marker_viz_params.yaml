@@ -1,0 +1,4 @@
+marker_viz_node:
+  ros__parameters:
+    craters: [1.0, 3.5]
+    corners: [1.0, 4.0]

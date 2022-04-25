@@ -5,6 +5,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <cg_msgs/msg/slip.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
+#include <cg_msgs/msg/actuator_state.hpp>
 #include <cmath> // std::abs
 #include <algorithm> // std::max
 #include <list> // moving average filter
@@ -24,6 +25,8 @@ private:
   // rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr enc_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_sub_;
   rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr telem_sub_;
+
+  rclcpp::Subscription<cg_msgs::msg::ActuatorState>::SharedPtr act_sub_;
 
   /* Message data */
   cg_msgs::msg::Slip slip_msg_;
@@ -91,6 +94,7 @@ private:
   void slipCallback();
   void globalCallback(const nav_msgs::msg::Odometry::SharedPtr global_msg);
   void encCallback(const nav_msgs::msg::Odometry::SharedPtr enc_msg);
+  void actStateCallback(const cg_msgs::msg::ActuatorState::SharedPtr msg);
   void slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg);
 
   // rclcpp::TimerBase::SharedPtr timer_ = this->create_wall_timer(

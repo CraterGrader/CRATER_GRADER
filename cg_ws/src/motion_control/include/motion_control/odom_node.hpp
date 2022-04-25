@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <cg_msgs/msg/actuator_state.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
 
 namespace cg {
@@ -15,6 +16,7 @@ public:
 private: 
   /* Publishers and Subscribers */
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+  rclcpp::Publisher<cg_msgs::msg::ActuatorState>::SharedPtr act_state_pub_;
   rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr enc_sub_;
 
   /* Message data */
@@ -35,6 +37,7 @@ private:
   double qp_steer_to_radian_;
   double qp_drive_to_pos_m_;
   double qpps_drive_to_speed_ms_;
+  double qp_tool_to_fs_;
 
   double pose_cov_x_;
   double pose_cov_y_;
