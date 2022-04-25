@@ -1,4 +1,29 @@
 marker_viz_node:
   ros__parameters:
-    craters: [1.0, 3.5]
-    corners: [1.0, 4.0]
+    # Crater locations
+    crater1x: 4.0
+    crater1y: 3.8 
+    crater1id: 0
+    crater2x: 2.5
+    crater2y: 3.5
+    crater2id: 1
+
+    # Size for craters
+    crater_scale_x: 0.1
+    crater_scale_y: 0.1
+    crater_scale_z: 0.2
+
+    # Crater colors
+    crater_r: 0.0
+    crater_g: 1.0
+    crater_b: 0.0
+
+    # Size for steering angle arrow
+    arrow_scale_x: 0.5
+    arrow_scale_y: 0.05
+    arrow_scale_z: 0.05
+
+    # Colors for steering angle arrow
+    arrow_r: 1.0
+    arrow_g: 0.0
+    arrow_b: 1.0
