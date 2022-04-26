@@ -8,6 +8,7 @@ module cg_msgs {
       // Slip percentage
       @default (value = 0.0)
       float slip;
+      float slip_avg;
       float vel_int;
       float vel_twst;
       float vel_avg;

@@ -61,28 +61,6 @@ namespace cg_visualization
     this->declare_parameter<float>("crater_b", 0.0);
     this->get_parameter("crater_b", crater_b_);
 
-    // Crater markers
-    // crater1_.header.frame_id = "map";
-    // crater1_.header.stamp = this->get_clock()->now();
-    // crater1_.ns = "craters";
-    // crater1_.id = 0;
-    // crater1_.type = visualization_msgs::msg::Marker::CYLINDER;
-    // crater1_.action = visualization_msgs::msg::Marker::ADD;
-    // crater1_.pose.position.x = crater1x_;
-    // crater1_.pose.position.y = crater1y_;
-    // crater1_.pose.position.z = 0;
-    // crater1_.pose.orientation.x = 0.0;
-    // crater1_.pose.orientation.y = 0.0;
-    // crater1_.pose.orientation.z = 0.0;
-    // crater1_.pose.orientation.w = 1.0;
-    // crater1_.scale.x = crater_scale_x_;
-    // crater1_.scale.y = crater_scale_y_;
-    // crater1_.scale.z = crater_scale_z_;
-    // crater1_.color.a = 1.0; // Alpha controls transparency
-    // crater1_.color.r = crater_r_;
-    // crater1_.color.g = crater_g_;
-    // crater1_.color.b = crater_b_;
-
     makeCrater(crater1_, crater1id_, crater1x_, crater1y_);
     craters_msg_.markers.push_back(crater1_);
 

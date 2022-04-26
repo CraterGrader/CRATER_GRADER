@@ -26,9 +26,20 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
   act_sub_ = this->create_subscription<cg_msgs::msg::ActuatorState>(
       "/actuator/state", 1, std::bind(&SlipEstimateNode::actStateCallback, this, std::placeholders::_1));
 
+  // Timer callback
+  timer_ = this->create_wall_timer(
+      std::chrono::milliseconds(100),
+      std::bind(&SlipEstimateNode::timerCallback, this));
+
   // Load parameters
   this->declare_parameter<float>("nonzero_slip_thresh", 10.0);
   this->get_parameter("nonzero_slip_thresh", nonzero_slip_thresh_);
+  this->declare_parameter<float>("nonzero_slip_thresh_ms", 0.05);
+  this->get_parameter("nonzero_slip_thresh_ms", nonzero_slip_thresh_ms_);
+  this->declare_parameter<float>("slip_latch_thresh_ms", 0.8);
+  this->get_parameter("slip_latch_thresh_ms", slip_latch_thresh_ms_);
+  this->declare_parameter<float>("slip_velocity_latch_release_ms", 0.06);
+  this->get_parameter("slip_velocity_latch_release_ms", slip_velocity_latch_release_ms_);
 
   this->declare_parameter<float>("Qx", 10.0);
   this->get_parameter("Qx", Qx_);
@@ -92,21 +103,57 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
   kf_vel_.init(x0_);
 }
 
-// void SlipEstimateNode::updateMovingAverage(){
+void SlipEstimateNode::timerCallback()
+{
+  // Calculate slip estimate
+  if (vel_wheels_ > nonzero_slip_thresh_ms_)
+  {
+    // Calculate slip if it's above the calculation threshold
+    // Expect 0 for no slip, 1 for 100% slip, clamp at zero
 
-//   // Build up the filter
-//   slip_window_.push_front(curr_raw_slip_);
-//   if (static_cast<int>(slip_window_.size()) > filter_window_) {
-//     slip_window_.pop_back(); // remove oldest value
-//   }
+    curr_slip_ = std::max(static_cast<float>(0.0), (vel_wheels_ - vel_kf_) / vel_wheels_);
+  }
+  else
+  {
+    curr_slip_ = static_cast<float>(0.0);
+  }
 
-//   // Update the filter
-//   curr_slip_avg_ = std::accumulate(slip_window_.begin(), slip_window_.end(), 0.0) / slip_window_.size();
-// }
+  slip_avg_ = updateMovingAverage(slip_window_, curr_slip_, slip_window_size_);
+
+  // Evaluate slip latch conditions
+  if (!slip_latch_)
+  {
+    // Activate latch if average slip is above a threshold
+    if (slip_avg_ > slip_latch_thresh_ms_)
+    {
+      slip_latch_ = true;
+    }
+  }
+  else
+  {
+    // Only release latch if both velocity estimates agree that we are driving above a threshold
+    if (vel_kf_ > slip_velocity_latch_release_ms_ && vel_wheels_ > slip_velocity_latch_release_ms_)
+    {
+      slip_latch_ = false;
+    }
+  }
+
+  slip_msg_.slip_latch = slip_latch_;
+  slip_msg_.slip = curr_raw_slip_;
+  slip_msg_.slip_avg = slip_avg_;
+  slip_msg_.vel_int = curr_vel_estimate_;
+  slip_msg_.vel_avg = curr_vel_avg_;
+  slip_msg_.vel_twst = vel_twst_;
+  slip_msg_.vel_kf = vel_kf_;
+  slip_msg_.slip = curr_slip_;
+  slip_msg_.header.stamp = this->get_clock()->now();
+  slip_pub_->publish(slip_msg_);
+}
 
 void SlipEstimateNode::actStateCallback(const cg_msgs::msg::ActuatorState::SharedPtr msg)
 {
-  // TODO
+  // Get current magnitude of wheel velocity
+  vel_wheels_ = std::abs(msg->wheel_velocity);
 }
 
 void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
@@ -186,9 +233,20 @@ float SlipEstimateNode::updateMovingAverage(std::list<float> &list, float &new_v
   return std::accumulate(list.begin(), list.end(), 0.0) / list.size();
 }
 
-void SlipEstimateNode::globalCallback(
-  const nav_msgs::msg::Odometry::SharedPtr msg) {
-  
+void SlipEstimateNode::globalCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+
+  // Kalman filter velocity estimate
+  Eigen::VectorXd z_(kf_m_);
+  z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
+
+  kf_vel_.predict();
+  kf_vel_.update(z_);
+  Eigen::VectorXd xhat_(kf_n_);
+  xhat_ = kf_vel_.state(); // [x; xdot; y; ydot]
+  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0)); // / 0.00008298755187;
+
+
+
   // Initialize last time step
   if (global_init_)
   {
@@ -225,52 +283,36 @@ void SlipEstimateNode::globalCallback(
   last_y_ = msg->pose.pose.position.y;
   last_t_ = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
 
-  if (actual_rear_vel_ > nonzero_slip_thresh_)
-  {
-    // Calculate slip if it's above the calculation threshold
-    // Expect 0 for no slip, 1 for 100% slip, clamp at zero
-    curr_raw_slip_ = std::max(static_cast<float>(0.0), (actual_rear_vel_ - curr_vel_avg_) / actual_rear_vel_);
-  }
-  else
-  {
-    curr_raw_slip_ = static_cast<float>(0.0);
-  }
+  // if (actual_rear_vel_ > nonzero_slip_thresh_)
+  // {
+  //   // Calculate slip if it's above the calculation threshold
+  //   // Expect 0 for no slip, 1 for 100% slip, clamp at zero
+  //   curr_raw_slip_ = std::max(static_cast<float>(0.0), (actual_rear_vel_ - curr_vel_avg_) / actual_rear_vel_);
+  // }
+  // else
+  // {
+  //   curr_raw_slip_ = static_cast<float>(0.0);
+  // }
 
-  // Evaluate slip latch conditions
-  if (!slip_latch_) {
-    if (curr_raw_slip_ > slip_latch_thresh_) 
-    {
-      slip_latch_ = true;
-    }
-  }
-  else {
-    if (curr_vel_avg_ > slip_velocity_latch_release_)
-    {
-      slip_latch_ = false;
-    }
-  }
-
-  // Kalman filter velocity estimate
-  
-  Eigen::VectorXd z_(kf_m_);
-  z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
-
-  kf_vel_.predict();
-  kf_vel_.update(z_);
-  Eigen::VectorXd xhat_(kf_n_);
-  xhat_ = kf_vel_.state(); // [x; xdot; y; ydot]
-  RCLCPP_INFO(this->get_logger(), "xhat_: %f, %f, %f, %f", xhat_(0), xhat_(1), xhat_(2), xhat_(3));
-  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0));// / 0.00008298755187;
+  // // Evaluate slip latch conditions
+  // if (!slip_latch_) {
+  //   if (curr_raw_slip_ > slip_latch_thresh_) 
+  //   {
+  //     slip_latch_ = true;
+  //   }
+  // }
+  // else {
+  //   if (curr_vel_avg_ > slip_velocity_latch_release_)
+  //   {
+  //     slip_latch_ = false;
+  //   }
+  // }
 
   // Publish the slip estimate
-  slip_msg_.slip_latch = slip_latch_;
-  slip_msg_.slip = curr_raw_slip_;
-  slip_msg_.vel_int = curr_vel_estimate_;
-  slip_msg_.vel_avg = curr_vel_avg_;
-  slip_msg_.vel_twst = vel_twst_;
-  slip_msg_.vel_kf = vel_kf_;
-  slip_msg_.header.stamp = this->get_clock()->now();
-  slip_pub_->publish(slip_msg_);
+  // slip_msg_.slip_latch = slip_latch_;
+  // slip_msg_.vel_kf = vel_kf_;
+  // slip_msg_.header.stamp = this->get_clock()->now();
+  // slip_pub_->publish(slip_msg_);
 }
 
 
