@@ -113,7 +113,7 @@ void AutoGraderNode::slipCallback(const cg_msgs::msg::Slip::SharedPtr msg) {
     // }
 
     // Latching slip detection
-    slipping_ = msg->slip_latch;
+    // slipping_ = msg->slip_latch;
   }
 }
 

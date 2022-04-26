@@ -22,11 +22,11 @@
     </inertial>
     <visual>
       <origin
-        xyz="0 0 0"
+        xyz="-0.0521086384396309 -0.000432029546655593 0.0190393113884893"
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="file:///root/CRATER_GRADER/cg_ws/src/cg_visualization/meshes/600220.STL" />
+          filename="file:///root/CRATER_GRADER/cg_ws/src/cg_visualization/meshes/600220.STL" scale="0.001 0.001 0.001"/>
       </geometry>
       <material
         name="">
@@ -34,14 +34,14 @@
           rgba="0.96078431372  0.7294117647 0.03529411764 1" />
       </material>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="file:///root/CRATER_GRADER/cg_ws/src/cg_visualization/meshes/600220.STL" />
+          filename="file:///root/CRATER_GRADER/cg_ws/src/cg_visualization/meshes/600220.STL" scale="1000 1000 1000" />
       </geometry>
-    </collision>
+    </collision> -->
   </link>
 </robot>

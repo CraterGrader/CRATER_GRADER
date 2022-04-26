@@ -64,8 +64,8 @@ namespace cg_visualization
     makeCrater(crater1_, crater1id_, crater1x_, crater1y_);
     craters_msg_.markers.push_back(crater1_);
 
-    makeCrater(crater2_, crater2id_, crater2x_, crater2y_);
-    craters_msg_.markers.push_back(crater2_);
+    // makeCrater(crater2_, crater2id_, crater2x_, crater2y_);
+    // craters_msg_.markers.push_back(crater2_);
   }
 
   void MarkerVizNode::makeCrater(visualization_msgs::msg::Marker &crater, int id, float craterx, float cratery)

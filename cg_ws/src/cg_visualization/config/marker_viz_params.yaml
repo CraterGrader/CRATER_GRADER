@@ -1,12 +1,12 @@
 marker_viz_node:
   ros__parameters:
     # Crater locations
-    crater1x: 4.6
-    crater1y: 3.2
+    crater1x: 3.75
+    crater1y: 3.5
     crater1id: 0
-    crater2x: 2.5
-    crater2y: 3.5
-    crater2id: 1
+    crater2x: 2.5 # NOT USED
+    crater2y: 3.5 # NOT USED
+    crater2id: 1  # NOT USED
 
     # Size for craters
     crater_scale_x: 0.1

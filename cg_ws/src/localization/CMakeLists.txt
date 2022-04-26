@@ -36,6 +36,7 @@ ament_target_dependencies(slip_estimate_node
 rclcpp
 cg_msgs
 nav_msgs
+geometry_msgs
 )
 
 # Add a custom library, and link the library with the executable

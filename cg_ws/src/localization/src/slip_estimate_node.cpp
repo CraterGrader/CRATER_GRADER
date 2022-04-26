@@ -19,6 +19,9 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
     "/odometry/filtered/ekf_global_node", 1, std::bind(&SlipEstimateNode::globalCallback, this, std::placeholders::_1)
   );
 
+  uwb_avg_sub_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+      "/uwb_beacon/average_tag", 1, std::bind(&SlipEstimateNode::uwbAvgCallback, this, std::placeholders::_1));
+
   telem_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
     "/encoder_telemetry", 1, std::bind(&SlipEstimateNode::slipTelemetryCallback, this, std::placeholders::_1)
   );
@@ -34,12 +37,16 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
   // Load parameters
   this->declare_parameter<float>("nonzero_slip_thresh", 10.0);
   this->get_parameter("nonzero_slip_thresh", nonzero_slip_thresh_);
-  this->declare_parameter<float>("nonzero_slip_thresh_ms", 0.05);
-  this->get_parameter("nonzero_slip_thresh_ms", nonzero_slip_thresh_ms_);
+  this->declare_parameter<float>("nonzero_slip_thresh_wheel_ms", 0.1);
+  this->get_parameter("nonzero_slip_thresh_wheel_ms", nonzero_slip_thresh_wheel_ms_);
+  this->declare_parameter<float>("nonzero_slip_thresh_vehicle_ms_", 0.07);
+  this->get_parameter("nonzero_slip_thresh_vehicle_ms_", nonzero_slip_thresh_vehicle_ms_);
   this->declare_parameter<float>("slip_latch_thresh_ms", 0.8);
   this->get_parameter("slip_latch_thresh_ms", slip_latch_thresh_ms_);
   this->declare_parameter<float>("slip_velocity_latch_release_ms", 0.06);
   this->get_parameter("slip_velocity_latch_release_ms", slip_velocity_latch_release_ms_);
+  this->declare_parameter<int>("slip_window_size", 10);
+  this->get_parameter("slip_window_size", slip_window_size_);
 
   this->declare_parameter<float>("Qx", 10.0);
   this->get_parameter("Qx", Qx_);
@@ -61,6 +68,11 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
   this->get_parameter("Py", Py_);
   this->declare_parameter<float>("Pydot", 10.0);
   this->get_parameter("Pydot", Pydot_);
+  this->declare_parameter<double>("kf_dt", 0.05);
+  this->get_parameter("kf_dt", kf_dt_);
+
+  this->declare_parameter<int>("vel_kf_window_size", 10);
+  this->get_parameter("vel_kf_window_size", vel_kf_window_size_);
 
   // Kalman Filter for velocity estimation
   // Discrete LTI projectile motion, measuring position only, constant velocity kinematics
@@ -105,12 +117,10 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
 
 void SlipEstimateNode::timerCallback()
 {
-  // Calculate slip estimate
-  if (vel_wheels_ > nonzero_slip_thresh_ms_)
+  // Calculate slip estimate if wheels are moving fast enough, and vehicle is moving too slow
+  if (vel_wheels_ > nonzero_slip_thresh_wheel_ms_ && vel_kf_ < nonzero_slip_thresh_vehicle_ms_)
   {
-    // Calculate slip if it's above the calculation threshold
-    // Expect 0 for no slip, 1 for 100% slip, clamp at zero
-
+    // Expect 0 for no slip, 1 for 100% slip, clamp at zero so no negative slip (only using magnitudes)
     curr_slip_ = std::max(static_cast<float>(0.0), (vel_wheels_ - vel_kf_) / vel_wheels_);
   }
   else
@@ -118,12 +128,13 @@ void SlipEstimateNode::timerCallback()
     curr_slip_ = static_cast<float>(0.0);
   }
 
+  // Use moving average to smooth slip estimate
   slip_avg_ = updateMovingAverage(slip_window_, curr_slip_, slip_window_size_);
 
   // Evaluate slip latch conditions
   if (!slip_latch_)
   {
-    // Activate latch if average slip is above a threshold
+    // Activate latch if average slip is above a threshold, and vehicle speed is below a threshold
     if (slip_avg_ > slip_latch_thresh_ms_)
     {
       slip_latch_ = true;
@@ -138,14 +149,16 @@ void SlipEstimateNode::timerCallback()
     }
   }
 
-  slip_msg_.slip_latch = slip_latch_;
-  slip_msg_.slip = curr_raw_slip_;
-  slip_msg_.slip_avg = slip_avg_;
+  // Not used
   slip_msg_.vel_int = curr_vel_estimate_;
-  slip_msg_.vel_avg = curr_vel_avg_;
   slip_msg_.vel_twst = vel_twst_;
-  slip_msg_.vel_kf = vel_kf_;
+
+  // Used
   slip_msg_.slip = curr_slip_;
+  slip_msg_.slip_avg = slip_avg_;
+  slip_msg_.slip_latch = slip_latch_;
+  slip_msg_.vel_kf = vel_kf_;
+  slip_msg_.vel_avg = vel_kf_avg_;
   slip_msg_.header.stamp = this->get_clock()->now();
   slip_pub_->publish(slip_msg_);
 }
@@ -154,6 +167,22 @@ void SlipEstimateNode::actStateCallback(const cg_msgs::msg::ActuatorState::Share
 {
   // Get current magnitude of wheel velocity
   vel_wheels_ = std::abs(msg->wheel_velocity);
+}
+
+void SlipEstimateNode::uwbAvgCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
+{
+  // Kalman filter velocity estimate
+  Eigen::VectorXd z_(kf_m_);
+  z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
+
+  kf_vel_.predict();
+  kf_vel_.update(z_);
+  Eigen::VectorXd xhat_(kf_n_);
+  xhat_ = kf_vel_.state();                                 // [x; xdot; y; ydot]
+  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0)); // / 0.00008298755187;
+
+  // Update moving average
+  vel_kf_avg_ = updateMovingAverage(vel_kf_window_, vel_kf_, vel_kf_window_size_);
 }
 
 void SlipEstimateNode::slipTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
@@ -235,17 +264,17 @@ float SlipEstimateNode::updateMovingAverage(std::list<float> &list, float &new_v
 
 void SlipEstimateNode::globalCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
 
-  // Kalman filter velocity estimate
-  Eigen::VectorXd z_(kf_m_);
-  z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
+  // // Kalman filter velocity estimate
+  // Eigen::VectorXd z_(kf_m_);
+  // z_ << msg->pose.pose.position.x, msg->pose.pose.position.y;
 
-  kf_vel_.predict();
-  kf_vel_.update(z_);
-  Eigen::VectorXd xhat_(kf_n_);
-  xhat_ = kf_vel_.state(); // [x; xdot; y; ydot]
-  vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0)); // / 0.00008298755187;
+  // kf_vel_.predict();
+  // kf_vel_.update(z_);
+  // Eigen::VectorXd xhat_(kf_n_);
+  // xhat_ = kf_vel_.state();                                 // [x; xdot; y; ydot]
+  // vel_kf_ = sqrt(pow(xhat_(1), 2.0) + pow(xhat_(3), 2.0)); // / 0.00008298755187;
 
-
+  // vel_kf_avg_ = updateMovingAverage(vel_kf_window_, vel_kf_, vel_kf_window_size_);
 
   // Initialize last time step
   if (global_init_)
