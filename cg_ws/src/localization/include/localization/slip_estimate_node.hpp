@@ -63,8 +63,8 @@ private:
   // float curr_vel_avg_;
 
   /* Good params */
-  float vel_wheels_ = 0.; // Wheel velocity averaged between front and back
-  float curr_slip_;
+  float vel_wheels_ = 0.0; // Wheel velocity averaged between front and back
+  float curr_slip_ = 0.0;
   float nonzero_slip_thresh_wheel_ms_;
   float slip_latch_thresh_ms_;
   float slip_velocity_latch_release_ms_;
@@ -72,15 +72,15 @@ private:
 
   int slip_window_size_ = 10;
   std::list<float> slip_window_;
-  float slip_avg_;
+  float slip_avg_ = 0.0;
 
   int vel_kf_window_size_ = 10;
   std::list<float> vel_kf_window_;
-  float vel_kf_avg_;
+  float vel_kf_avg_ = 0.0;
 
   float slip_latch_thresh_ = 0.8;
   float slip_velocity_latch_release_ = 2000;
-  bool slip_latch_;
+  bool slip_latch_ = false;
 
   // Kalman filter for velocity estimation
   int kf_n_ = 4; // Number of states

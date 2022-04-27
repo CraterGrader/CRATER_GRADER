@@ -32,15 +32,22 @@ def generate_launch_description():
       namespace='',
       executable='rviz2',
       name='rviz2',
-      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'crater_loc_test.rviz')]]
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_encore_main_orbit_view.rviz')]]
     ),
-    # Node(
-    #   package='rviz2',
-    #   namespace='',
-    #   executable='rviz2',
-    #   name='rviz2',
-    #   arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_suncam.rviz')]]
-    # ),
+    Node(
+      package='rviz2',
+      namespace='',
+      executable='rviz2',
+      name='rviz2',
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_encore_main_topdown_view.rviz')]]
+    ),
+    Node(
+      package='rviz2',
+      namespace='',
+      executable='rviz2',
+      name='rviz2',
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_encore_depthcam.rviz')]]
+    ),
     # Node(
     #   package='rviz2',
     #   namespace='',

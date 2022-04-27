@@ -118,10 +118,10 @@ SlipEstimateNode::SlipEstimateNode() : Node("slip_estimate_node") {
 void SlipEstimateNode::timerCallback()
 {
   // Calculate slip estimate if wheels are moving fast enough, and vehicle is moving too slow
-  if (vel_wheels_ > nonzero_slip_thresh_wheel_ms_ && vel_kf_ < nonzero_slip_thresh_vehicle_ms_)
+  if (vel_wheels_ > nonzero_slip_thresh_wheel_ms_ && vel_kf_avg_ < nonzero_slip_thresh_vehicle_ms_)
   {
     // Expect 0 for no slip, 1 for 100% slip, clamp at zero so no negative slip (only using magnitudes)
-    curr_slip_ = std::max(static_cast<float>(0.0), (vel_wheels_ - vel_kf_) / vel_wheels_);
+    curr_slip_ = std::max(static_cast<float>(0.0), (vel_wheels_ - vel_kf_avg_) / vel_wheels_);
   }
   else
   {
@@ -143,7 +143,7 @@ void SlipEstimateNode::timerCallback()
   else
   {
     // Only release latch if both velocity estimates agree that we are driving above a threshold
-    if (vel_kf_ > slip_velocity_latch_release_ms_ && vel_wheels_ > slip_velocity_latch_release_ms_)
+    if (vel_kf_avg_ > slip_velocity_latch_release_ms_ && vel_wheels_ > slip_velocity_latch_release_ms_)
     {
       slip_latch_ = false;
     }
