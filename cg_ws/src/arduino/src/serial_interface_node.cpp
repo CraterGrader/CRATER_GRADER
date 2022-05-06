@@ -1,5 +1,13 @@
 #include "arduino/serial_interface_node.hpp"
 
+/*
+ * Team CraterGrader
+ * CMU MRSD Program, Course 16-681
+ * Team Members: Alex Pletta, Ryan Lee, Russell Wong, Ben Younes, John Harrington
+ * Rev0: February 5, 2022
+ * Code description: Facilitate low-level motion control commands from Xavier ROS2 stack to micro-ROS node on Arduino Due
+ */
+
 namespace cg {
 namespace arduino {
 
