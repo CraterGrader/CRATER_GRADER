@@ -1,7 +1,7 @@
 slip_estimate_node:
   ros__parameters:
-    nonzero_slip_thresh: 800.0 # Ignore slip when wheel speed is under this threshold, in units of encoder counts per second (qpps) NOT USED
 
+    # Kalman filter model
     Qx: 0.05 # Process uncertainty for x
     Qxdot: 5.0 # Process uncertainty for xdot
     Qy: 0.05 # Process uncertainty for y
@@ -16,6 +16,7 @@ slip_estimate_node:
 
     vel_kf_window_size: 7 # Number of points to use in moving average of velocity estimate
 
+    # Slip estimation thresholds
     nonzero_slip_thresh_wheel_ms: 0.1 # Only calculate slip when wheel speed is ABOVE this threshold [m/s]
     nonzero_slip_thresh_vehicle_ms: 0.07 # Only calculate slip if vehicle velocity is BELOW this threshold [m/s]
 
