@@ -10,7 +10,6 @@ distortion_coefficients:
   rows: 1
   cols: 4
   data: [0., 0., 0., 0.]
-  #data: [-4.20510300e-02, -3.43845925e-03, -7.62396222e-04, -9.83326585e-06]
 rectification_matrix:
   rows: 3
   cols: 3

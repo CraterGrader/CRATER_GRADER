@@ -1,4 +1,14 @@
-# usb_cam [![ROS2 CI](https://github.com/ros-drivers/usb_cam/actions/workflows/build_test.yml/badge.svg)](https://github.com/ros-drivers/usb_cam/actions/workflows/build_test.yml)
+# usb_cam [![ROS2 usb_cam GitHub)](https://github.com/ros-drivers/usb_cam/tree/ros2)
+
+## Changes to Package
+- "config"
+  - Set the camera_info.yaml parameters to the calibrated fisheye model parameters
+  - Set the params.yaml to symlinked video device and desired parameters
+- "include/usb_cam/usb_cam_node.cpp"
+  - Added new variables and known camera distortion model parameters needed to undistort the image
+- "src/usb_cam_node.cpp"
+  - Changed parameter defaults
+  - Updated take_and_send_image() to use the fisheye model parameters to undistort the image before publishing it
 
 ## A ROS2 Driver for V4L USB Cameras
 This package is based off of V4L devices specifically instead of just UVC.
