@@ -10,6 +10,9 @@ OdomNode::OdomNode() : Node("odom_node") {
   odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>(
     "/encoder/odom", 1
   );
+  act_state_pub_ = this->create_publisher<cg_msgs::msg::ActuatorState>(
+    "/actuator/state", 1
+  );
   enc_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
     "/encoder_telemetry", 1, std::bind(&OdomNode::odomCallback, this, std::placeholders::_1)
   );
@@ -22,6 +25,8 @@ OdomNode::OdomNode() : Node("odom_node") {
   this->get_parameter("qp_drive_to_pos_m", qp_drive_to_pos_m_);
   this->declare_parameter<double>("qpps_drive_to_speed_ms", 0.0008298755187);
   this->get_parameter("qpps_drive_to_speed_ms", qpps_drive_to_speed_ms_);
+  this->declare_parameter<double>("qp_tool_to_fs", -0.00000666933);
+  this->get_parameter("qp_tool_to_fs", qp_tool_to_fs_);
 
   // position covariance
   this->declare_parameter<double>("pose_cov_x", 1);
@@ -67,7 +72,15 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
 
   float pos_delta = -qp_drive_to_pos_m_*(msg->drive_delta_front - msg->drive_delta_rear)/2; // flip if the direction is wrong
   float steer_angle = -qp_steer_to_radian_*(msg->steer_pos_rear - msg->steer_pos_front)/2; // flip this sign if the steer is reversed 
-  float drive_velocity = -qpps_drive_to_speed_ms_*(msg->drive_vel_front - msg->drive_vel_rear)/2; // flip this sign if the drive velocity is reversed 
+  float drive_velocity = -qpps_drive_to_speed_ms_*(msg->drive_vel_front - msg->drive_vel_rear)/2; // flip this sign if the drive velocity is reversed
+
+  // Actuator State message
+  auto act_state_msg = cg_msgs::msg::ActuatorState();
+  act_state_msg.header = msg->header;
+  act_state_msg.wheel_velocity = drive_velocity;
+  act_state_msg.steer_position = steer_angle;
+  act_state_msg.tool_position = msg->tool_pos * qp_tool_to_fs_;
+  act_state_pub_->publish(act_state_msg);
 
   delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)  - tlast_;
 

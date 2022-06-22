@@ -48,11 +48,19 @@ public:
 private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_points_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr below_points_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr above_points_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr plane_points_pub_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr raw_points_sub_;
 
   /* Callbacks */
   void rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 
+  bool use_sor_;
+  int sor_mean_k_;
+  double sor_stddev_mul_thresh_;
+  bool use_plane_seg_;
+  double plane_seg_dist_thresh_;
 };
 
 

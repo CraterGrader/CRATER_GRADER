@@ -22,6 +22,7 @@ camera:
         decimation_filter.filter_magnitude: 8 # The filter run on kernel sizes [2x2] to [8x8] pixels. For patches sized 2 and 3 the median depth value is selected. For larger kernels, 4-8 pixels, the mean depth is used due to performance considerations. More info: https://dev.intelrealsense.com/docs/post-processing-filters
         clip_distance: 2.0 # Remove from the depth image all values above a given value (meters), set negative to turn off clipping. More info: https://dev.intelrealsense.com/docs/ros-wrapper
         # 'colorizer' filter applies RGB normalization coloring to depth image, and 
+        colorizer.enable: true
         pointcloud.stream_filter: 0 # = 0 Allows any filter for streaming point cloud
         pointcloud_stream_format_filter: 0 # = 0 Allows any filter format for streaming point cloud
         pointcloud_texture_index: 0 # = 0 Allows any texture for streaming point cloud

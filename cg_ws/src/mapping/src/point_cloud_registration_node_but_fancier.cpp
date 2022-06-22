@@ -4,6 +4,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 namespace cg {
 namespace mapping {
@@ -37,6 +38,14 @@ PointCloudRegistrationNodeFancy::PointCloudRegistrationNodeFancy() :
   this->declare_parameter<float>("voxel_filter_size", 0.001);
   this->get_parameter("voxel_filter_size", voxel_filter_size_);
 
+
+  // Statistical Outlier Removal Params
+  this->declare_parameter<int>("sor_mean_k", 50);
+  this->get_parameter("sor_mean_k", sor_mean_k_);
+  this->declare_parameter<double>("sor_stddev_mul_thresh", 1.0);
+  this->get_parameter("sor_stddev_mul_thresh", sor_stddev_mul_thresh_);
+
+
   icp_.setMaximumIterations(icp_max_iters_);
   // icp_.setMaxCorrespondenceDistance (0.05);
 
@@ -52,165 +61,146 @@ void PointCloudRegistrationNodeFancy::timerCallback() {
     RCLCPP_WARN(this->get_logger(), "Waiting for initial point cloud data");
     return;
   }
-  // sensor_msgs::msg::PointCloud2 point_cloud_map_msg_temp;
-  // pcl::toROSMsg(*point_cloud_map_, point_cloud_map_msg_temp);
-  // point_cloud_map_msg_temp.header.frame_id = "map";
-  // terrain_raw_map_pub_->publish(point_cloud_map_msg_temp);
-  // return;
 
   if (new_data_received_) {
 
-    // geometry_msgs::msg::TransformStamped tf;
-    // try {
-    //   tf = tf_buffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
-    // }
-
-    // catch (tf2::TransformException &ex){
-    //   tf.transform.translation.x = 0;
-    //   tf.transform.translation.y = 0;
-    //   tf.transform.translation.z = 0;
-    //   tf.transform.rotation.x = 0;
-    //   tf.transform.rotation.y = 0;
-    //   tf.transform.rotation.z = 0;
-    //   tf.transform.rotation.w = 1;
-    // }
-
-    // New Stuff
+    // Statistical outlier removal for salt-and-pepper noise
+    // https://pcl.readthedocs.io/en/latest/statistical_outlier.html
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+    sor.setInputCloud(new_point_cloud_);
+    sor.setMeanK(sor_mean_k_);
+    sor.setStddevMulThresh(sor_stddev_mul_thresh_);
+    sor.filter(*new_point_cloud_);
 
     pcl::PointCloud<pcl::PointXYZ>& source_cloud = *new_point_cloud_;
     pcl::PointCloud<pcl::PointXYZ>& target_cloud = *point_cloud_map_;
 
-    // Remove NaN points from point clouds
-    // (this is necessary to avoid a segfault when running ICP)
     std::vector<int> nan_idx;
-    pcl::removeNaNFromPointCloud(source_cloud, source_cloud, nan_idx);
-    pcl::removeNaNFromPointCloud(target_cloud, target_cloud, nan_idx);
+    pcl::removeNaNFromPointCloud(*new_point_cloud_, *new_point_cloud_, nan_idx);
 
     // Estimate cloud normals
-    std::cout << "Computing source cloud normals\n";
+
+    // Calculate normals from new point cloud (source)
     pcl::NormalEstimation<pcl::PointXYZ, pcl::PointNormal> ne;
-    pcl::PointCloud<pcl::PointNormal>::Ptr src_normals_ptr (new pcl::PointCloud<pcl::PointNormal>);
-    pcl::PointCloud<pcl::PointNormal>& src_normals = *src_normals_ptr;
+    pcl::PointCloud<pcl::PointNormal>::Ptr new_normals_ptr (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointNormal>& new_normals = *new_normals_ptr;
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree_xyz (new pcl::search::KdTree<pcl::PointXYZ>());
     ne.setInputCloud(new_point_cloud_);
     ne.setSearchMethod(tree_xyz);
     ne.setRadiusSearch(0.05); // TODO: Need to tune this param
-    ne.compute(*src_normals_ptr);
-    for(size_t i = 0;  i < src_normals.points.size(); ++i) {
-        src_normals.points[i].x = source_cloud.points[i].x;
-        src_normals.points[i].y = source_cloud.points[i].y;
-        src_normals.points[i].z = source_cloud.points[i].z;
+    ne.compute(*new_normals_ptr);
+    for(size_t i = 0;  i < new_normals.points.size(); ++i) {
+        new_normals.points[i].x = source_cloud.points[i].x;
+        new_normals.points[i].y = source_cloud.points[i].y;
+        new_normals.points[i].z = source_cloud.points[i].z;
     }
 
-    std::cout << "Computing target cloud normals\n";
-    pcl::PointCloud<pcl::PointNormal>::Ptr tar_normals_ptr (new pcl::PointCloud<pcl::PointNormal>);
-    pcl::PointCloud<pcl::PointNormal>& tar_normals = *tar_normals_ptr;
+    // Calculate normals from target point cloud (existing map)
+    pcl::PointCloud<pcl::PointNormal>::Ptr map_normals_ptr (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointNormal>& map_normals = *map_normals_ptr;
     ne.setInputCloud(point_cloud_map_);
-    ne.compute(*tar_normals_ptr);
-    for(size_t i = 0;  i < tar_normals.points.size(); ++i) {
-        tar_normals.points[i].x = target_cloud.points[i].x;
-        tar_normals.points[i].y = target_cloud.points[i].y;
-        tar_normals.points[i].z = target_cloud.points[i].z;
+    ne.compute(*map_normals_ptr);
+    for(size_t i = 0;  i < map_normals.points.size(); ++i) {
+        map_normals.points[i].x = target_cloud.points[i].x;
+        map_normals.points[i].y = target_cloud.points[i].y;
+        map_normals.points[i].z = target_cloud.points[i].z;
     }
 
-    // Estimate the SIFT keypoints
-    pcl::SIFTKeypoint<pcl::PointNormal, pcl::PointWithScale> sift;
-    pcl::PointCloud<pcl::PointWithScale>::Ptr src_keypoints_ptr (new pcl::PointCloud<pcl::PointWithScale>);
-    pcl::PointCloud<pcl::PointWithScale>& src_keypoints = *src_keypoints_ptr;
-    pcl::search::KdTree<pcl::PointNormal>::Ptr tree_normal(new pcl::search::KdTree<pcl::PointNormal> ());
-    sift.setSearchMethod(tree_normal);
-    sift.setScales(min_scale, n_octaves, n_scales_per_octave);
-    sift.setMinimumContrast(min_contrast);
-    sift.setInputCloud(src_normals_ptr);
-    sift.compute(src_keypoints);
-    std::cout << "Found " << src_keypoints.points.size () << " SIFT keypoints in source cloud\n";
-  
-    pcl::PointCloud<pcl::PointWithScale>::Ptr tar_keypoints_ptr (new pcl::PointCloud<pcl::PointWithScale>);
-    pcl::PointCloud<pcl::PointWithScale>& tar_keypoints = *tar_keypoints_ptr;
-    sift.setInputCloud(tar_normals_ptr);
-    sift.compute(tar_keypoints);
-    std::cout << "Found " << tar_keypoints.points.size () << " SIFT keypoints in target cloud\n";
-    
-    // Extract FPFH features from SIFT keypoints
-    pcl::PointCloud<pcl::PointXYZ>::Ptr src_keypoints_xyz (new pcl::PointCloud<pcl::PointXYZ>);                           
-    pcl::copyPointCloud (src_keypoints, *src_keypoints_xyz);
-    pcl::FPFHEstimation<pcl::PointXYZ, pcl::PointNormal, pcl::FPFHSignature33> fpfh;
-    fpfh.setSearchSurface (point_cloud_map_);
-    fpfh.setInputCloud (src_keypoints_xyz);
-    fpfh.setInputNormals (src_normals_ptr);
-    fpfh.setSearchMethod (tree_xyz);
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr src_features_ptr (new pcl::PointCloud<pcl::FPFHSignature33>());
-    pcl::PointCloud<pcl::FPFHSignature33>& src_features = *src_features_ptr;
-    fpfh.setRadiusSearch(0.05);
-    fpfh.compute(src_features);
-    std::cout << "Computed " << src_features.size() << " FPFH features for source cloud\n";
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr tar_keypoints_xyz (new pcl::PointCloud<pcl::PointXYZ>);                           
-    pcl::copyPointCloud (tar_keypoints, *tar_keypoints_xyz);
-    fpfh.setSearchSurface (new_point_cloud_);
-    fpfh.setInputCloud (tar_keypoints_xyz);
-    fpfh.setInputNormals (tar_normals_ptr);
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr tar_features_ptr (new pcl::PointCloud<pcl::FPFHSignature33>());
-    pcl::PointCloud<pcl::FPFHSignature33>& tar_features = *tar_features_ptr;
-    fpfh.compute(tar_features);
-    std::cout << "Computed " << tar_features.size() << " FPFH features for target cloud\n";
-    
-    // Compute the transformation matrix for alignment
-    Eigen::Matrix4f tform = Eigen::Matrix4f::Identity();
-    // tform = computeInitialAlignment (src_keypoints_ptr, src_features_ptr, tar_keypoints_ptr,
-    //         tar_features_ptr, min_sample_dist, max_correspondence_dist, nr_iters);
-    
-    // Uncomment this code to run ICP 
-    // tform = refineAlignment (point_cloud_map_, new_point_cloud_, tform, max_correspondence_distance,
-    //         outlier_rejection_threshold, transformation_epsilon, max_iterations);
+    //SIFT Keypoint Estimation
 
-    tform = refineAlignment (tar_keypoints_xyz, src_keypoints_xyz, tform, max_correspondence_distance,
-            outlier_rejection_threshold, transformation_epsilon, max_iterations);
+    // RUN ICP
+    icp_.setInputSource(new_point_cloud_);
+    icp_.setInputTarget(point_cloud_map_);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr registered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    matrix_ = tf2::transformToEigen(tf_);
+    std::cout << matrix_.matrix().cast<float>() << std::endl;
+    icp_.align(*registered_cloud, matrix_.matrix().cast<float>());  
+    if (icp_.hasConverged()) {
+      // RCLCPP_INFO(this->get_logger(), "ICP Converged");
+      Eigen::Matrix4d registered_cloud_transform = icp_.getFinalTransformation().cast<double>();
+      // std::cout << registered_cloud_transform << std::endl;
+      pcl::transformPointCloud(*new_point_cloud_, *registered_cloud, registered_cloud_transform);
+      *point_cloud_map_ += *registered_cloud;
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>& transformed_cloud = *transformed_cloud_ptr;
-    pcl::transformPointCloud(*new_point_cloud_, transformed_cloud, tform);
-    std::cout << "Calculated transformation\n";
+    } else {
+      RCLCPP_WARN(this->get_logger(), "ICP Failed Convergence");
+    }
 
-    *point_cloud_map_ += transformed_cloud;
-    // if (first_pc) 
-    // {
-    //   *point_cloud_map_ = *transformed_cloud_ptr;
-    //   first_pc = false;
-    // } else 
-    // {
-    //   *point_cloud_map_ += *transformed_cloud_ptr;
-    // }
-    // End of New Stuff
-
-
-    // // Old Stuff::
-    // icp_.setInputSource(new_point_cloud_);
-    // icp_.setInputTarget(point_cloud_map_);
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr registered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    // matrix_ = tf2::transformToEigen(tf_);
-    // std::cout << matrix_.matrix().cast<float>() << std::endl;
-    // icp_.align(*registered_cloud, matrix_.matrix().cast<float>());  
-    // if (icp_.hasConverged()) {
-    //   // RCLCPP_INFO(this->get_logger(), "ICP Converged");
-    //   Eigen::Matrix4d registered_cloud_transform = icp_.getFinalTransformation().cast<double>();
-    //   // std::cout << registered_cloud_transform << std::endl;
-    //   pcl::transformPointCloud(*new_point_cloud_, *registered_cloud, registered_cloud_transform);
-    //   *point_cloud_map_ += *registered_cloud;
-
-    // } else {
-    //   RCLCPP_WARN(this->get_logger(), "ICP Failed Convergence");
-    // }
     new_data_received_ = false;
+
   }
 
+  //   // Estimate the SIFT keypoints
+  //   pcl::SIFTKeypoint<pcl::PointNormal, pcl::PointWithScale> sift;
+  //   pcl::PointCloud<pcl::PointWithScale>::Ptr src_keypoints_ptr (new pcl::PointCloud<pcl::PointWithScale>);
+  //   pcl::PointCloud<pcl::PointWithScale>& src_keypoints = *src_keypoints_ptr;
+  //   pcl::search::KdTree<pcl::PointNormal>::Ptr tree_normal(new pcl::search::KdTree<pcl::PointNormal> ());
+  //   sift.setSearchMethod(tree_normal);
+  //   sift.setScales(min_scale, n_octaves, n_scales_per_octave);
+  //   sift.setMinimumContrast(min_contrast);
+  //   sift.setInputCloud(src_normals_ptr);
+  //   sift.compute(src_keypoints);
+  //   std::cout << "Found " << src_keypoints.points.size () << " SIFT keypoints in source cloud\n";
+  
+  //   pcl::PointCloud<pcl::PointWithScale>::Ptr tar_keypoints_ptr (new pcl::PointCloud<pcl::PointWithScale>);
+  //   pcl::PointCloud<pcl::PointWithScale>& tar_keypoints = *tar_keypoints_ptr;
+  //   sift.setInputCloud(tar_normals_ptr);
+  //   sift.compute(tar_keypoints);
+  //   std::cout << "Found " << tar_keypoints.points.size () << " SIFT keypoints in target cloud\n";
+    
+  //   // Extract FPFH features from SIFT keypoints
+  //   pcl::PointCloud<pcl::PointXYZ>::Ptr src_keypoints_xyz (new pcl::PointCloud<pcl::PointXYZ>);                           
+  //   pcl::copyPointCloud (src_keypoints, *src_keypoints_xyz);
+  //   // pcl::FPFHEstimation<pcl::PointXYZ, pcl::PointNormal, pcl::FPFHSignature33> fpfh;
+  //   // fpfh.setSearchSurface (point_cloud_map_);
+  //   // fpfh.setInputCloud (src_keypoints_xyz);
+  //   // fpfh.setInputNormals (src_normals_ptr);
+  //   // fpfh.setSearchMethod (tree_xyz);
+  //   // pcl::PointCloud<pcl::FPFHSignature33>::Ptr src_features_ptr (new pcl::PointCloud<pcl::FPFHSignature33>());
+  //   // pcl::PointCloud<pcl::FPFHSignature33>& src_features = *src_features_ptr;
+  //   // fpfh.setRadiusSearch(0.05);
+  //   // fpfh.compute(src_features);
+  //   // std::cout << "Computed " << src_features.size() << " FPFH features for source cloud\n";
+
+  //   pcl::PointCloud<pcl::PointXYZ>::Ptr tar_keypoints_xyz (new pcl::PointCloud<pcl::PointXYZ>);                           
+  //   pcl::copyPointCloud (tar_keypoints, *tar_keypoints_xyz);
+  //   // fpfh.setSearchSurface (new_point_cloud_);
+  //   // fpfh.setInputCloud (tar_keypoints_xyz);
+  //   // fpfh.setInputNormals (tar_normals_ptr);
+  //   // pcl::PointCloud<pcl::FPFHSignature33>::Ptr tar_features_ptr (new pcl::PointCloud<pcl::FPFHSignature33>());
+  //   // pcl::PointCloud<pcl::FPFHSignature33>& tar_features = *tar_features_ptr;
+  //   // fpfh.compute(tar_features);
+  //   // std::cout << "Computed " << tar_features.size() << " FPFH features for target cloud\n";
+    
+  //   // Compute the transformation matrix for alignment
+  //   Eigen::Matrix4f tform = Eigen::Matrix4f::Identity();
+  //   // tform = computeInitialAlignment (src_keypoints_ptr, src_features_ptr, tar_keypoints_ptr,
+  //   //         tar_features_ptr, min_sample_dist, max_correspondence_dist, nr_iters);
+  //   // Uncomment this code to run ICP 
+  //   // tform = refineAlignment (point_cloud_map_, new_point_cloud_, tform, max_correspondence_distance,
+  //   //         outlier_rejection_threshold, transformation_epsilon, max_iterations);
+
+  //   tform = refineAlignment (new_point_cloud_, point_cloud_map_, tform, max_correspondence_distance,
+  //           outlier_rejection_threshold, transformation_epsilon, max_iterations);
+
+  //   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud_ptr (new pcl::PointCloud<pcl::PointXYZ>);
+  //   pcl::PointCloud<pcl::PointXYZ>& transformed_cloud = *transformed_cloud_ptr;
+  //   //pcl::transformPointCloud(*new_point_cloud_, transformed_cloud, tform);
+
+  //   *point_cloud_map_ += *new_point_cloud_;
+  //   // End of New Stuff
+
+  //   new_data_received_ = false;
+  // }
+
   // Downsample
-  // RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
+  RCLCPP_INFO(this->get_logger(), "Number of points before downsample: %lu", point_cloud_map_->size());
   pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
   voxel_grid.setInputCloud(point_cloud_map_);
   voxel_grid.setLeafSize(voxel_filter_size_, voxel_filter_size_, voxel_filter_size_);
   voxel_grid.filter(*point_cloud_map_);
-  // RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
+  RCLCPP_INFO(this->get_logger(), "Number of points after downsample: %lu", point_cloud_map_->size());
 
   // Convert map to sensor_msgs::msg::PointCloud2 and publish message
   sensor_msgs::msg::PointCloud2 point_cloud_map_msg;
@@ -236,6 +226,14 @@ void PointCloudRegistrationNodeFancy::filteredPointsCallback(const sensor_msgs::
   }
  
   if (point_cloud_map_->size() == 0) {
+
+    // Filter outliers from first point cloud
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+    sor.setInputCloud(new_point_cloud_);
+    sor.setMeanK(sor_mean_k_);
+    sor.setStddevMulThresh(sor_stddev_mul_thresh_);
+    sor.filter(*new_point_cloud_);
+
     pcl::transformPointCloud(*new_point_cloud_, *point_cloud_map_, tf2::transformToEigen(tf_).matrix().cast<float>());
     // first_pc = true;
   } else {

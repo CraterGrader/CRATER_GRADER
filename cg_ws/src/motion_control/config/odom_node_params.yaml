@@ -4,6 +4,7 @@ odom_node:
     qp_steer_to_radian: 0.00007632539564 
     qp_drive_to_pos_m: 0.00008298755187
     qpps_drive_to_speed_ms: 0.00008298755187
+    qp_tool_to_fs: -0.000666933440043
     pose_cov_x: 0.000001
     pose_cov_y: 0.000001
     pose_cov_z: 0.000001

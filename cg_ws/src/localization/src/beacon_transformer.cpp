@@ -28,7 +28,7 @@ BeaconTransformer::BeaconTransformer() : Node("beacon_transformer")
   average_tag_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
   "/uwb_beacon/average_tag", 1);
 
-  int pub_freq{100};
+  int pub_freq{5};
   tf_timer_ = this->create_wall_timer(
     std::chrono::milliseconds(1000/pub_freq),
     std::bind(&BeaconTransformer::tf_Callback, this)

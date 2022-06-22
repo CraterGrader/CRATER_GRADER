@@ -13,6 +13,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/EncoderTelemetry.idl"
   "msg/Slip.idl"
   "msg/MuxMode.idl"
+  "msg/ActuatorState.idl"
 
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs
