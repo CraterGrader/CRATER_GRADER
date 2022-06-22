@@ -25,9 +25,6 @@ BearingNode::BearingNode() : Node("bearing_node") {
     "/bearing", 1
   );
 
-  // For TESTING
-  // full_tf_pub_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-
   // Create listener
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -49,7 +46,6 @@ void BearingNode::timerCallback() {
   std::string fromTag_base = "april_tag";
   std::string toLink = "rob_base_link";
 
-  // Static frames to be used - TODO: Move this out of a callback to improve speed
   // Not sure if good idea as launch file opens node in random order
   std::string fromMap = "tag_map";
   std::string toCamera = "camera";
@@ -82,14 +78,13 @@ void BearingNode::timerCallback() {
 
     // Get camera to tag transform - matters the most, needs to not only include most recent transform
     try {
-      //rclcpp::Time now = this->get_clock()->now();
       cam_to_tag = tf_buffer_->lookupTransform(
         toCamera, fromTag,
         tf2::TimePointZero);
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.3 seconds old, discard
       double dt = (this->get_clock()->now() - tf_time).seconds();
-      //RCLCPP_INFO(this->get_logger(), "Time gap was %f", dt);
+
       if (dt > this->tf_discard_time) {
         continue;
       }
@@ -123,15 +118,6 @@ void BearingNode::timerCallback() {
     // Likely source of error
     tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
 
-    // Publish overall tf - TESTING
-    // map_to_link.header.stamp = this->get_clock()->now();
-    // map_to_link.header.frame_id = fromMap;
-    // map_to_link.child_frame_id = "baseL";
-    // map_to_link.transform = toMsg(tf_map_to_link);
-
-    // Send the transformation - TESTING
-    // full_tf_pub_->sendTransform(map_to_link);
-
     // Get Yaw
     double roll, pitch, yaw;
     tf_map_to_link.getBasis().getRPY(roll, pitch, yaw);
@@ -149,15 +135,12 @@ void BearingNode::timerCallback() {
     double best_bearing = bearings[0];
     double min_dist = tag_dist_to_cam[0];
 
-    for (int j = 0; j < (int)bearings.size(); j++) {
+    for (int j = 0; j < static_cast<int>(bearings.size()); j++) {
       if (tag_dist_to_cam[j] < min_dist) {
         best_bearing = bearings[j];
         min_dist = tag_dist_to_cam[j];
       }
     }
-
-    // Note bearing - comment out after final product
-    RCLCPP_INFO(this->get_logger(), "Bearing Angle [deg]: %f\n", best_bearing * 180 / M_PI);
     
     // Variables for average bearing over the buffer length
     double avg_bearing;
@@ -206,8 +189,11 @@ void BearingNode::timerCallback() {
                                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                 0.0, 0.0, 0.0, 0.0, 0.0, this->bearing_covariance};
 
-    // Publish the estimated bearing
+    // Publish the estimated bearing  
     bearing_pub_->publish(bearing);
+  }
+  else {
+    RCLCPP_WARN(this->get_logger(), "No bearing tags were detected.");
   }
 }
 

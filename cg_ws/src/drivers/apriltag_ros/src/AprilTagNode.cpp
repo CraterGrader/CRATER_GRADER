@@ -29,7 +29,6 @@ AprilTagNode::AprilTagNode(rclcpp::NodeOptions options)
     max_hamming(declare_parameter<int>("max_hamming", 0)),
     z_up(declare_parameter<bool>("z_up", false)),
     // topics
-    //sub_cam(image_transport::create_camera_subscription(this, "image", std::bind(&AprilTagNode::onCamera, this, std::placeholders::_1, std::placeholders::_2), declare_parameter<std::string>("image_transport", "raw"), rmw_qos_profile_sensor_data)),
     pub_tf(create_publisher<tf2_msgs::msg::TFMessage>("/tf", rclcpp::QoS(100))),
     pub_detections(create_publisher<apriltag_msgs::msg::AprilTagDetectionArray>("detections", rclcpp::QoS(1)))
 {
@@ -77,9 +76,6 @@ AprilTagNode::~AprilTagNode() {
 
 //void AprilTagNode::onCamera(const sensor_msgs::msg::Image::ConstSharedPtr& msg_img, const sensor_msgs::msg::CameraInfo::ConstSharedPtr& msg_ci) {
 void AprilTagNode::onCamera(const sensor_msgs::msg::Image & msg_img) {
-    // copy camera intrinsics
-    //std::memcpy(K.data(), msg_ci->k.data(), 9*sizeof(double));
-
     // convert to 8bit monochrome image
     const cv::Mat img_uint8 = cv_bridge::toCvCopy(msg_img, "mono8")->image;
 

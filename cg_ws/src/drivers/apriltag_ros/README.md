@@ -1,4 +1,24 @@
-# AprilTag ROS2 Node
+# apriltag_ros
+The apriltag_msgs package was cloned from [GitHub Link](https://github.com/christianrauch/apriltag_ros).
+
+## Changes from the Original Package
+- "cfg"
+  - Removed all original configurations and added tags_Standard1h12.yaml for the Standard41h12 tag type
+- "include/AprilTagNode.hpp"
+  - Replaced the camera subscriber with a ros2 message subscriber to not require simultaneous paired subscription to both a CameraInfo and Image message
+  - Added a bearing publisher to publish the detected bearing to be used in the bearing node
+  - Modified the OnCamera function to only require and use the image as an input
+- "launch"
+  - Replaced tag_16h5_all.launch.py with tag_41h12_all.launch.py
+  - Increased the comprehensiveness of the tag configuration to add more adjustable parameters
+- "src/AprilTagNode.cpp"
+  - Removed all tag families except tagStandard41h12 as they weren't used
+  - Removed the camera subscriber declaration
+  - Added a sun camera subscriber to listen to Image messages
+  - Set the camera calibration parameters to previously calibrated known values
+  - Removed CameraInfo as a function parameter for the OnCamera function as only one set of predetermined calibration parameterse are needed
+
+## AprilTag ROS2 Node
 
 This ROS2 node uses the AprilTag library to detect AprilTags in images and publish their pose, id and additional metadata.
 
