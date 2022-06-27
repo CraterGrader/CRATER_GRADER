@@ -3,7 +3,6 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/int64.hpp>
-#include <std_msgs/msg/int8.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
 // Diagnostics
