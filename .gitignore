@@ -6,6 +6,7 @@
 # Bag files
 *bags/
 *bag/
+*.db3
 
 # VNC
 cg_ws/nohup.out
