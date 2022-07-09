@@ -11,9 +11,6 @@
 # VNC
 cg_ws/nohup.out
 
-# Tools
-tools/cal_cam_data/
-
 # Other
 *.DS_Store
 __pycache__/
