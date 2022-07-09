@@ -116,12 +116,4 @@ def generate_launch_description():
         output='screen'
     ))
 
-    # Turn on rviz2 if visualizing
-    if bearing_params['bearing_node']['ros__parameters']['publish_viz']:
-        nodes.append(Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2'
-        ))
-
     return LaunchDescription(nodes)

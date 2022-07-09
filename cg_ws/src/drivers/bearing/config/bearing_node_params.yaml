@@ -23,4 +23,3 @@ bearing_node:
     tf_discard_time: 0.8
     rolling_avg_buffer: 5
     pub_freq: 10
-    publish_viz: false
