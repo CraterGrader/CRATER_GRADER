@@ -163,9 +163,6 @@ void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::
   pcl::fromROSMsg(*msg, *new_point_cloud_);
   try {
     tf_ = tf_buffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
-    // std::cout << tf2::transformToEigen(transform_stamped).matrix().cast<float>() << std::endl;
-    // pcl::transformPointCloud(*new_point_cloud_, *point_cloud_map_, tf2::transformToEigen(transform_stamped).matrix().cast<float>());
-    // pcl::fromROSMsg(*msg, *point_cloud_map_);
   } catch (tf2::TransformException &ex) {
     RCLCPP_WARN(this->get_logger(), "Could not lookupTransform from source %s to target %s: %s",
       source_frame_.c_str(), target_frame_.c_str(), ex.what()
