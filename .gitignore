@@ -16,3 +16,4 @@ cg_ws/nohup.out
 __pycache__/
 cg_ws/.vscode/
 .vscode/
+**__pycache__
