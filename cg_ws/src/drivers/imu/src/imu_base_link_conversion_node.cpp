@@ -81,7 +81,6 @@ void ImuBaseLinkConversionNode::doTransform(
   imu_out.angular_velocity.z = vel.z();
 
   imu_out.angular_velocity_covariance = imu_in.angular_velocity_covariance;
-  // transformCovariance(imu_in.angular_velocity_covariance, imu_out.angular_velocity_covariance, r);
 
   Eigen::Vector3d acc = t * Eigen::Vector3d(
     imu_in.linear_acceleration.x,
@@ -93,7 +92,6 @@ void ImuBaseLinkConversionNode::doTransform(
   imu_out.linear_acceleration.z = acc.z();
 
   imu_out.linear_acceleration_covariance = imu_in.linear_acceleration_covariance;
-  // transformCovariance(imu_in.linear_acceleration_covariance, imu_out.linear_acceleration_covariance, r);
 
 
   Eigen::Quaternion<double> orientation = r * Eigen::Quaternion<double>(
@@ -109,7 +107,6 @@ void ImuBaseLinkConversionNode::doTransform(
   imu_out.orientation.z = orientation.z();
 
   imu_out.orientation_covariance = imu_in.orientation_covariance;
-  // transformCovariance(imu_in.orientation_covariance, imu_out.orientation_covariance, r);
 }
 
 void ImuBaseLinkConversionNode::transformCovariance(
