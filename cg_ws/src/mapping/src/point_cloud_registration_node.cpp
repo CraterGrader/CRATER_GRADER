@@ -86,11 +86,6 @@ void PointCloudRegistrationNode::timerCallback() {
     RCLCPP_WARN(this->get_logger(), "Waiting for initial point cloud data");
     return;
   }
-  // sensor_msgs::msg::PointCloud2 point_cloud_map_msg_temp;
-  // pcl::toROSMsg(*point_cloud_map_, point_cloud_map_msg_temp);
-  // point_cloud_map_msg_temp.header.frame_id = "map";
-  // terrain_raw_map_pub_->publish(point_cloud_map_msg_temp);
-  // return;
 
   if (new_data_received_) {
     // Plane removal test
