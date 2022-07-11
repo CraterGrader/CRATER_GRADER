@@ -118,9 +118,7 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
 
     seg.setInputCloud (xyz_filtered_cloud);
     seg.segment (*inliers, *coefficients);
-    // for (const auto & c: coefficients->values) {
-    //   std::cout << c << ',' << ' ';
-    // }
+
     bool is_plane_facing_up = ((coefficients->values.size() == 4) && (coefficients->values[3] > 0));
     // std::cout << is_plane_facing_up << std::endl;
     if (use_plane_seg_) {
