@@ -177,7 +177,5 @@ void PointCloudRegistrationNode::filteredPointsCallback(const sensor_msgs::msg::
   }
 }
 
-//BEN COMMENT 
-
 }  // namespace mapping
 }  // namespace cg
