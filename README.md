@@ -97,3 +97,7 @@ Note that building only needs to be done if you want to update the image. This s
 - You can check the status of containers using `docker-compose ps`, or with the desktop app.
 - The `docker-compose.yml` file defines how the dockerfile(s) get called.
 - If desired, you can add an additional arguement for the image name (e.g. `cg-dev`) with steps 2, 4, and 6 to apply `docker-compose` commands to only that service. Service must exist in `docker-compose.yml`. Step 5 still requires specification of an image name.
+
+## Useful Testing Commands After Colcon Test 
+colcon test --pytest-args "-m 'not linter'" --packages-up-to <pkg-name>
+colcon test-result --verbose --test-result-base build/<pkg-name>
