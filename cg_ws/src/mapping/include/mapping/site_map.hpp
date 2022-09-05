@@ -35,6 +35,7 @@ class CellHistory {
   size_t fingerIndex_ = 0;
   size_t windowSize_ = 1000;
   std::vector<float> window_;
+  
 };
 
 class SiteMap {
