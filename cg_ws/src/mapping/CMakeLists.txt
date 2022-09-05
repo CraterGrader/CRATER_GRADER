@@ -70,8 +70,12 @@ ament_target_dependencies(terrain_filtering
 )
 
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(site_map_test
+        test/site_map_test.cpp
+        include/mapping/site_map.hpp
+        src/site_map.cpp
+        )
 endif()
 
 
