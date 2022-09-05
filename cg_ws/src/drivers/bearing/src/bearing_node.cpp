@@ -55,7 +55,12 @@ void BearingNode::timerCallback() {
   std::string tf_map_frame = "map";
   
   // Store bearing estimates and distances
+  std::vector<double> rolls;
+  std:;vector<double> pitches;
   std::vector<double> bearings;
+  std:;vector<double> x_trans;
+  std:;vector<double> y_trans;
+  std:;vector<double> z_trans;
   std::vector<double> tag_dist_to_cam;
 
   // Declare tf frames
@@ -122,7 +127,13 @@ void BearingNode::timerCallback() {
     double roll, pitch, yaw;
     tf_map_to_link.getBasis().getRPY(roll, pitch, yaw);
 
+    x_trans.push_back(tf_map_to_link.getOrigin().x());
+    y_trans.push_back(tf_map_to_link.getOrigin().y());
+    z_trans.push_back(tf_map_to_link.getOrigin().z());
+
     // Calculate and append bearing
+    pitches.push_back(pitch);
+    rolls.push_back(roll);
     bearings.push_back(yaw);
 
     // Get cartesian distance from camera to tag for weighting
@@ -132,12 +143,22 @@ void BearingNode::timerCallback() {
   }
   if (bearings.size() > 0) {
     // Find the best tag to get angle from
+    double best_roll = rolls[0];
+    double best_pitch = pitches[0];
     double best_bearing = bearings[0];
+    double best_x_pose = x_trans[0];
+    double best_y_pose = y_trans[0];
+    double best_z_pose = z_trans[0];
     double min_dist = tag_dist_to_cam[0];
 
     for (int j = 0; j < static_cast<int>(bearings.size()); j++) {
       if (tag_dist_to_cam[j] < min_dist) {
+        best_roll = rolls[j];
+        best_pitch = pitches[j];
         best_bearing = bearings[j];
+        best_x_pose = x_trans[j];
+        best_y_pose = y_trans[j];
+        best_z_pose = z_trans[j];
         min_dist = tag_dist_to_cam[j];
       }
     }
@@ -163,13 +184,13 @@ void BearingNode::timerCallback() {
     avg_bearing = std::atan2(sum_y, sum_x);
 
     // Set the PoseWithCovarianceStamped message's position to 0
-    bearing.pose.pose.position.x = 0.0;
-    bearing.pose.pose.position.y = 0.0;
-    bearing.pose.pose.position.z = 0.0;
+    bearing.pose.pose.position.x = best_x_pose;
+    bearing.pose.pose.position.y = best_y_pose;
+    bearing.pose.pose.position.z = best_z_pose;
 
     // Convert yaw back into a quarternion for orientation
     tf2::Quaternion q;
-    q.setRPY(0, 0, avg_bearing);
+    q.setRPY(best_roll, best_pitch, avg_bearing);
 
     // Set the quarternion in the message
     bearing.pose.pose.orientation.x = q.x();
@@ -182,12 +203,12 @@ void BearingNode::timerCallback() {
     bearing.header.frame_id = tf_map_frame;
 
     // Set covariance
-    bearing.pose.covariance =  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, this->bearing_covariance};
+    bearing.pose.covariance =  {0.01, 0.0,  0.0,  0.0,    0.0,    0.0,
+                                0.0,  0.01, 0.0,  0.0,    0.0,    0.0,
+                                0.0,  0.0,  0.01, 0.0,    0.0,    0.0,
+                                0.0,  0.0,  0.0,  0.005,  0.0,    0.0,
+                                0.0,  0.0,  0.0,  0.0,    0.005,  0.0,
+                                0.0,  0.0,  0.0,  0.0,    0.0,    this->bearing_covariance};
 
     // Publish the estimated bearing  
     bearing_pub_->publish(bearing);
