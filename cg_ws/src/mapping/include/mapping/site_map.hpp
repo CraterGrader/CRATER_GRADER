@@ -35,7 +35,7 @@ class CellHistory {
   size_t fingerIndex_ = 0;
   size_t windowSize_ = 1000;
   std::vector<float> window_;
-  
+
 };
 
 class SiteMap {
@@ -47,7 +47,7 @@ class SiteMap {
 
   // methods
   void binPts(std::vector<mapPoint> rawPts);      // method to bin points into map
-  void postProcess(); // method to possibly do outlier rejection and associated tasks on pts 
+  std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to possibly do outlier rejection and associated tasks on pts 
   void updateCells(); // method to update cells based on modified points
   float binLen(float pos, float resolution);
 
@@ -55,6 +55,7 @@ class SiteMap {
   float getResolution(){return resolution_;}
   size_t getNcells(){return height_*width_;}
   size_t getWidth(){return width_;}
+  size_t getHeight(){return height_;}
   size_t getHeightMapSize(){return heightMap_.size();}
   std::vector<CellHistory> getFilterMap(){return filterMap_;}
   std::vector<float> getHeightMap(){return heightMap_;}

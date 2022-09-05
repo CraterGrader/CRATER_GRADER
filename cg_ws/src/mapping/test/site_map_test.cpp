@@ -80,8 +80,8 @@ TEST(MyTestFixture, indexCheck) {
   pt2.z = 2.0;
 
   cg::mapping::mapPoint pt3; 
-  pt3.x = 0.5;
-  pt3.y = 1.5;
+  pt3.x = 99.5;
+  pt3.y = -1.5;
   pt3.z = 3.0;
 
   cg::mapping::mapPoint pt4; 
@@ -99,6 +99,6 @@ TEST(MyTestFixture, indexCheck) {
 
   EXPECT_NEAR(heightMapGet[0], 1.0, 0.1);
   EXPECT_NEAR(heightMapGet[1], 2.0, 0.1);
-  EXPECT_NEAR(heightMapGet[2], 3.0, 0.1);
+  EXPECT_NEAR(heightMapGet[2], 0.0, 0.1);
   EXPECT_NEAR(heightMapGet[3], 4.0, 0.1);
 }

@@ -46,16 +46,41 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
     descretePoints[i].z = rawPts[i].z;
   }
   // use postProcess method 
-  // TODO: ADD POSTPROCESSING
+  std::vector<cg::mapping::indexPoint> processedPts = postProcess(descretePoints);
+
   // update view 2, filtermap
-  for (size_t i=0 ; i < descretePoints.size(); i++){
-    size_t index = descretePoints[i].x + (descretePoints[i].y * getWidth());
-    filterMap_[index].addPoint(descretePoints[i]);
+  for (size_t i=0 ; i < processedPts.size(); i++){
+    size_t index = processedPts[i].x + (processedPts[i].y * getWidth());
+    filterMap_[index].addPoint(processedPts[i]);
   }
 }
 
-void SiteMap::postProcess(){
-  // take a given point, and throw out if necessary  
+std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mapping::indexPoint> ptsCheck){
+  // out of bounds check 
+
+  size_t badCount = 0; 
+  std::vector<bool> goodBad(ptsCheck.size(), true);
+
+  for (size_t i=0 ; i < ptsCheck.size(); i++){
+    if ((ptsCheck[i].x >= (int) getWidth()) || (ptsCheck[i].y >= (int) getHeight()) || (ptsCheck[i].y < 0.0) || (ptsCheck[i].x < 0.0)){
+      badCount++; 
+      goodBad[i] = false;
+    }
+  }
+
+  std::vector<cg::mapping::indexPoint> goodPts;
+  goodPts.resize(ptsCheck.size()-badCount);
+
+  size_t goodCounter = 0; 
+
+  for (size_t i=0 ; i < ptsCheck.size(); i++){
+    if (goodBad[i]){
+      goodPts[goodCounter] = ptsCheck[i];
+      goodCounter++;
+    }
+  }
+
+  return goodPts;
 }
 
 void SiteMap::updateCells(){
