@@ -1,0 +1,18 @@
+point_cloud_registration:
+  ros__parameters:
+    source_frame: realsense_frame
+    target_frame: map
+
+    ## ICP Params ##
+    icp_max_iters: 10000 #10
+    icp_max_correspondence_dist: 0.001 #inf
+    icp_transformation_eps: 0.0 #0
+    icp_euclidean_fitness_eps: -0.001 #-inf
+    # icp_min_num_correspondences: 3
+
+    ## Statistical Outlier Removal Params ##
+    sor_mean_k: 120
+    sor_stddev_mul_thresh: 1.5
+
+    ## Downsampling Params ##
+    voxel_filter_size: 0.01  # Voxel side length for downsampling [m]

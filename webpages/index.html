@@ -1,0 +1,67 @@
+<html>
+
+<head>
+
+  <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js">
+    // Import ROSLIB from RobotWebTools
+  </script>
+
+  <script type="text/javascript" type="text/javascript">
+    // Connecting to ROS
+    // -----------------
+
+    var ros = new ROSLIB.Ros({
+      url: 'ws://192.168.1.156:9090'
+    });
+
+    ros.on('connection', function () {
+      console.log('Connected to websocket server.');
+    });
+
+    ros.on('error', function (error) {
+      console.log('Error connecting to websocket server: ', error);
+    });
+
+    ros.on('close', function () {
+      console.log('Connection to websocket server closed.');
+    });
+
+    // Subscribing to a Topic
+    // ----------------------
+
+    // var listener = new ROSLIB.Topic({
+    //   ros: ros,
+    //   name: '/arduino_cmd',
+    //   messageType: 'std_msgs/msg/Int64'
+    // });
+
+    // listener.subscribe(function (message) {
+    //   console.log('Received message on ' + listener.name + ': ' + message.data);
+    //   //listener.unsubscribe();
+    // });
+
+    var listener2 = new ROSLIB.Topic({
+        ros: ros,
+        name: '/actuator_cmd',
+        messageType: 'cg_msgs/msg/ActuatorCommand'
+      });
+
+    listener2.subscribe(function (message) {
+      console.log('Received message on ' + listener2.name + ': ' + JSON.stringify(message));
+      //listener.unsubscribe();
+    });
+
+  </script>
+
+
+</head>
+
+
+
+<body>
+    <h1>Ladies and Gentlemen</h1>
+
+    <p>Start your engines!</p>
+</body>
+
+</html>

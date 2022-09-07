@@ -1,0 +1,22 @@
+serial_interface_node:
+  ros__parameters:
+    # General params
+    diagnostic_updater.period: 0.2 # Diagnostics publishing rate in seconds [double]
+
+    # Frequency logging for /arduino_cmd topic
+    freq_min_ard_cmd: 5.0 # Minimum allowable frequency [double]
+    freq_max_ard_cmd: 50.0 # Maximum allowable frequency [double]
+    freq_tol_ard_cmd: 0.05 # Allowable frequency tolerance as percentage of min or max [double]
+    freq_window_ard_cmd : 5 # Number of messages for calculating frequency statistics [int]
+
+    # Frequency logging for /arduino_feedback topic
+    freq_min_ard_fdbk: 5.0 # Minimum allowable frequency [double]
+    freq_max_ard_fdbk: 50.0 # Maximum allowable frequency [double]
+    freq_tol_ard_fdbk: 0.05 # Allowable frequency tolerance as percentage of min or max [double]
+    freq_window_ard_fdbk: 5 # Number of messages for calculating frequency statistics [int]
+
+    # Frequency logging for /encoder/telemetry topic
+    freq_min_enc_telem: 5.0 # Minimum allowable frequency [double]
+    freq_max_enc_telem: 50.0 # Maximum allowable frequency [double]
+    freq_tol_enc_telem: 0.05 # Allowable frequency tolerance as percentage of min or max [double]
+    freq_window_enc_telem: 5 # Number of messages for calculating frequency statistics [int]

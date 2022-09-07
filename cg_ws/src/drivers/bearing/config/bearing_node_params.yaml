@@ -1,0 +1,30 @@
+bearing_node:
+  ros__parameters:
+    # Positions relative to worksite frame (bottom left of map)
+    tags:
+      position: # m
+        x: ['3.81', '7.62', '3.81', '0']
+        y: ['7.3152', '3.6576', '0', '3.6576']
+        z: ['0.7508', '0.7508', '0.7508', '0.7508']
+      orientation: # rad
+        x: ['1.5708', '1.5708', '1.5708', '1.5708']
+        y: ['0', '0', '0', '0']
+        z: ['0', '-1.5708', '3.1416', '1.5708']
+    # Camera position relative to the robot base frame
+    base_cam_tf:
+      position: # m
+        x: '0.2257'
+        y: '0'
+        z: '0.5269'
+      orientation: # rad
+        x: '-1.5708'
+        y: '0'
+        z: '-1.5708'
+    # Confidence in bearing estimate (lower is higher confidence)
+    bearing_covariance: 0.005
+    # Time before transform is discarded / not considered in calculation
+    tf_discard_time: 0.8
+    # Buffer for calculating average angle
+    rolling_avg_buffer: 5
+    # Frequency of angle publishing
+    pub_freq: 10

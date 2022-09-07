@@ -40,7 +40,7 @@ VnImuNode::VnImuNode() : Node("vn_imu_node") {
 
   // Initialize publishers and subscribers
   imu_pub_ = this->create_publisher<sensor_msgs::msg::Imu>(
-    "/imu/data", 1
+    "/imu/data/imu_link", 1
   );
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(1000/freq),
@@ -61,7 +61,8 @@ void VnImuNode::timerCallback() {
   q.setRPY(
     M_PI/180.0*vs_data_register.yawPitchRoll[2] - orientation_zero_offsets_.x,
     M_PI/180.0*vs_data_register.yawPitchRoll[1] - orientation_zero_offsets_.y,
-    0.0  // Intentionally ignore yaw assuming no magnetometer data on the moon, and set to zero
+    // 0.0  // Intentionally ignore yaw assuming no magnetometer data on the moon, and set to zero
+    M_PI/180.0*vs_data_register.yawPitchRoll[0] - orientation_zero_offsets_.z
   );
   q.normalize();
   msg.orientation = tf2::toMsg(q);
