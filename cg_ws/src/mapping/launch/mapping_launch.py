@@ -24,11 +24,10 @@ def generate_launch_description():
             output='screen',
             parameters=[terrain_filtering_params]
         ),
-        # Node(
-        #     package='mapping',
-        #     executable='point_cloud_registration',
-        #     name='point_cloud_registration',
-        #     output='screen',
-        #     parameters=[point_cloud_registration_params]
-        # )
+        Node(
+            package='mapping',
+            executable='site_map',
+            name='site_map',
+            output='screen'
+        )
     ])

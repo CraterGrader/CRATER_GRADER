@@ -56,7 +56,7 @@ class SiteMap {
   size_t getNcells(){return height_*width_;}
   size_t getWidth(){return width_;}
   size_t getHeight(){return height_;}
-  size_t getHeightMapSize(){return heightMap_.size();}
+  size_t getHeightMapSize(){return heightMap_.size();} // for testing atm 
   std::vector<CellHistory> getFilterMap(){return filterMap_;}
   std::vector<float> getHeightMap(){return heightMap_;}
 
@@ -68,7 +68,6 @@ class SiteMap {
   size_t height_;
   size_t width_;
   float resolution_;
-  
 };
 
 } // mapping namespace

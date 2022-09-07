@@ -26,37 +26,56 @@ find_package(tf2_sensor_msgs REQUIRED)
 include_directories(include)
 
 # build nodes
-add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
-  src/point_cloud_registration_node.cpp
-)
-ament_target_dependencies(point_cloud_registration
-  rclcpp
-  rclcpp_components
-  pcl_ros
-  sensor_msgs
-  tf2
-  tf2_ros
-  tf2_eigen
-)
+# add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
+#   src/point_cloud_registration_node.cpp
+# )
+# ament_target_dependencies(point_cloud_registration
+#   rclcpp
+#   rclcpp_components
+#   pcl_ros
+#   sensor_msgs
+#   tf2
+#   tf2_ros
+#   tf2_eigen
+# )
 
-# build nodes
-add_executable(point_cloud_registration_but_fancier src/point_cloud_registration_main_but_fancier.cpp
-  src/point_cloud_registration_node_but_fancier.cpp
-)
-ament_target_dependencies(point_cloud_registration_but_fancier
-  rclcpp
-  rclcpp_components
-  pcl_ros
-  sensor_msgs
-  tf2
-  tf2_ros
-  tf2_eigen
-)
+# # build nodes
+# add_executable(point_cloud_registration_but_fancier src/point_cloud_registration_main_but_fancier.cpp
+#   src/point_cloud_registration_node_but_fancier.cpp
+# )
+# ament_target_dependencies(point_cloud_registration_but_fancier
+#   rclcpp
+#   rclcpp_components
+#   pcl_ros
+#   sensor_msgs
+#   tf2
+#   tf2_ros
+#   tf2_eigen
+# )
 
 add_executable(terrain_filtering src/terrain_filtering_main.cpp
   src/terrain_filtering_node.cpp
 )
 ament_target_dependencies(terrain_filtering
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  tf2_ros
+  tf2
+  geometry_msgs
+  pcl_ros
+  tf2_eigen
+  tf2_geometry_msgs
+  tf2_sensor_msgs
+)
+
+add_executable(site_map src/site_map_main.cpp
+  src/site_map_node.cpp
+  include/mapping/site_map.hpp
+  src/site_map.cpp
+)
+
+ament_target_dependencies(site_map
   rclcpp
   rclcpp_components
   sensor_msgs
@@ -80,15 +99,19 @@ endif()
 
 
 # Install targets
-install(TARGETS point_cloud_registration
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(TARGETS point_cloud_registration
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
-install(TARGETS point_cloud_registration_but_fancier
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(TARGETS point_cloud_registration_but_fancier
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 install(TARGETS terrain_filtering
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS site_map
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -13,6 +13,8 @@ void CellHistory::addPoint(indexPoint pt){
   }
 }
 
+SiteMap::SiteMap(){}
+
 SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){  
   height_ = cHeight;
   width_ = cWidth;
@@ -34,6 +36,7 @@ float CellHistory::getMean(){
   else{
     return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
   }
+  // if filter is NOT FULL AND THERE ARE NO POINTS IN THE WINDOW, THEN RETURN ZERO 
   return 0.0f;
 }
 
@@ -45,6 +48,7 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
     descretePoints[i].y = binLen(rawPts[i].y, getResolution());
     descretePoints[i].z = rawPts[i].z;
   }
+  
   // use postProcess method 
   std::vector<cg::mapping::indexPoint> processedPts = postProcess(descretePoints);
 
