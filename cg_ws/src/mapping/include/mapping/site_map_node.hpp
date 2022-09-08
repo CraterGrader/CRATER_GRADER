@@ -21,10 +21,13 @@ public:
 private: 
   /* Publishers and Subscribers */ 
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr new_points_sub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_pub_;
+  rclcpp::TimerBase::SharedPtr timer_; // For looping publish
 
   /* Callbacks */
   void newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
-  
+  void timerCallback(); // For looping publish
+
   /* Variables */
   cg::mapping::SiteMap siteMap_;
   std::vector<float> mapTemp;
