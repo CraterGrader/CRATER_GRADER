@@ -33,8 +33,10 @@ class CellHistory {
   // attributes  
   bool filterFull_ = false;
   size_t fingerIndex_ = 0;
-  size_t windowSize_ = 1000;
+  size_t windowSize_ = 3;
   std::vector<float> window_;
+  float prevAvg = 0.0;
+  float lastVal = 0.0;
 
 };
 

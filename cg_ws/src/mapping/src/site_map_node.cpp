@@ -16,12 +16,14 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
 
   // Load parameters
   // TODO: CONVERT TO PARAMS
-  size_t cHeight = 7;
-  size_t cWidth = 7; 
-  float cResolution = 1.0;
+  size_t cHeight = 70;
+  size_t cWidth = 70; 
+  float cResolution = 0.1;
 
   cg::mapping::SiteMap temp(cHeight,cWidth,cResolution);
   siteMap_ = temp;
+
+  mapTemp.resize(siteMap_.getNcells());
 
 }
 
@@ -46,12 +48,16 @@ void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr 
   // UPDATE CELLS 
   siteMap_.updateCells();
 
-  std::vector<float> mapTemp = siteMap_.getHeightMap();
+  mapTemp = siteMap_.getHeightMap();
+
+  size_t temp = siteMap_.getNcells(); 
+
+  RCLCPP_INFO_STREAM(this->get_logger(), " ");
+  RCLCPP_INFO_STREAM(this->get_logger(), " Number of Cells " << temp );
 
   for (size_t i=0; i < mapTemp.size(); i++){
     RCLCPP_INFO_STREAM(this->get_logger(), " " << mapTemp[i] );
   }
-  RCLCPP_INFO_STREAM(this->get_logger(), " ");
 
 }
 

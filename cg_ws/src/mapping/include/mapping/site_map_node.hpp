@@ -27,6 +27,8 @@ private:
   
   /* Variables */
   cg::mapping::SiteMap siteMap_;
+  std::vector<float> mapTemp;
+
 
   /* Parameters */
 

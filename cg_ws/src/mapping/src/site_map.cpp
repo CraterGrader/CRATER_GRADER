@@ -4,12 +4,19 @@ namespace cg {
 namespace mapping {
 
 void CellHistory::addPoint(indexPoint pt){
+  if (filterFull_){
+    lastVal = window_[fingerIndex_];
+  }
+  
   window_[fingerIndex_] = pt.z;
   fingerIndex_ = fingerIndex_ + 1;
 
   if (fingerIndex_ == windowSize_){
     fingerIndex_= 0;
-    filterFull_= true;
+    if (!filterFull_){
+      filterFull_= true;
+      prevAvg = getMean();
+    }
   }
 }
 
@@ -18,6 +25,7 @@ SiteMap::SiteMap(){}
 SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){  
   height_ = cHeight;
   width_ = cWidth;
+  // todo add check to ensure that resolution is possible with map size
   resolution_ = cResolution;
   heightMap_.resize(height_*width_, 0.0f);
   filterMap_.resize(height_*width_, CellHistory());
@@ -30,11 +38,15 @@ float SiteMap::binLen(float pos, float resolution){
 float CellHistory::getMean(){
   if (!filterFull_){
     if (fingerIndex_ != 0){
+      // if filter is not full BUT we have data
       return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / fingerIndex_);
     }
   }
   else{
-    return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
+    // if filter is full and we are only constant time updating
+    prevAvg = prevAvg + ((window_[fingerIndex_] - lastVal)/windowSize_);
+    return prevAvg;
+    // return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
   }
   // if filter is NOT FULL AND THERE ARE NO POINTS IN THE WINDOW, THEN RETURN ZERO 
   return 0.0f;
