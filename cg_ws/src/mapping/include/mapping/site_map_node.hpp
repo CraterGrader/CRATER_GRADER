@@ -1,14 +1,11 @@
-#pragma once 
+#pragma once
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <mapping/site_map.hpp>
-
-// hail marry
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_types.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
-// #include <pcl_ros/transforms.h>
 
 namespace cg {
 namespace mapping {
@@ -30,8 +27,6 @@ private:
 
   /* Variables */
   cg::mapping::SiteMap siteMap_;
-  std::vector<float> mapTemp;
-
 
   /* Parameters */
 

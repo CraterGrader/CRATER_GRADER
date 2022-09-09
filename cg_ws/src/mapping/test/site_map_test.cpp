@@ -20,11 +20,6 @@ TEST(MyTestFixture, funcitonalityCheck) {
   float resSet = 1.0;
   EXPECT_EQ(getRes,resSet);
 
-  // check filter window 
-  size_t size = siteMapTest.getHeightMapSize();
-  float sizeSet = cHeight*cWidth;
-  EXPECT_EQ(size,sizeSet);
-
 }
 
 TEST(MyTestFixture, filterCheck) {
