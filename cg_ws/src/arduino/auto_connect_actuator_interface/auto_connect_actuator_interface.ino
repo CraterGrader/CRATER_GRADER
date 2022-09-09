@@ -49,7 +49,7 @@ bool micro_ros_init_successful;
 #define BYTE_TO_QP_DELTA_POS_SCALE 10  // Drive Scale 
 #define BYTE_TO_QP_DELTA_POS_OFFSET 127 // 
 
-#define BYTE_TO_QP_TOOL_SCALE -588 // Tool Scale
+#define BYTE_TO_QP_TOOL_SCALE 117 //-588 // Tool Scale
 #define BYTE_TO_QP_TOOL_OFFSET 0 // Tool offset 
 
 #define POSN_CTRL_ACCEL_QPPS 600

@@ -69,9 +69,11 @@ namespace arduino {
     this->get_parameter("QPPS_TO_BYTE_DRIVE_SCALE", QPPS_TO_BYTE_DRIVE_SCALE_);
     this->declare_parameter<int>("QPPS_TO_BYTE_DRIVE_OFFSET", 127);
     this->get_parameter("QPPS_TO_BYTE_DRIVE_OFFSET", QPPS_TO_BYTE_DRIVE_OFFSET_);
-    this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE", 22);
+    // this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE", 22);
+    this->declare_parameter<int>("QP_TO_BYTE_TOOL_SCALE", 117);
     this->get_parameter("QP_TO_BYTE_TOOL_SCALE", QP_TO_BYTE_TOOL_SCALE_);
-    this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET", 588);
+    // this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET", 588);
+    this->declare_parameter<int>("QP_TO_BYTE_TOOL_OFFSET", 0);
     this->get_parameter("QP_TO_BYTE_TOOL_OFFSET", QP_TO_BYTE_TOOL_OFFSET_);
     this->declare_parameter<int>("QP_TO_BYTE_DELTA_POS_SCALE", 10);
     this->get_parameter("QP_TO_BYTE_DELTA_POS_SCALE", QP_TO_BYTE_DELTA_POS_SCALE_);
