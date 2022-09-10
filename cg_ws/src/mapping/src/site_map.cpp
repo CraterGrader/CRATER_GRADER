@@ -5,10 +5,10 @@ namespace mapping {
 
 void CellHistory::addPoint(indexPoint pt){
 
-  // if the filter is full, save the value getting removed 
+  // if the filter is full, save the value getting removed before its removed
   if (filterFull_){ lastVal = window_[fingerIndex_]; }
 
-  // overide point with incoming point
+  // overide point with incoming point & increment the index 
   window_[fingerIndex_] = pt.z;
   fingerIndex_ = fingerIndex_ + 1;
 
@@ -29,36 +29,32 @@ void CellHistory::addPoint(indexPoint pt){
 // default constructor
 SiteMap::SiteMap(){}
 
+// nominal constructor
 SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){  
   height_ = cHeight;
   width_ = cWidth;
-  // todo add check to ensure that resolution is possible with map size
   resolution_ = cResolution;
   heightMap_.resize(height_*width_, 0.0f);
   filterMap_.resize(height_*width_, CellHistory());
 }
 
-float SiteMap::binLen(float pos, float resolution){
-  return floor(pos/resolution);
-  // return floor(((pos+resolution)/2/resolution));
+int SiteMap::binLen(float pos){
+  // for a continous point along an axis, return its int location which should align with map
+  return (int) floor(pos/getResolution());
 }
 
 float CellHistory::getMean(){
   if (!filterFull_){
     if (fingerIndex_ != 0){ // if filter is not full BUT we have data
-
+      
       // TODO: make this NOT iterate over entire window
       return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / fingerIndex_);
     }
   }
   else{ // if filter is full and we are only constant time updating
 
-    // return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
-
-    prevAvg = prevAvg + ((window_[fingerIndex_] - lastVal)/windowSize_);
-
-    return prevAvg;
-    
+    // TODO CONVERT THIS TO CONSTANT TIME
+    return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
     }
 
   // if filter is NOT FULL AND THERE ARE NO POINTS IN THE WINDOW, THEN RETURN ZERO 
@@ -69,8 +65,8 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
   std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size()/decimation_);
 
   for (size_t i=0 ; i < (rawPts.size()/decimation_); i++){
-    descretePoints[i].x = binLen(rawPts[i*decimation_].x, getResolution());
-    descretePoints[i].y = binLen(rawPts[i*decimation_].y, getResolution());
+    descretePoints[i].x = binLen(rawPts[i*decimation_].x - xTransform_);
+    descretePoints[i].y = binLen(rawPts[i*decimation_].y - yTransform_);
     descretePoints[i].z = rawPts[i*decimation_].z;
   }
   
@@ -80,9 +76,7 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
   // update view 2, filtermap
   for (size_t i=0 ; i < processedPts.size(); i++){
 
-    size_t index = processedPts[i].y + (processedPts[i].x * getWidth());
-    // size_t index = processedPts[i].x + (processedPts[i].y * getWidth());
-    
+    size_t index = processedPts[i].y + (processedPts[i].x * getWidth());    
     filterMap_[index].addPoint(processedPts[i]);
 
   }

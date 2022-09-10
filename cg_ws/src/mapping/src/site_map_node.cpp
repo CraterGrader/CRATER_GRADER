@@ -8,27 +8,28 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   new_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
     "/terrain/filtered", 1, std::bind(&SiteMapNode::newPtsCallback, this, std::placeholders::_1));
   visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
-      "/site_map_viz", 1);
+    "/site_map_viz", 1);
 
   // Timer callback
   timer_ = this->create_wall_timer(
-      std::chrono::milliseconds(100),
-      std::bind(&SiteMapNode::timerCallback, this));
+    std::chrono::milliseconds(100),
+    std::bind(&SiteMapNode::timerCallback, this));
 
   // Load parameters
-  // TODO: CONVERT TO PARAMS
-  size_t cHeight = 70;
-  size_t cWidth = 70; 
-  float cResolution = 0.1;
+  this->declare_parameter<int>("height", 5);
+  this->get_parameter("height", height_);
 
-  cg::mapping::SiteMap temp(cHeight,cWidth,cResolution);
+  this->declare_parameter<int>("width", 5);
+  this->get_parameter("width", width_);
+
+  this->declare_parameter<float>("resolution", 1.0);
+  this->get_parameter("resolution", resolution_);
+
+  cg::mapping::SiteMap temp(height_,width_,resolution_);
   siteMap_ = temp;
 }
 
 void SiteMapNode::timerCallback(){
-  // Report the current mode
-  // RCLCPP_INFO(this->get_logger(), "visualizing site map...");
-
   // get a temp map from siteMap
   std::vector<float> tempMap = siteMap_.getHeightMap();
   size_t iterator = 0; 
@@ -39,8 +40,8 @@ void SiteMapNode::timerCallback(){
   for (int col=0; col<static_cast<int>(siteMap_.getWidth()); col++) {
     for (int row=0; row < static_cast<int>(siteMap_.getHeight()); row++) {
       pcl::PointXYZ newPoint;
-      newPoint.x = col * siteMap_.getResolution(); // cell x-coordinate in map frame
-      newPoint.y = row * siteMap_.getResolution(); // cell y-coordinate in map frame
+      newPoint.x = (col * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
+      newPoint.y = row * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
       newPoint.z =  tempMap[iterator]; // cell height in map frame
       myCloud.points.push_back(newPoint);
       iterator++; 

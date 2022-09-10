@@ -29,6 +29,9 @@ private:
   cg::mapping::SiteMap siteMap_;
 
   /* Parameters */
+  int height_;
+  int width_; 
+  float resolution_;
 
 }; // class SiteMapNode
 

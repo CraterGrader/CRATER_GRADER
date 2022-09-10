@@ -1,0 +1,5 @@
+site_map:
+  ros__parameters:
+    height: 35
+    width: 35
+    resolution: 0.142
