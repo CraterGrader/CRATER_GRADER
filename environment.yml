@@ -15,5 +15,3 @@ dependencies:
     - empy
     - lark
     - pyyaml
-    - netifaces
-    - pymongo

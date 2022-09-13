@@ -1,6 +1,6 @@
 imu_node:
   ros__parameters:
-    device_name: '/dev/cg_dev/tty_imu'
+    device_name: '/dev/ttyUSB0'
     baud_rate: 115200
     pub_freq: 20  # Publishing frequency in Hz
     publish_viz: false
@@ -29,4 +29,4 @@ imu_node:
       orientation: # rad
         x: 4.1822e-09
         y: 5.2720e-09
-        z: 6.0e-9  # Arbitrary value, has not been measured
+        z: 1000.0 # Really large number because we are not using it. Parameters in robot_localization need to be set properly so that yaw gets ignored
