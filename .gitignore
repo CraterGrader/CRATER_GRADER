@@ -1,19 +1,12 @@
 # ROS2 workspace build files 
-*build/
-*install/
-*log/
-
-# Bag files
-*bags/
-*bag/
-*.db3
+cg_ws/build/
+cg_ws/install/
+cg_ws/log/
 
 # VNC
 cg_ws/nohup.out
 
 # Other
 *.DS_Store
-__pycache__/
-cg_ws/.vscode/
-.vscode/
-**__pycache__
+*__pycache__/
+*.vscode

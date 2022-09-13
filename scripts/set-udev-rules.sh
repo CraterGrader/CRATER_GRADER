@@ -13,8 +13,6 @@ sudo echo 'KERNEL=="ttyACM[0-9]*", SUBSYSTEM=="tty", ATTRS{idVendor}=="1366", AT
 # IMU 
 sudo echo 'KERNEL=="ttyUSB[0-9]*", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK="cg_dev/tty_imu"' | sudo tee /etc/udev/rules.d/49-cg-custom.rules -a
 
-# IMU 
-sudo echo 'KERNEL=="video[0-9]*", SUBSYSTEM=="video4linux", ATTRS{idVendor}=="32e4", ATTRS{idProduct}=="9230", SYMLINK="cg_dev/sun_cam"' | sudo tee /etc/udev/rules.d/49-cg-custom.rules -a
 
 # Reset the udev rules immediately, run the following command:
 sudo udevadm control --reload-rules && udevadm trigger
