@@ -48,9 +48,9 @@ public:
 private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_points_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr below_points_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr above_points_pub_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr plane_points_pub_;
+  // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr below_points_pub_;
+  // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr above_points_pub_;
+  // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr plane_points_pub_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr raw_points_sub_;
 
   /* Callbacks */
