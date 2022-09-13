@@ -16,6 +16,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
+find_package(diagnostic_updater REQUIRED)
 
 include_directories(include)
 
@@ -28,6 +29,7 @@ ament_target_dependencies(serial_interface_node
   rclcpp_components
   std_msgs
   cg_msgs
+  diagnostic_updater
 )
 
 if(BUILD_TESTING)

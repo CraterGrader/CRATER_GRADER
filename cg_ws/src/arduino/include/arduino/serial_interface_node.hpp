@@ -5,6 +5,9 @@
 #include <std_msgs/msg/int64.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/encoder_telemetry.hpp>
+// Diagnostics
+#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <diagnostic_updater/publisher.hpp>
 
 namespace cg {
 namespace arduino {
@@ -18,6 +21,7 @@ private:
   /* Publishers and Subscribers */
   // Sending commands to arduino
   rclcpp::Publisher<std_msgs::msg::Int64>::SharedPtr cmd_pub_;
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostic_pub_;
   rclcpp::Subscription<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
@@ -25,7 +29,7 @@ private:
   rclcpp::Subscription<std_msgs::msg::Int64>::SharedPtr ard_sub_;
   rclcpp::Publisher<cg_msgs::msg::EncoderTelemetry>::SharedPtr enc_pub_;
 
-  // declare parameters 
+  // declare parameters
   int QP_TO_BYTE_STEER_SCALE_;
   int QP_TO_BYTE_STEER_OFFSET_;
   int QPPS_TO_BYTE_DRIVE_SCALE_;
@@ -36,9 +40,34 @@ private:
   int QP_TO_BYTE_DELTA_POS_OFFSET_;
   
   /* Message data */
-  cg_msgs::msg::ActuatorCommand actuator_cmd_;
+  cg_msgs::msg::ActuatorCommand actuator_cmd_; // Actuator command to send to arduino
   std_msgs::msg::Int64 ard_feedback_;
   cg_msgs::msg::EncoderTelemetry enc_telemetry_;
+
+  /* Diagnostics */
+  diagnostic_updater::Updater diagnostic_updater_;
+  void populateDiagnosticsStatus(diagnostic_updater::DiagnosticStatusWrapper &stat); // Function for updating status information
+
+  // Log topic frequency for /arduino_cmd
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> arduino_cmd_freq_;
+  double freq_min_ard_cmd_;
+  double freq_max_ard_cmd_;
+  double freq_tol_ard_cmd_;
+  int freq_window_ard_cmd_;
+
+  // Log topic frequency for /arduino_feedback
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> arduino_feedback_freq_;
+  double freq_min_ard_fdbk_;
+  double freq_max_ard_fdbk_;
+  double freq_tol_ard_fdbk_;
+  int freq_window_ard_fdbk_;
+
+  // Log topic frequency for /encoder/telemetry
+  std::unique_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> encoder_telemetry_freq_;
+  double freq_min_enc_telem_;
+  double freq_max_enc_telem_;
+  double freq_tol_enc_telem_;
+  int freq_window_enc_telem_;
 
   /* Callbacks */
   void timerCallback();

@@ -1,0 +1,21 @@
+#include "std_msgs/msg/Header.idl"
+
+module cg_msgs {
+  module msg {
+    struct ActuatorState {
+      std_msgs::msg::Header header;
+
+      // Velocity of wheel actuators, in m/s
+      @default (value = 0.0)
+      double wheel_velocity;
+
+      // Position of front steer wheels, in rad
+      @default (value = 0.0)
+      double steer_position;
+
+      // Position of tool actuators, in percent of full scale [0, 100]
+      @default (value = 0.0)
+      double tool_position;
+    };
+  };
+};

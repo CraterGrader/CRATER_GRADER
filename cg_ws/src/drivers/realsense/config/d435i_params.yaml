@@ -4,7 +4,9 @@ camera:
 
         ###### Parameters below are set for team RealSense use.
         # Full design doc: https://docs.google.com/document/d/1tAVGqHS5lSfpPyG7R2rneph2jFr8ycn5qpuouTwiMsk/edit?usp=sharing
-        # More info on RealSense ROS2 parameters: https://index.ros.org/r/realsense2_camera/
+        # More info on RealSense ROS2 parameters: 
+        # 1) https://index.ros.org/r/realsense2_camera/
+        # 2) https://dev.intelrealsense.com/docs/ros-wrapper
         # More info on RealSense hardware components: https://www.intelrealsense.com/depth-camera-d435/
         ######
 
@@ -13,13 +15,20 @@ camera:
         device_type: d435i # Make sure we're connecting to the correct device type        
         
         # Point cloud
-        enable_pointcloud: true # True to turn on the point cloud
+        pointcloud.enable: true # True to turn on the point cloud
         pointcloud_qos: "SENSOR_DATA" # Use 'Best Effort' publishing
-        filters: colorizer # Applies RGB normalization coloring to depth image
+        filters: decimation # Subsamples the point cloud 
+        decimation_filter.enable: true
+        decimation_filter.filter_magnitude: 8 # The filter run on kernel sizes [2x2] to [8x8] pixels. For patches sized 2 and 3 the median depth value is selected. For larger kernels, 4-8 pixels, the mean depth is used due to performance considerations. More info: https://dev.intelrealsense.com/docs/post-processing-filters
+        clip_distance: 2.0 # Remove from the depth image all values above a given value (meters), set negative to turn off clipping. More info: https://dev.intelrealsense.com/docs/ros-wrapper
+        # 'colorizer' filter applies RGB normalization coloring to depth image, and 
+        colorizer.enable: true
         pointcloud.stream_filter: 0 # = 0 Allows any filter for streaming point cloud
         pointcloud_stream_format_filter: 0 # = 0 Allows any filter format for streaming point cloud
         pointcloud_texture_index: 0 # = 0 Allows any texture for streaming point cloud
         pointcloud_texture_stream: RS2_STREAM_COLOR # = RS2_STREAM_COLOR is the default
+        
+        odom_frame_id: "map"
 
         # Data sources 
         enable_depth: true # True to allow depth processing; necessary for point cloud
@@ -44,11 +53,11 @@ camera:
         # Source settings
         color_fps: 30.0 # Set frame rate for rgb images, seemingly no effect if enable_color=false
         color_height: 480 # Set image height for rgb images, seemingly no effect if enable_color=false
-        color_width: 640 # Set image width for rgb images, seemingly no effect if enable_color=false
+        color_width: 848 # Set image width for rgb images, seemingly no effect if enable_color=false
         color_qos: "SENSOR_DATA" # Set ROS2 Quality of Service for color data, "SENSOR_DATA" here maps to "Best Effort" in ROS2, seemingly no effect if enable_color=false
 
         depth_fps: 30.0 # Set frame rate for depth images/processing, 30.0 observed to give ~14fps point cloud frame rate
         depth_height: 480 # Set frame height for depth images, 480 observed to give ~14fps point cloud frame rate
-        depth_width: 640 # Set frame width for depth images, 640 observed to give ~14fps point cloud frame rate
+        depth_width: 848 # Set frame width for depth images, 640 observed to give ~14fps point cloud frame rate
         depth_qos: "SENSOR_DATA" # Set ROS2 Quality of Service for depth data, "SENSOR_DATA" here maps to "Best Effort" in ROS2
         

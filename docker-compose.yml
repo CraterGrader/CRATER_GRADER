@@ -1,28 +1,48 @@
 version: "3.9"
 services:
   cg-dev:
-    build:
-      context: ./
-      dockerfile: ./docker/cgdev.dockerfile
-      network: host
+    image: p84514faf325/cratergrader:cg-338-v1.0.0
     devices:
       - /dev/input/:/dev/input/
     volumes:
       - .:/root/CRATER_GRADER
     ports:
       - 5901:5900 # <external port>:<container port>
+      - 9090:9090 # Websocket for health monitoring via rosbridge_suite
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag
+  cg-dev-addon:
+    build:
+      context: ./
+      dockerfile: ./docker/addon.dockerfile
+      network: host
+    volumes:
+      - .:/root/CRATER_GRADER
+    ports:
+      - 5901:5900 # <external port>:<container port>
+      - 9090:9090 # Websocket for health monitoring via rosbridge_suite
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
   cg-dev-hw:
-    build:
-      context: ./
-      dockerfile: ./docker/cgdev.dockerfile
-      network: host
+    image: p84514faf325/cratergrader:cg-338-v1.0.0
     privileged: true
     volumes:
       - .:/root/CRATER_GRADER
       - /dev/:/dev/
     ports:
       - 5901:5900 # <external port>:<container port>
+      - 9090:9090 # Websocket for health monitoring via rosbridge_suite
+    tty: true # use terminal, i.e. the `-t` flag
+    stdin_open: true # allow terminal input, i.e. the `-i` flag
+  cg-dev-full-build:
+    build:
+      context: ./
+      dockerfile: ./docker/cgdev.dockerfile
+      network: host
+    volumes:
+      - .:/root/CRATER_GRADER
+    ports:
+      - 5901:5900 # <external port>:<container port>
+      - 9090:9090 # Websocket for health monitoring via rosbridge_suite
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
