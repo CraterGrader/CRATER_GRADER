@@ -22,11 +22,11 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
   // Load parameters
   this->declare_parameter<double>("design_blade_pos", 60.0);
   this->get_parameter("design_blade_pos", design_blade_pos_);
-  this->declare_parameter<double>("max_des_blade_pos", 90.0);
-  this->get_parameter("max_des_blade_pos", max_des_blade_pos_);
+  this->declare_parameter<double>("raised_blade_pos", 0.0);
+  this->get_parameter("raised_blade_pos", raised_blade_pos_);
   RCLCPP_INFO(this->get_logger(), "Using params:");
   RCLCPP_INFO(this->get_logger(), "design_blade_pos: %f", design_blade_pos_);
-  RCLCPP_INFO(this->get_logger(), "max_des_blade_pos: %f", max_des_blade_pos_);
+  RCLCPP_INFO(this->get_logger(), "raised_blade_pos: %f", raised_blade_pos_);
 
   // Initialize the current mode to the default mode, until new message is received
   curr_mux_mode_ = cg_msgs::msg::MuxMode::IDLE;
@@ -46,7 +46,7 @@ void AutoGraderNode::timerCallback() {
     // Set the blade height
     if (!driving_forward_) {
       // Bring blade up if moving backwards
-      cmd_msg_.tool_position = max_des_blade_pos_;
+      cmd_msg_.tool_position = raised_blade_pos_;
     } else {
       // Put blade down in all other conditions
       cmd_msg_.tool_position = design_blade_pos_;
