@@ -20,7 +20,7 @@ AutoGraderNode::AutoGraderNode() : Node("autograder_node") {
     "/encoder_telemetry", 1, std::bind(&AutoGraderNode::telemCallback, this, std::placeholders::_1));
 
   // Load parameters
-  this->declare_parameter<double>("design_blade_pos", 60.0);
+  this->declare_parameter<double>("design_blade_pos", 80.0);
   this->get_parameter("design_blade_pos", design_blade_pos_);
   this->declare_parameter<double>("raised_blade_pos", 0.0);
   this->get_parameter("raised_blade_pos", raised_blade_pos_);
