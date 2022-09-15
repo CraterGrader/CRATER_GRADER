@@ -37,7 +37,8 @@ void CellBayes::updateElvationStatic(float ptHeight, float ptVariance){
 void CellBayes::updateVarianceStatic(float ptVariance){
   // Probabilistic Terrain Mapping for Mobile Robots With Uncertain Localization
   // https://ieeexplore.ieee.org/document/8392399
-  cellVariance_ = (ptVariance * getCellVariance()) / (ptVariance + getCellVariance());
+  // Update cell variance, but clamp to minimum value to prevent vanishing to zero (for dynamic update)
+  cellVariance_ = std::max(minCellVariance_, (ptVariance * getCellVariance()) / (ptVariance + getCellVariance()));
 }
 
 // default constructor
@@ -145,7 +146,7 @@ void SiteMap::updateCellsBayes(){
   for (size_t i=0; i<getNcells(); i++){
 
     if (filterMap_[i].filterIsEmpty() == true){
-      heightMap_[i] = 1.0f;
+      heightMap_[i] = 0.0f;
     }
 
     else{

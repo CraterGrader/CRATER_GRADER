@@ -59,7 +59,8 @@ class CellBayes {
   private:
   // attributes  
   float cellElevation_ = 0.0f; 
-  float cellVariance_ = 1.0f;
+  float cellVariance_ = 1000.0f;
+  float minCellVariance_ = 0.01f;
 
 };
 
