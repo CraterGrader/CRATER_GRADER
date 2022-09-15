@@ -49,7 +49,7 @@ TEST(MyTestFixture, filterCheck) {
 
   siteMapTest.binPts(newPts);
 
-  siteMapTest.updateCells();
+  siteMapTest.updateCellsMean();
 
   std::vector<float> heightMapGet = siteMapTest.getHeightMap();
 
@@ -88,7 +88,7 @@ TEST(MyTestFixture, indexCheck) {
 
   siteMapTest.binPts(newPts);
 
-  siteMapTest.updateCells();
+  siteMapTest.updateCellsMean();
 
   std::vector<float> heightMapGet = siteMapTest.getHeightMap();
 

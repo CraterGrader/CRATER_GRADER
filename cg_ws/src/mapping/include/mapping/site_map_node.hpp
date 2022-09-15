@@ -6,6 +6,8 @@
 #include <pcl/point_types.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
+// #include <cg_msgs/msg/encoder_telemetry.hpp>
+
 
 namespace cg {
 namespace mapping {
@@ -21,12 +23,17 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_pub_;
   rclcpp::TimerBase::SharedPtr timer_; // For looping publish
 
+  // rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr telem_sub_;
+
   /* Callbacks */
   void newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
   void timerCallback(); // For looping publish
+  // void telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg);
+
 
   /* Variables */
   cg::mapping::SiteMap siteMap_;
+  // float driveSpeed = 0.0f;
 
   /* Parameters */
   int height_;

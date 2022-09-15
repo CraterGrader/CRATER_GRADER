@@ -5,6 +5,8 @@ namespace mapping {
 
 void CellHistory::addPoint(indexPoint pt){
 
+  filterEmpty_ = false;
+
   // if the filter is full, save the value getting removed before its removed
   if (filterFull_){ lastVal = window_[fingerIndex_]; }
 
@@ -26,16 +28,30 @@ void CellHistory::addPoint(indexPoint pt){
   }
 }
 
+void CellBayes::updateElvationStatic(float ptHeight, float ptVariance){
+  // Probabilistic Terrain Mapping for Mobile Robots With Uncertain Localization
+  // https://ieeexplore.ieee.org/document/8392399
+   cellElevation_ = (getCellVariance() * ptHeight + ptVariance * getCellElevation()) / (getCellVariance() + ptVariance);
+}
+
+void CellBayes::updateVarianceStatic(float ptVariance){
+  // Probabilistic Terrain Mapping for Mobile Robots With Uncertain Localization
+  // https://ieeexplore.ieee.org/document/8392399
+  cellVariance_ = (ptVariance * getCellVariance()) / (ptVariance + getCellVariance());
+}
+
 // default constructor
 SiteMap::SiteMap(){}
 
 // nominal constructor
-SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){  
+SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){
   height_ = cHeight;
   width_ = cWidth;
   resolution_ = cResolution;
   heightMap_.resize(height_*width_, 0.0f);
   filterMap_.resize(height_*width_, CellHistory());
+  varianceMap_.resize(height_*width_, CellBayes());
+
 }
 
 int SiteMap::binLen(float pos){
@@ -115,11 +131,33 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   return goodPts;
 }
 
-void SiteMap::updateCells(){
+void SiteMap::updateCellsMean(){
   
   // use view 2 filter map to update values in view 1 height map
   for (size_t i=0; i<getNcells(); i++){
     heightMap_[i] = filterMap_[i].getMean();
+  }
+
+}
+
+void SiteMap::updateCellsBayes(){
+  
+  for (size_t i=0; i<getNcells(); i++){
+
+    if (filterMap_[i].filterIsEmpty() == true){
+      heightMap_[i] = 1.0f;
+    }
+
+    else{
+      float elev = filterMap_[i].getFirstElement();
+      float variance = 1.0f;
+
+      varianceMap_[i].updateElvationStatic(elev, variance);
+      varianceMap_[i].updateVarianceStatic(variance);
+      heightMap_[i] = varianceMap_[i].getCellElevation();
+      // heightMap_[i] = varianceMap_[i].getCellVariance();
+    }
+
   }
 }
 

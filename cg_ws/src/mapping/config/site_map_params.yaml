@@ -1,5 +1,6 @@
 site_map:
   ros__parameters:
-    height: 35
-    width: 35
-    resolution: 0.142
+  # site assumed to be 5mx5m
+    height: 50
+    width: 50
+    resolution: 0.1

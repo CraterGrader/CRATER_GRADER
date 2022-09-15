@@ -9,11 +9,11 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
     "/terrain/filtered", 1, std::bind(&SiteMapNode::newPtsCallback, this, std::placeholders::_1));
   visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
     "/site_map_viz", 1);
+  // telem_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
+  //   "/encoder_telemetry", 1, std::bind(&SiteMapNode::telemCallback, this, std::placeholders::_1));
 
   // Timer callback
-  timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(100),
-    std::bind(&SiteMapNode::timerCallback, this));
+  timer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::timerCallback, this));
 
   // Load parameters
   this->declare_parameter<int>("height", 5);
@@ -77,14 +77,14 @@ void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr 
   siteMap_.binPts(incomingPts);
 
   // UPDATE CELLS 
-  siteMap_.updateCells();
+  // siteMap_.updateCellsMean();
+  siteMap_.updateCellsBayes();
 
 }
 
-// TODO SERVICE FOR SITEMAP OBJECT PUBLISH
-
-  // PUBLISH PTR FOR THE SITEMAP OBJECT SO PLANNER CAN ACCESS
-
+// void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
+//     driveSpeed = static_cast<float> msg->drive_vel_rear; 
+// }
 
 }  // namespace mapping
 }  // namespace cg
