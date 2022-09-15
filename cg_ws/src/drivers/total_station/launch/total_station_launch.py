@@ -21,7 +21,7 @@ def generate_launch_description():
         total_station_beacon_static_tf_params = yaml.load(
             stream,
             Loader=yaml.SafeLoader
-        )['beacon_static_transform_publisher']['ros__parameters']
+        )['total_station_beacon_static_transform_publisher']['ros__parameters']
 
     return LaunchDescription([
         Node(
@@ -37,18 +37,9 @@ def generate_launch_description():
             package='tf2_ros',
             executable='static_transform_publisher',
             arguments=[
-                total_station_beacon_static_tf_params['beacon_back']['x'], total_station_beacon_static_tf_params['beacon_back']['y'], total_station_beacon_static_tf_params['beacon_back']['z'],
-                total_station_beacon_static_tf_params['beacon_back']['yaw'], total_station_beacon_static_tf_params['beacon_back']['pitch'], total_station_beacon_static_tf_params['beacon_back']['roll'],
-                total_station_beacon_static_tf_params['beacon_back']['parent_frame_id'], total_station_beacon_static_tf_params['beacon_back']['child_frame_id']
+                total_station_beacon_static_tf_params['total_station_prism']['x'], total_station_beacon_static_tf_params['total_station_prism']['y'], total_station_beacon_static_tf_params['total_station_prism']['z'],
+                total_station_beacon_static_tf_params['total_station_prism']['yaw'], total_station_beacon_static_tf_params['total_station_prism']['pitch'], total_station_beacon_static_tf_params['total_station_prism']['roll'],
+                total_station_beacon_static_tf_params['total_station_prism']['parent_frame_id'], total_station_beacon_static_tf_params['total_station_prism']['child_frame_id']
             ]
         ),
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            arguments=[
-                total_station_beacon_static_tf_params['beacon_front']['x'], total_station_beacon_static_tf_params['beacon_front']['y'], total_station_beacon_static_tf_params['beacon_front']['z'],
-                total_station_beacon_static_tf_params['beacon_front']['yaw'], total_station_beacon_static_tf_params['beacon_front']['pitch'], total_station_beacon_static_tf_params['beacon_front']['roll'],
-                total_station_beacon_static_tf_params['beacon_front']['parent_frame_id'], total_station_beacon_static_tf_params['beacon_front']['child_frame_id']
-            ]
-        )
     ])

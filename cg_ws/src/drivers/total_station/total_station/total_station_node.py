@@ -31,9 +31,9 @@ class ts16_localizer(Node):
 
         self.declare_parameter('total_station_hz', 10)
         self.total_station_hz = self.get_parameter(
-            'total_station_hz').get_parameter_value().double_value
+            'total_station_hz').get_parameter_value().integer_value
         self.timer = self.create_timer(
-            self.total_station_hz, self.total_station_timer_callback)
+            1 / self.total_station_hz, self.total_station_timer_callback)
 
         self.declare_parameter('total_station_verbose', False)
         self.total_station_verbose = self.get_parameter(
@@ -44,7 +44,7 @@ class ts16_localizer(Node):
             'positional_rms').get_parameter_value().double_value
 
         self.TS_publisher = self.create_publisher(
-            PoseWithCovarianceStamped, "total_station", self.total_station_hz)
+            PoseWithCovarianceStamped, "total_station", 10)
 
         self.declare_parameter('total_station_port', 'ttyUSB0')
         self.total_station_port = self.get_parameter(
@@ -52,19 +52,28 @@ class ts16_localizer(Node):
 
         self.declare_parameter('total_station_baudrate', 19200)
         self.total_station_baudate = self.get_parameter(
-            'total_station_baudrate').get_parameter_value().int_value
+            'total_station_baudrate').get_parameter_value().integer_value
 
-        self.serialPortLeicaTS16 = serial.Serial(
-            port=self.total_station_port,
-            baudrate=self.total_station_baudate,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS
-        )
+        
+        self.get_logger().info(f"Port: {self.total_station_port}")
+        self.get_logger().info(f"Baudrate: {self.total_station_baudate}")
+
+        try:
+            self.serialPortLeicaTS16 = serial.Serial(
+                port=self.total_station_port,
+                baudrate=self.total_station_baudate,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS
+            )
+        except:
+            self.serialPortLeicaTS16 = None
+            self.get_logger().info("Could not connect to port")
+
 
         # Open Serial Connection to TS16
         if (not self.open_ts_connection(nRetries=5)):
-            print("Failed to Connect with Leica TS16")
+            self.get_logger().info("Failed to Connect with Leica TS16")
 
     def open_ts_connection(self, nRetries=5):
         """
@@ -82,13 +91,13 @@ class ts16_localizer(Node):
                     tries += 1
 
             if (not self.serialPortLeicaTS16.isOpen()):
-                print('Problem opening port')
+                self.get_logger().info('Problem opening port')
 
             return self.serialPortLeicaTS16.isOpen()
 
         except:
-            print("Connection Error - Leica TS not connected?")
-            return self.serialPortLeicaTS16.isOpen()
+            self.get_logger().info("Connection Error - Leica TS not connected?")
+            return False
 
     def close_ts_connection(self):
         """
@@ -127,6 +136,10 @@ class ts16_localizer(Node):
         Requesting and reading total station data on regular intervals
         """
 
+        if self.serialPortLeicaTS16 == None:
+            # self.get_logger().info("Failed callback, no serial connection")
+            return 
+
         waitTime = 100  # Delay getting the measurement
         TMC_GetCoordinate_CMD = '2082'
         TMC_AUTO_INC_MODE = 1
@@ -146,9 +159,13 @@ class ts16_localizer(Node):
 
         serial_output = self.serialPortLeicaTS16.readline()
 
-        position = self.parse_coordinate_output(serial_output)
+        output_str = "".join( chr(x) for x in bytearray(serial_output))
+        self.get_logger().info(f"Raw Output String: {output_str}")
 
-        self.publishTSPose(position, "map", self.TS_publisher)
+        position = self.parse_coordinate_output(output_str)
+
+        if len(position) == 3:
+            self.publishTSPose(position, "map", self.TS_publisher)
 
         return
 
@@ -158,10 +175,12 @@ class ts16_localizer(Node):
 
         response_parts = response_high_level_split[1].split(",")
 
-        return_code = response_parts[0]
+
+        return_code = int(response_parts[0])
+        self.get_logger().info(f"Response code : {return_code}")
         if return_code != 0:
-            print("TS request execution unsuccessful, ommitting datapoint")
-            return
+            self.get_logger().info("TS request execution unsuccessful, ommitting datapoint")
+            return []
 
         # Position in "Easting-Northing-Height" format 
         # Equivalent of X-Y-Z when coordinate system setup appropriately
@@ -178,9 +197,9 @@ class ts16_localizer(Node):
         """
 
         pose_msg = PoseWithCovarianceStamped()
-        pose_msg.pose.pose.position.x = float(pos[0])
-        pose_msg.pose.pose.position.y = float(pos[1])
-        pose_msg.pose.pose.position.z = float(pos[2])
+        pose_msg.pose.pose.position.x = float(pos[0]) - 1000
+        pose_msg.pose.pose.position.y = float(pos[1]) - 2000
+        pose_msg.pose.pose.position.z = float(pos[2]) - 3000
         pose_msg.pose.pose.orientation.x = 0.0
         pose_msg.pose.pose.orientation.y = 0.0
         pose_msg.pose.pose.orientation.z = 0.0
