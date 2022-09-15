@@ -131,15 +131,36 @@ class ts16_localizer(Node):
 
         return request + '\r\n'
 
-    def total_station_timer_callback(self):
+    def take_ts_measurement(self):
         """
-        Requesting and reading total station data on regular intervals
+        Request a new measurement be taken from TS
         """
 
-        if self.serialPortLeicaTS16 == None:
-            # self.get_logger().info("Failed callback, no serial connection")
-            return 
+        TMC_MEASURE_MODE = 1 # Default Distance-measurement
+        TMC_DoMeasurement_CMD = '2008'
+        TMC_AUTO_INC_MODE = 1
+        request = self.create_geocom_request(
+            TMC_DoMeasurement_CMD, [TMC_MEASURE_MODE, TMC_AUTO_INC_MODE])
+        encoded_req = request.encode()
 
+        # Send encoded command
+        self.serialPortLeicaTS16.write(encoded_req)
+        t_start = time.time()
+
+        length = 10
+        t_timeout = 0.5
+        while ((self.serialPortLeicaTS16.inWaiting() < length or (length == 0 and self.serialPortLeicaTS16.inWaiting() == 0)) and time.time()-t_start < t_timeout):
+            time.sleep(0.001)
+        time.sleep(0.025)
+
+        serial_output = self.serialPortLeicaTS16.readline()
+        return "".join( chr(x) for x in bytearray(serial_output))
+
+    def get_ts_coordinate(self):
+        """
+        Get current measurement from TS
+        """
+        
         waitTime = 100  # Delay getting the measurement
         TMC_GetCoordinate_CMD = '2082'
         TMC_AUTO_INC_MODE = 1
@@ -158,14 +179,46 @@ class ts16_localizer(Node):
         time.sleep(0.025)
 
         serial_output = self.serialPortLeicaTS16.readline()
+        return "".join( chr(x) for x in bytearray(serial_output))
 
-        output_str = "".join( chr(x) for x in bytearray(serial_output))
-        self.get_logger().info(f"Raw Output String: {output_str}")
+    def total_station_timer_callback(self):
+        """
+        Requesting and reading total station data on regular intervals
+        """
 
-        position = self.parse_coordinate_output(output_str)
+        if self.serialPortLeicaTS16 == None:
+            # self.get_logger().info("Failed callback, no serial connection")
+            return 
 
+        # Get measurement
+        mesaurement_done = False
+        n_tries = 3
+        cur_try = 0
+        while (cur_try <= n_tries and not mesaurement_done):
+            measurement_output = self.take_ts_measurement()
+            cur_try += 1
+            response_high_level_split = measurement_output.split(":")
+            response_parts = response_high_level_split[1].split(",")
+            if int(response_parts[0]) == 0:
+                mesaurement_done = True
+
+        if mesaurement_done == False:
+            self.get_logger().info(f"Measurement Failed: {response_parts[0]}")
+
+
+        # Get coordinate from new measurement
+        coordinate_output = self.get_ts_coordinate()
+
+        # Parse coordinate from new measurement if possible
+        position = self.parse_coordinate_output(coordinate_output)
+
+        # If position can be correctly parsed, publish!
         if len(position) == 3:
+            self.get_logger().info("Publishing position from TS")
             self.publishTSPose(position, "map", self.TS_publisher)
+        else:
+            self.get_logger().info(f"Coordinate Output String: {coordinate_output}")
+
 
         return
 
@@ -175,11 +228,9 @@ class ts16_localizer(Node):
 
         response_parts = response_high_level_split[1].split(",")
 
-
         return_code = int(response_parts[0])
-        self.get_logger().info(f"Response code : {return_code}")
-        if return_code != 0:
-            self.get_logger().info("TS request execution unsuccessful, ommitting datapoint")
+        if return_code not in [0, 1283, 1284]:
+            self.get_logger().info(f"TS request execution unsuccessful, error code: {return_code}")
             return []
 
         # Position in "Easting-Northing-Height" format 
