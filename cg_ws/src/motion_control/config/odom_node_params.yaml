@@ -5,15 +5,15 @@ odom_node:
     qp_drive_to_pos_m: 0.00008298755187
     qpps_drive_to_speed_ms: 0.00008298755187
     qp_tool_to_fs: -0.000666933440043
-    pose_cov_x: 0.000001
-    pose_cov_y: 0.000001
-    pose_cov_z: 0.000001
-    pose_cov_r: 0.000001
-    pose_cov_p: 0.000001
-    pose_cov_yaw: 0.000001
-    twist_cov_x: 0.000001
-    twist_cov_y: 0.000001
-    twist_cov_z: 0.000001
-    twist_cov_r: 0.000001
-    twist_cov_p: 0.000001
-    twist_cov_yaw: 0.000001
+    pose_cov_x: 0.01
+    pose_cov_y: 0.01
+    pose_cov_z: 0.01
+    pose_cov_r: 0.01
+    pose_cov_p: 0.01
+    pose_cov_yaw: 0.01
+    twist_cov_x: 0.01
+    twist_cov_y: 0.01
+    twist_cov_z: 0.01
+    twist_cov_r: 0.01
+    twist_cov_p: 0.01
+    twist_cov_yaw: 0.01
