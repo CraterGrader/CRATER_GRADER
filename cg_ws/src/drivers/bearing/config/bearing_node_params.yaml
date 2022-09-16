@@ -2,9 +2,10 @@ bearing_node:
   ros__parameters:
     # Positions relative to worksite frame (bottom left of map)
     tags:
+      # Rough offset to beacno is y=0.815 and x=0.915 
       position: # m
-        x: ['3.81', '7.62', '3.81', '0']
-        y: ['7.3152', '3.6576', '0', '3.6576']
+        x: ['2.895', '6.705', '2.895', '-0.915']
+        y: ['6.5', '2.85', '-0.815', '2.85']
         z: ['0.7508', '0.7508', '0.7508', '0.7508']
       orientation: # rad
         x: ['1.5708', '1.5708', '1.5708', '1.5708']
