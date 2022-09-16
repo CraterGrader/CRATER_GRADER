@@ -34,7 +34,7 @@ UsbCamNode::UsbCamNode(const rclcpp::NodeOptions & node_options)
   this->declare_parameter("image_width", 1280);
   this->declare_parameter("io_method", "mmap");
   this->declare_parameter("pixel_format", "yuyv");
-  this->declare_parameter("video_device", "/dev/video2");
+  this->declare_parameter("video_device", "/dev/cg_dev/sun_cam");
 
   get_params();
   init();

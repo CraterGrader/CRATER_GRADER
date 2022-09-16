@@ -145,6 +145,7 @@ void BearingNode::timerCallback() {
     // Find the best tag to get angle from
     double best_roll = rolls[0];
     double best_pitch = pitches[0];
+    double best_bearing = bearings[0];
     double best_x_pose = x_trans[0];
     double best_y_pose = y_trans[0];
     double best_z_pose = z_trans[0];
@@ -190,18 +191,17 @@ void BearingNode::timerCallback() {
       this->rolling_x.erase(rolling_x.begin());
       this->rolling_y.erase(rolling_y.begin());
       this->rolling_z.erase(rolling_z.begin());
-
     }
 
     // Average the unit vectors and get angle
     sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
     sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
     avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
-    avg_roll = std::accumulate(this->rolling_roll.begin(), this->rolling_roll.end(0, 0.0)/rolling_avg_buffer;
-    avg_pitch = std::accumulate(this->rolling_pitch.begin(), this->rolling_pitch.end(0, 0.0)/rolling_avg_buffer;
-    avg_x = std::accumulate(this->rolling_x.begin(), this->rolling_x.end(0, 0.0)/rolling_avg_buffer;
-    avg_y = std::accumulate(this->rolling_y.begin(), this->rolling_y.end(0, 0.0)/rolling_avg_buffer;
-    avg_z = std::accumulate(this->rolling_z.begin(), this->rolling_z.end(0, 0.0)/rolling_avg_buffer;
+    avg_roll = std::accumulate(this->rolling_roll.begin(), this->rolling_roll.end(), 0.0)/rolling_avg_buffer;
+    avg_pitch = std::accumulate(this->rolling_pitch.begin(), this->rolling_pitch.end(), 0.0)/rolling_avg_buffer;
+    avg_x = std::accumulate(this->rolling_x.begin(), this->rolling_x.end(), 0.0)/rolling_avg_buffer;
+    avg_y = std::accumulate(this->rolling_y.begin(), this->rolling_y.end(), 0.0)/rolling_avg_buffer;
+    avg_z = std::accumulate(this->rolling_z.begin(), this->rolling_z.end(), 0.0)/rolling_avg_buffer;
     
 
     // Set the PoseWithCovarianceStamped message's position to 0
