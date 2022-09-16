@@ -168,6 +168,7 @@ void BearingNode::timerCallback() {
     double sum_x_angle;
     double avg_roll;
     double avg_pitch;
+    double avg_bearing;
     double avg_x;
     double avg_y;
     double avg_z;
@@ -197,11 +198,11 @@ void BearingNode::timerCallback() {
     sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
     sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
     avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
-    avg_roll = std::accumulate(this->rolling_roll.begin(), this->rolling_roll.end(0, 0.0)/rolling_avg_buffer;
-    avg_pitch = std::accumulate(this->rolling_pitch.begin(), this->rolling_pitch.end(0, 0.0)/rolling_avg_buffer;
-    avg_x = std::accumulate(this->rolling_x.begin(), this->rolling_x.end(0, 0.0)/rolling_avg_buffer;
-    avg_y = std::accumulate(this->rolling_y.begin(), this->rolling_y.end(0, 0.0)/rolling_avg_buffer;
-    avg_z = std::accumulate(this->rolling_z.begin(), this->rolling_z.end(0, 0.0)/rolling_avg_buffer;
+    avg_roll = std::accumulate(this->rolling_roll.begin(), this->rolling_roll.end(), 0.0)/rolling_avg_buffer;
+    avg_pitch = std::accumulate(this->rolling_pitch.begin(), this->rolling_pitch.end(), 0.0)/rolling_avg_buffer;
+    avg_x = std::accumulate(this->rolling_x.begin(), this->rolling_x.end(), 0.0)/rolling_avg_buffer;
+    avg_y = std::accumulate(this->rolling_y.begin(), this->rolling_y.end(), 0.0)/rolling_avg_buffer;
+    avg_z = std::accumulate(this->rolling_z.begin(), this->rolling_z.end(), 0.0)/rolling_avg_buffer;
     
 
     // Set the PoseWithCovarianceStamped message's position to 0
