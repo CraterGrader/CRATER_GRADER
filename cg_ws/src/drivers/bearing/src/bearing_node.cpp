@@ -56,11 +56,11 @@ void BearingNode::timerCallback() {
   
   // Store bearing estimates and distances
   std::vector<double> rolls;
-  std:;vector<double> pitches;
+  std::vector<double> pitches;
   std::vector<double> bearings;
-  std:;vector<double> x_trans;
-  std:;vector<double> y_trans;
-  std:;vector<double> z_trans;
+  std::vector<double> x_trans;
+  std::vector<double> y_trans;
+  std::vector<double> z_trans;
   std::vector<double> tag_dist_to_cam;
 
   // Declare tf frames
@@ -145,7 +145,6 @@ void BearingNode::timerCallback() {
     // Find the best tag to get angle from
     double best_roll = rolls[0];
     double best_pitch = pitches[0];
-    double best_bearing = bearings[0];
     double best_x_pose = x_trans[0];
     double best_y_pose = y_trans[0];
     double best_z_pose = z_trans[0];
@@ -165,32 +164,54 @@ void BearingNode::timerCallback() {
     
     // Variables for average bearing over the buffer length
     double avg_bearing;
-    double sum_y;
-    double sum_x;
+    double sum_y_angle;
+    double sum_x_angle;
+    double avg_roll;
+    double avg_pitch;
+    double avg_x;
+    double avg_y;
+    double avg_z;
     
     // Instead of averaging the bearing, sum the unit vectors
     this->rolling_sin.push_back(std::sin(best_bearing));
     this->rolling_cos.push_back(std::cos(best_bearing));
+    this->rolling_roll.push_back(best_roll);
+    this->rolling_pitch.push_back(best_pitch);
+    this->rolling_x.push_back(best_x_pose);
+    this->rolling_y.push_back(best_y_pose);
+    this->rolling_z.push_back(best_z_pose);
 
     // Erase the oldest bearing if the buffer is longer than the limit
     if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
+      this->rolling_roll.erase(rolling_roll.begin());
+      this->rolling_pitch.erase(rolling_pitch.begin());
+      this->rolling_x.erase(rolling_x.begin());
+      this->rolling_y.erase(rolling_y.begin());
+      this->rolling_z.erase(rolling_z.begin());
+
     }
 
     // Average the unit vectors and get angle
-    sum_y = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
-    sum_x = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
-    avg_bearing = std::atan2(sum_y, sum_x);
+    sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
+    sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
+    avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
+    avg_roll = std::accumulate(this->rolling_roll.begin(), this->rolling_roll.end(0, 0.0)/rolling_avg_buffer;
+    avg_pitch = std::accumulate(this->rolling_pitch.begin(), this->rolling_pitch.end(0, 0.0)/rolling_avg_buffer;
+    avg_x = std::accumulate(this->rolling_x.begin(), this->rolling_x.end(0, 0.0)/rolling_avg_buffer;
+    avg_y = std::accumulate(this->rolling_y.begin(), this->rolling_y.end(0, 0.0)/rolling_avg_buffer;
+    avg_z = std::accumulate(this->rolling_z.begin(), this->rolling_z.end(0, 0.0)/rolling_avg_buffer;
+    
 
     // Set the PoseWithCovarianceStamped message's position to 0
-    bearing.pose.pose.position.x = best_x_pose;
-    bearing.pose.pose.position.y = best_y_pose;
-    bearing.pose.pose.position.z = best_z_pose;
+    bearing.pose.pose.position.x = avg_x;
+    bearing.pose.pose.position.y = avg_y;
+    bearing.pose.pose.position.z = avg_z;
 
     // Convert yaw back into a quarternion for orientation
     tf2::Quaternion q;
-    q.setRPY(best_roll, best_pitch, avg_bearing);
+    q.setRPY(avg_roll, avg_pitch, avg_bearing);
 
     // Set the quarternion in the message
     bearing.pose.pose.orientation.x = q.x();

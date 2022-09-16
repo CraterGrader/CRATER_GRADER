@@ -1,0 +1,19 @@
+rosbag2_bagfile_information:
+  version: 4
+  storage_identifier: sqlite3
+  relative_file_paths:
+    - 0deg_3m_50cm_lateral_0.db3
+  duration:
+    nanoseconds: 17599603998
+  starting_time:
+    nanoseconds_since_epoch: 1662618217002080506
+  message_count: 177
+  topics_with_message_count:
+    - topic_metadata:
+        name: /bearing
+        type: geometry_msgs/msg/PoseWithCovarianceStamped
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 177
+  compression_format: ""
+  compression_mode: ""
