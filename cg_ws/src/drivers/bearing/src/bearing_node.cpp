@@ -145,6 +145,7 @@ void BearingNode::timerCallback() {
     // Find the best tag to get angle from
     double best_roll = rolls[0];
     double best_pitch = pitches[0];
+    double best_bearing = bearings[0];
     double best_x_pose = x_trans[0];
     double best_y_pose = y_trans[0];
     double best_z_pose = z_trans[0];
@@ -168,7 +169,6 @@ void BearingNode::timerCallback() {
     double sum_x_angle;
     double avg_roll;
     double avg_pitch;
-    double avg_bearing;
     double avg_x;
     double avg_y;
     double avg_z;
