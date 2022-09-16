@@ -190,22 +190,6 @@ class ts16_localizer(Node):
             # self.get_logger().info("Failed callback, no serial connection")
             return 
 
-        # Get measurement
-        mesaurement_done = False
-        n_tries = 3
-        cur_try = 0
-        while (cur_try <= n_tries and not mesaurement_done):
-            measurement_output = self.take_ts_measurement()
-            cur_try += 1
-            response_high_level_split = measurement_output.split(":")
-            response_parts = response_high_level_split[1].split(",")
-            if int(response_parts[0]) == 0:
-                mesaurement_done = True
-
-        if mesaurement_done == False:
-            self.get_logger().info(f"Measurement Failed: {response_parts[0]}")
-
-
         # Get coordinate from new measurement
         coordinate_output = self.get_ts_coordinate()
 
@@ -219,26 +203,32 @@ class ts16_localizer(Node):
         else:
             self.get_logger().info(f"Coordinate Output String: {coordinate_output}")
 
-
         return
 
     def parse_coordinate_output(self, serial_output, continuous=False):
 
-        response_high_level_split = serial_output.split(":")
+        try:
+            response_high_level_split = serial_output.split(":")
 
-        response_parts = response_high_level_split[1].split(",")
+            response_parts = response_high_level_split[1].split(",")
 
-        return_code = int(response_parts[0])
-        if return_code not in [0, 1283, 1284]:
-            self.get_logger().info(f"TS request execution unsuccessful, error code: {return_code}")
-            return []
+            return_code = int(response_parts[0])
+            if return_code not in [0, 1283, 1284]:
+                self.get_logger().info(f"TS request execution unsuccessful, error code: {return_code}")
+                return []
 
+
+            # Position in "Easting-Northing-Height" format 
         # Position in "Easting-Northing-Height" format 
-        # Equivalent of X-Y-Z when coordinate system setup appropriately
-        enh_position_coordinate = response_parts[1:4]
-        enh_position_coordinate_continuous = response_parts[5:8]
+            # Position in "Easting-Northing-Height" format 
+            # Equivalent of X-Y-Z when coordinate system setup appropriately
+            enh_position_coordinate = response_parts[1:4]
+            enh_position_coordinate_continuous = response_parts[5:8]
 
-        return enh_position_coordinate if continuous else enh_position_coordinate_continuous
+            return enh_position_coordinate if continuous else enh_position_coordinate_continuous
+        
+        except:
+            return []
 
     def publishTSPose(self, pos, frame_id, publisher):
         """
@@ -247,26 +237,29 @@ class ts16_localizer(Node):
         :returns: none
         """
 
-        pose_msg = PoseWithCovarianceStamped()
-        pose_msg.pose.pose.position.x = float(pos[0]) - 1000
-        pose_msg.pose.pose.position.y = float(pos[1]) - 2000
-        pose_msg.pose.pose.position.z = float(pos[2]) - 3000
-        pose_msg.pose.pose.orientation.x = 0.0
-        pose_msg.pose.pose.orientation.y = 0.0
-        pose_msg.pose.pose.orientation.z = 0.0
-        pose_msg.pose.pose.orientation.w = 1.0
-        pose_msg.header.stamp = self.get_clock().now().to_msg()
-        pose_msg.header.frame_id = frame_id
+        try:
+            pose_msg = PoseWithCovarianceStamped()
+            pose_msg.pose.pose.position.x = float(pos[0])
+            pose_msg.pose.pose.position.y = float(pos[1])
+            pose_msg.pose.pose.position.z = float(pos[2])
+            pose_msg.pose.pose.orientation.x = 0.0
+            pose_msg.pose.pose.orientation.y = 0.0
+            pose_msg.pose.pose.orientation.z = 0.0
+            pose_msg.pose.pose.orientation.w = 1.0
+            pose_msg.header.stamp = self.get_clock().now().to_msg()
+            pose_msg.header.frame_id = frame_id
 
-        # Assuming diagonal covariance matrix
-        # Setting rotation covariance to 1 by default, but should be thrown out during sensor fusion
-        pose_msg.pose.covariance = [self.positional_rms, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, self.positional_rms, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0, self.positional_rms, 0.0, 0.0, 0.0,
-                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        publisher.publish(pose_msg)
+            # Assuming diagonal covariance matrix
+            # Setting rotation covariance to 1 by default, but should be thrown out during sensor fusion
+            pose_msg.pose.covariance = [self.positional_rms, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, self.positional_rms, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, self.positional_rms, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            publisher.publish(pose_msg)
+        except:
+            self.get_logger().info(f"Could not publish position: {pos}")
 
 
 def main(args=None):
