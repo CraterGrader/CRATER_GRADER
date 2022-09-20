@@ -5,7 +5,7 @@ dependencies:
   - pip
   - jupyterlab
   - pandas
-  - numpy
+  - numpy=1.19.4
   - scipy
   - tqdm
   - matplotlib
