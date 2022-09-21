@@ -26,11 +26,19 @@ ament_target_dependencies(autograder_node
   cg_msgs
 )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
+# if(BUILD_TESTING)
+#   find_package(ament_lint_auto REQUIRED)
+#   ament_lint_auto_find_test_dependencies()
+# endif()
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(common_test
+    test/common_test.cpp
+    include/planning/common.hpp
+    src/common.cpp
+  )
+endif()
 
 # Install targets
 install(TARGETS autograder_node
