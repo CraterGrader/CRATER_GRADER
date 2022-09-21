@@ -54,7 +54,25 @@ class ts16_localizer(Node):
         self.total_station_baudate = self.get_parameter(
             'total_station_baudrate').get_parameter_value().integer_value
 
-        
+        self.declare_parameter('ts_prism_x_offset', 0.0)
+        self.ts_prism_x_offset = self.get_parameter(
+            'ts_prism_x_offset').get_parameter_value().double_value
+
+        self.declare_parameter('ts_prism_y_offset', 0.0)
+        self.ts_prism_y_offset = self.get_parameter(
+            'ts_prism_y_offset').get_parameter_value().double_value
+
+        self.declare_parameter('ts_prism_z_rotation', 0.0)
+        self.ts_prism_z_rotation = self.get_parameter(
+            'ts_prism_z_rotation').get_parameter_value().double_value
+
+        self.z_rot_mat = np.array([
+            [np.cos(self.ts_prism_z_rotation), -
+             np.sin(self.ts_prism_z_rotation), 0],
+            [np.sin(self.ts_prism_z_rotation), np.cos(
+                self.ts_prism_z_rotation), 0],
+            [0, 0, 1]])
+
         self.get_logger().info(f"Port: {self.total_station_port}")
         self.get_logger().info(f"Baudrate: {self.total_station_baudate}")
 
@@ -69,7 +87,6 @@ class ts16_localizer(Node):
         except:
             self.serialPortLeicaTS16 = None
             self.get_logger().info("Could not connect to port")
-
 
         # Open Serial Connection to TS16
         if (not self.open_ts_connection(nRetries=5)):
@@ -136,7 +153,7 @@ class ts16_localizer(Node):
         Request a new measurement be taken from TS
         """
 
-        TMC_MEASURE_MODE = 1 # Default Distance-measurement
+        TMC_MEASURE_MODE = 1  # Default Distance-measurement
         TMC_DoMeasurement_CMD = '2008'
         TMC_AUTO_INC_MODE = 1
         request = self.create_geocom_request(
@@ -154,13 +171,13 @@ class ts16_localizer(Node):
         time.sleep(0.025)
 
         serial_output = self.serialPortLeicaTS16.readline()
-        return "".join( chr(x) for x in bytearray(serial_output))
+        return "".join(chr(x) for x in bytearray(serial_output))
 
     def get_ts_coordinate(self):
         """
         Get current measurement from TS
         """
-        
+
         waitTime = 100  # Delay getting the measurement
         TMC_GetCoordinate_CMD = '2082'
         TMC_AUTO_INC_MODE = 1
@@ -179,7 +196,7 @@ class ts16_localizer(Node):
         time.sleep(0.025)
 
         serial_output = self.serialPortLeicaTS16.readline()
-        return "".join( chr(x) for x in bytearray(serial_output))
+        return "".join(chr(x) for x in bytearray(serial_output))
 
     def total_station_timer_callback(self):
         """
@@ -188,7 +205,7 @@ class ts16_localizer(Node):
 
         if self.serialPortLeicaTS16 == None:
             # self.get_logger().info("Failed callback, no serial connection")
-            return 
+            return
 
         # Get coordinate from new measurement
         coordinate_output = self.get_ts_coordinate()
@@ -201,7 +218,8 @@ class ts16_localizer(Node):
             self.get_logger().info("Publishing position from TS")
             self.publishTSPose(position, "map", self.TS_publisher)
         else:
-            self.get_logger().info(f"Coordinate Output String: {coordinate_output}")
+            self.get_logger().info(
+                f"Coordinate Output String: {coordinate_output}")
 
         return
 
@@ -214,34 +232,39 @@ class ts16_localizer(Node):
 
             return_code = int(response_parts[0])
             if return_code not in [0, 1283, 1284]:
-                self.get_logger().info(f"TS request execution unsuccessful, error code: {return_code}")
+                self.get_logger().info(
+                    f"TS request execution unsuccessful, error code: {return_code}")
                 return []
 
-
-            # Position in "Easting-Northing-Height" format 
-        # Position in "Easting-Northing-Height" format 
-            # Position in "Easting-Northing-Height" format 
+            # Position in "Easting-Northing-Height" format
+        # Position in "Easting-Northing-Height" format
+            # Position in "Easting-Northing-Height" format
             # Equivalent of X-Y-Z when coordinate system setup appropriately
             enh_position_coordinate = response_parts[1:4]
             enh_position_coordinate_continuous = response_parts[5:8]
 
             return enh_position_coordinate if continuous else enh_position_coordinate_continuous
-        
+
         except:
             return []
 
-    def publishTSPose(self, pos, frame_id, publisher):
+    def publishTSPose(self, pos, frame_id, publisher, transform=True):
         """
         Publish Position using provided publisher
         :param: [Double] PoseData, String frame_id
         :returns: none
         """
 
+        # Transform point into site-map frame
+        transformed_pos = pos
+        if transform:
+            transformed_pos = (self.z_rot_mat @ np.array(pos).T).tolist()
+
         try:
             pose_msg = PoseWithCovarianceStamped()
-            pose_msg.pose.pose.position.x = float(pos[0])
-            pose_msg.pose.pose.position.y = float(pos[1])
-            pose_msg.pose.pose.position.z = float(pos[2])
+            pose_msg.pose.pose.position.x = float(transformed_pos[0])
+            pose_msg.pose.pose.position.y = float(transformed_pos[1])
+            pose_msg.pose.pose.position.z = float(transformed_pos[2])
             pose_msg.pose.pose.orientation.x = 0.0
             pose_msg.pose.pose.orientation.y = 0.0
             pose_msg.pose.pose.orientation.z = 0.0
@@ -252,11 +275,11 @@ class ts16_localizer(Node):
             # Assuming diagonal covariance matrix
             # Setting rotation covariance to 1 by default, but should be thrown out during sensor fusion
             pose_msg.pose.covariance = [self.positional_rms, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, self.positional_rms, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, self.positional_rms, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                                        0.0, self.positional_rms, 0.0, 0.0, 0.0, 0.0,
+                                        0.0, 0.0, self.positional_rms, 0.0, 0.0, 0.0,
+                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             publisher.publish(pose_msg)
         except:
             self.get_logger().info(f"Could not publish position: {pos}")
