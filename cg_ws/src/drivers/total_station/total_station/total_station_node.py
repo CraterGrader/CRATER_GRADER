@@ -44,7 +44,7 @@ class ts16_localizer(Node):
             'positional_rms').get_parameter_value().double_value
 
         self.TS_publisher = self.create_publisher(
-            PoseWithCovarianceStamped, "total_station", 10)
+            PoseWithCovarianceStamped, "total_station_prism", 10)
 
         self.declare_parameter('total_station_port', 'ttyUSB0')
         self.total_station_port = self.get_parameter(
