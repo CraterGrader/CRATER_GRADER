@@ -5,8 +5,13 @@ namespace planning {
 
 // Data types
 struct Point {
-  float x;
-  float y;
+  float x; // [m], continuous in global map frame
+  float y; // [m], continuous in global map frame
+};
+
+struct Pose {
+  Point pt;
+  float yaw; // [rad], continuous in global map frame
 };
 
 // Functions
