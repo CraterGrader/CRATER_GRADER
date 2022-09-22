@@ -273,9 +273,9 @@ class ts16_localizer(Node):
 
         try:
             pose_msg = PoseWithCovarianceStamped()
-            pose_msg.pose.pose.position.x = float(transformed_pos[0]) - self.ts_prism_x_offset
-            pose_msg.pose.pose.position.y = float(transformed_pos[1]) - self.ts_prism_y_offset
-            pose_msg.pose.pose.position.z = float(transformed_pos[2]) - self.ts_prism_z_offset
+            pose_msg.pose.pose.position.x = float(transformed_pos[0]) + self.ts_prism_x_offset
+            pose_msg.pose.pose.position.y = float(transformed_pos[1]) + self.ts_prism_y_offset
+            pose_msg.pose.pose.position.z = float(transformed_pos[2]) + self.ts_prism_z_offset
             pose_msg.pose.pose.orientation.x = 0.0
             pose_msg.pose.pose.orientation.y = 0.0
             pose_msg.pose.pose.orientation.z = 0.0
