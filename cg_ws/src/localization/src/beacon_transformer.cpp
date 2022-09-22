@@ -145,5 +145,5 @@ bool BeaconTransformer::tf_update(std::string toFrameRel, std::string fromFrameR
 }
 
 
-}  // namespace total_station_rtls
+}  // namespace uwb_beacon_rtls
 }  // namespace cg
