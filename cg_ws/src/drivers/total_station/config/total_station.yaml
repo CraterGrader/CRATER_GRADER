@@ -1,0 +1,7 @@
+total_station_node:
+  ros__parameters:
+    total_station_port: '/dev/ttyUSB0'
+    total_station_verbose: True
+    positional_rms: 0.005
+    total_station_hz: 10
+    raw_topic: '/total_station/'
