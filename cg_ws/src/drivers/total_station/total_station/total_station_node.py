@@ -62,6 +62,15 @@ class ts16_localizer(Node):
         self.ts_prism_y_offset = self.get_parameter(
             'ts_prism_y_offset').get_parameter_value().double_value
 
+        self.declare_parameter('ts_prism_z_offset', 0.0)
+        self.ts_prism_z_offset = self.get_parameter(
+            'ts_prism_z_offset').get_parameter_value().double_value
+
+        self.get_logger().info(f"x Offset: {self.ts_prism_x_offset}")
+        self.get_logger().info(f"y Offset: {self.ts_prism_y_offset}")
+        self.get_logger().info(f"z Offset: {self.ts_prism_z_offset}")
+
+
         self.declare_parameter('ts_prism_z_rotation', 0.0)
         self.ts_prism_z_rotation = self.get_parameter(
             'ts_prism_z_rotation').get_parameter_value().double_value
@@ -71,7 +80,7 @@ class ts16_localizer(Node):
              np.sin(self.ts_prism_z_rotation), 0],
             [np.sin(self.ts_prism_z_rotation), np.cos(
                 self.ts_prism_z_rotation), 0],
-            [0, 0, 1]])
+            [0, 0, 1]], dtype=np.double)        
 
         self.get_logger().info(f"Port: {self.total_station_port}")
         self.get_logger().info(f"Baudrate: {self.total_station_baudate}")
@@ -256,15 +265,17 @@ class ts16_localizer(Node):
         """
 
         # Transform point into site-map frame
-        transformed_pos = pos
+
+
+        transformed_pos = [float(num) for num in pos]
         if transform:
-            transformed_pos = (self.z_rot_mat @ np.array(pos).T).tolist()
+            transformed_pos = (self.z_rot_mat @ np.array(transformed_pos).T).tolist()
 
         try:
             pose_msg = PoseWithCovarianceStamped()
-            pose_msg.pose.pose.position.x = float(transformed_pos[0])
-            pose_msg.pose.pose.position.y = float(transformed_pos[1])
-            pose_msg.pose.pose.position.z = float(transformed_pos[2])
+            pose_msg.pose.pose.position.x = float(transformed_pos[0]) - self.ts_prism_x_offset
+            pose_msg.pose.pose.position.y = float(transformed_pos[1]) - self.ts_prism_y_offset
+            pose_msg.pose.pose.position.z = float(transformed_pos[2]) - self.ts_prism_z_offset
             pose_msg.pose.pose.orientation.x = 0.0
             pose_msg.pose.pose.orientation.y = 0.0
             pose_msg.pose.pose.orientation.z = 0.0
