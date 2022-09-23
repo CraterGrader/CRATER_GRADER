@@ -37,9 +37,18 @@ void TSPrismTransformer::ts_prism_callback(const geometry_msgs::msg::PoseWithCov
     if (got_tf)
     {
       // ts_prism_transformStamped.transform.rotation = base_link_transform.transform.rotation;
-      std::cout << ts_prism_transformStamped.transform.translation.x << ", " 
-                << ts_prism_transformStamped.transform.translation.y << ", " 
-                << ts_prism_transformStamped.transform.translation.z << std::endl ;
+
+      base_link_transform.transform.translation.x = 0;
+      base_link_transform.transform.translation.y = 0;
+      base_link_transform.transform.translation.z = 0; 
+      // std::cout << ts_prism_transformStamped.transform.translation.x << ", " 
+      //           << ts_prism_transformStamped.transform.translation.y << ", " 
+      //           << ts_prism_transformStamped.transform.translation.z << std::endl ;
+      ts_prism_transformStamped.transform.rotation.w = 1;
+      ts_prism_transformStamped.transform.rotation.x = 0;
+      ts_prism_transformStamped.transform.rotation.y = 0;
+      ts_prism_transformStamped.transform.rotation.z = 0; 
+      tf2::doTransform(updated_pose_, updated_pose_, base_link_transform);
       tf2::doTransform(updated_pose_, updated_pose_, ts_prism_transformStamped);
       transformed_ts_prism_pub_->publish(updated_pose_);
     }
