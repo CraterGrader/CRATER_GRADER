@@ -19,6 +19,12 @@ TSPrismTransformer::TSPrismTransformer() : Node("ts_prism_transformer")
   transformed_ts_prism_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
   "/transformed_total_station_prism", 1);
 
+  int pub_freq{10};
+  tf_timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(1000/pub_freq),
+    std::bind(&TSPrismTransformer::tf_Callback, this)
+  );
+
   // Tf listeners
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -30,7 +36,10 @@ void TSPrismTransformer::ts_prism_callback(const geometry_msgs::msg::PoseWithCov
     updated_pose_ = *prism_msg;
     if (got_tf)
     {
-      ts_prism_transformStamped.transform.rotation = base_link_transform.transform.rotation;
+      // ts_prism_transformStamped.transform.rotation = base_link_transform.transform.rotation;
+      std::cout << ts_prism_transformStamped.transform.translation.x << ", " 
+                << ts_prism_transformStamped.transform.translation.y << ", " 
+                << ts_prism_transformStamped.transform.translation.z << std::endl ;
       tf2::doTransform(updated_pose_, updated_pose_, ts_prism_transformStamped);
       transformed_ts_prism_pub_->publish(updated_pose_);
     }
@@ -50,8 +59,10 @@ void TSPrismTransformer::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu
 // Update tf transforms 
 void TSPrismTransformer::tf_Callback() 
 {        
-  bool got_tf1 = tf_update(map_frame, prism_frame, ts_prism_transformStamped);
+  bool got_tf1 = tf_update(base_link_frame, prism_frame, ts_prism_transformStamped);
+  // if (got_tf1) std::cout << "GOT TF1" << std::endl;
   bool got_tf2 = tf_update(map_frame, base_link_frame, base_link_transform);
+  // if (got_tf2) std::cout << "GOT TF2" << std::endl;
   got_tf = got_tf1 && got_tf2;
 }
 

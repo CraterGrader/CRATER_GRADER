@@ -28,7 +28,7 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr ts_prism_subscription_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;
     rclcpp::TimerBase::SharedPtr tf_timer_{nullptr};
-    rclcpp::TimerBase::SharedPtr transformed_ts_prism_timer_{nullptr};
+    // rclcpp::TimerBase::SharedPtr transformed_ts_prism_timer_{nullptr};
 
     /* Callbacks */
     void ts_prism_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr prism_msg);
@@ -41,7 +41,7 @@ private:
     std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
     bool got_tf{false};
 
-    std::string prism_frame = "ts_prism";
+    std::string prism_frame = "total_station_prism";
     std::string base_link_frame = "base_link";
     std::string map_frame = "map";
 

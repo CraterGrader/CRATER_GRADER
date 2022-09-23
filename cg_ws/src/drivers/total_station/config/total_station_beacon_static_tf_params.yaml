@@ -7,5 +7,5 @@ total_station_beacon_static_transform_publisher:
       roll: '0'
       pitch: '0'
       yaw: '0'
-      parent_frame_id: base_link
+      parent_frame_id: map
       child_frame_id: total_station_prism
