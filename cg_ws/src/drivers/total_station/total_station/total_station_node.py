@@ -298,8 +298,10 @@ class ts16_localizer(Node):
                                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             publisher.publish(pose_msg)
+            return True
         except:
             self.get_logger().info(f"Could not publish position: {pos}")
+            return False
 
 
 def main(args=None):
