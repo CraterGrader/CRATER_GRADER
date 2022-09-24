@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y zsh bash wget \
   # Export MicroROS DDS settings, assumes ROS_LOCALHOST_ONLY != 1
   && echo 'export FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/disable_fastdds_shm.xml' >> /root/.zshrc \
   && echo 'export FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/disable_fastdds_shm.xml' >> /root/.bashrc \
-  # Try sourcing cg_ws packages in bash shell; use zsh shell for building and bash shell for running
+  # Try sourcing cg_ws packages in bash shell; workflow := use zsh shell for building and bash shell for running
   && echo 'source /root/CRATER_GRADER/cg_ws/install/local_setup.bash > /dev/null 2>&1' >> ~/.bashrc \
   # Fix zsh autocomplete for ROS2 packages
   && echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc \
@@ -92,7 +92,6 @@ RUN  mkdir ~/.vnc \
 
 # -------- Setup CraterGrader environment packages --------
 # Setup python environment
-RUN apt-get update && apt-get install -y python3.7
 COPY requirements.txt /root/
 RUN pip3 install -r /root/requirements.txt && rm -f /root/requirements.txt
 
