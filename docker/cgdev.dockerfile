@@ -1,31 +1,26 @@
 # -------- Build on existing docker images ----------------
-# Get conda files
-FROM continuumio/miniconda3:4.10.3p1 as conda_setup
-
 # Use microros as the base image, to avoid rebuilding from source every time
 FROM microros/micro-ros-agent:galactic as ros_base
 
-# Copy over conda into ros_base image
-ENV PATH=/root/miniconda3/bin:/opt/conda/bin:${PATH}
-COPY --from=conda_setup /opt/conda/ /opt/conda/
-
+###########################################################
 ### Automatically setup and build MicroROS packages from source, no longer needed but kept in case microros docker image fails, probably should be run with ros:$ROS_DISTRO image instead of microros/micro-ros-agent:$ROS_DISTRO
 ## WORKDIR /root/microros_ws_autobuild
 ## RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
-##   && apt-get update && rosdep update \
-##   && rosdep install --from-path src --ignore-src -y \
-##   && . /opt/ros/$ROS_DISTRO/setup.sh \
-##   && colcon build \
-##   && . install/local_setup.sh \
-##   && ros2 run micro_ros_setup create_firmware_ws.sh host \
-##   && ros2 run micro_ros_setup build_firmware.sh \
-##   && . install/local_setup.sh \
-##   && ros2 run micro_ros_setup create_agent_ws.sh \
-##   && ros2 run micro_ros_setup build_agent.sh \
-##   && . install/local_setup.sh
+##  && apt-get update && rosdep update \
+##  && rosdep install --from-path src --ignore-src -y \
+##  && . /opt/ros/$ROS_DISTRO/setup.sh \
+##  && colcon build \
+##  && . install/local_setup.sh \
+##  && ros2 run micro_ros_setup create_firmware_ws.sh host \
+##  && ros2 run micro_ros_setup build_firmware.sh \
+##  && . install/local_setup.sh \
+##  && ros2 run micro_ros_setup create_agent_ws.sh \
+##  && ros2 run micro_ros_setup build_agent.sh \
+##  && . install/local_setup.sh
+###########################################################
 # ---------------------------------------------------------
 
-# -------- Base environment configuration ----------------------
+# -------- Base environment configuration -----------------
 # Setup vim theme
 COPY docker/.vim/ /root/.vim/
 COPY docker/.vimrc /root/.vimrc
@@ -39,37 +34,31 @@ RUN apt-get update && apt-get install -y zsh bash wget \
   && sh -c "$(wget -O- https://raw.githubusercontent.com/deluan/zsh-in-docker/master/zsh-in-docker.sh)" \
   # Initialize custom zsh theme
   && echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc \
-  # Conda
-  && conda init zsh \
-  && conda init bash \
   # Source ROS underlay
   && echo '# ROS' >> /root/.zshrc \
   && echo '# ROS' >> /root/.bashrc \
   && echo 'source /opt/ros/$ROS_DISTRO/setup.zsh' >> /root/.zshrc \
   && echo 'source /opt/ros/$ROS_DISTRO/setup.bash' >> /root/.bashrc \
   # Source MicroROS overlay
-  && echo 'source /uros_ws/install/setup.zsh' >> /root/.zshrc \
-  && echo 'source /uros_ws/install/setup.bash' >> /root/.bashrc \
+  && echo 'source /uros_ws/install/local_setup.zsh' >> /root/.zshrc \
+  && echo 'source /uros_ws/install/local_setup.bash' >> /root/.bashrc \
   # Export MicroROS DDS settings, assumes ROS_LOCALHOST_ONLY != 1
   && echo 'export FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/disable_fastdds_shm.xml' >> /root/.zshrc \
   && echo 'export FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/disable_fastdds_shm.xml' >> /root/.bashrc \
-  # Try sourcing cg_ws packages
-  && echo 'source /root/CRATER_GRADER/cg_ws/install/setup.zsh > /dev/null 2>&1' >> ~/.zshrc \
-  && echo 'source /root/CRATER_GRADER/cg_ws/install/setup.bash > /dev/null 2>&1' >> ~/.bashrc \
+  # Try sourcing cg_ws packages in bash shell; workflow := use zsh shell for building and bash shell for running
+  && echo 'source /root/CRATER_GRADER/cg_ws/install/local_setup.bash > /dev/null 2>&1' >> ~/.bashrc \
   # Fix zsh autocomplete for ROS2 packages
   && echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc \
   && echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc \
-  # Start new shells in the cg conda environment
-  && echo '# Conda environment' >> /root/.zshrc \
-  && echo '# Conda environment' >> /root/.bashrc \
-  && echo "conda activate cg" >> ~/.zshrc \
-  && echo "conda activate cg" >> ~/.bashrc \
+  # Set ROS_DOMAIN_ID for wireless network
+  && echo 'export ROS_DOMAIN_ID=25' >> /root/.zshrc \
+  && echo 'export ROS_DOMAIN_ID=25' >> /root/.bashrc \
   # Welcome message
   && echo '# Welcome message' >> /root/.zshrc \
   && echo "figlet -f slant 'CraterGrader'" >> ~/.zshrc
 # ---------------------------------------------------------
 
-# -------- Base system packages ----------------------
+# -------- Base system packages ---------------------------
 # Install "starter pack" of some basic tools
 RUN apt-get update && apt-get install -y \
   figlet \
@@ -87,7 +76,7 @@ RUN apt-get update && apt-get install -y \
 # -------- VNC GUI Configuration --------------------------
 # Setup a VNC password
 RUN  mkdir ~/.vnc \
-  && x11vnc -storepasswd cratergrader ~/.vnc/passwd \
+  && x11vnc -storepasswd cratergrader-vnc ~/.vnc/passwd \
   # Start the VNC server
   && echo '# VNC setup' >> /root/.zshrc \
   && echo '# VNC setup' >> /root/.bashrc \
@@ -102,10 +91,9 @@ RUN  mkdir ~/.vnc \
 # ---------------------------------------------------------
 
 # -------- Setup CraterGrader environment packages --------
-# Setup conda environment
-COPY environment.yml /root/
-RUN conda env create --name cg -f /root/environment.yml --force \
-    && rm -f /root/environment.yml
+# Setup python environment
+COPY requirements.txt /root/
+RUN pip3 install -r /root/requirements.txt && rm -f /root/requirements.txt
 
 # Apt packages
 # Run the following with DEBIAN_FRONTEND=noninteractive to avoid prompt for keyboard language, see https://askubuntu.com/questions/876240/how-to-automate-setting-up-of-keyboard-configuration-package
