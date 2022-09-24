@@ -228,7 +228,7 @@ class ts16_localizer(Node):
             success = self.publishTSPose(position, "map", self.TS_publisher)
             if not success:
                 self.get_logger().info(
-                    f"Failed Output String: {coordinate_output}")
+                    f"Failed Output String Parse: {coordinate_output}")
         else:
             self.get_logger().info(
                 f"Failed Output String: {coordinate_output}")
@@ -270,10 +270,10 @@ class ts16_localizer(Node):
         try:
 
             # Transform point into site-map frame
-            transformed_pos = [num for num in pos]
+            transformed_pos = [float(num) for num in pos]
 
             # Attempt to sanitize input
-            transformed_pos = [num.split("\x00")[0] for num in pos]
+            # transformed_pos = [num.split("\x00")[0] for num in pos]
 
             if transform:
                 transformed_pos = (self.z_rot_mat @ np.array(transformed_pos).T).tolist()
