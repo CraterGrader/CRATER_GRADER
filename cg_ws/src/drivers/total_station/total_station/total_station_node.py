@@ -225,10 +225,13 @@ class ts16_localizer(Node):
         # If position can be correctly parsed, publish!
         if len(position) == 3:
             self.get_logger().info("Publishing position from TS")
-            self.publishTSPose(position, "map", self.TS_publisher)
+            success = self.publishTSPose(position, "map", self.TS_publisher)
+            if not success:
+                self.get_logger().info(
+                    f"Failed Output String Parse: {coordinate_output}")
         else:
             self.get_logger().info(
-                f"Coordinate Output String: {coordinate_output}")
+                f"Failed Output String: {coordinate_output}")
 
         return
 
@@ -264,14 +267,17 @@ class ts16_localizer(Node):
         :returns: none
         """
 
-        # Transform point into site-map frame
-
-
-        transformed_pos = [float(num) for num in pos]
-        if transform:
-            transformed_pos = (self.z_rot_mat @ np.array(transformed_pos).T).tolist()
-
         try:
+
+            # Transform point into site-map frame
+            transformed_pos = [float(num) for num in pos]
+
+            # Attempt to sanitize input
+            # transformed_pos = [num.split("\x00")[0] for num in pos]
+
+            if transform:
+                transformed_pos = (self.z_rot_mat @ np.array(transformed_pos).T).tolist()
+
             pose_msg = PoseWithCovarianceStamped()
             pose_msg.pose.pose.position.x = float(transformed_pos[0]) + self.ts_prism_x_offset
             pose_msg.pose.pose.position.y = float(transformed_pos[1]) + self.ts_prism_y_offset
@@ -292,8 +298,10 @@ class ts16_localizer(Node):
                                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             publisher.publish(pose_msg)
+            return True
         except:
             self.get_logger().info(f"Could not publish position: {pos}")
+            return False
 
 
 def main(args=None):
