@@ -73,7 +73,7 @@ namespace cg
       bool got_tf1 = tf_update(base_link_frame, prism_frame, ts_prism_transformStamped);
       // if (got_tf1) std::cout << "GOT TF1" << std::endl;
 
-      // Get Orientatino between map and base_link in map_frame
+      // Get Orientation between map and base_link in map_frame
       bool got_tf2 = tf_update(map_frame, base_link_frame, base_link_transform);
       // if (got_tf2) std::cout << "GOT TF2" << std::endl;
       got_tf = got_tf1 && got_tf2;
