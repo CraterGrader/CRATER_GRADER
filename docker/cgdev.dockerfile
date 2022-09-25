@@ -50,9 +50,6 @@ RUN apt-get update && apt-get install -y zsh bash wget \
   # Fix zsh autocomplete for ROS2 packages
   && echo 'eval "$(register-python-argcomplete3 ros2)"' >> /root/.zshrc \
   && echo 'eval "$(register-python-argcomplete3 colcon)"' >> /root/.zshrc \
-  # Set ROS_DOMAIN_ID for wireless network
-  && echo 'export ROS_DOMAIN_ID=25' >> /root/.zshrc \
-  && echo 'export ROS_DOMAIN_ID=25' >> /root/.bashrc \
   # Welcome message
   && echo '# Welcome message' >> /root/.zshrc \
   && echo "figlet -f slant 'CraterGrader'" >> ~/.zshrc
