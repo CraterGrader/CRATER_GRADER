@@ -151,7 +151,7 @@ void SiteMap::updateCellsBayes(){
 
     else{
       float elev = filterMap_[i].getFirstElement();
-      float variance = 1.0f;
+      float variance = 10.0f;
 
       varianceMap_[i].updateElvationStatic(elev, variance);
       varianceMap_[i].updateVarianceStatic(variance);
