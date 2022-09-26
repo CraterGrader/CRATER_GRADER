@@ -1,7 +1,7 @@
 realsense_static_transform_publisher:
   ros__parameters:
     x: '0.24567'
-    y: '0.04175'
+    y: '-0.011' #'0.04175'
     z: '0.5738225'
     # x: '0.24734' params until 25092022
     # y: '0.018'
