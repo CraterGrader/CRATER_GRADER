@@ -39,13 +39,17 @@ if(BUILD_TESTING)
     include/planning/common.hpp
     src/common.cpp
   )
+  ament_target_dependencies(common_test
+    cg_msgs
+  )
 
   ament_add_gtest(exploration_planner_test
-  test/exploration_planner_test.cpp
-  include/planning/exploration_planner.hpp
-  src/exploration_planner.cpp
+    test/exploration_planner_test.cpp
+    include/planning/exploration_planner.hpp
+    src/exploration_planner.cpp
   )
   ament_target_dependencies(exploration_planner_test
+    cg_msgs
     mapping
   )
 endif()
