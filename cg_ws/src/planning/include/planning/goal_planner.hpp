@@ -10,7 +10,7 @@ namespace planning {
 class GoalPlanner {
 
 public:
-  virtual Pose getGoalPose(const Pose& agent_pose, const cg::mapping::SiteMap& map) = 0;
+  virtual Pose2D getGoalPose(const Pose2D& agent_pose, const cg::mapping::SiteMap& map) = 0;
 
 };
 

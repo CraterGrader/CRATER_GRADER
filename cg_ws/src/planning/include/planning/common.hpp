@@ -7,18 +7,18 @@ namespace cg {
 namespace planning {
 
 // Data types
-struct Point {
+struct Point2D {
   float x; // [m], continuous in global map frame
   float y; // [m], continuous in global map frame
 };
 
-struct Pose {
-  Point pt;
+struct Pose2D{
+  Point2D pt;
   float yaw; // [rad], continuous in global map frame
 };
 
 // Functions
-float euclidean_distance(Point pt1, Point pt2);
+float euclidean_distance(Point2D pt1, Point2D pt2);
 
 } // planning namespace
 } // cg namespace
