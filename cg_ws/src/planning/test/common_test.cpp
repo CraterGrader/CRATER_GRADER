@@ -9,6 +9,15 @@ TEST(CommonTest, createPoint2DTest) {
   EXPECT_NEAR(y, pt.y, absolute_range);
 }
 
+TEST(CommonTest, createPose2DTest) {
+  double x = 1.0, y = 2.0, yaw = 3.0;
+  cg_msgs::msg::Pose2D pose = cg::planning::create_pose2d(x, y, yaw);
+  float absolute_range = 1e-5;
+  EXPECT_NEAR(x, pose.pt.x, absolute_range);
+  EXPECT_NEAR(y, pose.pt.y, absolute_range);
+  EXPECT_NEAR(yaw, pose.yaw, absolute_range);
+}
+
 TEST(CommonTest, euclideanTest) {
   float expected = 1.41;
   cg_msgs::msg::Point2D pt1 = cg::planning::create_point2d(0.0, 0.0);

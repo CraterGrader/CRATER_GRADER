@@ -11,8 +11,10 @@ namespace planning {
 class ExplorationPlanner : public GoalPlanner {
 
 public:
-  Pose2D getGoalPose(const Pose2D &agent_pose, const cg::mapping::SiteMap &map);
-  void planExploration(const Pose2D &agent_pose, const cg::mapping::SiteMap &map);
+  cg_msgs::msg::Pose2D getGoalPose(
+    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map);
+  void planExploration(
+    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map);
   
 };
 
