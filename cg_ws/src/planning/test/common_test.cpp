@@ -18,7 +18,7 @@ TEST(CommonTest, createPose2DTest) {
   EXPECT_NEAR(yaw, pose.yaw, absolute_range);
 }
 
-TEST(CommonTest, TrajectoryMsgTest) {
+TEST(CommonTest, trajectoryMsgTest) {
   cg_msgs::msg::Trajectory traj;
   traj.path.push_back(cg::planning::create_pose2d(0.0, 0.0, 0.0));
   traj.velocity_targets.push_back(0.0);
