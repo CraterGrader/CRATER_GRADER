@@ -1,10 +1,13 @@
 realsense_static_transform_publisher:
   ros__parameters:
-    x: '0.24734'
-    y: '0.018'
-    z: '0.57861'
-    roll: '-2.300231269'
-    pitch: '-0.015343837'
+    x: '0.24567'
+    y: '-0.011' #'0.04175'
+    z: '0.5738225'
+    # x: '0.24734' params until 25092022
+    # y: '0.018'
+    # z: '0.57861'
+    roll: '-2.29133009' # this affects camera pitch
+    pitch: '-0.045' # this affects camera roll
     yaw: '-1.5952951'
     parent_frame_id: 'base_link'
     child_frame_id: 'realsense_frame'

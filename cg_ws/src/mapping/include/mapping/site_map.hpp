@@ -30,10 +30,15 @@ class CellHistory {
   float getMean();
   float getFirstElement(){return window_.front();}
   bool filterIsEmpty(){return filterEmpty_;}
+  
+  void filterUpdate(){filterUpdate_ = true;}
+  void filterUpdated(){filterUpdate_ = false;}
+  bool filterIsUpdated(){return filterUpdate_;}
 
   private:
   // attributes
   bool filterEmpty_ = true;
+  bool filterUpdate_ = false;
   bool filterFull_ = false; // flag which states which "get mean" return to use
   size_t fingerIndex_ = 0; // index which tracks data in filter
   size_t windowSize_ = 1; // the size of the filter window
@@ -60,7 +65,7 @@ class CellBayes {
   // attributes  
   float cellElevation_ = 0.0f; 
   float cellVariance_ = 1000.0f;
-  float minCellVariance_ = 0.01f;
+  float minCellVariance_ = 0.001f;
 
 };
 
@@ -103,10 +108,10 @@ class SiteMap {
   size_t decimation_ = 1; // a parameter which can drop points coming into the map 
 
   // TODO TURN INTO PARAMETER
-  float filterMaxTerrain_ = 0.3; // the maximum value of points which can be added to the map 
+  float filterMaxTerrain_ = 1.0; // the maximum value of points which can be added to the map, relative to map frame
 
   // TODO TURN INTO PARAMETER
-  float filterMinTerrain_ = -0.3; // the minimum value of points which can be added to the map
+  float filterMinTerrain_ = -1.0; // the minimum value of points which can be added to the map, relative to map frame
 
   // TODO TURN INTO PARAMETER
   float xTransform_ = 1.0;
