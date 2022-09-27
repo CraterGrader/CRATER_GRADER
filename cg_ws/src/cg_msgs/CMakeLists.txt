@@ -16,6 +16,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Slip.idl"
   "msg/MuxMode.idl"
   "msg/ActuatorState.idl"
+  "msg/Trajectory.idl"
 
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs

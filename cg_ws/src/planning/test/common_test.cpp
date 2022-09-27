@@ -18,6 +18,16 @@ TEST(CommonTest, createPose2DTest) {
   EXPECT_NEAR(yaw, pose.yaw, absolute_range);
 }
 
+TEST(CommonTest, TrajectoryMsgTest) {
+  cg_msgs::msg::Trajectory traj;
+  traj.path.push_back(cg::planning::create_pose2d(0.0, 0.0, 0.0));
+  traj.velocity_targets.push_back(0.0);
+  traj.tool_positions.push_back(0.0);
+  EXPECT_EQ(traj.path.size(), static_cast<long unsigned int>(1));
+  EXPECT_EQ(traj.velocity_targets.size(), static_cast<long unsigned int>(1));
+  EXPECT_EQ(traj.tool_positions.size(), static_cast<long unsigned int>(1));
+}
+
 TEST(CommonTest, euclideanTest) {
   float expected = 1.41;
   cg_msgs::msg::Point2D pt1 = cg::planning::create_point2d(0.0, 0.0);

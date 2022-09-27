@@ -4,6 +4,7 @@
 #include <cmath> // sqrt
 #include <cg_msgs/msg/point2_d.hpp>
 #include <cg_msgs/msg/pose2_d.hpp>
+#include <cg_msgs/msg/trajectory.hpp>
 
 namespace cg {
 namespace planning {
