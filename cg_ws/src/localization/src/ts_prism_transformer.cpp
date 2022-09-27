@@ -43,7 +43,7 @@ namespace cg
       updated_pose_ = *prism_msg;
       if (got_imu && got_bearing_)
       {
-        
+        // Obtain yaw angle from bearing and roll/pitch from IMU in quaternion forms
         tf2::Quaternion bearing_q(
           latest_bearing_.pose.pose.orientation.x,
           latest_bearing_.pose.pose.orientation.y,
@@ -55,17 +55,17 @@ namespace cg
           imu_last.orientation.z,
           imu_last.orientation.w);
 
+        // Convert quaternions to roll/pitch/yaw
         tf2::Matrix3x3 bearing_m(bearing_q);
         tf2::Matrix3x3 imu_m(imu_q);
         double bearing_roll, bearing_pitch, bearing_yaw;
         double imu_roll, imu_pitch, imu_yaw;
         bearing_m.getRPY(bearing_roll, bearing_pitch, bearing_yaw);
         imu_m.getRPY(imu_roll, imu_pitch, imu_yaw);
+
+        // Compute 3DOF orientation from map to base_link, based on raw IMU and bearing measurements
         tf2::Quaternion map_to_base_link_q;
         map_to_base_link_q.setRPY(imu_roll, imu_pitch, bearing_yaw);
-
-        // std::cout << "RPY: " << imu_roll*180/M_PI << ", " << imu_pitch*180/M_PI << ", " << bearing_yaw*180/M_PI << "\n";
-
         Eigen::Quaternion<double> map_to_base_link_rotation(
           map_to_base_link_q.w(),
           map_to_base_link_q.x(),
@@ -73,6 +73,8 @@ namespace cg
           map_to_base_link_q.z()
         );
 
+        // TODO parametrize this hard-coded translation
+        // Get static TS prism to base_link translation from transform/parameters
         Eigen::Vector3d ts_prism_to_base_link_translation(
           // ts_prism_transformStamped.transform.translation.x,
           // ts_prism_transformStamped.transform.translation.y,
@@ -80,14 +82,17 @@ namespace cg
           -0.1, 0.0, -0.8
         );
 
+        // Rotate translation such that it is axis aligned with base_link
         Eigen::Vector3d rotated_ts_prism_to_base_link_translation = map_to_base_link_rotation * ts_prism_to_base_link_translation;
 
+        // Get position of TS prism in map frame, from raw TS measurement
         Eigen::Vector3d map_to_ts_prism_translation(
           updated_pose_.pose.pose.position.x,
           updated_pose_.pose.pose.position.y,
           updated_pose_.pose.pose.position.z
         );
 
+        // Get position of base_link in map frame by translating position of TS prism
         Eigen::Vector3d map_to_base_link_translation = map_to_ts_prism_translation + rotated_ts_prism_to_base_link_translation;
         updated_pose_.pose.pose.position.x = map_to_base_link_translation.x();
         updated_pose_.pose.pose.position.y = map_to_base_link_translation.y();
@@ -97,43 +102,10 @@ namespace cg
         updated_pose_.pose.pose.orientation.y = map_to_base_link_rotation.y();
         updated_pose_.pose.pose.orientation.z = map_to_base_link_rotation.z();
 
-        // // Zero out the translation to isolate the rotation between the map and baselink
-        // base_link_transform.transform.translation.x = 0;
-        // base_link_transform.transform.translation.y = 0;
-        // base_link_transform.transform.translation.z = 0;
-        // std::cout << "BEFORE\n";
-        // std::cout << ts_prism_transformStamped.transform.translation.x << ", "
-        //           << ts_prism_transformStamped.transform.translation.y << ", "
-        //           << ts_prism_transformStamped.transform.translation.z << std::endl;
-        // // ts_prism_transformStamped.transform.rotation.w = 1;
-        // // ts_prism_transformStamped.transform.rotation.x = 0;
-        // // ts_prism_transformStamped.transform.rotation.y = 0;
-        // // ts_prism_transformStamped.transform.rotation.z = 0;
-        // // Transform the base_link->prism translation by the map->base_link orientation
-        // base_link_transform.header.frame_id = "total_station_prism";
-        // std::cout << "Base_link_transform frame_id: " << base_link_transform.header.frame_id << ", child: " << base_link_transform.child_frame_id << std::endl;
-        // std::cout << "ts_prism_transform frame_id: " << ts_prism_transformStamped.header.frame_id << ", child: " << ts_prism_transformStamped.child_frame_id << std::endl;
-        // tf2::doTransform(ts_prism_transformStamped, ts_prism_transformStamped, base_link_transform);
-        // std::cout << "AFTER\n";
-        // std::cout << ts_prism_transformStamped.transform.translation.x << ", "
-        //           << ts_prism_transformStamped.transform.translation.y << ", "
-        //           << ts_prism_transformStamped.transform.translation.z << std::endl;
-
-        // // Apply transformed base_link->prism translation to pose
-        // updated_pose_.header.frame_id = "base_link";
-        // // tf2::doTransform(updated_pose_, updated_pose_, base_link_transform);
-        // tf2::doTransform(updated_pose_, updated_pose_, ts_prism_transformStamped);
-        // updated_pose_.header.frame_id = "map";
         transformed_ts_prism_pub_->publish(updated_pose_);
       } else {
         std::cout << "No imu or bearing received\n";
       }
-      // else if (got_imu)
-      // {
-      //   ts_prism_transformStamped.transform.rotation = imu_last.orientation;
-      //   tf2::doTransform(updated_pose_, updated_pose_, ts_prism_transformStamped);
-      //   transformed_ts_prism_pub_->publish(updated_pose_);
-      // }
     }
 
     void TSPrismTransformer::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg)
@@ -143,16 +115,15 @@ namespace cg
     }
 
     // Update tf transforms
+    // TODO investigate if tf_Callback and tf_Update are still needed
     void TSPrismTransformer::tf_Callback()
     {
 
       // Get Translation between base_link and prism in base_link_frame
       bool got_tf1 = tf_update(prism_frame, base_link_frame, ts_prism_transformStamped);
-      // if (got_tf1) std::cout << "GOT TF1" << std::endl;
 
       // Get Orientation between map and base_link in map_frame
       bool got_tf2 = tf_update(map_frame, base_link_frame, base_link_transform);
-      // if (got_tf2) std::cout << "GOT TF2" << std::endl;
       got_tf = got_tf1 && got_tf2;
     }
 

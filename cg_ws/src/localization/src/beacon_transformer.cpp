@@ -55,7 +55,6 @@ void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCova
       tf2::doTransform(updated_pose_0_, updated_pose_0_, tag_0_transformStamped);
       tag_0_pub_->publish(updated_pose_0_);
       pub_tag_0 = true;
-      // std::cout << "PUB TAG 0" << std::endl;
     }
     else if (got_imu) {
       tag_0_transformStamped.transform.rotation = imu_last.orientation;
@@ -74,7 +73,6 @@ void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCova
       tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
       tag_1_pub_->publish(updated_pose_1_);
       pub_tag_1 = true;
-      // std::cout << "PUB TAG 1" << std::endl;
     }
     else if (got_imu) {
       tag_1_transformStamped.transform.rotation = imu_last.orientation;
