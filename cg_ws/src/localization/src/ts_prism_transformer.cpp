@@ -79,7 +79,7 @@ namespace cg
           // ts_prism_transformStamped.transform.translation.x,
           // ts_prism_transformStamped.transform.translation.y,
           // ts_prism_transformStamped.transform.translation.z
-          -0.1, 0.0, -0.8
+          -0.20033, -0.020133, -0.75628
         );
 
         // Rotate translation such that it is axis aligned with base_link
