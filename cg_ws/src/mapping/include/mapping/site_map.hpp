@@ -5,6 +5,7 @@
 #include <math.h>
 #include <assert.h>
 #include <numeric>
+#include <cg_msgs/msg/site_map.hpp>
 
 namespace cg {
 namespace mapping {
@@ -85,6 +86,7 @@ class SiteMap {
   void updateCellsBayes(); // method to update cells based on modified points
   int binLen(float pos); // method used to bin a position into an index
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
+  cg_msgs::msg::SiteMap toMsg() const;
 
   // getter funcitons 
   float getResolution(){return resolution_;}
