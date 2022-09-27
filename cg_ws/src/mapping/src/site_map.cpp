@@ -95,6 +95,7 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
 
     size_t index = processedPts[i].y + (processedPts[i].x * getWidth());    
     filterMap_[index].addPoint(processedPts[i]);
+    filterMap_[index].filterUpdate(); 
 
   }
 }
@@ -150,13 +151,16 @@ void SiteMap::updateCellsBayes(){
     }
 
     else{
-      float elev = filterMap_[i].getFirstElement();
-      float variance = 1.0f;
 
-      varianceMap_[i].updateElvationStatic(elev, variance);
-      varianceMap_[i].updateVarianceStatic(variance);
+      if (filterMap_[i].filterIsUpdated() == true){
+        float elev = filterMap_[i].getFirstElement();
+        float variance = 0.1f;
+        filterMap_[i].filterUpdated();
+        varianceMap_[i].updateElvationStatic(elev, variance);
+        varianceMap_[i].updateVarianceStatic(variance);
+      }
+
       heightMap_[i] = varianceMap_[i].getCellElevation();
-      // heightMap_[i] = varianceMap_[i].getCellVariance();
     }
 
   }

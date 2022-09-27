@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   cg-dev:
-    image: p84514faf325/cratergrader:cg-338-v1.0.0
+    image: p84514faf325/cratergrader:cg-460-v1.1.0
     devices:
       - /dev/input/:/dev/input/
     volumes:
@@ -24,7 +24,7 @@ services:
     tty: true # use terminal, i.e. the `-t` flag
     stdin_open: true # allow terminal input, i.e. the `-i` flag
   cg-dev-hw:
-    image: p84514faf325/cratergrader:cg-338-v1.0.0
+    image: p84514faf325/cratergrader:cg-460-v1.1.0
     privileged: true
     network_mode: "host"
     volumes:
