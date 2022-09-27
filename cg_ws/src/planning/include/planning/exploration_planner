@@ -1,0 +1,22 @@
+#ifndef EXPLORATION_PLANNER_HPP
+#define EXPLORATION_PLANNER_HPP
+
+#include <planning/common.hpp>
+#include <planning/goal_planner.hpp>
+#include <mapping/site_map.hpp>
+
+namespace cg {
+namespace planning {
+
+class ExplorationPlanner : public GoalPlanner {
+
+public:
+  Pose getGoalPose(const Pose &agent_pose, const cg::mapping::SiteMap &map);
+  void planExploration(const Pose &agent_pose, const cg::mapping::SiteMap &map);
+  
+};
+
+} // namespace planning
+} // namespace cg
+
+#endif // EXPLORATION_PLANNER_HPP
