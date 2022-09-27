@@ -172,5 +172,9 @@ cg_msgs::msg::SiteMap SiteMap::toMsg() const {
   return map_msg;
 }
 
+void SiteMap::setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg) {
+  heightMap_ = msg.height_map;
+}
+
 } // mapping namespace
 } // cg namespace

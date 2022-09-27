@@ -86,7 +86,10 @@ class SiteMap {
   void updateCellsBayes(); // method to update cells based on modified points
   int binLen(float pos); // method used to bin a position into an index
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
+
+  // conversion methods
   cg_msgs::msg::SiteMap toMsg() const;
+  void setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg);
 
   // getter funcitons 
   float getResolution(){return resolution_;}
