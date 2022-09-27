@@ -1,0 +1,10 @@
+module cg_msgs {
+  module msg {
+    struct Point2D {
+      @default(value = 0.0)
+      double x;
+      @default(value = 0.0)
+      double y;
+    };
+  };
+};
