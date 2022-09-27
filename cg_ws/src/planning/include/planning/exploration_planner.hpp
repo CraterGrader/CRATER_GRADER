@@ -1,5 +1,5 @@
-#ifndef EXPLORATION_PLANNER_HPP
-#define EXPLORATION_PLANNER_HPP
+#ifndef PLANNING__EXPLORATION_PLANNER_HPP
+#define PLANNING__EXPLORATION_PLANNER_HPP
 
 #include <planning/common.hpp>
 #include <planning/goal_planner.hpp>
@@ -19,4 +19,4 @@ public:
 } // namespace planning
 } // namespace cg
 
-#endif // EXPLORATION_PLANNER_HPP
+#endif // PLANNING__EXPLORATION_PLANNER_HPP

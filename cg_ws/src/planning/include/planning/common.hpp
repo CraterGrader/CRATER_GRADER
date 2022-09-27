@@ -1,3 +1,6 @@
+#ifndef PLANNING__COMMON_HPP
+#define PLANNING__COMMON_HPP
+
 #include <cmath> // sqrt
 
 namespace cg {
@@ -19,3 +22,5 @@ float euclidean_distance(Point pt1, Point pt2);
 
 } // planning namespace
 } // cg namespace
+
+#endif // PLANNING__COMMON_HPP

@@ -1,5 +1,5 @@
-#ifndef GOAL_PLANNER_HPP
-#define GOAL_PLANNER_HPP
+#ifndef PLANNING__GOAL_PLANNER_HPP
+#define PLANNING__GOAL_PLANNER_HPP
 
 #include <planning/common.hpp>
 #include <mapping/site_map.hpp>
@@ -17,4 +17,4 @@ public:
 } // namespace planning
 } // namespace cg
 
-#endif // GOAL_PLANNER_HPP
+#endif // PLANNING__GOAL_PLANNER_HPP

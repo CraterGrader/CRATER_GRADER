@@ -14,6 +14,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cg_msgs REQUIRED)
+find_package(mapping REQUIRED)
 
 include_directories(include)
 
@@ -37,6 +38,15 @@ if(BUILD_TESTING)
     test/common_test.cpp
     include/planning/common.hpp
     src/common.cpp
+  )
+
+  ament_add_gtest(exploration_planner_test
+  test/exploration_planner_test.cpp
+  include/planning/exploration_planner.hpp
+  src/exploration_planner.cpp
+  )
+  ament_target_dependencies(exploration_planner_test
+    mapping
   )
 endif()
 

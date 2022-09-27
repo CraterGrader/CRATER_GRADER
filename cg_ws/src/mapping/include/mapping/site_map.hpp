@@ -1,3 +1,6 @@
+#ifndef MAPPING__SITE_MAP_HPP
+#define MAPPING__SITE_MAP_HPP
+
 #include <vector>
 #include <math.h>
 #include <assert.h>
@@ -123,3 +126,5 @@ class SiteMap {
 
 } // mapping namespace
 } // cg namespace
+
+#endif // MAPPING__SITE_MAP_HPP
