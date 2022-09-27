@@ -52,6 +52,16 @@ if(BUILD_TESTING)
     cg_msgs
     mapping
   )
+
+  ament_add_gtest(transport_planner_test
+    test/transport_planner_test.cpp
+    include/planning/transport_planner.hpp
+    src/transport_planner.cpp
+  )
+  ament_target_dependencies(transport_planner_test
+    cg_msgs
+    mapping
+  )
 endif()
 
 # Install targets
