@@ -62,6 +62,26 @@ if(BUILD_TESTING)
     cg_msgs
     mapping
   )
+
+  ament_add_gtest(kinematic_planner_test
+    test/kinematic_planner_test.cpp
+    include/planning/kinematic_planner.hpp
+    src/kinematic_planner.cpp
+  )
+  ament_target_dependencies(kinematic_planner_test
+    cg_msgs
+    mapping
+  )
+
+  ament_add_gtest(velocity_planner_test
+    test/velocity_planner_test.cpp
+    include/planning/velocity_planner.hpp
+    src/velocity_planner.cpp
+  )
+  ament_target_dependencies(velocity_planner_test
+    cg_msgs
+    mapping
+  )
 endif()
 
 # Install targets
