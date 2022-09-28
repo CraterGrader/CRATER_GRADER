@@ -14,9 +14,9 @@ imu_node:
         y: 0.0
         z: 0.0
       orientation: # rad
-        x: 0.0
-        y: 0.0
-        z: 0.0
+        x: 0.0 # roll
+        y: 0.010472 # pitch, offset 0.6deg
+        z: 0.0 # yaw
     variance: # Measurement variance values (squared RMS)
       linear_acc: # m/s^2
         x: 0.00017424
