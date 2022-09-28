@@ -1,7 +1,11 @@
+#ifndef MAPPING__SITE_MAP_HPP
+#define MAPPING__SITE_MAP_HPP
+
 #include <vector>
 #include <math.h>
 #include <assert.h>
 #include <numeric>
+#include <cg_msgs/msg/site_map.hpp>
 
 namespace cg {
 namespace mapping {
@@ -83,6 +87,10 @@ class SiteMap {
   int binLen(float pos); // method used to bin a position into an index
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
 
+  // conversion methods
+  cg_msgs::msg::SiteMap toMsg() const;
+  void setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg);
+
   // getter funcitons 
   float getResolution(){return resolution_;}
   size_t getNcells(){return height_*width_;}
@@ -123,3 +131,5 @@ class SiteMap {
 
 } // mapping namespace
 } // cg namespace
+
+#endif // MAPPING__SITE_MAP_HPP

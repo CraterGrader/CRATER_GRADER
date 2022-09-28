@@ -166,5 +166,15 @@ void SiteMap::updateCellsBayes(){
   }
 }
 
+cg_msgs::msg::SiteMap SiteMap::toMsg() const {
+  cg_msgs::msg::SiteMap map_msg;
+  map_msg.height_map = heightMap_;
+  return map_msg;
+}
+
+void SiteMap::setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg) {
+  heightMap_ = msg.height_map;
+}
+
 } // mapping namespace
 } // cg namespace
