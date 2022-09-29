@@ -57,6 +57,7 @@ class CellBayes {
   public:
   // constructor
   CellBayes(){};
+  CellBayes(float cellStartingVariance, float minCellVariance);
 
   // methods
   void updateElvationStatic(float ptHeight, float ptVariance);
@@ -80,12 +81,23 @@ class SiteMap {
   // constructor
   SiteMap();
   SiteMap(size_t cHeight, size_t cWidth, float cResolution);
+  SiteMap(size_t cHeight, 
+          size_t cWidth, 
+          float cResolution, 
+          float filterMaxTerrain, 
+          float filterMinTerrain, 
+          float xTransform, 
+          float yTransform, 
+          float unseenGridHeight, 
+          float incomingPointVariance, 
+          float cellStartingVariance, 
+          float minCellVariance);
 
   // methods
   void binPts(std::vector<mapPoint> rawPts); // method to bin points into map
   void updateCellsMean(); // method to update cells based on modified points
   void updateCellsBayes(); // method to update cells based on modified points
-  int binLen(float pos); // method used to bin a position into an index
+  void normalizeSiteMap(); // method to update cells based on modified points
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
 
   // conversion methods
@@ -106,29 +118,22 @@ class SiteMap {
   std::vector<float> heightMap_;       // "view 1"
   std::vector<CellHistory> filterMap_; // "view 2" 
   std::vector<CellBayes> varianceMap_; // "view 3" 
+  float zTransform_ = 0.0f;
+  bool siteNormalized = false;
+  bool siteMapFull = false; 
 
   // attributes
   size_t height_; // the vertical number of cells in the map 
   size_t width_; // the horizontal number of cells in the map
   float resolution_; // the "resolution" in meters which links the map dimensions to its real world size
-
-  // TODO TURN INTO PARAMETER
   float filterMaxTerrain_ = 1.0f; // the maximum value of points which can be added to the map, relative to map frame
-
-  // TODO TURN INTO PARAMETER
   float filterMinTerrain_ = -1.0f; // the minimum value of points which can be added to the map, relative to map frame
-
-  // TODO TURN INTO PARAMETER
   float xTransform_ = 1.0f;
-
-  // TODO TURN INTO PARAMETER
   float yTransform_ = 1.0f;
-
-  // TODO TURN INTO PARAMETER
-  float unseenGridHeight_ = 1.0f;
-
-  // TODO TURN INTO PARAMETER
-  float incomingPointVariance_ = 10.1f;
+  float unseenGridHeight_ = 0.0f;
+  float incomingPointVariance_ = 0.05f;
+  float cellStartingVariance_ = 0.05f;
+  float minCellVariance_ = 0.00001f;
 
 };
 

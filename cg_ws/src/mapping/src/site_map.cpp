@@ -28,6 +28,11 @@ void CellHistory::addPoint(indexPoint pt){
   }
 }
 
+CellBayes::CellBayes(float cellStartingVariance, float minCellVariance){
+  cellVariance_ = cellStartingVariance;
+  minCellVariance_ = minCellVariance;
+}
+
 void CellBayes::updateElvationStatic(float ptHeight, float ptVariance){
   // Probabilistic Terrain Mapping for Mobile Robots With Uncertain Localization
   // https://ieeexplore.ieee.org/document/8392399
@@ -51,14 +56,38 @@ SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){
   resolution_ = cResolution;
   heightMap_.resize(height_*width_, 0.0f);
   filterMap_.resize(height_*width_, CellHistory());
-  varianceMap_.resize(height_*width_, CellBayes());
-
+  varianceMap_.resize(height_*width_, CellBayes(cellStartingVariance_, minCellVariance_));
 }
 
-int SiteMap::binLen(float pos){
-  // for a continous point along an axis, return its int location which should align with map
-  return (int) floor(pos/getResolution());
-}
+// full param constructor
+SiteMap::SiteMap(size_t cHeight, 
+                  size_t cWidth, 
+                  float cResolution, 
+                  float filterMaxTerrain, 
+                  float filterMinTerrain, 
+                  float xTransform, 
+                  float yTransform, 
+                  float unseenGridHeight, 
+                  float incomingPointVariance, 
+                  float cellStartingVariance, 
+                  float minCellVariance){
+
+  height_ = cHeight;
+  width_ = cWidth;
+  resolution_ = cResolution;
+  filterMaxTerrain_ = filterMaxTerrain;
+  filterMinTerrain_ = filterMinTerrain;
+  xTransform_ = xTransform;
+  yTransform_ = yTransform;
+  unseenGridHeight_ = unseenGridHeight;
+  incomingPointVariance_ = incomingPointVariance;
+  cellStartingVariance_ = cellStartingVariance;
+  minCellVariance_ = minCellVariance;
+  heightMap_.resize(height_*width_, 0.0f);
+  filterMap_.resize(height_*width_, CellHistory());
+  varianceMap_.resize(height_*width_, CellBayes(cellStartingVariance_, minCellVariance_));
+  }
+
 
 float CellHistory::getMean(){
   if (!filterFull_){
@@ -76,11 +105,16 @@ float CellHistory::getMean(){
 }
 
 void SiteMap::binPts(std::vector<mapPoint> rawPts){
+
+  // statically declare a vector of index points based on the raw point size
   std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size());
 
+  // pack every raw point value into an Index point
   for (size_t i=0 ; i < rawPts.size(); i++){
-    descretePoints[i].x = binLen(rawPts[i].x - xTransform_);
-    descretePoints[i].y = binLen(rawPts[i].y - yTransform_);
+    float x_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].x, xTransform_);
+    float y_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].y, yTransform_);
+    descretePoints[i].x = cg::mapping::binLength(x_pos_site_map_frame, getResolution());
+    descretePoints[i].y = cg::mapping::binLength(y_pos_site_map_frame, getResolution());
     descretePoints[i].z = rawPts[i].z;
   }
   
@@ -89,11 +123,9 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
 
   // update view 2, filtermap
   for (size_t i=0 ; i < processedPts.size(); i++){
-
-    size_t index = processedPts[i].y + (processedPts[i].x * getWidth());    
+    size_t index = cg::mapping::discreteCoordsToCellIndex(processedPts[i].x, processedPts[i].y, getWidth());
     filterMap_[index].addPoint(processedPts[i]);
-    filterMap_[index].filterUpdate(); 
-
+    filterMap_[index].filterUpdate();
   }
 }
 
@@ -114,17 +146,31 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
 
   std::vector<cg::mapping::indexPoint> goodPts;
   goodPts.resize(ptsCheck.size()-badCount);
-
   size_t goodCounter = 0; 
-
   for (size_t i=0 ; i < ptsCheck.size(); i++){
     if (goodBad[i]){
       goodPts[goodCounter] = ptsCheck[i];
       goodCounter++;
     }
   }
-
   return goodPts;
+}
+
+void SiteMap::normalizeSiteMap(){
+  // bool mapFull = true;
+  // for (size_t i=0; i<getNcells(); i++){
+  //   if (heightMap_[i] == 0.0f){
+  //     mapFull = false;
+  //   }
+  // }
+  // if (mapFull && !siteNormalized){
+  //   float sum = 0.0f;
+  //   for (size_t i=0; i<getNcells(); i++){
+  //     sum += heightMap_[i];
+  //   }
+  //   zTransform_ = sum / getNcells();
+  //   siteNormalized = true;
+  // }
 }
 
 void SiteMap::updateCellsMean(){
@@ -157,7 +203,7 @@ void SiteMap::updateCellsBayes(){
         varianceMap_[i].updateVarianceStatic(variance);
       }
       // get the cell elevation for the map
-      heightMap_[i] = varianceMap_[i].getCellElevation();
+      heightMap_[i] = varianceMap_[i].getCellElevation() - zTransform_;
     }
 
   }
