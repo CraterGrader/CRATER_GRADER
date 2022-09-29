@@ -1,0 +1,10 @@
+module cg_msgs {
+  module msg {
+    struct Point2D {
+      @default(value = 0.0)
+      double x; // [m], continuous in global map frame
+      @default(value = 0.0)
+      double y; // [m], continuous in global map frame
+    };
+  };
+};

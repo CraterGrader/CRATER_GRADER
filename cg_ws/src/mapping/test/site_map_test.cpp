@@ -32,4 +32,3 @@ TEST(MapUtilTest, UtilfuncitonalityCheck) {
 
   ASSERT_TRUE(inMap);
 }
-
