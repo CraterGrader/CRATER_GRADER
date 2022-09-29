@@ -85,8 +85,8 @@ void OdomNode::odomCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)  - tlast_;
 
   // vel
-  odom_msg_.twist.twist.linear.x = drive_velocity * cos(steer_angle) * cos(prev_heading_);
-  odom_msg_.twist.twist.linear.y = drive_velocity * cos(steer_angle) * sin(prev_heading_);
+  odom_msg_.twist.twist.linear.x = drive_velocity; // * cos(steer_angle) * cos(prev_heading_);
+  odom_msg_.twist.twist.linear.y = 0; //drive_velocity * sin(steer_angle) * sin(prev_heading_);
   odom_msg_.twist.twist.linear.z = 0;
 
   // omega
