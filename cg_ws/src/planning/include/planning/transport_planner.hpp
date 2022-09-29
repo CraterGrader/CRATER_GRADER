@@ -13,6 +13,20 @@ class TransportPlanner : public GoalPlanner {
 public:
   cg_msgs::msg::Pose2D getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map);
+
+private: 
+  // tuple<std::vector<cg::mapping::indexPoint>, std::vector<cg::mapping::indexPoint> > = gen_nodes_from_height_map(std::vector<float> map);
+ 
+  // distance_matrix  setup_distance_matrix(src_nodes, sink_nodes)
+ 
+  // src_array, sink_array = setup_height_arrays(src_nodes, sink_nodes)
+ 
+  // policy solve_emd(sink_array, src_array, distance_matrix)
+ 
+  // transport_list = get_transport_list(policy, src_nodes, sink_nodes)
+ 
+  // nearest_transport, transport_idx = find_nearest_transport(transport_list, agent.pose, visited_transport_indices)
+
 };
 
 } // namespace planning
