@@ -63,28 +63,25 @@ int SiteMap::binLen(float pos){
 float CellHistory::getMean(){
   if (!filterFull_){
     if (fingerIndex_ != 0){ // if filter is not full BUT we have data
-      
       // TODO: make this NOT iterate over entire window
       return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / fingerIndex_);
     }
   }
   else{ // if filter is full and we are only constant time updating
-
     // TODO CONVERT THIS TO CONSTANT TIME
     return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
     }
-
   // if filter is NOT FULL AND THERE ARE NO POINTS IN THE WINDOW, THEN RETURN ZERO 
   return 0.0f;
 }
 
 void SiteMap::binPts(std::vector<mapPoint> rawPts){
-  std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size()/decimation_);
+  std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size());
 
-  for (size_t i=0 ; i < (rawPts.size()/decimation_); i++){
-    descretePoints[i].x = binLen(rawPts[i*decimation_].x - xTransform_);
-    descretePoints[i].y = binLen(rawPts[i*decimation_].y - yTransform_);
-    descretePoints[i].z = rawPts[i*decimation_].z;
+  for (size_t i=0 ; i < rawPts.size(); i++){
+    descretePoints[i].x = binLen(rawPts[i].x - xTransform_);
+    descretePoints[i].y = binLen(rawPts[i].y - yTransform_);
+    descretePoints[i].z = rawPts[i].z;
   }
   
   // use postProcess method 
@@ -107,14 +104,11 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   std::vector<bool> goodBad(ptsCheck.size(), true);
 
   for (size_t i=0 ; i < ptsCheck.size(); i++){
-    if ((ptsCheck[i].x >= (int) getWidth()) 
-          || (ptsCheck[i].y >= (int) getHeight()) 
-          || (ptsCheck[i].y < 0.0) 
-          || (ptsCheck[i].x < 0.0)
-          || (ptsCheck[i].z > filterMaxTerrain_)
-          || (ptsCheck[i].z < filterMinTerrain_)){
-      badCount++; 
-      goodBad[i] = false;
+    if (!cg::mapping::indexInMap(ptsCheck[i].x, ptsCheck[i].y, getWidth(), getHeight())){
+      if (!cg::mapping::heightInRange(ptsCheck[i].z, filterMinTerrain_, filterMaxTerrain_)){
+        badCount++; 
+        goodBad[i] = false;
+      }
     }
   }
 
@@ -134,32 +128,35 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
 }
 
 void SiteMap::updateCellsMean(){
-  
   // use view 2 filter map to update values in view 1 height map
   for (size_t i=0; i<getNcells(); i++){
     heightMap_[i] = filterMap_[i].getMean();
   }
-
 }
 
 void SiteMap::updateCellsBayes(){
-  
+  // for each cell in map
   for (size_t i=0; i<getNcells(); i++){
-
+    // if the filter is empty, set the height of the cell to the default value
     if (filterMap_[i].filterIsEmpty() == true){
-      heightMap_[i] = 0.0f;
+      heightMap_[i] = unseenGridHeight_;
     }
-
+    // if filter is not empty (we have seen this cell before)
     else{
-
+      // if the filter has been updated since the last updateCellsBayes
       if (filterMap_[i].filterIsUpdated() == true){
+        // get the new element in the filter map 
         float elev = filterMap_[i].getFirstElement();
-        float variance = 0.1f;
+        // set the variance of the incoming point 
+        // TODO, turn into a function for variance expansion
+        float variance = incomingPointVariance_;
+        // set flag that filter map has been updated 
         filterMap_[i].filterUpdated();
+        // call bayes recursive update
         varianceMap_[i].updateElvationStatic(elev, variance);
         varianceMap_[i].updateVarianceStatic(variance);
       }
-
+      // get the cell elevation for the map
       heightMap_[i] = varianceMap_[i].getCellElevation();
     }
 

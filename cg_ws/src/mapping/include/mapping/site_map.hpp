@@ -2,6 +2,7 @@
 #include <math.h>
 #include <assert.h>
 #include <numeric>
+#include "mapping/map_util.hpp"
 
 namespace cg {
 namespace mapping {
@@ -103,21 +104,23 @@ class SiteMap {
   size_t width_; // the horizontal number of cells in the map
   float resolution_; // the "resolution" in meters which links the map dimensions to its real world size
 
+  // TODO TURN INTO PARAMETER
+  float filterMaxTerrain_ = 1.0f; // the maximum value of points which can be added to the map, relative to map frame
 
   // TODO TURN INTO PARAMETER
-  size_t decimation_ = 1; // a parameter which can drop points coming into the map 
+  float filterMinTerrain_ = -1.0f; // the minimum value of points which can be added to the map, relative to map frame
 
   // TODO TURN INTO PARAMETER
-  float filterMaxTerrain_ = 1.0; // the maximum value of points which can be added to the map, relative to map frame
+  float xTransform_ = 1.0f;
 
   // TODO TURN INTO PARAMETER
-  float filterMinTerrain_ = -1.0; // the minimum value of points which can be added to the map, relative to map frame
+  float yTransform_ = 1.0f;
 
   // TODO TURN INTO PARAMETER
-  float xTransform_ = 1.0;
+  float unseenGridHeight_ = 1.0f;
 
   // TODO TURN INTO PARAMETER
-  float yTransform_ = 1.0;
+  float incomingPointVariance_ = 10.1f;
 
 };
 

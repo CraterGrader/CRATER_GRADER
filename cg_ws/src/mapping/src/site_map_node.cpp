@@ -72,14 +72,10 @@ void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr 
     incomingPts[i].y = temp_cloud->points[i].y; 
     incomingPts[i].z = temp_cloud->points[i].z; 
   }
-
   // BIN POINTS 
   siteMap_.binPts(incomingPts);
-
   // UPDATE CELLS 
-  // siteMap_.updateCellsMean();
   siteMap_.updateCellsBayes();
-  // siteMap_.updateCellsMean()
 }
 
 // void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
