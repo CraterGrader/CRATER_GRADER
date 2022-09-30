@@ -196,7 +196,7 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
       // float below_ground_min_z = below_ground_cloud->points[0].z, below_ground_max_z = above_ground_cloud->points[0].z;
       // RCLCPP_INFO(this->get_logger(), "Avg Above/Plane/Below Ground Z: %f, %f, %f", avg_above_ground_z, avg_plane_z, avg_below_ground_z);
       if (avg_above_ground_z < avg_below_ground_z) {
-        RCLCPP_INFO(this->get_logger(), "Flipped Z");
+        // RCLCPP_INFO(this->get_logger(), "Flipped Z");
         auto temp_cloud = above_ground_cloud;
         above_ground_cloud = below_ground_cloud;
         below_ground_cloud = temp_cloud;
