@@ -146,11 +146,6 @@ void BearingNode::timerCallback() {
     double avg_bearing;
     double sum_y_angle;
     double sum_x_angle;
-    double avg_roll;
-    double avg_pitch;
-    double avg_x;
-    double avg_y;
-    double avg_z;
     
     // Instead of averaging the bearing, sum the unit vectors
     this->rolling_sin.push_back(std::sin(best_bearing));
