@@ -12,6 +12,23 @@ namespace planning {
         max_trajectory_length(0.4),
         trajectory_resolution(0.05) {};
 
+    void generatePath(
+        std::vector<cg_msgs::msg::Pose2D> &path,
+        const cg_msgs::msg::Pose2D &agent_pose,
+        const cg::mapping::SiteMap &map) {
+            // TODO
+
+            """
+            Potential functions to break out:
+
+            astart() 
+
+            pose_within_thresh_to_visited()
+        
+            """
+
+        }
+
     bool KinematicPlanner::samePoseWithThresh(
         const cg_msgs::msg::Pose2D &trajectory_end_pose,
         const cg_msgs::msg::Pose2D &goal_pose) {
@@ -153,9 +170,21 @@ namespace planning {
         const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
         const cg::mapping::SiteMap &map) {
 
-            // Get site
+            // TODO
 
         }
+
+    std::vector<float> calculateTrajectoryCost(
+        const std::vector<cg_msgs::msg::Pose2D> &trajectory,
+        const cg::mapping::SiteMap &map) {
+            // TODO
+        }
+
+      float trajectory_heuristic(
+    const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
+    const cg_msgs::msg::Pose2D &goal_pose) {
+        // TODO
+    }
 
 
 } // namespace planning
