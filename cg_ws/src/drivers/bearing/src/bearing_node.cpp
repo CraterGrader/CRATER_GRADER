@@ -21,7 +21,7 @@ BearingNode::BearingNode() : Node("bearing_node") {
   this->get_parameter("bearing_covariance", this->bearing_covariance);
 
   // Initialize publishers and subscribers
-  bearing_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
+  bearing_pub_ = this->create_publisher<std_msgs::msg::Float32>(
     "/bearing", 1
   );
 
@@ -40,7 +40,8 @@ BearingNode::BearingNode() : Node("bearing_node") {
 
 void BearingNode::timerCallback() {
   // Radians
-  geometry_msgs::msg::PoseWithCovarianceStamped bearing; 
+  // geometry_msgs::msg::PoseWithCovarianceStamped bearing; 
+  std_msgs::msg::Float32 bearing;
 
   // Frames to be used
   std::string fromTag_base = "april_tag";
@@ -75,6 +76,7 @@ void BearingNode::timerCallback() {
 
     // Get the full fromTag frame id
     std::string fromTag = fromTag_base + std::to_string(i);
+    // std::string fromTag = "STag_tag_0";
 
     // Get camera to tag transform - matters the most, needs to not only include most recent transform
     try {
@@ -84,6 +86,7 @@ void BearingNode::timerCallback() {
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.3 seconds old, discard
       double dt = (this->get_clock()->now() - tf_time).seconds();
+      
 
       if (dt > this->tf_discard_time) {
         continue;
@@ -144,52 +147,74 @@ void BearingNode::timerCallback() {
     
     // Variables for average bearing over the buffer length
     double avg_bearing;
-    double sum_y_angle;
-    double sum_x_angle;
+    std::vector<double> sorted_bearings;
+    double sum_y_angle = 0.0;
+    double sum_x_angle = 0.0;
     
     // Instead of averaging the bearing, sum the unit vectors
+    this->rolling_bearing.push_back(best_bearing);
     this->rolling_sin.push_back(std::sin(best_bearing));
     this->rolling_cos.push_back(std::cos(best_bearing));
 
     // Erase the oldest bearing if the buffer is longer than the limit
     if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
+      this->rolling_bearing.erase(rolling_bearing.begin());
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
     }
 
-    // Average the unit vectors and get angle
-    sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
-    sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
+    if ((int)rolling_avg_buffer > 2 && (int)this->rolling_bearing.size() == rolling_avg_buffer) {
+      std::vector<int> indices(rolling_bearing.size());
+      std::iota(indices.begin(), indices.end(), 0);
+      std::sort(indices.begin(), indices.end(),
+                [&](int A, int B) -> bool {
+                    return rolling_bearing[A] < rolling_bearing[B];
+                });
+
+      // Average the unit vectors and get angle
+      for (int i = 0; i < (int)rolling_avg_buffer - 4; i++) {
+        sum_y_angle += this->rolling_sin[indices[i+2]];
+        sum_x_angle += this->rolling_cos[indices[i+2]];
+      }
+    }
+    else {
+      sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
+      sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
+    }
     avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
     
-    // Set the PoseWithCovarianceStamped message's position to 0
-    bearing.pose.pose.position.x = 0.0;
-    bearing.pose.pose.position.y = 0.0;
-    bearing.pose.pose.position.z = 0.0;
+    // // Set the PoseWithCovarianceStamped message's position to 0
+    // bearing.pose.pose.position.x = 0.0;
+    // bearing.pose.pose.position.y = 0.0;
+    // bearing.pose.pose.position.z = 0.0;
 
-    // Convert yaw back into a quarternion for orientation
-    tf2::Quaternion q;
-    q.setRPY(0.0, 0.0, avg_bearing);
+    // // Convert yaw back into a quarternion for orientation
+    // tf2::Quaternion q;
+    // q.setRPY(0.0, 0.0, avg_bearing);
 
-    // Set the quarternion in the message
-    bearing.pose.pose.orientation.x = q.x();
-    bearing.pose.pose.orientation.y = q.y();
-    bearing.pose.pose.orientation.z = q.z();
-    bearing.pose.pose.orientation.w = q.w();
+    // // Set the quarternion in the message
+    // bearing.pose.pose.orientation.x = q.x();
+    // bearing.pose.pose.orientation.y = q.y();
+    // bearing.pose.pose.orientation.z = q.z();
+    // bearing.pose.pose.orientation.w = q.w();
 
-    // Set header and frame name
-    bearing.header.stamp = this->get_clock()->now();
-    bearing.header.frame_id = tf_map_frame;
+    // // Set header and frame name
+    // bearing.header.stamp = this->get_clock()->now();
+    // bearing.header.frame_id = tf_map_frame;
 
-    // Set covariance
-    bearing.pose.covariance =  {0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
-                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
-                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
-                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
-                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
-                                0.0,  0.0,  0.0,  0.0,  0.0,  this->bearing_covariance};
+    // // Set covariance
+    // bearing.pose.covariance =  {0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+    //                             0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+    //                             0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+    //                             0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+    //                             0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+    //                             0.0,  0.0,  0.0,  0.0,  0.0,  this->bearing_covariance};
 
     // Publish the estimated bearing  
+    // bearing_pub_->publish(bearing);
+
+    // Test for bearing in degrees
+    bearing.data = avg_bearing * 180.0 / 3.14159;
     bearing_pub_->publish(bearing);
   }
   else {

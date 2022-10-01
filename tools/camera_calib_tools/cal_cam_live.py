@@ -25,14 +25,15 @@ img_counter = 1
 
 # Get file path to data direcotry and create the directory if it doesn't already exist
 cal_cam_data = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), './cal_cam_data/')
+    os.path.abspath(__file__)), './additional_1920/')
 if not os.path.exists(cal_cam_data):
   os.makedirs(cal_cam_data)
 
 # Read from the camera
 cap = cv2.VideoCapture(2)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
 # Set to YUYV to match the default on the usb_cam
 fourcc_cap = cv2.VideoWriter_fourcc(*'YUYV')
 cap.set(cv2.CAP_PROP_FOURCC, fourcc_cap)
@@ -94,7 +95,7 @@ while(True):
         imgpoints.append(corners2)
 
         # Save file
-        img_name = "cal_cam_{:03d}.png".format(img_counter)
+        img_name = "additional_1920_{:03d}.png".format(img_counter)
         cv2.imwrite(cal_cam_data + img_name, img_cp)
         print(f"{img_name} written!")
         img_counter += 1

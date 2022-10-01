@@ -1,15 +1,15 @@
-image_width: 640
-image_height: 480
-camera_name: test_camera
+image_width: 1920
+image_height: 1080
+camera_name: camera
 camera_matrix:
   rows: 3
   cols: 3
-  data: [359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.]
+  data: [553.7564405, 0., 952.68355522, 0., 553.91867457, 495.19384415, 0., 0., 1.]
 distortion_model: fisheye
 distortion_coefficients:
   rows: 1
   cols: 4
-  data: [0., 0., 0., 0.]
+  data: [-0.04027236, -0.00342575, -0.00311329, 0.00038835]
 rectification_matrix:
   rows: 3
   cols: 3
@@ -17,4 +17,4 @@ rectification_matrix:
 projection_matrix:
   rows: 3
   cols: 4
-  data: [359.23290304, 0., 629.64159832, 0., 0., 0., 359.26041139, 321.40026019, 0., 0., 1., 0.]
+  data: [553.7564405, 0., 952.68355522, 0., 0., 553.91867457, 495.19384415, 0., 0., 0., 1., 0.]

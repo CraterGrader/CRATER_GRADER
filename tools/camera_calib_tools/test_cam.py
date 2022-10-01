@@ -3,8 +3,8 @@ import numpy as np
 
 # Read from the camera
 cap = cv2.VideoCapture(2)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 # Set to YUYV to match the default on the usb_cam
 fourcc_cap = cv2.VideoWriter_fourcc(*'YUYV')
 cap.set(cv2.CAP_PROP_FOURCC, fourcc_cap)
@@ -17,16 +17,16 @@ _, img = cap.read()
 h,  w = img.shape[:2]
 
 #  Camera Matrix
-K = np.array([[ 359.23290304,    0.,          629.64159832],
- [   0.,          359.26041139,  321.40026019],
- [   0.,            0.,            1.        ]]
+K = np.array([  [553.7564405,   0.,              952.68355522],
+                [0.,            553.91867457,   495.19384415],
+                [0.,            0.,             1.        ]]
 )
 
 # Distortion Matrix
-D = np.array([[ -4.20510300e-02],
- [ -3.43845925e-03],
- [ -7.62396222e-04],
- [ -9.83326585e-06]])
+D = np.array([[-0.04027236],
+            [-0.00342575],
+            [-0.00311329],
+            [ 0.00038835]])
 
 while(True):
     ret, img = cap.read()

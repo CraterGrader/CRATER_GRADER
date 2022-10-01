@@ -28,6 +28,6 @@ bearing_node:
     # Time before transform is discarded / not considered in calculation
     tf_discard_time: 0.8
     # Buffer for calculating average angle
-    rolling_avg_buffer: 5
+    rolling_avg_buffer: 7
     # Frequency of angle publishing
     pub_freq: 10

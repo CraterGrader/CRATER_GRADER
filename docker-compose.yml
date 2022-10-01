@@ -4,6 +4,7 @@ services:
     image: p84514faf325/cratergrader:cg-338-v1.0.0
     devices:
       - /dev/input/:/dev/input/
+      - /dev/video2:/dev/video2
     volumes:
       - .:/root/CRATER_GRADER
     ports:

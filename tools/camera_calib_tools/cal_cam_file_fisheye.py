@@ -29,7 +29,7 @@ prev_img_shape = None
 cv2.namedWindow("Camera")
 
 # Extracting path of individual image stored in a given directory
-images = glob.glob('cal_cam_data/*.png')
+images = glob.glob('1920_cam_data/*.png')
 
 for fname in images:
   img = cv2.imread(fname)

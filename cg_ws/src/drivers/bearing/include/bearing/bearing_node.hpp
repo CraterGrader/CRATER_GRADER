@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <std_msgs/msg/float32.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/buffer.h>
@@ -24,7 +25,8 @@ public:
 
 private:
   /* Publishers and Subscribers */
-  rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr bearing_pub_;
+  // rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr bearing_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr bearing_pub_;
 
   /* Callbacks */
   // Timer callback
