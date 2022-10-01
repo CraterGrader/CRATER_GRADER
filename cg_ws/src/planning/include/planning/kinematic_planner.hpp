@@ -52,7 +52,7 @@ public:
 
   // Generate base lattice based on class parameters
   std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice();
-  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius);
+  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right);
 
   // Threshold to determine if trajectory end pose is a valid final pose
   float goal_pose_distance_threshold;
