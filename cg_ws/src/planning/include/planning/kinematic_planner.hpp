@@ -2,10 +2,11 @@
 #define PLANNING__KINEMATIC_PLANNER_HPP
 
 #include <vector>
-
+#include <cmath.h>
 #include <planning/common.hpp>
 #include <mapping/site_map.hpp>
 #include <cg_msgs/msg/pose2_d.hpp>
+
 
 namespace cg {
 namespace planning {
@@ -49,11 +50,17 @@ public:
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
     const cg_msgs::msg::Pose2D &goal_pose);
 
+  // Generate base lattice based on class parameters
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice();
+  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius);
+
   // Threshold to determine if trajectory end pose is a valid final pose
   float goal_pose_distance_threshold;
 
   // Lattice Parameters
-  std::vector<float> turn_radii;
+  float turn_radii_min;
+  float turn_radii_max;
+  float turn_radii_resolution;
   float max_trajectory_length;
   float trajectory_resolution;
 

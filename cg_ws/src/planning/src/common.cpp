@@ -21,5 +21,13 @@ float euclidean_distance(const cg_msgs::msg::Point2D& pt1, const cg_msgs::msg::P
   return std::sqrt((pt2.x - pt1.x) * (pt2.x - pt1.x) + (pt2.y - pt1.y) * (pt2.y - pt1.y));
 }
 
+float rad2deg(float rad) {
+  return 180 * (rad / M_PI);
+}
+
+float deg2rad(float deg) {
+  return M_PI * (deg / 180);
+}
+
 } // planning namespace
 } // cg namespace
