@@ -26,14 +26,14 @@ public:
     const cg_msgs::msg::Pose2D &goal_pose);
 
   // Checks if trajectory_end_pose is within distance threshold of goal_pose
-  bool samePoseWithThresh(
+  bool samePoseWithinThresh(
     const cg_msgs::msg::Pose2D &trajectory_end_pose,
     const cg_msgs::msg::Pose2D &goal_pose);
 
   // Creates a std::vector of lattice trajectories 
   // based on a base lattice type and current pose
   std::vector<std::vector<cg_msgs::msg::Pose2D>> transformLatticeToPose(
-    const std::vector<cg_msgs::msg::Pose2D> &base_lattice,
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
     const cg_msgs::msg::Pose2D &current_pose);
 
   // Checks if trajectory is valid (eg. within worksite)

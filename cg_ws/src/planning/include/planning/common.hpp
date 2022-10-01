@@ -2,6 +2,7 @@
 #define PLANNING__COMMON_HPP
 
 #include <cmath> // sqrt
+#include <Eigen/Dense> // matrix multiplication
 #include <cg_msgs/msg/point2_d.hpp>
 #include <cg_msgs/msg/pose2_d.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
@@ -16,6 +17,13 @@ cg_msgs::msg::Pose2D create_pose2d(const double& x, const double& y, const doubl
 float euclidean_distance(
   const cg_msgs::msg::Point2D& pt1,
   const cg_msgs::msg::Point2D& pt2);
+
+float rad2deg(float rad);
+float deg2rad(float deg);
+
+cg_msgs::msg::Point2D transformPoint(
+  const cg_msgs::msg::Point2D &source_pt, 
+  const cg_msgs::msg::Pose2D &pose);
 
 } // planning namespace
 } // cg namespace

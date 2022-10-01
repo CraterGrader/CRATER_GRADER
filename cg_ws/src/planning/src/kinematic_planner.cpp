@@ -104,6 +104,34 @@ namespace planning {
         return lattice_arm;
     }
 
+    std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::transformLatticeToPose(
+        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
+        const cg_msgs::msg::Pose2D &current_pose) 
+    {
+
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> transformed_lattice;   
+        for (std::vector<cg_msgs::msg::Pose2D> trajectory : base_lattice) {
+
+            std::vector<cg_msgs::msg::Pose2D> transformed_trajectory;
+            for (cg::msgs::msg::Pose2D pose: trajectory) {
+
+                cg_msgs::msg::Point2D transformed_point = transformPoint(pose.pt, current_pose);
+
+                cg_msgs::msg::Pose2D transformed_pose = create_pose2d(
+                    transformed_point.pt.x, transformed_point.pt.y, pose.yaw + current_pose.yaw);
+                transformed_trajectory.push_back(transformed_pose);
+            }
+            transformed_lattice.push_back(transformed_trajectory);
+        }
+
+        return transformed_lattice;
+    }
+
+    bool samePoseWithinThresh(
+        const cg_msgs::msg::Pose2D &trajectory_end_pose,
+    const cg_msgs::msg::Pose2D &goal_pose) {
+        return euclidean_distance(trajectory_end_pose, goal_pose) <= goal_pose_distance_threshold; 
+    }
 
 
 } // namespace planning
