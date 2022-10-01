@@ -10,7 +10,9 @@ namespace planning {
         turn_radii_max(1.6), 
         turn_radii_resolution(0.4),
         max_trajectory_length(0.4),
-        trajectory_resolution(0.05) {};
+        trajectory_resolution(0.05),
+        pose_position_equality_threshold(0.05),
+        pose_position_equality_threshold(deg2rad(5)) {};
 
     void generatePath(
         std::vector<cg_msgs::msg::Pose2D> &path,
@@ -18,16 +20,41 @@ namespace planning {
         const cg::mapping::SiteMap &map) {
             // TODO
 
-            """
-            Potential functions to break out:
+            // Instantiate lattice
 
-            astart() 
+            // Run astar search
 
-            pose_within_thresh_to_visited()
-        
-            """
+            // If valid traj found, return
+
 
         }
+
+    std::vector<cg_msgs::msg::Pose2D> lattice_astar_search(
+        const cg_msgs::msg::Pose2D &agent_pose,
+        const cg_msgs::msg::Pose2D &goal_pose,
+        const cg::mapping::SiteMap &map,
+        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) {
+            // TODO
+
+            // Full Astar, follow prototype
+
+            // Use AStarNode struct
+
+            // Create starting nodes in priority queue (find valid datatstructure)
+
+            // Perform standard Astar, where children node come from lattice generated
+
+            // Add topography cost and heursitic to node cost
+
+
+            // returns valid trajectory
+            // if cannot find...
+            // Add some form of horizon to stop if in loop??
+
+            // If no traj found, return empty vector
+
+        }
+    
 
     bool KinematicPlanner::samePoseWithThresh(
         const cg_msgs::msg::Pose2D &trajectory_end_pose,
@@ -36,6 +63,8 @@ namespace planning {
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() {
+
+        assert(turn_radii_min > 0 && turn_radii_max > 0);
 
         // Generate turn_radii vector
         std::vector<float> turn_radii;
@@ -47,17 +76,21 @@ namespace planning {
 
         std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
         for (float turn_radius: turn_radii) {
+            // Forwards right
             lattice.push_back(generateLatticeArm(turn_radius, true, true));
+            // Forwards left
             lattice.push_back(generateLatticeArm(turn_radius, true, false));
-            
-            // Account for "negative" turn radius
-            if (abs(turn_radius) > 1e-2) {
-                lattice.push_back(generateLatticeArm(turn_radius, false, true));
-                lattice.push_back(generateLatticeArm(turn_radius, false, false));
-            }
+            // Backwards right
+            lattice.push_back(generateLatticeArm(turn_radius, false, true));
+            // Backwards left
+            lattice.push_back(generateLatticeArm(turn_radius, false, false));
         }
+        // Going straight, forwards/backwards
+        lattice.push_back(generateLatticeArm(0, true, false));
+        lattice.push_back(generateLatticeArm(0, false, false));
         return lattice;
-    }
+        
+        }
 
     std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(float turn_radius, bool forwards, bool right) {
 
@@ -67,14 +100,14 @@ namespace planning {
         std::vector<cg_msgs::msg::Pose2D> lattice_arm;
         int num_segments = ceil(max_trajectory_length / trajectory_resolution);
         float x,y,yaw;
-        x = y = yaw 0.0;
+        x = y = yaw = 0.0;
 
         float trajectory_arc = max_trajectory_length;
         if (!forwards) max_trajectory_length *= -1;
 
         // Straight (forwards and backwards)
-        if (abs(turn_radius) < 1e-2) {
-            float incremental_movement = static_cast<float>(max_trajectory_length / num_segments);
+        if (turn_radius < 1e-2) {
+            float incremental_movement = max_trajectory_length / num_segments;
             if (!forwards) incremental_movement *= -1;
 
             for (int n = 0; n <= num_segments; ++n) {
@@ -148,11 +181,7 @@ namespace planning {
             std::vector<cg_msgs::msg::Pose2D> transformed_trajectory;
             for (cg::msgs::msg::Pose2D pose: trajectory) {
 
-                cg_msgs::msg::Point2D transformed_point = transformPoint(pose.pt, current_pose);
-
-                cg_msgs::msg::Pose2D transformed_pose = create_pose2d(
-                    transformed_point.pt.x, transformed_point.pt.y, pose.yaw + current_pose.yaw);
-                transformed_trajectory.push_back(transformed_pose);
+                transformed_trajectory.push_back(transformPose(pose, current_pose));
             }
             transformed_lattice.push_back(transformed_trajectory);
         }
@@ -172,19 +201,38 @@ namespace planning {
 
             // TODO
 
+            // Access map data to find bounds
+            // Check if all points of vehicle are within bounds
+            // Do we need footprint information to make this effective?
+                // Maybe that's in the map data structure?
+
         }
 
-    std::vector<float> calculateTrajectoryCost(
+    std::vector<float> calculateTopographyCost(
         const std::vector<cg_msgs::msg::Pose2D> &trajectory,
-        const cg::mapping::SiteMap &map) {
+        const cg::mapping::SiteMap &map)
+        {
             // TODO
+            // Compute summed heights of map along trajectory
         }
 
-      float trajectory_heuristic(
-    const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-    const cg_msgs::msg::Pose2D &goal_pose) {
-        // TODO
-    }
+    float trajectory_heuristic(
+        const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
+        const cg_msgs::msg::Pose2D &goal_pose)
+        {
+            // TODO
+            // Distance between goal pose and final point of trajectory
+        }
+
+    bool posesWithinThresh(
+        const cg_msgs::msg::Pose2D &pose,
+        const std::vector<cg_msgs::msg::Pose2D> &goal_pose) {
+
+            return (
+                euclidean_distance(pose.pt, goal_pose.pt) < pose_position_equality_threshold && 
+                abs(pose.yaw - goal_pose.yaw) < pose_yaw_equality_threshold);
+
+        }
 
 
 } // namespace planning

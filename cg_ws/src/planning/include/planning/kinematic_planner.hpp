@@ -18,7 +18,20 @@ public:
   void generatePath(
     std::vector<cg_msgs::msg::Pose2D> &path,
     const cg_msgs::msg::Pose2D &agent_pose,
+    const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::SiteMap &map);
+  
+  // Performs a lattice astar search agent in map environment
+  std::vector<cg_msgs::msg::Pose2D> lattice_astar_search(
+    const cg_msgs::msg::Pose2D &agent_pose,
+    const cg_msgs::msg::Pose2D &goal_pose,
+    const cg::mapping::SiteMap &map,
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice);
+
+  // Check if two poses are close enough according to class thresholds
+  bool posesWithinThresh(
+    const cg_msgs::msg::Pose2D &pose,
+    const std::vector<cg_msgs::msg::Pose2D> &goal_pose);
 
   // Truncates trajectory to closest pose to goal_pose, returns pose and index
   std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
@@ -41,8 +54,8 @@ public:
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
     const cg::mapping::SiteMap &map);
 
-  // Calculates the total cost of the trajectory
-  std::vector<float> calculateTrajectoryCost(
+  // Calculates the total cost of the topography for trajectory
+  std::vector<float> calculateTopographyCost(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory,
     const cg::mapping::SiteMap &map);
 
@@ -58,6 +71,10 @@ public:
   // Threshold to determine if trajectory end pose is a valid final pose
   float goal_pose_distance_threshold;
 
+  // Pose equality thresholds
+  float pose_position_equality_threshold;
+  float pose_yaw_equality_threshold;
+
   // Lattice Parameters
   float turn_radii_min;
   float turn_radii_max;
@@ -68,6 +85,19 @@ public:
   // Cost Parameters
   float topography_weight;
   float trajectory_heuristic_epsilon;
+
+};
+
+struct AStarNode {
+
+  float g_cost;
+  int idx;
+  int parent_idx;
+  cg_msgs::msg::Pose2D pose;
+  std::vector<cg_msgs::msg::Pose2D> trajectory;
+
+  AStarNode(g_cost, idx, parent_idx, pose, trajectory) :
+    g_cost(g_cost), idx(idx), parent_idx(idx), pose(pose), trajectory(trajectory) {};
 
 };
 
