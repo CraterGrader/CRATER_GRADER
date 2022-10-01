@@ -25,6 +25,11 @@ cg_msgs::msg::Point2D transformPoint(
   const cg_msgs::msg::Point2D &source_pt, 
   const cg_msgs::msg::Pose2D &pose);
 
+cg_msgs::msg::Point2D transformPose(
+  const cg_msgs::msg::Pose2D &source_pose, 
+  const cg_msgs::msg::Pose2D &transforming_pose);
+
+
 } // planning namespace
 } // cg namespace
 
