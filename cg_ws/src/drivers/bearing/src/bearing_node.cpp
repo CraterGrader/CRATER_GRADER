@@ -155,6 +155,7 @@ void BearingNode::timerCallback() {
     if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
+
     }
 
     // Average the unit vectors and get angle

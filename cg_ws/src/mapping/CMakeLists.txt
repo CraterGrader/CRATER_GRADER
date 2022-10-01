@@ -22,6 +22,7 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
+find_package(cg_msgs REQUIRED)
 
 include_directories(include)
 
@@ -86,6 +87,7 @@ ament_target_dependencies(site_map
   tf2_eigen
   tf2_geometry_msgs
   tf2_sensor_msgs
+  cg_msgs
 )
 
 if(BUILD_TESTING)
@@ -95,6 +97,9 @@ if(BUILD_TESTING)
         include/mapping/site_map.hpp
         src/site_map.cpp
         )
+  ament_target_dependencies(site_map_test
+    cg_msgs
+  )
 endif()
 
 
@@ -125,5 +130,8 @@ install(DIRECTORY launch
 install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}/
 )
+
+# Export library files so other packages can link
+ament_export_include_directories(include)
 
 ament_package()
