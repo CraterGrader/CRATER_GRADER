@@ -39,7 +39,6 @@ namespace planning {
                 lattice.push_back(generateLatticeArm(turn_radius, false, false));
             }
         }
-
         return lattice;
     }
 
@@ -104,6 +103,23 @@ namespace planning {
         return lattice_arm;
     }
 
+    std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
+    const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
+    const cg_msgs::msg::Pose2D &goal_pose) {
+
+        float closest_distance = INFINITY;
+        float dist;
+        int closest_idx = -1;
+        for (int i = 0; i < trajectory.size(); ++i) {
+            dist = euclidean_distance(trajectory[i], goal_pose);
+            if (dist < closest_distance) {
+                closest_distance = dist;
+                closest_idx = i;
+            }
+        }
+        return std::make_pair(trajectory[closest_idx], closest_idx);
+    }
+
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::transformLatticeToPose(
         const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
         const cg_msgs::msg::Pose2D &current_pose) 
@@ -132,6 +148,14 @@ namespace planning {
     const cg_msgs::msg::Pose2D &goal_pose) {
         return euclidean_distance(trajectory_end_pose, goal_pose) <= goal_pose_distance_threshold; 
     }
+
+    bool isValidTrajectory(
+        const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
+        const cg::mapping::SiteMap &map) {
+
+            // Get site
+
+        }
 
 
 } // namespace planning

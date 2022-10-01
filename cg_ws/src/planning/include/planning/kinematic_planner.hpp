@@ -20,8 +20,8 @@ public:
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg::mapping::SiteMap &map);
 
-  // Truncates trajectory to closest pose to goal_pose
-  cg_msgs::msg::Pose2D getClosestTrajectoryPoseToGoal(
+  // Truncates trajectory to closest pose to goal_pose, returns pose and index
+  std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
     const cg_msgs::msg::Pose2D &goal_pose);
 
@@ -38,7 +38,8 @@ public:
 
   // Checks if trajectory is valid (eg. within worksite)
   bool isValidTrajectory(
-    const std::vector<cg_msgs::msg::Pose2D> &trajectory);
+    const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
+    const cg::mapping::SiteMap &map);
 
   // Calculates the total cost of the trajectory
   std::vector<float> calculateTrajectoryCost(
