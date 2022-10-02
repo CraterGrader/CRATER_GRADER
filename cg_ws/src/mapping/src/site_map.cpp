@@ -28,6 +28,11 @@ void CellHistory::addPoint(indexPoint pt){
   }
 }
 
+CellBayes::CellBayes(float cellStartingVariance, float minCellVariance){
+  cellVariance_ = cellStartingVariance;
+  minCellVariance_ = minCellVariance;
+}
+
 void CellBayes::updateElvationStatic(float ptHeight, float ptVariance){
   // Probabilistic Terrain Mapping for Mobile Robots With Uncertain Localization
   // https://ieeexplore.ieee.org/document/8392399
@@ -51,40 +56,66 @@ SiteMap::SiteMap(size_t cHeight, size_t cWidth, float cResolution){
   resolution_ = cResolution;
   heightMap_.resize(height_*width_, 0.0f);
   filterMap_.resize(height_*width_, CellHistory());
-  varianceMap_.resize(height_*width_, CellBayes());
-
+  varianceMap_.resize(height_*width_, CellBayes(cellStartingVariance_, minCellVariance_));
 }
 
-int SiteMap::binLen(float pos){
-  // for a continous point along an axis, return its int location which should align with map
-  return (int) floor(pos/getResolution());
-}
+// full param constructor
+SiteMap::SiteMap(size_t cHeight, 
+                  size_t cWidth, 
+                  float cResolution, 
+                  float filterMaxTerrain, 
+                  float filterMinTerrain, 
+                  float xTransform, 
+                  float yTransform, 
+                  float unseenGridHeight, 
+                  float incomingPointVariance, 
+                  float cellStartingVariance, 
+                  float minCellVariance){
+
+  height_ = cHeight;
+  width_ = cWidth;
+  resolution_ = cResolution;
+  filterMaxTerrain_ = filterMaxTerrain;
+  filterMinTerrain_ = filterMinTerrain;
+  xTransform_ = xTransform;
+  yTransform_ = yTransform;
+  unseenGridHeight_ = unseenGridHeight;
+  incomingPointVariance_ = incomingPointVariance;
+  cellStartingVariance_ = cellStartingVariance;
+  minCellVariance_ = minCellVariance;
+  heightMap_.resize(height_*width_, 0.0f);
+  filterMap_.resize(height_*width_, CellHistory());
+  varianceMap_.resize(height_*width_, CellBayes(cellStartingVariance_, minCellVariance_));
+  }
+
 
 float CellHistory::getMean(){
   if (!filterFull_){
     if (fingerIndex_ != 0){ // if filter is not full BUT we have data
-      
       // TODO: make this NOT iterate over entire window
       return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / fingerIndex_);
     }
   }
   else{ // if filter is full and we are only constant time updating
-
     // TODO CONVERT THIS TO CONSTANT TIME
     return (float) (std::accumulate(window_.begin(), window_.end(), 0.0f) / windowSize_);
     }
-
   // if filter is NOT FULL AND THERE ARE NO POINTS IN THE WINDOW, THEN RETURN ZERO 
   return 0.0f;
 }
 
 void SiteMap::binPts(std::vector<mapPoint> rawPts){
-  std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size()/decimation_);
 
-  for (size_t i=0 ; i < (rawPts.size()/decimation_); i++){
-    descretePoints[i].x = binLen(rawPts[i*decimation_].x - xTransform_);
-    descretePoints[i].y = binLen(rawPts[i*decimation_].y - yTransform_);
-    descretePoints[i].z = rawPts[i*decimation_].z;
+  // statically declare a vector of index points based on the raw point size
+  std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size());
+
+  // pack every raw point value into an Index point
+  for (size_t i=0 ; i < rawPts.size(); i++){
+    float x_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].x, xTransform_);
+    float y_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].y, yTransform_);
+    descretePoints[i].x = cg::mapping::binLength(x_pos_site_map_frame, getResolution());
+    descretePoints[i].y = cg::mapping::binLength(y_pos_site_map_frame, getResolution());
+    descretePoints[i].z = rawPts[i].z;
   }
   
   // use postProcess method 
@@ -92,11 +123,9 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
 
   // update view 2, filtermap
   for (size_t i=0 ; i < processedPts.size(); i++){
-
-    size_t index = processedPts[i].y + (processedPts[i].x * getWidth());    
+    size_t index = cg::mapping::discreteCoordsToCellIndex(processedPts[i].x, processedPts[i].y, getWidth());
     filterMap_[index].addPoint(processedPts[i]);
-    filterMap_[index].filterUpdate(); 
-
+    filterMap_[index].filterUpdate();
   }
 }
 
@@ -107,60 +136,74 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   std::vector<bool> goodBad(ptsCheck.size(), true);
 
   for (size_t i=0 ; i < ptsCheck.size(); i++){
-    if ((ptsCheck[i].x >= (int) getWidth()) 
-          || (ptsCheck[i].y >= (int) getHeight()) 
-          || (ptsCheck[i].y < 0.0) 
-          || (ptsCheck[i].x < 0.0)
-          || (ptsCheck[i].z > filterMaxTerrain_)
-          || (ptsCheck[i].z < filterMinTerrain_)){
-      badCount++; 
-      goodBad[i] = false;
+    if (!cg::mapping::indexInMap(ptsCheck[i].x, ptsCheck[i].y, getWidth(), getHeight())){
+      if (!cg::mapping::heightInRange(ptsCheck[i].z, filterMinTerrain_, filterMaxTerrain_)){
+        badCount++; 
+        goodBad[i] = false;
+      }
     }
   }
 
   std::vector<cg::mapping::indexPoint> goodPts;
   goodPts.resize(ptsCheck.size()-badCount);
-
   size_t goodCounter = 0; 
-
   for (size_t i=0 ; i < ptsCheck.size(); i++){
     if (goodBad[i]){
       goodPts[goodCounter] = ptsCheck[i];
       goodCounter++;
     }
   }
-
   return goodPts;
 }
 
+void SiteMap::normalizeSiteMap(){
+  // bool mapFull = true;
+  // for (size_t i=0; i<getNcells(); i++){
+  //   if (heightMap_[i] == 0.0f){
+  //     mapFull = false;
+  //   }
+  // }
+  // if (mapFull && !siteNormalized){
+  //   float sum = 0.0f;
+  //   for (size_t i=0; i<getNcells(); i++){
+  //     sum += heightMap_[i];
+  //   }
+  //   zTransform_ = sum / getNcells();
+  //   siteNormalized = true;
+  // }
+}
+
 void SiteMap::updateCellsMean(){
-  
   // use view 2 filter map to update values in view 1 height map
   for (size_t i=0; i<getNcells(); i++){
     heightMap_[i] = filterMap_[i].getMean();
   }
-
 }
 
 void SiteMap::updateCellsBayes(){
-  
+  // for each cell in map
   for (size_t i=0; i<getNcells(); i++){
-
+    // if the filter is empty, set the height of the cell to the default value
     if (filterMap_[i].filterIsEmpty() == true){
-      heightMap_[i] = 0.0f;
+      heightMap_[i] = unseenGridHeight_;
     }
-
+    // if filter is not empty (we have seen this cell before)
     else{
-
+      // if the filter has been updated since the last updateCellsBayes
       if (filterMap_[i].filterIsUpdated() == true){
+        // get the new element in the filter map 
         float elev = filterMap_[i].getFirstElement();
-        float variance = 0.1f;
+        // set the variance of the incoming point 
+        // TODO, turn into a function for variance expansion
+        float variance = incomingPointVariance_;
+        // set flag that filter map has been updated 
         filterMap_[i].filterUpdated();
+        // call bayes recursive update
         varianceMap_[i].updateElvationStatic(elev, variance);
         varianceMap_[i].updateVarianceStatic(variance);
       }
-
-      heightMap_[i] = varianceMap_[i].getCellElevation();
+      // get the cell elevation for the map
+      heightMap_[i] = varianceMap_[i].getCellElevation() - zTransform_;
     }
 
   }

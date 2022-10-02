@@ -74,6 +74,8 @@ add_executable(site_map src/site_map_main.cpp
   src/site_map_node.cpp
   include/mapping/site_map.hpp
   src/site_map.cpp
+  include/mapping/map_util.hpp
+  src/map_util.cpp
 )
 
 ament_target_dependencies(site_map
@@ -96,6 +98,8 @@ if(BUILD_TESTING)
         test/site_map_test.cpp
         include/mapping/site_map.hpp
         src/site_map.cpp
+        include/mapping/map_util.hpp
+        src/map_util.cpp
         )
   ament_target_dependencies(site_map_test
     cg_msgs

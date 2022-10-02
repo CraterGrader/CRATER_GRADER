@@ -1,6 +1,14 @@
 site_map:
   ros__parameters:
   # site assumed to be 5mx5m
-    height: 50
-    width: 50
-    resolution: 0.1
+    height: 5 
+    width: 5
+    resolution: 1.0
+    filterMaxTerrain: 0.5
+    filterMinTerrain: -0.5
+    xTransform: 1.0
+    yTransform: 1.0
+    unseenGridHeight: 0.0
+    incomingPointVariance: 0.05
+    cellStartingVariance: 10.0
+    minCellVariance: 0.00001
