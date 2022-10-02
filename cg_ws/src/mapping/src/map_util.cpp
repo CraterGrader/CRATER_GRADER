@@ -1,4 +1,4 @@
-#include "mapping/site_map.hpp"
+#include "mapping/map_util.hpp"
 
 namespace cg {
 namespace mapping {

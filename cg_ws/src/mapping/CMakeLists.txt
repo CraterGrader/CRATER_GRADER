@@ -104,6 +104,16 @@ if(BUILD_TESTING)
   ament_target_dependencies(site_map_test
     cg_msgs
   )
+  ament_add_gtest(map_test
+    test/map_test.cpp
+    include/mapping/map.hpp
+    src/map.cpp
+    include/mapping/map_util.hpp
+    src/map_util.cpp
+  )
+  ament_target_dependencies(map_test
+    cg_msgs
+  )
 endif()
 
 

@@ -1,3 +1,8 @@
+#ifndef MAPPING__MAP_UTIL_HPP
+#define MAPPING__MAP_UTIL_HPP
+
+#include <cmath> // floor
+
 namespace cg {
 namespace mapping {
 
@@ -8,5 +13,8 @@ int binLength(float pos, float resolution);
 int discreteCoordsToCellIndex(size_t x, size_t y, size_t width);
 int continousCoordsToCellIndex(float x, float y, size_t width, float resolution);
 float convertMaptoSiteMapFrame(float pos, float offset);
+
 } // mapping namespace
 } // cg namespace
+
+#endif // MAPPING__MAP_UTIL_HPP
