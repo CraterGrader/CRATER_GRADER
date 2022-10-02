@@ -2,6 +2,7 @@
 #define PLANNING__KINEMATIC_PLANNER_HPP
 
 #include <vector>
+#include <queue>
 #include <cmath.h>
 #include <planning/common.hpp>
 #include <mapping/site_map.hpp>
@@ -22,7 +23,7 @@ public:
     const cg::mapping::SiteMap &map);
   
   // Performs a lattice astar search agent in map environment
-  std::vector<cg_msgs::msg::Pose2D> lattice_astar_search(
+  std::vector<cg_msgs::msg::Pose2D> latticeAStarSearch(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::SiteMap &map,
@@ -59,9 +60,9 @@ public:
     const std::vector<cg_msgs::msg::Pose2D> &trajectory,
     const cg::mapping::SiteMap &map);
 
-  // Calculate heuristic associated with trajectory
-  float trajectory_heuristic(
-    const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
+  // Calculate heuristic associated with trajectories
+  std::vector<float> trajectories_heuristic(
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
     const cg_msgs::msg::Pose2D &goal_pose);
 
   // Generate base lattice based on class parameters
