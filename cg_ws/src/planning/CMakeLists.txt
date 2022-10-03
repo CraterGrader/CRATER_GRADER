@@ -51,6 +51,7 @@ if(BUILD_TESTING)
     test/exploration_planner_test.cpp
     include/planning/exploration_planner.hpp
     src/exploration_planner.cpp
+    src/common.cpp
   )
   ament_target_dependencies(exploration_planner_test
     cg_msgs
