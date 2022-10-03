@@ -15,6 +15,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cg_msgs REQUIRED)
 find_package(mapping REQUIRED)
+find_package(ortools CONFIG REQUIRED)
 
 include_directories(include)
 
@@ -56,13 +57,14 @@ if(BUILD_TESTING)
   ament_add_gtest(transport_planner_test
     test/transport_planner_test.cpp
     include/planning/transport_planner.hpp
-    include/planning/ceres_helloworld.hpp
+    # include/planning/ceres_helloworld.hpp
     src/transport_planner.cpp
   )
   ament_target_dependencies(transport_planner_test
     cg_msgs
     mapping
   )
+  target_link_libraries(transport_planner_test ortools::ortools)
 
   ament_add_gtest(kinematic_planner_test
     test/kinematic_planner_test.cpp
