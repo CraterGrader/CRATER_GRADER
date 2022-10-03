@@ -24,8 +24,9 @@ private:
   std::vector<cg_msgs::msg::Pose2D> exploration_waypoints_;
   unsigned int curr_waypoint_idx_;
 
-  static constexpr float xy_goal_thresh_ = 0.1;
-  static constexpr float yaw_goal_thresh_ = 0.0872665; // 5 deg
+  static constexpr double xy_goal_thresh_ = 0.1;
+  static constexpr double yaw_goal_thresh_ = 0.0872665; // 5 deg
+  static constexpr double min_dist_from_map_boundary_ = 0.5;
 };
 
 } // namespace planning
