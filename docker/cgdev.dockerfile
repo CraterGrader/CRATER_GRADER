@@ -3,7 +3,7 @@
 FROM microros/micro-ros-agent:galactic as ros_base
 
 ###########################################################
-### Automatically setup and build MicroROS packages from source, no longer needed but kept in case microros docker image fails, probably should be run with ros:$ROS_DISTRO image instead of microros/micro-ros-agent:$ROS_DISTRO
+### Automatically setup and build MicroROS packages from source, NO LONGER NEEDED but kept in case microros docker image fails, probably should be run with ros:$ROS_DISTRO image instead of microros/micro-ros-agent:$ROS_DISTRO
 ## WORKDIR /root/microros_ws_autobuild
 ## RUN git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup \
 ##  && apt-get update && rosdep update \
@@ -31,7 +31,7 @@ ENV TERM=xterm-256color
 RUN apt-get update && apt-get install -y zsh bash wget \
   && PATH="$PATH:/usr/bin/zsh" \
   # Install Oh-My-Zsh with default theme
-  && sh -c "$(wget -O- https://raw.githubusercontent.com/deluan/zsh-in-docker/master/zsh-in-docker.sh)" \
+  && sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.1.3/zsh-in-docker.sh)" \
   # Initialize custom zsh theme
   && echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc \
   # Source ROS underlay
@@ -88,6 +88,28 @@ RUN  mkdir ~/.vnc \
 # ---------------------------------------------------------
 
 # -------- Setup CraterGrader environment packages --------
+# Build cmake from source for cross-compliation
+# See the following, WITHOUT PURGE! https://stackoverflow.com/a/59689105
+# (purging cmake can affect ROS: https://askubuntu.com/a/829311)
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz -P /root/ \
+  && cd /root/ \
+  && tar zxvf cmake-3.24.2.tar.gz \
+  && cd cmake-3.24.2 \
+  && ./bootstrap \
+  && make \
+  && make install \ 
+  && cd /root/ \
+  && rm -rf cmake-3.24.2 cmake-3.24.2.tar.gz
+
+# Install OR-Tools; see https://github.com/google/or-tools/blob/stable/cmake/README.md
+RUN cd /root/ && git clone https://github.com/CraterGrader/or-tools.git \
+  && cd or-tools && mkdir build \
+  && cmake -S. -Bbuild -DBUILD_SAMPLES:BOOL=OFF -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_DEPS:BOOL=ON -DUSE_COINOR:BOOL=OFF -DUSE_SCIP:BOOL=OFF -DUSE_PDLP:BOOL=ON \
+  && cmake --build build \
+  && cd build/ && make install \
+  && cd /root/ \
+  && rm -rf or-tools
+
 # Setup python environment
 COPY requirements.txt /root/
 RUN pip3 install -r /root/requirements.txt && rm -f /root/requirements.txt
