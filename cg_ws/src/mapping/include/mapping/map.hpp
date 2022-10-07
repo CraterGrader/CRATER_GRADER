@@ -16,11 +16,11 @@ class Map {
     Map(size_t height, size_t width, float resolution, std::vector<float> cell_data);
 
     // Helpers
-    bool pointInMap(float x, float y);
-    size_t continousCoordsToCellIndex(float x, float y);
-    float getDataAtIdx(size_t idx);
-    bool validIdx(size_t idx);
-    float getResolution(){return resolution_;}
+    bool pointInMap(float x, float y) const;
+    size_t continousCoordsToCellIndex(float x, float y) const;
+    float getDataAtIdx(size_t idx) const;
+    bool validIdx(size_t idx) const;
+    float getResolution() const {return resolution_;} 
 
   private:
     // attributes

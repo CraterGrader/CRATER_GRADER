@@ -107,19 +107,19 @@ float CellHistory::getMean(){
 void SiteMap::binPts(std::vector<mapPoint> rawPts){
 
   // statically declare a vector of index points based on the raw point size
-  std::vector<cg::mapping::indexPoint> descretePoints(rawPts.size());
+  std::vector<cg::mapping::indexPoint> discretePoints(rawPts.size());
 
   // pack every raw point value into an Index point
-  for (size_t i=0 ; i < rawPts.size(); i++){
+  for (size_t i=0 ; i < rawPts.size(); ++i){
     float x_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].x, xTransform_);
     float y_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].y, yTransform_);
-    descretePoints[i].x = cg::mapping::binLength(x_pos_site_map_frame, getResolution());
-    descretePoints[i].y = cg::mapping::binLength(y_pos_site_map_frame, getResolution());
-    descretePoints[i].z = rawPts[i].z;
+    discretePoints[i].x = cg::mapping::pointToDiscreteCoord(x_pos_site_map_frame, getResolution());
+    discretePoints[i].y = cg::mapping::pointToDiscreteCoord(y_pos_site_map_frame, getResolution());
+    discretePoints[i].z = rawPts[i].z;
   }
   
   // use postProcess method 
-  std::vector<cg::mapping::indexPoint> processedPts = postProcess(descretePoints);
+  std::vector<cg::mapping::indexPoint> processedPts = postProcess(discretePoints);
 
   // update view 2, filtermap
   for (size_t i=0 ; i < processedPts.size(); i++){
@@ -133,13 +133,13 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   // out of bounds check 
 
   size_t badCount = 0; 
-  std::vector<bool> goodBad(ptsCheck.size(), true);
+  std::vector<bool> isPointValid(ptsCheck.size(), true);
 
   for (size_t i=0 ; i < ptsCheck.size(); i++){
     if (!cg::mapping::indexInMap(ptsCheck[i].x, ptsCheck[i].y, getWidth(), getHeight())){
       if (!cg::mapping::heightInRange(ptsCheck[i].z, filterMinTerrain_, filterMaxTerrain_)){
         badCount++; 
-        goodBad[i] = false;
+        isPointValid[i] = false;
       }
     }
   }
@@ -148,7 +148,7 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   goodPts.resize(ptsCheck.size()-badCount);
   size_t goodCounter = 0; 
   for (size_t i=0 ; i < ptsCheck.size(); i++){
-    if (goodBad[i]){
+    if (isPointValid[i]){
       goodPts[goodCounter] = ptsCheck[i];
       goodCounter++;
     }
@@ -156,22 +156,23 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   return goodPts;
 }
 
-void SiteMap::normalizeSiteMap(){
-  // bool mapFull = true;
-  // for (size_t i=0; i<getNcells(); i++){
-  //   if (heightMap_[i] == 0.0f){
-  //     mapFull = false;
-  //   }
-  // }
-  // if (mapFull && !siteNormalized){
-  //   float sum = 0.0f;
-  //   for (size_t i=0; i<getNcells(); i++){
-  //     sum += heightMap_[i];
-  //   }
-  //   zTransform_ = sum / getNcells();
-  //   siteNormalized = true;
-  // }
-}
+// TODO
+// void SiteMap::normalizeSiteMap(){
+//   bool mapFull = true;
+//   for (size_t i=0; i<getNcells(); i++){
+//     if (heightMap_[i] == 0.0f){
+//       mapFull = false;
+//     }
+//   }
+//   if (mapFull && !siteNormalized){
+//     float sum = 0.0f;
+//     for (size_t i=0; i<getNcells(); i++){
+//       sum += heightMap_[i];
+//     }
+//     zTransform_ = sum / getNcells();
+//     siteNormalized = true;
+//   }
+// }
 
 void SiteMap::updateCellsMean(){
   // use view 2 filter map to update values in view 1 height map

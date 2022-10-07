@@ -16,7 +16,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   PubTimer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::PubTimerCallback, this));
 
   // Map Normalization callback 
-  SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(10000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
+  // SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(10000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
 
 
   // Load parameters
@@ -69,8 +69,6 @@ void SiteMapNode::PubTimerCallback(){
     for (int row=0; row < static_cast<int>(siteMap_.getHeight()); row++) {
       pcl::PointXYZ newPoint;
       newPoint.x = (row * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
-      newPoint.x = (row * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
-
       newPoint.y = col * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
       newPoint.z =  tempMap[iterator]; // cell height in map frame
       myCloud.points.push_back(newPoint);
@@ -88,9 +86,9 @@ void SiteMapNode::PubTimerCallback(){
   visualization_pub_->publish(site_map_viz_msg);
 }
 
-void SiteMapNode::SiteNormalizeTimerCallback(){
-  siteMap_.normalizeSiteMap();
-}
+// void SiteMapNode::SiteNormalizeTimerCallback(){
+//   siteMap_.normalizeSiteMap();
+// }
 
 void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
 
