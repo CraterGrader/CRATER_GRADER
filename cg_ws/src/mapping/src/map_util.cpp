@@ -16,7 +16,9 @@ bool indexInMap(size_t x, size_t y, size_t width, size_t height){
     // resolution := meter / cell (square) 
     // x & y := discrete position indices
     // position must be in site_map frame 
-    return (0 <= x && x < width && 0 <= y && y < height);
+
+    // Unsigned ints, always >= 0
+    return (x < width && y < height);
 }
 
 bool heightInRange(float height, float minHeight, float maxHeight){
@@ -55,6 +57,35 @@ float convertMaptoSiteMapFrame(float pos, float offset){
     // pos: position along an axis, meters 
     // offset: site_map origin offset from map origin 
     return pos-offset;
+}
+
+float rad2deg(float rad) {
+  return 180 * (rad / M_PI);
+}
+
+float deg2rad(float deg) {
+  return M_PI * (deg / 180);
+}
+
+cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, const cg_msgs::msg::Pose2D &source_frame_rel_dest) {
+
+    // Source frame is relative to destination frame
+    // Generate Transformation matrix from pose, based on yaw z-rotation  
+    Eigen::Matrix4f pose_mat;
+    pose_mat << std::cos(source_frame_rel_dest.yaw), -std::sin(source_frame_rel_dest.yaw), 0, source_frame_rel_dest.pt.x,
+        std::sin(source_frame_rel_dest.yaw), std::cos(source_frame_rel_dest.yaw), 0, source_frame_rel_dest.pt.y,
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+
+    Eigen::Vector4f source_vec;
+    source_vec << source_pt.x, source_pt.y, 0, 1;
+    
+    Eigen::Vector4f transformed_vec = pose_mat * source_vec;
+
+    cg_msgs::msg::Point2D dest_pt;
+    dest_pt.x = transformed_vec.coeff(0);
+    dest_pt.y = transformed_vec.coeff(1);
+    return dest_pt;
 }
 
 } // mapping namespace

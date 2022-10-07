@@ -23,6 +23,10 @@ find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
+find_package(Eigen3)
+
+# Add Eigen3 Library
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 include_directories(include)
 
