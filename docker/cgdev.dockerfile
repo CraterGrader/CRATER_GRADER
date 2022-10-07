@@ -91,15 +91,15 @@ RUN  mkdir ~/.vnc \
 # Build cmake from source for cross-compliation
 # See the following, WITHOUT PURGE! https://stackoverflow.com/a/59689105
 # (purging cmake can affect ROS: https://askubuntu.com/a/829311)
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.24.2/cmake-3.24.2.tar.gz -P /root/ \
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.23.4/cmake-3.23.4.tar.gz -P /root/ \
   && cd /root/ \
-  && tar zxvf cmake-3.24.2.tar.gz \
-  && cd cmake-3.24.2 \
+  && tar zxvf cmake-3.23.4.tar.gz \
+  && cd cmake-3.23.4 \
   && ./bootstrap \
   && make \
   && make install \ 
   && cd /root/ \
-  && rm -rf cmake-3.24.2 cmake-3.24.2.tar.gz
+  && rm -rf cmake-3.23.4 cmake-3.23.4.tar.gz
 
 # Install OR-Tools; see https://github.com/google/or-tools/blob/stable/cmake/README.md
 RUN cd /root/ && git clone https://github.com/CraterGrader/or-tools.git \
