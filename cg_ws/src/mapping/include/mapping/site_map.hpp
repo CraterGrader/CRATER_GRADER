@@ -105,14 +105,14 @@ class SiteMap {
   void setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg);
 
   // getter funcitons 
-  float getResolution(){return resolution_;}
-  size_t getNcells(){return height_*width_;}
-  size_t getWidth(){return width_;}
-  size_t getHeight(){return height_;}
-  std::vector<CellHistory> getFilterMap(){return filterMap_;}
-  std::vector<float> getHeightMap(){return heightMap_;}
-  float getXTransform(){return xTransform_;}
-  float getYTransform(){return yTransform_;}
+  float getResolution() const {return resolution_;}
+  size_t getNcells() const {return height_*width_;}
+  size_t getWidth() const {return width_;}
+  size_t getHeight() const {return height_;}
+  std::vector<CellHistory> getFilterMap() const {return filterMap_;}
+  std::vector<float> getHeightMap() const {return heightMap_;}
+  float getXTransform() const {return xTransform_;}
+  float getYTransform() const {return yTransform_;}
 
   // private:
   std::vector<float> heightMap_;       // "view 1"

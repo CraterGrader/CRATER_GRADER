@@ -7,7 +7,7 @@ TEST(MapTestConstructorTest, emptyInit) {
   size_t width = 2; 
   float resolution = 1.0;
   
-  cg::mapping::Map empty_map(height, width, resolution);
+  cg::mapping::Map<float> empty_map(height, width, resolution);
 
   // resolution test 
   float getRes = empty_map.getResolution();
