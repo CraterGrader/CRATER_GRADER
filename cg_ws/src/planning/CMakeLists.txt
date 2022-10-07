@@ -57,7 +57,6 @@ if(BUILD_TESTING)
   ament_add_gtest(transport_planner_test
     test/transport_planner_test.cpp
     include/planning/transport_planner.hpp
-    # include/planning/ceres_helloworld.hpp
     src/transport_planner.cpp
   )
   ament_target_dependencies(transport_planner_test
