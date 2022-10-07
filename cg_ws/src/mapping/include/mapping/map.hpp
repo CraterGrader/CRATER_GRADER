@@ -20,20 +20,21 @@ class Map {
     Map(size_t height, size_t width, float resolution, std::vector<T> cell_data_);
 
     // Helpers
-    bool validPoint(const cg_msgs::msg::Point2D &pt) const;
     size_t continousCoordsToCellIndex(const cg_msgs::msg::Point2D &pt) const;
     cg_msgs::msg::Point2D indexToContinuousCoords(size_t idx) const; 
 
-    T getDataAtIdx(size_t idx) const;
+    // Checkers
     bool validIdx(size_t idx) const;
+    bool validPoint(const cg_msgs::msg::Point2D &pt) const;
 
-    // getter functions 
+    // Getter functions 
+    T getDataAtIdx(size_t idx) const;
     float getResolution() const {return resolution_;}
     size_t getWidth() const {return width_;}
     size_t getHeight() const {return height_;}
     std::vector<T> getCellData() const {return cell_data_;}
 
-    // setter functions
+    // Setter functions
     void setCellData(std::vector<T> input_data) {cell_data_ = input_data;}
     void updateCellElement(T new_element, size_t idx);
 
