@@ -17,6 +17,11 @@ find_package(cg_msgs REQUIRED)
 find_package(mapping REQUIRED)
 find_package(ortools CONFIG REQUIRED)
 
+### TODO: had to include this to get mapping package to work?
+find_package(Eigen3 REQUIRED)
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
+####
+
 include_directories(include)
 
 # build nodes
@@ -58,6 +63,7 @@ if(BUILD_TESTING)
     test/transport_planner_test.cpp
     include/planning/transport_planner.hpp
     src/transport_planner.cpp
+    src/common.cpp
   )
   ament_target_dependencies(transport_planner_test
     cg_msgs
