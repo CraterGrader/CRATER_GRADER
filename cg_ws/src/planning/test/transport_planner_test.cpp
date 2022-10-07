@@ -29,6 +29,15 @@ TEST(TransportPlannerTest, ortools_EMD_toddler){
   EXPECT_NEAR(expected, actual,0.01);
 }
 
+TEST(TransportPlannerTest, ortools_EMD_middle_schooler){
+  cg::planning::TransportPlanner transport_planner;
+  float val = transport_planner.solveEMDhardMap();
+
+  float expected = 1.8f;
+  float actual = val;
+  EXPECT_NEAR(expected, actual,10000.0);
+}
+
 
 
 // colcon test --packages-select planning --event-handlers console_cohesion+
