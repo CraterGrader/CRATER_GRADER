@@ -43,141 +43,300 @@ float TransportPlanner::basicExample()
   return objective->Value();
 }
 
-    // def gen_nodes_from_height_map(map):
-    //   # Convert map cells to nodes
-    //   src_nodes = []
-    //   sink_nodes = []
-    //   # Loop through height map and assign points to either source or sink
-    //   for idx in range(map.height * map.width):
-    //       # Get associated coordinates with these indices
-    //       x, y = map.idx_to_coords(idx)
-    //       # Positive height becomes a source; positive volume in +z
-    //       height = map.get_height(idx)
-    //       if height > 0.0:
-    //         src_nodes.append(Node(x, y, height))
-    //         continue
-    //       # Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
-    //       if height < 0.0:
-    //         sink_nodes.append(Node(x, y, -height))
-    //         continue
-    //   return src_nodes, sink_nodes
+float TransportPlanner::solveEMDtoy(){
+    
+    TransportNode y1 = {.x = -1, .y = -3.5, .height= 0.3};
+    TransportNode y2 = {.x = -1.5, .y = 1.8, .height= 0.4};
+    TransportNode y3 = {.x = 2.5, .y = 1.5, .height= 0.3};
+    std::vector<TransportNode> source_nodes{y1,y2,y3};
+    // n source nodes = 3
 
-    // def setup_distance_matrix(src_nodes, sink_nodes):
-    //   d = []
-    //   for src_node in src_nodes:
-    //     for sink_node in sink_nodes:
-    //       d.append(distance_function(
-    //           np.array([sink_node.x, sink_node.y]), np.array([src_node.x, src_node.y])))
-    //   d = np.array(d).reshape(len(src_nodes), len(sink_nodes))
-    //   return d
+    TransportNode x1 = {.x = -2, .y = -3, .height= 0.4};
+    TransportNode x2 = {.x = -1, .y = 2, .height= 0.1};
+    TransportNode x3 = {.x = 2, .y = 1, .height= 0.3};
+    TransportNode x4 = {.x = 3, .y = 1, .height= 0.2};
+    std::vector<TransportNode> sink_nodes{x1,x2,x3,x4};    
+    // m sink nodes = 4 
 
-    // def setup_height_arrays(src_nodes, sink_nodes):
-    //   src_array = np.array([node.h for node in src_nodes])
-    //   sink_array = np.array([node.h for node in sink_nodes])
-    //   return src_array, sink_array
+    std::vector<float> distance_nodes;
+    // source then sink loop makes vector row major order 
+    for (size_t i = 0; i < source_nodes.size(); i++) {
+        for (size_t j = 0; j < sink_nodes.size(); j++) {
+            // TODO, make distance function, common.cpp
+            float distance = math.sqrt(((src_nodes[i].x - sink_nodes[j].x)^2)+((src_nodes[i].y - sink_nodes[j].y)^2));
+            distance_nodes.push_back();
+        }
+    }
 
-    // def solve_emd(x, y, d):
-    //   """
-    //   Solves MILP Earth Mover's Distance Problem
-    //   Args:
-    //     x (numpy.ndarray, dim = m x 1): vector of sink values to fill ("subgrade")
-    //     y (numpy.ndarray, dim = n x 1): vector of source values to cut ("supergrade")
-    //     d (numpy.ndarray, dim = n x m): distance matrix between sources and sinks i.e. d(x_i, y_j)
-    //   Returns:
-    //     pi (numpy.ndarray, dim = n x m): matrix for volumes to transport from source y_j to x_i
-    //     cost (float): total cost for problem solution
-    //     sol_description (string): text describing some intution/insight for solution
-    //   """
-    //   # ---------------------------------------------------------------------------
-    //   # Create c, G, h matrices for cvx.solvers.lp()
-    //   n = y.shape[0]
-    //   m = x.shape[0]
-    //   # --------
-    //   # c: Cost vector from distance matrix, row major order
-    //   c = d.flatten()
-    //   # --------
-    //   # G: build up with blocks
-    //   # Block multipliers for y
-    //   vec1m = np.ones((m, 1)).T
-    //   zeros1m = np.zeros((m, 1)).T
-    //   block1m = []
-    //   for i in range(n):
-    //     row = np.c_[np.tile(zeros1m, i), vec1m, np.tile(zeros1m, n-i-1)]
-    //     block1m.append(row)
-    //   block1m = np.vstack(block1m)
-    //   # Block multipliers for x
-    //   block1n = np.tile(np.eye(m), n)
-    //   # Combine blocks
-    //   G = np.r_[block1m,
-    //             block1n,
-    //             -block1m,
-    //             -block1n,
-    //             -np.eye(n*m)]
-    //   # --------
-    //   # h: constraint values for inequalities
-    //   # Upper bound possible transport values
-    //   M = np.amax([np.sum(x), np.sum(y)])
-    //   # Check binary decision case; compare sink vs. source volumes to solve directly once instead of needing MILP search techniques (ex. exhaustive, branch & bound, etc.)
-    //   if np.sum(y) < np.sum(x):
-    //     # More sink than source; constrain by total source volume
-    //     sol_description = "$V_{source} < V_{sink}$ : max transport constrained by total source volume"
-    //     print(f"[INFO] {sol_description}, setting b=0")
-    //     b = 0
-    //   else:
-    //     # More source than sink, or exactly the same amout; constrain by total sink volume
-    //     if np.sum(y) == np.sum(x):
-    //       sol_description = "$V_{source} = V_{sink}$ : max cost transport, source and sink constraints equivalent"
-    //     else:
-    //       sol_description = "$V_{source} > V_{sink}$ : max transport constrained by total sink volume"
-    //     print(f"[INFO] {sol_description}, setting b=1")
-    //     b = 1
-    //   # Pack vector
-    //   h = np.r_[y,
-    //              x,
-    //              -y + M * b,
-    //              -x + M * (1 - b),
-    //              np.zeros(n * m)]
-    //   # ---------------------------------------------------------------------------
-    //   # Solve the problem
-    //   c = cvx.matrix(c)
-    //   G = cvx.matrix(G)
-    //   h = cvx.matrix(h)
-    //   print("[INFO] Solving...\n")
-    //   sol = cvx.solvers.lp(c, G, h)
-    //   print()
-    //   # ---------------------------------------------------------------------------
-    //   # Extract solution
-    //   cost = sol['primal objective']
-    //   pi = np.array(sol['x']) # Transport plan
-    //   # Reformat and return solution
-    //   return pi.reshape(n,m), cost, sol_description
+    // Declare the solver.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("GLOP"));
 
-    // def get_transport_list(policy, src_nodes, sink_nodes):
-    //   '''
-    //   List of transport plans as [(start_node_1, end_node_1, volume_1), ... (start_node_N, end_node_N, volume_N)]
-    //   '''
-    //   transport_list = []
-    //   zero_transport_threshold = 1e-4 # minimum threshold to consider as non-zero transport
-    //   for i, sink_node in enumerate(sink_nodes):
-    //     for j, src_node in enumerate(src_nodes):
-    //       new_volume = policy[j, i]
-    //       if new_volume > zero_transport_threshold:
-    //         transport_list.append([src_node, sink_node, new_volume])
 
-    //   return transport_list
+    const double infinity = solver->infinity();
 
-    // def find_nearest_transport(transport_list, agent_pose, visited_transport_indices=[]):
-    //   best_dist = np.inf
-    //   for j, transport in enumerate(transport_list):
-    //     src_node = transport[0]
-    //     # Compare euclidean distance between current pose and each source node
-    //     node_dist = (src_node.x - agent_pose.x)**2 + (src_node.y - agent_pose.y)**2
-    //     if node_dist < best_dist and j not in visited_transport_indices:
-    //       best_dist = node_dist
-    //       nearest_transport = transport
-    //       transport_idx = j
+    MPVariable *const t11 = solver->MakeNumVar(0.0, infinity, "t1");
+    MPVariable *const t12 = solver->MakeNumVar(0.0, infinity, "t2");
+    MPVariable *const t13 = solver->MakeNumVar(0.0, infinity, "t3");
+    MPVariable *const t14 = solver->MakeNumVar(0.0, infinity, "t4");
+    MPVariable *const t21 = solver->MakeNumVar(0.0, infinity, "t5");
+    MPVariable *const t22 = solver->MakeNumVar(0.0, infinity, "t6");
+    MPVariable *const t23 = solver->MakeNumVar(0.0, infinity, "t7");
+    MPVariable *const t24 = solver->MakeNumVar(0.0, infinity, "t8");
+    MPVariable *const t31 = solver->MakeNumVar(0.0, infinity, "t9");
+    MPVariable *const t32 = solver->MakeNumVar(0.0, infinity, "t10");
+    MPVariable *const t33 = solver->MakeNumVar(0.0, infinity, "t11");
+    MPVariable *const t34 = solver->MakeNumVar(0.0, infinity, "t12");
 
-    //   return nearest_transport, transport_idx
+    // Define the constraints.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    float M = 10000.0; 
+    int b = 1;
+
+    // constraint on all transports in transport plan lower bound sink max
+    MPConstraint *const c_sink_1 = solver->MakeRowConstraint(-infinity, x1.height);
+    c_sink_1->SetCoefficient(t11, 1);
+    c_sink_1->SetCoefficient(t21, 1);
+    c_sink_1->SetCoefficient(t31, 1);
+    MPConstraint *const c_sink_2 = solver->MakeRowConstraint(-infinity, x2.height);
+    c_sink_2->SetCoefficient(t12, 1);
+    c_sink_2->SetCoefficient(t22, 1);
+    c_sink_2->SetCoefficient(t32, 1);
+    MPConstraint *const c_sink_3 = solver->MakeRowConstraint(-infinity, x3.height);
+    c_sink_3->SetCoefficient(t13, 1);
+    c_sink_3->SetCoefficient(t23, 1);
+    c_sink_3->SetCoefficient(t33, 1);
+    MPConstraint *const c_sink_4 = solver->MakeRowConstraint(-infinity, x4.height);
+    c_sink_3->SetCoefficient(t14, 1);
+    c_sink_3->SetCoefficient(t24, 1);
+    c_sink_3->SetCoefficient(t34, 1);
+
+    // constraint on all transports in transport plan lower bound source max
+    MPConstraint *const c_source_1 = solver->MakeRowConstraint(-infinity, y1.height);
+    c_source_1->SetCoefficient(t11, 1);
+    c_source_1->SetCoefficient(t12, 1);
+    c_source_1->SetCoefficient(t13, 1);
+    c_source_1->SetCoefficient(t14, 1);
+    MPConstraint *const c_source_2 = solver->MakeRowConstraint(-infinity, y2.height);
+    c_source_2->SetCoefficient(t21, 1);
+    c_source_2->SetCoefficient(t22, 1);
+    c_source_2->SetCoefficient(t23, 1);
+    c_source_2->SetCoefficient(t24, 1);
+    MPConstraint *const c_source_3 = solver->MakeRowConstraint(-infinity, y3.height);
+    c_source_3->SetCoefficient(t31, 1);
+    c_source_3->SetCoefficient(t32, 1);
+    c_source_3->SetCoefficient(t33, 1);
+    c_source_3->SetCoefficient(t34, 1);
+
+    // mixted integer constraint sink 
+    MPConstraint *const c_mlp_sink_1 = solver->MakeRowConstraint(x1.height-(M*(1-b)), infinity);
+    c_mlp_sink_1->SetCoefficient(t11, 1);
+    c_mlp_sink_1->SetCoefficient(t21, 1);
+    c_mlp_sink_1->SetCoefficient(t31, 1);
+    MPConstraint *const c_mlp_sink_2 = solver->MakeRowConstraint(x2.height-(M*(1-b)), infinity);
+    c_mlp_sink_2->SetCoefficient(t12, 1);
+    c_mlp_sink_2->SetCoefficient(t22, 1);
+    c_mlp_sink_2->SetCoefficient(t32, 1);
+    MPConstraint *const c_mlp_sink_3 = solver->MakeRowConstraint(x3.height-(M*(1-b)), infinity);
+    c_mlp_sink_3->SetCoefficient(t13, 1);
+    c_mlp_sink_3->SetCoefficient(t23, 1);
+    c_mlp_sink_3->SetCoefficient(t33, 1);
+    MPConstraint *const c_mlp_sink_4 = solver->MakeRowConstraint(x4.height-(M*(1-b)), infinity);
+    c_mlp_sink_4->SetCoefficient(t14, 1);
+    c_mlp_sink_4->SetCoefficient(t24, 1);
+    c_mlp_sink_4->SetCoefficient(t34, 1);
+
+    // mixted integer constraint source 
+    MPConstraint *const c_mlp_source_1 = solver->MakeRowConstraint(y1.height-(M*b), infinity);
+    c_mlp_source_1->SetCoefficient(t11, 1);
+    c_mlp_source_1->SetCoefficient(t12, 1);
+    c_mlp_source_1->SetCoefficient(t13, 1);
+    c_mlp_source_1->SetCoefficient(t14, 1);
+    MPConstraint *const c_mlp_source_2 = solver->MakeRowConstraint(y2.height-(M*b), infinity);
+    c_mlp_source_2->SetCoefficient(t21, 1);
+    c_mlp_source_2->SetCoefficient(t22, 1);
+    c_mlp_source_2->SetCoefficient(t23, 1);
+    c_mlp_source_2->SetCoefficient(t24, 1);
+    MPConstraint *const c_mlp_source_3 = solver->MakeRowConstraint(y3.height-(M*b), infinity);
+    c_mlp_source_3->SetCoefficient(t31, 1);
+    c_mlp_source_3->SetCoefficient(t32, 1);
+    c_mlp_source_3->SetCoefficient(t33, 1);
+    c_mlp_source_3->SetCoefficient(t34, 1);
+
+    // Define the objective function.
+    // // Create the objective function, 3 * x + y.
+    MPObjective *const objective = solver->MutableObjective();
+    objective->SetCoefficient(t11, distance_nodes.at(0));
+    objective->SetCoefficient(t12, distance_nodes.at(1));
+    objective->SetCoefficient(t13, distance_nodes.at(2));    
+    objective->SetCoefficient(t14, distance_nodes.at(3));    
+    objective->SetCoefficient(t21, distance_nodes.at(4));    
+    objective->SetCoefficient(t22, distance_nodes.at(5));    
+    objective->SetCoefficient(t23, distance_nodes.at(6));    
+    objective->SetCoefficient(t24, distance_nodes.at(7)); 
+    objective->SetCoefficient(t31, distance_nodes.at(8)); 
+    objective->SetCoefficient(t32, distance_nodes.at(9));
+    objective->SetCoefficient(t33, distance_nodes.at(10));
+    objective->SetCoefficient(t34, distance_nodes.at(11));
+
+    objective->SetMinimization();
+
+    // Invoke the solver and display the results.
+    solver->Solve();
+
+    float objective_test = objective->Value();
+
+    return objective_test;
+
+}
+
+float TransportPlanner::solveEMDhardMap(){
+
+    // declare height-map vector 
+    std::vector<float> heightMapStandIn{0,    0,    0,    0,    0,    0,    0,    0,    0, 
+                                        0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                        0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,
+                                        0,    0,  1.0,    0, -2.0,    0,  1.0,    0,    0,
+                                        0,    0,  1.0, -2.0, -4.0, -2.0,  1.0,    0,    0,
+                                        0,    0,  1.0,    0, -2.0,    0,  1.0,    0,    0,
+                                        0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,
+                                        0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                        0,    0,    0,    0,    0,    0,    0,    0,    0};
+
+    std::vector<float> designTOPO{0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0, 
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0};
+    
+    float threshold_z = 0.001;
+    
+    float vol_sink = 0.0f;
+    float vol_source = 0.0f;
+
+    // ---------------------------------------------------
+    // TODO turn this into a function 
+
+    // declare source vector 
+    std::vector<TransportNode> source_nodes;
+    
+    // declare sink vector 
+    std::vector<TransportNode> sink_nodes;
+
+    // todo get from param or site_map object
+    size_t map_height = 9;
+    size_t map_width = 9;
+    size_t num_cells = map_height*map_width;
+    float resolution = 0.1;
+
+    // Loop through height map and assign points to either source or sink
+    for (size_t i = 0; i < num_cells; i++) {
+
+        // Get associated coordinates with these indices
+        // TODO, make map util
+        float x = (i % map_width)*resolution;
+        float y = (math::floor(i / map_width))*resolution;
+
+        float height = heightMapStandIn.at(i);
+
+        TransportNode node;
+
+        // Positive height becomes a source; positive volume in +z
+        if (height > (designTOPO.at(i)+threshold_z)){
+            node.x = x; 
+            node.y = y; 
+            node.height = height;
+            vol_source += height;
+            src_nodes.push_back(node);
+        }
+
+        // # Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
+        if (height < designTOPO.at(i)-threshold_z){
+            node.x = x; 
+            node.y = y; 
+            node.height = -height;
+            vol_sink += -height;
+            sink_nodes.push_back(node);
+        }
+
+    }
+    // ---------------------------------------------------
+
+    
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // TODO turn this into a function 
+    // Setup distance vector
+    std::vector<float> distance_vector;
+
+    // source then sink loop makes vector row major order 
+    for (size_t i = 0; i < source_nodes.size(); i++) {
+        for (size_t j = 0; j < sink_nodes.size(); j++) {
+            // TODO, make distance function, common.cpp
+            float distance = math.sqrt(((src_nodes.at(i).x - sink_nodes.at(j).x)^2)+((src_nodes.at(i).y - sink_nodes.at(j).y)^2));
+            distance_vector.push_back(distance);
+        }
+    }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    // Declare the solver.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("GLOP"));
+
+
+    // Create the variables.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    size_t m_policy = source_nodes.size();    
+    size_t n_policy = sink_nodes.size();
+    size_t num_cells_policy = m_policy * n_policy;
+
+    const double infinity = solver->infinity();
+
+    // do a for loop to create all items in the transport matrix policiy, mxn
+    std::vector<MPVariable*> transport_plan;
+    std::vector<std::string> varNames;
+
+    for (size_t i = 0; i < num_cells_policy; i++){
+        std::string numVarName = 't' + std::to_string(i);
+        varNames.push_back(numVarName);
+        transport_plan.push_back(solver->MakeNumVar(0.0, infinity, numVarName));
+    }
+
+    // Define the constraints.
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    float M = std::max(vol_sink, vol_source);
+    int b; 
+
+    // todo make better 
+    if (vol_sink > vol_source){
+        b = 0;
+    }
+    else{
+        b = 1;
+    }
+
+    std::vector<MPConstraint*> constraints;
+
+    // do a for loop 
+    for (size_t i = 0; i < m_policy; i++){
+        constraints.push_back(solver->MakeRowConstraint(-infinity, x1.height))
+        for (size_t j = 0; j < n_policy; j++){
+            
+        }
+    }
+
+
+
+    return 1.0f;
+
+}
 
   } // namespace planning
 } // namespace cg
