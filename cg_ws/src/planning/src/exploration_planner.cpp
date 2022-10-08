@@ -4,7 +4,7 @@
 namespace cg {
 namespace planning {
 
-void ExplorationPlanner::planExploration(
+std::vector<cg_msgs::msg::Pose2D> ExplorationPlanner::planExploration(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map) {
 
   // For now, have a fixed set of waypoints
@@ -33,6 +33,8 @@ void ExplorationPlanner::planExploration(
   exploration_waypoints_.push_back(cg::planning::create_pose2d(
     2.0/3.0*w, 1.0/3.0*h, 135*M_PI/180
   ));
+
+  return exploration_waypoints_;
 }
 
 cg_msgs::msg::Pose2D ExplorationPlanner::getGoalPose(

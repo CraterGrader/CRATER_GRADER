@@ -8,3 +8,4 @@
 //   float absolute_range = 0.0f;
 //   EXPECT_NEAR(expected, actual, absolute_range);
 // }
+// TEST(ExplorationPlannerTest, planExplorationTest)

@@ -14,8 +14,7 @@ public:
   ExplorationPlanner() : curr_waypoint_idx_(0) {};
   cg_msgs::msg::Pose2D getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
-  //
-  void planExploration(
+  std::vector<cg_msgs::msg::Pose2D> planExploration(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
   bool isExplorationDone() const {return curr_waypoint_idx_ >= exploration_waypoints_.size();}
 
