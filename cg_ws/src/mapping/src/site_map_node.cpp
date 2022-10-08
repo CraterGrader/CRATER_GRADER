@@ -18,6 +18,10 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   // Map Normalization callback 
   // SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(10000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
 
+  // Initialize services
+  server_ = this->create_service<cg_msgs::srv::SiteMap>(
+      "site_map_server",
+      std::bind(&SiteMapNode::sendSiteMap, this, std::placeholders::_1, std::placeholders::_2));
 
   // Load parameters
   this->declare_parameter<int>("height", 5);
@@ -108,6 +112,14 @@ void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr 
   siteMap_.binPts(incomingPts);
   // UPDATE CELLS 
   siteMap_.updateCellsBayes();
+}
+
+void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res)
+{
+  cg_msgs::msg::SiteMap map_msg;
+  map_msg.height_map = {0.0, 1.0, 2.0, 3.0};
+  res->site_map = map_msg;
+  res->success = true;
 }
 
 // void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
