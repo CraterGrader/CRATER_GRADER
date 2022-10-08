@@ -3,7 +3,7 @@
 
 #include <planning/common.hpp>
 #include <planning/goal_planner.hpp>
-#include <mapping/site_map.hpp>
+#include <mapping/map.hpp>
 
 namespace cg {
 namespace planning {
@@ -13,10 +13,10 @@ class ExplorationPlanner : public GoalPlanner {
 public:
   ExplorationPlanner() : curr_waypoint_idx_(0) {};
   cg_msgs::msg::Pose2D getGoalPose(
-    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map);
+    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
   //
   void planExploration(
-    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map);
+    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
   bool isExplorationDone() const {return curr_waypoint_idx_ >= exploration_waypoints_.size();}
 
 private:

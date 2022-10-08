@@ -5,7 +5,7 @@ namespace cg {
 namespace planning {
 
 void ExplorationPlanner::planExploration(
-    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map) {
+    const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map) {
 
   // For now, have a fixed set of waypoints
   // Drive in a circle, then back into a corner and drive forward toward the center
@@ -37,7 +37,7 @@ void ExplorationPlanner::planExploration(
 
 cg_msgs::msg::Pose2D ExplorationPlanner::getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose,
-    const cg::mapping::SiteMap &map) {
+    const cg::mapping::Map<float> &map) {
 
   // Check if we have reached the end of the exploration phase
   if (isExplorationDone()) {
