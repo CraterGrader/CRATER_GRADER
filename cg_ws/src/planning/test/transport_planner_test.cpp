@@ -1,46 +1,9 @@
 #include <gtest/gtest.h>
 #include <planning/transport_planner.hpp>
 
-TEST(TransportPlannerTest, ortools_helloworld){
-  cg::planning::TransportPlanner transport_planner;
-  // Example from ortools, should always return optimal value of 4: https://developers.google.com/optimization/introduction/cpp#complete-program
-  float val = transport_planner.basicExample();
-
-  float expected = 4.0f;
-  float actual = val;
-  EXPECT_EQ(expected, actual);
-}
-
-TEST(TransportPlannerTest, ortools_EMD_baby){
-  cg::planning::TransportPlanner transport_planner;
-  float val = transport_planner.solveEMDtoy();
-
-  float expected = 1.8f;
-  float actual = val;
-  EXPECT_NEAR(expected, actual,0.01);
-}
-
-TEST(TransportPlannerTest, ortools_EMD_toddler){
-  cg::planning::TransportPlanner transport_planner;
-  float val = transport_planner.solveEMDtoyLoop();
-
-  float expected = 1.8f;
-  float actual = val;
-  EXPECT_NEAR(expected, actual,0.01);
-}
-
-TEST(TransportPlannerTest, ortools_EMD_middle_schooler){
-  cg::planning::TransportPlanner transport_planner;
-  float val = transport_planner.solveEMDhardMap();
-
-  float expected = 1.8f;
-  float actual = val;
-  EXPECT_NEAR(expected, actual,10000.0);
-}
-
-TEST(TransportPlannerTest, ortools_EMD_high_schooler)
+TEST(TransportPlannerTest, vector_map)
 {
-  // Make height and 
+  // Make height data
   std::vector<float> heightMapStandIn{0,    0,    0,    0,    0,    0,    0,    0,    0, 
                                       0,    0,    0,    0,    0,    0,    0,    0,    0,
                                       0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,
@@ -61,6 +24,7 @@ TEST(TransportPlannerTest, ortools_EMD_high_schooler)
                                   0,    0,    0,    0,    0,    0,    0,    0,    0, 
                                   0,    0,    0,    0,    0,    0,    0,    0,    0};
 
+  // Create maps
   size_t map_height_cells = 9;
   size_t map_width_cells = 9;
   float resolution = 0.1;
@@ -70,7 +34,7 @@ TEST(TransportPlannerTest, ortools_EMD_high_schooler)
 
   // Solve transport problem
   cg::planning::TransportPlanner transport_planner;
-  float objective_value = transport_planner.solveEMDrealMap(current_height_map, design_height_map, threshold_z);
+  float objective_value = transport_planner.planTransport(current_height_map, design_height_map, threshold_z);
   std::vector<cg::planning::TransportAssignment> transport_assignments = transport_planner.getTransportAssignments();
   
   // Check number of transport assignments
@@ -82,4 +46,16 @@ TEST(TransportPlannerTest, ortools_EMD_high_schooler)
   float expected_obj = 1.86f;
   float actual_obj = objective_value;
   EXPECT_NEAR(expected_obj, actual_obj, 0.1);
+}
+
+TEST(TransportPlannerTest, toy_problem)
+{
+  // Solve transport problem (nodes created manually inside method)
+  cg::planning::TransportPlanner transport_planner;
+  float val = transport_planner.solveToyProblem();
+
+  // Check objective value
+  float expected = 1.8f;
+  float actual = val;
+  EXPECT_NEAR(expected, actual, 0.01);
 }

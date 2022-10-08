@@ -26,20 +26,27 @@ struct TransportAssignment {
 class TransportPlanner : public GoalPlanner {
 
 public:
+  // Constructor()
   TransportPlanner() {};
+
+  // Computations()
+  float planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z);
   cg_msgs::msg::Pose2D getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
-  float basicExample(); // Example from ortools, should always return optimal value of 4: https://developers.google.com/optimization/introduction/cpp#complete-program
 
-  size_t ij_to_index(size_t x, size_t y, size_t width);
+  float solveToyProblem(); // For implementation verification purposes only
 
-  float solveEMDtoy(); // prototype of EMD solve
-  float solveEMDtoyLoop();
-  float solveEMDhardMap(); // EMD Solve hard coded map
-  float solveEMDrealMap(const cg::mapping::Map<float> &height_map, const cg::mapping::Map<float> &design_map, float threshold_z);
+  // Helpers()
+  size_t ij_to_index(size_t x, size_t y, size_t width) const;
+  void init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z);
+  void calculate_distances(std::vector<float> &distances_between_nodes, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes);
+  float solveForTransportAssignments(std::vector<TransportAssignment> &new_transport_assignments, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes, const std::vector<float> &distances_between_nodes, const float vol_source, const float vol_sink, bool verbose);
+
+  // Getters()
   std::vector<TransportAssignment> getTransportAssignments() const {return transport_assignments_;};
 
 private: 
-  std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (basically the non-zero transports)
+  // Attributes
+  std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (i.e. the non-zero transports)
 };
 
 } // namespace planning
