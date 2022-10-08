@@ -10,7 +10,7 @@ namespace planning {
     // Timer callback
     timer_ = this->create_wall_timer(
         std::chrono::milliseconds(100),
-        std::bind(&CmdMuxNode::timerCallback, this));
+        std::bind(&BehaviorExecutive::timerCallback, this));
   }
 
 void BehaviorExecutive::timerCallback()

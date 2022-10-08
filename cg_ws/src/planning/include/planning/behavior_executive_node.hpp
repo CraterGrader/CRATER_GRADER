@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef PLANNING__BEHAVIOR_EXECUTIVE_HPP
+#define PLANNING__BEHAVIOR_EXECUTIVE_HPP
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -27,3 +28,5 @@ private:
 
 } // namespace planning
 } // namespace cg
+
+#endif // PLANNING__BEHAVIOR_EXECUTIVE_HPP

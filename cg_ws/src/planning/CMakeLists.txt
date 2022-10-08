@@ -32,6 +32,12 @@ ament_target_dependencies(autograder_node
   rclcpp
   cg_msgs
 )
+add_executable(behavior_executive_node src/behavior_executive_main.cpp
+  src/behavior_executive_node.cpp
+)
+ament_target_dependencies(behavior_executive_node
+  rclcpp
+)
 
 # if(BUILD_TESTING)
 #   find_package(ament_lint_auto REQUIRED)
@@ -94,6 +100,9 @@ endif()
 
 # Install targets
 install(TARGETS autograder_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS behavior_executive_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
