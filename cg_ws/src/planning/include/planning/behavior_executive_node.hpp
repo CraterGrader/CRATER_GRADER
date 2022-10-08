@@ -2,6 +2,7 @@
 #define PLANNING__BEHAVIOR_EXECUTIVE_HPP
 
 #include <rclcpp/rclcpp.hpp>
+#include <mapping/map.hpp>
 
 namespace cg {
 namespace planning {
@@ -23,6 +24,7 @@ private:
   void timerCallback(); // For looping publish
 
   /* Variables */
+  cg::mapping::Map<float> height_map;
 
 }; // class BehaviorExecutive
 

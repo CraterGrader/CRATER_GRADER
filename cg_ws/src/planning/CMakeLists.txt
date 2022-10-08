@@ -37,6 +37,8 @@ add_executable(behavior_executive_node src/behavior_executive_main.cpp
 )
 ament_target_dependencies(behavior_executive_node
   rclcpp
+  cg_msgs
+  mapping
 )
 
 # if(BUILD_TESTING)
