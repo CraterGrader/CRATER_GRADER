@@ -15,6 +15,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cg_msgs REQUIRED)
 find_package(mapping REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+# Add Eigen3 Library
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 include_directories(include)
 
