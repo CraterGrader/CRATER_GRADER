@@ -26,7 +26,7 @@ private:
   rclcpp::TimerBase::SharedPtr SiteNormalizeTimer_; // For looping publish
 
   /* Services */
-  rclcpp::Service<cg_msgs::srv::SiteMap>::SharedPtr server_;
+  rclcpp::Service<cg_msgs::srv::SiteMap>::SharedPtr site_map_server_;
   void sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res);
 
   // rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr telem_sub_;
