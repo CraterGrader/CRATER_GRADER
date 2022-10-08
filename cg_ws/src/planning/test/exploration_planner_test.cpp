@@ -57,3 +57,19 @@ TEST(ExplorationPlannerTest, getGoalPoseTest) {
   EXPECT_NEAR(pose.pt.y, exploration_waypoints[1].pt.y, 1e-5);
   EXPECT_NEAR(pose.yaw, exploration_waypoints[1].yaw, 1e-5);
 }
+
+TEST(ExplorationPlannerTest, isExplorationDoneTest) {
+  cg::planning::ExplorationPlanner ep;
+  auto agent_pose = cg::planning::create_pose2d(0, 0, 0);
+  size_t map_height = 10, map_width = 10;
+  float map_res = 1.0;
+  cg::mapping::Map<float> map(map_height, map_width, map_res);
+
+  auto exploration_waypoints = ep.planExploration(agent_pose, map);
+
+  for (const auto & pose : exploration_waypoints) {
+    EXPECT_FALSE(ep.isExplorationDone());
+    ep.getGoalPose(pose, map);
+  }
+  EXPECT_TRUE(ep.isExplorationDone());
+}
