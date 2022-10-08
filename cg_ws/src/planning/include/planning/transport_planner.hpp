@@ -17,6 +17,12 @@ struct TransportNode {
     float height;
 };
 
+struct TransportAssignment {
+  TransportNode source_node;
+  TransportNode sink_node;
+  float transport_volume;
+};
+
 class TransportPlanner : public GoalPlanner {
 
 public:
@@ -30,8 +36,10 @@ public:
   float solveEMDtoyLoop();
   float solveEMDhardMap(); // EMD Solve hard coded map
   float solveEMDrealMap(const cg::mapping::Map<float> &height_map, const cg::mapping::Map<float> &design_map, float threshold_z);
+  std::vector<TransportAssignment> getTransportAssignments() const {return transport_assignments_;};
 
-      private:
+private: 
+  std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (basically the non-zero transports)
 };
 
 } // namespace planning

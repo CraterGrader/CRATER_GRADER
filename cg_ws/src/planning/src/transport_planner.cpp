@@ -704,16 +704,28 @@ float TransportPlanner::solveEMDrealMap(const cg::mapping::Map<float> &current_h
 
   // Extract the results.
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  // Objective value
-  float objective_test = objective->Value();
 
-  // Optimization variables
+  // Transport assignments from optimization variables
+  transport_assignments_.clear();
+  for (size_t i = 0; i < n_policy; i++) {
+    for (size_t j = 0; j < m_policy; j++) {
+      size_t index = ij_to_index(i, j, m_policy);
+      float transport_volume = transport_plan.at(index)->solution_value();
+      // All non-zero transports should be added as assignments
+      if (transport_volume > 0) {
+        TransportAssignment new_assignment = {.source_node = source_nodes[i], .sink_node = sink_nodes[j], .transport_volume = transport_volume};
+        transport_assignments_.push_back(new_assignment);
+      }
+    }
+  }
+
   for (size_t t = 0; t < num_cells_policy; t++)
   {
     LOG(INFO) << varNames.at(t) << ": " << transport_plan.at(t)->solution_value();
   }
 
-  return objective_test;
+  // Return the objective value
+  return objective->Value();
 }
 
 } // namespace planning
