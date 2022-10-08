@@ -1,10 +1,26 @@
 #include <gtest/gtest.h>
 #include <planning/kinematic_planner.hpp>
 
-// TEST(KinematicPlannerTest, helloworld)
-// {
-//   float expected = 0.0f;
-//   float actual = 0.0f;
-//   float absolute_range = 0.0f;
-//   EXPECT_NEAR(expected, actual, absolute_range);
-// }
+
+TEST(KinematicPlannerTest, helloworld)
+{
+  float expected = 0.0f;
+  float actual = 0.0f;
+  float absolute_range = 0.0f;
+  EXPECT_NEAR(expected, actual, absolute_range);
+}
+
+
+// Test getClosestTrajectoryPoseToGoal()
+
+// Test samePoseWithinThresh
+
+// Test transformLatticeToPose
+
+// isValidTrajectory() need map input
+
+// Test calculateTopographyCost
+
+// Test trajectories_heuristic
+
+// Test generateBaseLattice

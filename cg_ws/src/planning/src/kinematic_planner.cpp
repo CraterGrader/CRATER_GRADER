@@ -60,8 +60,8 @@ namespace planning {
             pq_nodes.pop();
 
             // Check if current node can can complete trajectory
-            auto [closest_traj_pose, closest_traj_idx] = getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
-            if (samePoseWithinThresh(closest_traj_pose, goal_pose)) {
+            auto [closest_traj_pose, closest_traj_idx] = KinematicPlanner::getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
+            if (KinematicPlanner::samePoseWithinThresh(closest_traj_pose, goal_pose)) {
                 int curr_idx = curr_node.idx;
 
                 // Add final trajectory to 
@@ -103,7 +103,7 @@ namespace planning {
             // Filter out nonvalid trajectories
             std::vector<std::vector<cg_msgs::msg::Pose2D>> valid_trajectories;
             for (auto trajectory : lattice_trajectories) {
-                if (isValidTrajectory(trajectory, map)) {
+                if (KinematicPlanner::isValidTrajectory(trajectory, map)) {
                     valid_trajectories.push_back(trajectory);
                 }
             }
@@ -118,17 +118,17 @@ namespace planning {
             }
 
             // Calculate next nodes on all valid trajectories
-            for (int traj_idx = 0; traj_idx < valid_trajectories.size(); ++traj_idx) {
+            for (size_t traj_idx = 0; traj_idx < valid_trajectories.size(); ++traj_idx) {
                 
                 // Skip if trajectory includes points out of bounds
-                if (!isValidTrajectory(valid_trajectories[traj_idx], map)) continue;
+                if (!KinematicPlanner::isValidTrajectory(valid_trajectories[traj_idx], map)) continue;
 
                 cg_msgs::msg::Pose2D end_of_cur_traj_pose = valid_trajectories[traj_idx].back();
 
                 // Skip if nose pose is close to another node that has been visited
                 bool skip_new_node = false;
                 for (auto visited_node : visited_nodes) {
-                    if (samePoseWithinThresh(end_of_cur_traj_pose, visited_node.pose)) {
+                    if (KinematicPlanner::samePoseWithinThresh(end_of_cur_traj_pose, visited_node.pose)) {
                         skip_new_node = true;
                         break;
                     }
@@ -140,7 +140,7 @@ namespace planning {
 
                 // Create new child node
                 AStarNode succ_node = {succ_g_cost, 
-                                       visited_trajectories.size(), // Current pose idx
+                                       static_cast<int>(visited_trajectories.size()), // Current pose idx
                                        curr_node.idx, // Parent pose idx
                                        end_of_cur_traj_pose, // Current Pose
                                        valid_trajectories[traj_idx]}; //
@@ -167,8 +167,8 @@ namespace planning {
         const cg_msgs::msg::Pose2D &trajectory_end_pose,
         const cg_msgs::msg::Pose2D &goal_pose) {
             return (
-                euclidean_distance(pose.pt, goal_pose.pt) < pose_position_equality_threshold && 
-                abs(pose.yaw - goal_pose.yaw) < pose_yaw_equality_threshold);
+                cg::planning::euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) < pose_position_equality_threshold &&
+                abs(trajectory_end_pose.yaw - goal_pose.yaw) < pose_yaw_equality_threshold);
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() {
@@ -212,7 +212,6 @@ namespace planning {
         float x,y,yaw;
         x = y = yaw = 0.0;
 
-        float trajectory_arc = max_trajectory_length;
         if (!forwards) max_trajectory_length *= -1;
 
         // Straight (forwards and backwards)
@@ -222,7 +221,7 @@ namespace planning {
 
             for (int n = 0; n <= num_segments; ++n) {
                 x += incremental_movement;
-                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
+                cg_msgs::msg::Pose2D pose = cg::planning::create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
             }
         }
@@ -238,7 +237,7 @@ namespace planning {
                 y = turn_radius * sin(cur_rad) - turn_radius;
                 yaw = M_PI + atan2(-cos(cur_rad), sin(cur_rad));
 
-                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
+                cg_msgs::msg::Pose2D pose= cg::planning::create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
                 cur_rad += rad_increment;
             }
@@ -254,7 +253,7 @@ namespace planning {
                 y = turn_radius * sin(cur_rad) + turn_radius;
                 yaw = atan2(-cos(cur_rad), sin(cur_rad));
 
-                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
+                cg_msgs::msg::Pose2D pose = cg::planning::create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
                 cur_rad += rad_increment;
             }
@@ -270,8 +269,8 @@ namespace planning {
         float closest_distance = INFINITY;
         float dist;
         int closest_idx = -1;
-        for (int i = 0; i < trajectory.size(); ++i) {
-            dist = euclidean_distance(trajectory[i].pt, goal_pose.pt);
+        for (size_t i = 0; i < trajectory.size(); ++i) {
+            dist = cg::planning::euclidean_distance(trajectory[i].pt, goal_pose.pt);
             if (dist < closest_distance) {
                 closest_distance = dist;
                 closest_idx = i;
@@ -330,8 +329,12 @@ namespace planning {
             float topography_cost = 0;
             for (cg_msgs::msg::Pose2D pose : trajectory) {
 
-                // TODO: get_height_at_pose needs to be developed as a utils or map function, currently DNE
-                topography_cost += abs(map.get_height_at_pose(pose));
+                size_t pose_idx = cg::mapping::continousCoordsToCellIndex(
+                    pose.pt.x,
+                    pose.pt.y,
+                    map.getWidth(),
+                    map.getResolution());
+                topography_cost += abs(map.getHeightMap()[pose_idx]);
             }
 
             // Weight topography cost

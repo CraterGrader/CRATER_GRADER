@@ -7,7 +7,7 @@
 #include <iostream>
 #include <planning/common.hpp>
 #include <mapping/site_map.hpp>
-#include <cg_msgs/msg/pose2_d.hpp>
+#include <mapping/map_util.hpp>
 
 
 namespace cg {

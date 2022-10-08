@@ -15,7 +15,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cg_msgs REQUIRED)
 find_package(mapping REQUIRED)
-find_package(Eigen3)
+find_package(Eigen3 REQUIRED)
 
 # Add Eigen3 Library
 INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
@@ -69,8 +69,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(kinematic_planner_test
     test/kinematic_planner_test.cpp
-    include/planning/kinematic_planner.hpp
+    src/common.cpp
     src/kinematic_planner.cpp
+    ../mapping/src/map_util.cpp
   )
   ament_target_dependencies(kinematic_planner_test
     cg_msgs
