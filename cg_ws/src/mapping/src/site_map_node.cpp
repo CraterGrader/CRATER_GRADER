@@ -118,8 +118,7 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
 {
   (void)req; // No request input for cg_msgs/srv/SiteMap.srv, but service needs both Request and Response args so just "touch" the request to hide unused parameter warning
   cg_msgs::msg::SiteMap map_msg;
-  map_msg.height_map = {0.0, 1.0, 2.0, 3.0};
-  // map_msg.height_map = heightMap_;
+  map_msg.height_map = heightMap_;
   res->site_map = map_msg;
   res->success = true;
 }
