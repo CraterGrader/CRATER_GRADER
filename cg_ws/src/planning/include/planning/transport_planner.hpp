@@ -29,12 +29,9 @@ public:
   float solveEMDtoy(); // prototype of EMD solve
   float solveEMDtoyLoop();
   float solveEMDhardMap(); // EMD Solve hard coded map
-  float solveEMDrealMap();
+  float solveEMDrealMap(const cg::mapping::Map<float> &height_map, const cg::mapping::Map<float> &design_map, float threshold_z);
 
-private: 
-
-  
-
+      private:
 };
 
 } // namespace planning

@@ -384,7 +384,6 @@ float TransportPlanner::solveEMDhardMap(){
         // TODO, make map util
         float x = (i % map_width)*resolution;
         float y = (std::floor(i / map_width))*resolution;
-
         float height = heightMapStandIn.at(i);
 
         TransportNode node;
@@ -410,7 +409,6 @@ float TransportPlanner::solveEMDhardMap(){
     }
     // ---------------------------------------------------
 
-    
     std::vector<float> distance_nodes;
     // source then sink loop makes vector row major order 
     for (size_t i=0; i < source_nodes.size(); i++) {
@@ -535,38 +533,8 @@ float TransportPlanner::solveEMDhardMap(){
     return objective_test;
 }
 
-float TransportPlanner::solveEMDrealMap()
+float TransportPlanner::solveEMDrealMap(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, float threshold_z)
 {
-
-  // declare height-map vector
-  std::vector<float> heightMapStandIn{0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                      0, 0, 0, 1.0, 1.0, 1.0, 0, 0, 0,
-                                      0, 0, 1.0, 0, -2.0, 0, 1.0, 0, 0,
-                                      0, 0, 1.0, -2.0, -4.0, -2.0, 1.0, 0, 0,
-                                      0, 0, 1.0, 0, -2.0, 0, 1.0, 0, 0,
-                                      0, 0, 0, 1.0, 1.0, 1.0, 0, 0, 0,
-                                      0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                      0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  std::vector<float> designTOPO{0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-  size_t map_height = 9;
-  size_t map_width = 9;
-  float resolution = 0.1;
-  cg::mapping::Map<float> map(map_height, map_width, resolution, heightMapStandIn);
-  cg::mapping::Map<float> design_topo(map_height, map_width, resolution, designTOPO);
-
-  float threshold_z = 0.001; // symmetric height offset from design topo to make nodes for
-
   // ---------------------------------------------------
   // declare source vector
   std::vector<TransportNode> source_nodes;
@@ -575,29 +543,29 @@ float TransportPlanner::solveEMDrealMap()
   std::vector<TransportNode> sink_nodes;
 
   // todo get from map object
-  size_t num_cells = map.getHeight() * map.getWidth();
+  size_t num_cells = current_height_map.getHeight() * current_height_map.getWidth();
 
   // Loop through height map and assign points to either source or sink
   float vol_sink = 0.0f;
   float vol_source = 0.0f;
   for (size_t i = 0; i < num_cells; i++) {
     // Put associated coordinates and height with each index into a node
-    cg_msgs::msg::Point2D pt = map.indexToContinuousCoords(i);
-    float cell_height = map.getDataAtIdx(i);
+    cg_msgs::msg::Point2D pt = current_height_map.indexToContinuousCoords(i);
+    float cell_height = current_height_map.getDataAtIdx(i);
     TransportNode node;
 
     // Positive height becomes a source; positive volume in +z
-    if (cell_height > (design_topo.getDataAtIdx(i) + threshold_z))
+    if (cell_height > (design_height_map.getDataAtIdx(i) + threshold_z))
     {
       node.x = pt.x;
       node.y = pt.y;
       node.height = cell_height;
-      
+
       vol_source += node.height;
       source_nodes.push_back(node);
     }
     // Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
-    else if (cell_height < (design_topo.getDataAtIdx(i) - threshold_z))
+    else if (cell_height < (design_height_map.getDataAtIdx(i) - threshold_z))
     {
       node.x = pt.x;
       node.y = pt.y;
@@ -617,7 +585,7 @@ float TransportPlanner::solveEMDrealMap()
     {
       // Calculate distance between points
       cg_msgs::msg::Point2D source_pt = create_point2d(source_nodes[i].x, source_nodes[i].y);
-      cg_msgs::msg::Point2D sink_pt = create_point2d(sink_nodes[i].x, sink_nodes[i].y);
+      cg_msgs::msg::Point2D sink_pt = create_point2d(sink_nodes[j].x, sink_nodes[j].y);
       float distance = euclidean_distance(source_pt, sink_pt);
       distance_nodes.push_back(distance);
     }
