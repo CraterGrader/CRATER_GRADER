@@ -22,7 +22,7 @@ namespace planning {
         const cg_msgs::msg::Pose2D &agent_pose,
         const cg_msgs::msg::Pose2D &goal_pose,
         const cg::mapping::Map<float> &map,
-        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) {
+        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const {
         
         // TODO: Maybe stopping the planner if exceeding # iterations of lattice planning?
         
@@ -165,13 +165,13 @@ namespace planning {
 
     bool KinematicPlanner::samePoseWithinThresh(
         const cg_msgs::msg::Pose2D &trajectory_end_pose,
-        const cg_msgs::msg::Pose2D &goal_pose) {
+        const cg_msgs::msg::Pose2D &goal_pose) const {
             return (
-                cg::planning::euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) < pose_position_equality_threshold &&
-                abs(trajectory_end_pose.yaw - goal_pose.yaw) < pose_yaw_equality_threshold);
+                euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_position_equality_threshold &&
+                abs(trajectory_end_pose.yaw - goal_pose.yaw) <= pose_yaw_equality_threshold);
     }
 
-    std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() {
+    std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() const {
 
         assert(turn_radii_min > 0 && turn_radii_max > 0);
 
@@ -202,60 +202,59 @@ namespace planning {
         }
 
     std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
-        float turn_radius, bool forwards, bool right) {
+        float turn_radius, bool forwards, bool right) const {
 
         // Since left/right is handled with flags, turn radius should always be positive
-        assert(turn_radius > 0);
+        assert(turn_radius >= 0);
 
         std::vector<cg_msgs::msg::Pose2D> lattice_arm;
         int num_segments = ceil(max_trajectory_length / trajectory_resolution);
         float x,y,yaw;
         x = y = yaw = 0.0;
 
-        if (!forwards) max_trajectory_length *= -1;
+        float max_arm_traj_length = max_trajectory_length;
+        if (!forwards) max_arm_traj_length *= -1;
 
         // Straight (forwards and backwards)
         if (turn_radius < 1e-2) {
-            float incremental_movement = max_trajectory_length / num_segments;
-            if (!forwards) incremental_movement *= -1;
-
-            for (int n = 0; n <= num_segments; ++n) {
+            float incremental_movement = max_arm_traj_length / num_segments;
+            for (int n = 0; n < num_segments; ++n) {
                 x += incremental_movement;
-                cg_msgs::msg::Pose2D pose = cg::planning::create_pose2d(x, y, yaw);
+                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
             }
         }
         // Right (forwards and backwards)
         else if (right) {
             float start_rad = M_PI/2;
-            float stop_rad = (-max_trajectory_length / turn_radius) + start_rad;
+            float stop_rad = (-max_arm_traj_length / turn_radius) + start_rad;
             float rad_increment = (stop_rad - start_rad) / num_segments;
-
             float cur_rad = start_rad;
-            for (int n = 0; n <= num_segments; ++n) {
+
+            for (int n = 0; n < num_segments; ++n) {
+                cur_rad += rad_increment;
                 x = turn_radius * cos(cur_rad);
                 y = turn_radius * sin(cur_rad) - turn_radius;
                 yaw = M_PI + atan2(-cos(cur_rad), sin(cur_rad));
 
-                cg_msgs::msg::Pose2D pose= cg::planning::create_pose2d(x, y, yaw);
+                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
-                cur_rad += rad_increment;
             }
         // Left (forwards & backwards)
         } else {
             float start_rad = -M_PI/2;
-            float stop_rad = (max_trajectory_length / turn_radius) + start_rad;
+            float stop_rad = (max_arm_traj_length / turn_radius) + start_rad;
             float rad_increment = (stop_rad - start_rad) / num_segments;
-
             float cur_rad = start_rad;
-            for (int n = 0; n <= num_segments; ++n) {
+
+            for (int n = 0; n < num_segments; ++n) {
+                cur_rad += rad_increment;
                 x = turn_radius * cos(cur_rad);
                 y = turn_radius * sin(cur_rad) + turn_radius;
                 yaw = atan2(-cos(cur_rad), sin(cur_rad));
 
-                cg_msgs::msg::Pose2D pose = cg::planning::create_pose2d(x, y, yaw);
+                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
-                cur_rad += rad_increment;
             }
         }
 
@@ -264,13 +263,13 @@ namespace planning {
 
     std::pair<cg_msgs::msg::Pose2D, int> KinematicPlanner::getClosestTrajectoryPoseToGoal(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-    const cg_msgs::msg::Pose2D &goal_pose) {
+    const cg_msgs::msg::Pose2D &goal_pose) const {
 
         float closest_distance = INFINITY;
         float dist;
         int closest_idx = -1;
         for (size_t i = 0; i < trajectory.size(); ++i) {
-            dist = cg::planning::euclidean_distance(trajectory[i].pt, goal_pose.pt);
+            dist = euclidean_distance(trajectory[i].pt, goal_pose.pt);
             if (dist < closest_distance) {
                 closest_distance = dist;
                 closest_idx = i;
@@ -281,7 +280,7 @@ namespace planning {
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::transformLatticeToPose(
         const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
-        const cg_msgs::msg::Pose2D &current_pose) {
+        const cg_msgs::msg::Pose2D &current_pose) const {
 
         std::vector<std::vector<cg_msgs::msg::Pose2D>> transformed_lattice;   
         for (std::vector<cg_msgs::msg::Pose2D> trajectory : base_lattice) {
@@ -300,7 +299,7 @@ namespace planning {
 
     bool KinematicPlanner::isValidTrajectory(
         const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-        const cg::mapping::Map<float> &map) {
+        const cg::mapping::Map<float> &map) const {
 
         // Check if all points of vehicle are within bounds
         for (cg_msgs::msg::Pose2D pose : trajectory) {
@@ -314,7 +313,7 @@ namespace planning {
 
     float KinematicPlanner::calculateTopographyCost(
         const std::vector<cg_msgs::msg::Pose2D> &trajectory,
-        const cg::mapping::Map<float> &map) {
+        const cg::mapping::Map<float> &map) const {
 
             float topography_cost = 0;
             for (cg_msgs::msg::Pose2D pose : trajectory) {
@@ -331,7 +330,7 @@ namespace planning {
 
     std::vector<float> KinematicPlanner::trajectories_heuristic(
         const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
-        const cg_msgs::msg::Pose2D &goal_pose) {
+        const cg_msgs::msg::Pose2D &goal_pose) const {
             std::vector<float> trajectories_heuristic;
             for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
                 trajectories_heuristic.push_back(euclidean_distance(trajectory.back().pt, goal_pose.pt));

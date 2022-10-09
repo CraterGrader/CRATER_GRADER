@@ -59,42 +59,42 @@ public:
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::Map<float> &map,
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice);
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const;
 
   // Truncates trajectory to closest pose to goal_pose, returns pose and index
   std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-    const cg_msgs::msg::Pose2D &goal_pose);
+    const cg_msgs::msg::Pose2D &goal_pose) const;
 
   // Checks if trajectory_end_pose is within distance threshold of goal_pose
   bool samePoseWithinThresh(
     const cg_msgs::msg::Pose2D &trajectory_end_pose,
-    const cg_msgs::msg::Pose2D &goal_pose);
+    const cg_msgs::msg::Pose2D &goal_pose) const;
 
   // Creates a std::vector of lattice trajectories 
   // based on a base lattice type and current pose
   std::vector<std::vector<cg_msgs::msg::Pose2D>> transformLatticeToPose(
     const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
-    const cg_msgs::msg::Pose2D &current_pose);
+    const cg_msgs::msg::Pose2D &current_pose) const;
 
   // Checks if trajectory is valid (eg. within worksite)
   bool isValidTrajectory(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-    const cg::mapping::Map<float> &map);
+    const cg::mapping::Map<float> &map) const;
 
   // Calculates the total cost of the topography for trajectory
   float calculateTopographyCost(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory,
-    const cg::mapping::Map<float> &map);
+    const cg::mapping::Map<float> &map) const;
 
   // Calculate heuristic associated with trajectories
   std::vector<float> trajectories_heuristic(
     const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
-    const cg_msgs::msg::Pose2D &goal_pose);
+    const cg_msgs::msg::Pose2D &goal_pose) const;
 
   // Generate base lattice based on class parameters
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice();
-  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right);
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice() const;
+  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right) const;
 
 };
 
