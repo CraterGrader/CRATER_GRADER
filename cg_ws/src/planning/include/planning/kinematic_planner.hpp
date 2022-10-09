@@ -6,8 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <planning/common.hpp>
-#include <mapping/site_map.hpp>
-#include <mapping/map_util.hpp>
+#include <mapping/map.hpp>
 
 
 namespace cg {
@@ -53,13 +52,13 @@ public:
     std::vector<cg_msgs::msg::Pose2D> &path,
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
-    const cg::mapping::SiteMap &map);
+    const cg::mapping::Map<float> &map);
   
   // Performs a lattice astar search agent in map environment
   std::vector<cg_msgs::msg::Pose2D> latticeAStarSearch(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
-    const cg::mapping::SiteMap &map,
+    const cg::mapping::Map<float> &map,
     const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice);
 
   // Truncates trajectory to closest pose to goal_pose, returns pose and index
@@ -81,12 +80,12 @@ public:
   // Checks if trajectory is valid (eg. within worksite)
   bool isValidTrajectory(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-    const cg::mapping::SiteMap &map);
+    const cg::mapping::Map<float> &map);
 
   // Calculates the total cost of the topography for trajectory
   float calculateTopographyCost(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory,
-    const cg::mapping::SiteMap &map);
+    const cg::mapping::Map<float> &map);
 
   // Calculate heuristic associated with trajectories
   std::vector<float> trajectories_heuristic(

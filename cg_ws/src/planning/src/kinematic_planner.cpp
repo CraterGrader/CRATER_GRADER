@@ -7,7 +7,7 @@ namespace planning {
         std::vector<cg_msgs::msg::Pose2D> &path,
         const cg_msgs::msg::Pose2D &agent_pose,
         const cg_msgs::msg::Pose2D &goal_pose,
-        const cg::mapping::SiteMap &map) {
+        const cg::mapping::Map<float> &map) {
             // Instantiate lattice
             std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice();
 
@@ -21,7 +21,7 @@ namespace planning {
     std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
         const cg_msgs::msg::Pose2D &agent_pose,
         const cg_msgs::msg::Pose2D &goal_pose,
-        const cg::mapping::SiteMap &map,
+        const cg::mapping::Map<float> &map,
         const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) {
         
         // TODO: Maybe stopping the planner if exceeding # iterations of lattice planning?
@@ -300,22 +300,12 @@ namespace planning {
 
     bool KinematicPlanner::isValidTrajectory(
         const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-        const cg::mapping::SiteMap &map) {
-
-        // Access map data to find bounds
-        float width_limit = map.getWidth() * map.getResolution();
-        float height_limit = map.getHeight() * map.getResolution();
+        const cg::mapping::Map<float> &map) {
 
         // Check if all points of vehicle are within bounds
         for (cg_msgs::msg::Pose2D pose : trajectory) {
-            // Check bottom limit
-            if (pose.pt.x < 0 || pose.pt.y < 0) {
-                return false;
-            }
-            // Check upper limit
-            if (pose.pt.x > width_limit || pose.pt.y > height_limit) {
-                return false;
-            }
+            // Check if point is in limits of map
+            if (!map.validPoint(pose.pt)) return false;
         }
         return true;
         // TODO: Do we need footprint information to make this effective?
@@ -324,17 +314,13 @@ namespace planning {
 
     float KinematicPlanner::calculateTopographyCost(
         const std::vector<cg_msgs::msg::Pose2D> &trajectory,
-        const cg::mapping::SiteMap &map) {
+        const cg::mapping::Map<float> &map) {
 
             float topography_cost = 0;
             for (cg_msgs::msg::Pose2D pose : trajectory) {
 
-                size_t pose_idx = cg::mapping::continousCoordsToCellIndex(
-                    pose.pt.x,
-                    pose.pt.y,
-                    map.getWidth(),
-                    map.getResolution());
-                topography_cost += abs(map.getHeightMap()[pose_idx]);
+                size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
+                topography_cost += abs(map.getDataAtIdx(pose_idx));
             }
 
             // Weight topography cost
