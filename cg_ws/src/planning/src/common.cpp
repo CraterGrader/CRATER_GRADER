@@ -38,16 +38,20 @@ cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, con
         0, 0, 1, 0,
         0, 0, 0, 1;
 
-  Eigen::Vector2d source_vec(source_pt.x, source_pt.y, 0, 1);  
+  Eigen::Vector2d source_vec;
+  source_vec << source_pt.x, source_pt.y, 0, 1;
+    
   Eigen::Vector2d transformed_vec = pose_mat * source_vec;
 
   return create_point2d(transformed_vec.coeff(0), transformed_vec.coeff(1));
 }
 
-cg_msgs::msg::Pose2D transformPose(const cg_msgs::msg::Pose2D &source_pose, const cg_msgs::msg::Pose2D &transforming_pose) {
+cg_msgs::msg::Pose2D transformPose(
+  const cg_msgs::msg::Pose2D &source_pose, 
+  const cg_msgs::msg::Pose2D &transforming_pose) {
 
   cg_msgs::msg::Point2D transformed_point = transformPoint(source_pose.pt, transforming_pose);
-  return create_pose2d(transformed_vec.coeff(0), transformed_vec.coeff(1), source_pose.yaw + transforming_pose.yaw);
+  return create_pose2d(transformed_point.x, transformed_point.y, source_pose.yaw + transforming_pose.yaw);
 }
 
 } // planning namespace
