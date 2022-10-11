@@ -10,10 +10,18 @@ class FSM {
 
 public:
   enum class State {
+    READY,
     UPDATE_MAP,
     SITE_WORK_DONE,
     MAP_EXPLORED,
-    REPLAN_TRANSPORT
+    REPLAN_TRANSPORT,
+    PLAN_TRANSPORT,
+    GET_TRANSPORT_GOALS,
+    PLAN_EXPLORATION,
+    GET_EXPLORATION_GOALS,
+    GOALS_REMAINING,
+    GET_WORKSYSTEM_TRAJECTORY,
+    STOPPED
   };
 
   enum class Signal {
@@ -21,7 +29,10 @@ public:
     STOP,
     YES,
     NO,
-    MAP_UPDATED
+    MAP_UPDATED,
+    TRANSPORT_PLANNED,
+    EXPLORATION_PLANNED,
+    DRIVE
   };
 
   // Constructors()
@@ -50,7 +61,7 @@ private:
    * - Used to initialize the static state and signal
    * - May need to update the init_default_test if these defaults change
    */
-  static State defaultStartState() { return State::UPDATE_MAP; }
+  static State defaultStartState() { return State::READY; }
   static Signal defaultStartSignal() { return Signal::START; }
   /******************************/
 

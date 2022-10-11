@@ -101,12 +101,30 @@ if(BUILD_TESTING)
     test/fsm_test.cpp
     include/planning/fsm/fsm.hpp
     src/fsm/fsm.cpp
+    include/planning/fsm/ready.hpp
+    src/fsm/ready.cpp
     include/planning/fsm/update_map.hpp
     src/fsm/update_map.cpp
     include/planning/fsm/site_work_done.hpp
     src/fsm/site_work_done.cpp
     include/planning/fsm/map_explored.hpp
     src/fsm/map_explored.cpp
+    include/planning/fsm/replan_transport.hpp
+    src/fsm/replan_transport.cpp
+    include/planning/fsm/plan_transport.hpp
+    src/fsm/plan_transport.cpp
+    include/planning/fsm/get_transport_goals.hpp
+    src/fsm/get_transport_goals.cpp
+    include/planning/fsm/plan_exploration.hpp
+    src/fsm/plan_exploration.cpp
+    include/planning/fsm/get_exploration_goals.hpp
+    src/fsm/get_exploration_goals.cpp
+    include/planning/fsm/goals_remaining.hpp
+    src/fsm/goals_remaining.cpp
+    include/planning/fsm/get_worksystem_trajectory.hpp
+    src/fsm/get_worksystem_trajectory.cpp
+    include/planning/fsm/stopped.hpp
+    src/fsm/stopped.cpp
   )
 endif()
 
