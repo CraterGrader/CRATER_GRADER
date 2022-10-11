@@ -2,8 +2,8 @@
 colors
 @enduml
 
-@startuml PlanningFSM_20221010_REV00
-mainframe PlanningFSM_20221010_REV00
+@startuml PlanningFSM_20221011_REV01
+mainframe PlanningFSM_20221011_REV01
 ' Formatting
 ' ------------------------------------
 hide empty description
@@ -60,9 +60,9 @@ state FallBack #Gainsboro {
     end note
 
   ' Fallback state interactions
-  CallForHelp --> OperatorAvailable
+  CallForHelp --> OperatorAvailable : call_help
   OperatorAvailable --> OperatorIntervention : yes
-    OperatorIntervention --> ContinueMission
+    OperatorIntervention --> ContinueMission : check_mission
       ContinueMission --> UpdateMap : yes
       ContinueMission --> EndMission : no
   OperatorAvailable --> EndMission : no
@@ -81,7 +81,7 @@ state DriveToGoals #Magenta {
 
   ' Driving state interactions
   GoalsRemaining --> GetWorksystemTrajectory : yes
-    GetWorksystemTrajectory --> FollowTrajectory
+    GetWorksystemTrajectory --> FollowTrajectory : follow_trajectory
       FollowTrajectory --> GoalsRemaining : goal_reached
       FollowTrajectory --> EscapeManeuver : stuck
         EscapeManeuver --> FollowTrajectory : not_stuck
@@ -90,19 +90,19 @@ state DriveToGoals #Magenta {
 } 
 
 ' Global state interactions
-[*] --> UpdateMap
-  UpdateMap --> SiteWorkDone
+[*] --> UpdateMap : start
+  UpdateMap --> SiteWorkDone : map_updated
   SiteWorkDone --> EndMission : yes
   SiteWorkDone --> MapExplored : no
     MapExplored --> ReplanTransport : yes
       ReplanTransport --> PlanTransport : yes
-        PlanTransport --> GetTransportGoals
+        PlanTransport --> GetTransportGoals : transport_planned
       ReplanTransport --> GetTransportGoals : no
-        GetTransportGoals --> GoalsRemaining
+        GetTransportGoals --> GoalsRemaining : drive
     MapExplored --> PlanExploration : no
-      PlanExploration --> GetExplorationGoals
-      GetExplorationGoals --> GoalsRemaining
-EndMission --> [*]
+      PlanExploration --> GetExplorationGoals : exploration_planned
+      GetExplorationGoals --> GoalsRemaining : drive
+EndMission --> [*] : stop
 
 @enduml
 

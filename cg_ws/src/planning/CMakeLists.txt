@@ -96,6 +96,18 @@ if(BUILD_TESTING)
     cg_msgs
     mapping
   )
+
+  ament_add_gtest(fsm_test
+    test/fsm_test.cpp
+    include/planning/fsm/fsm.hpp
+    src/fsm/fsm.cpp
+    include/planning/fsm/update_map.hpp
+    src/fsm/update_map.cpp
+    include/planning/fsm/site_work_done.hpp
+    src/fsm/site_work_done.cpp
+    include/planning/fsm/map_explored.hpp
+    src/fsm/map_explored.cpp
+  )
 endif()
 
 # Install targets

@@ -1,0 +1,62 @@
+#ifndef PLANNING__FSM_HPP
+#define PLANNING__FSM_HPP
+
+#include <string> // for converting enums to string
+
+namespace cg {
+namespace planning {
+
+class FSM {
+
+public:
+  enum class State {
+    UPDATE_MAP,
+    SITE_WORK_DONE,
+    MAP_EXPLORED,
+    REPLAN_TRANSPORT
+  };
+
+  enum class Signal {
+    START,
+    STOP,
+    YES,
+    NO,
+    MAP_UPDATED
+  };
+
+  // Constructors()
+  FSM(){};
+  FSM(State start_state, Signal start_signal);
+  
+  // Destructor(), for resetting static variables
+  ~FSM();
+
+  // Getters()
+  State getCurrState() const { return curr_state_; }
+  Signal getPreSignal() const { return pre_signal_; }
+
+  // Helpers
+  std::string currStateToString();
+  std::string preSignalToString();
+
+protected: // "Shared private" variables
+  static State curr_state_; // Current state that should run
+  static Signal pre_signal_; // Precursing signal that led to the current state
+
+private:
+  /******************************/
+  /**
+   * These default...() methods should only be used by the FSM class!
+   * - Used to initialize the static state and signal
+   * - May need to update the init_default_test if these defaults change
+   */
+  static State defaultStartState() { return State::UPDATE_MAP; }
+  static Signal defaultStartSignal() { return Signal::START; }
+  /******************************/
+
+}; // class FSM
+
+} // namespace planning
+} // namespace cg
+
+#endif // PLANNING__FSM_HPP
