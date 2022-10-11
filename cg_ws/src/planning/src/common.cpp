@@ -32,16 +32,14 @@ float deg2rad(float deg) {
 cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, const cg_msgs::msg::Pose2D &pose) {
 
   // Generate Transformation matrix from pose, based on yaw z-rotation
-  Eigen::Matrix2d pose_mat;
-  pose_mat << cos(pose.yaw), -sin(pose.yaw), 0, pose.pt.x,
-        sin(pose.yaw), cos(pose.yaw), 0, pose.pt.y,
-        0, 0, 1, 0,
-        0, 0, 0, 1;
-
-  Eigen::Vector2d source_vec;
-  source_vec << source_pt.x, source_pt.y, 0, 1;
+  Eigen::Matrix3d pose_mat;
+  pose_mat << cos(pose.yaw), -sin(pose.yaw), pose.pt.x,
+        sin(pose.yaw), cos(pose.yaw), pose.pt.y,
+        0, 0, 1;
+  Eigen::Vector3d source_vec;
+  source_vec << source_pt.x, source_pt.y, 1;
     
-  Eigen::Vector2d transformed_vec = pose_mat * source_vec;
+  Eigen::Vector3d transformed_vec = pose_mat * source_vec;
 
   return create_point2d(transformed_vec.coeff(0), transformed_vec.coeff(1));
 }

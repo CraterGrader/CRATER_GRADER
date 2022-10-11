@@ -46,7 +46,7 @@ namespace planning {
         // Initialize with first trajectory and node
         std::vector<cg_msgs::msg::Pose2D> start_trajectory = {agent_pose};
         AStarNode start_node = {0.0, 0, 0, agent_pose, start_trajectory};
-        pq_nodes.push_back(std::make_pair(0.0, start_node));
+        pq_nodes.push(std::make_pair(0.0, start_node));
 
         int num_iter = 0;
         while (!pq_nodes.empty()) {
@@ -109,7 +109,7 @@ namespace planning {
             }
 
             // Calculate trajectory heuristic h(s') for valid trajectories
-            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectories_heuristic(valid_trajectories, goal_pose);
+            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose);
                 
             // Get trajectory costs c(s,s') for valid trajectories
             std::vector<float> trajectories_costs;
@@ -149,7 +149,7 @@ namespace planning {
 
                 // Add new poses to pqueue using f(s') = g(s') + h(s')
                 float f_cost = succ_g_cost + trajectories_heuristic[traj_idx];
-                pq_nodes.push_back(std::make_pair(f_cost, succ_node));
+                pq_nodes.push(std::make_pair(f_cost, succ_node));
             }
         }
 
@@ -328,7 +328,7 @@ namespace planning {
             return weighted_topography_cost;
         }
 
-    std::vector<float> KinematicPlanner::trajectories_heuristic(
+    std::vector<float> KinematicPlanner::trajectoriesHeuristic(
         const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
         const cg_msgs::msg::Pose2D &goal_pose) const {
             std::vector<float> trajectories_heuristic;

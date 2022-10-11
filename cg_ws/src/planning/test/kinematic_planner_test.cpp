@@ -10,6 +10,28 @@ TEST(KinematicPlannerTest, helloworld)
   EXPECT_NEAR(expected, actual, absolute_range);
 }
 
+// Test generatePath()
+TEST(KinematicPlannerTest, Test_generatePath) {
+
+  // cg::planning::KinematicPlanner kinematic_planner;
+  // std::vector<cg_msgs::msg::Pose2D> path;
+  // cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
+  // cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(6, 5, 0)};
+
+  // std::vector<float> cells(10000, 1);
+  // std::cout << "size" << cells.size() << std::endl;
+  // cg::mapping::Map<float> map{static_cast<size_t>(100), 
+  //                     static_cast<size_t>(100), 
+  //                     static_cast<float>(0.1),
+  //                     cells};
+  
+  // kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
+
+  // EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0/kinematic_planner.trajectory_resolution) + 1);
+  // EXPECT_NEAR(path.back().pt.x, 6, kinematic_planner.pose_position_equality_threshold);
+  // EXPECT_NEAR(path.back().pt.y, 5, kinematic_planner.pose_position_equality_threshold);
+
+}
 
 // Test getClosestTrajectoryPoseToGoal()
 TEST(KinematicPlannerTest, Test_getClosestTrajectoryPoseToGoal)
@@ -17,14 +39,14 @@ TEST(KinematicPlannerTest, Test_getClosestTrajectoryPoseToGoal)
 
   cg::planning::KinematicPlanner kinematic_planner;
 
-  cg_msgs::msg::Pose2D expected_closest{cg::planning::create_pose2d(0,1,0)};
+  cg_msgs::msg::Pose2D expected_closest{cg::planning::create_pose2d(0, 1, 0)};
 
   std::vector<cg_msgs::msg::Pose2D> trajectory{
-    cg::planning::create_pose2d(0,0,0),
+    cg::planning::create_pose2d(0, 0, 0),
     expected_closest,
-    cg::planning::create_pose2d(0,4,0)};
+    cg::planning::create_pose2d(0, 4, 0)};
 
-  cg_msgs::msg::Pose2D goalPose{cg::planning::create_pose2d(0,2,0)};
+  cg_msgs::msg::Pose2D goalPose{cg::planning::create_pose2d(0, 2, 0)};
 
   std::pair<cg_msgs::msg::Pose2D, int> closest_traj;
   closest_traj = kinematic_planner.getClosestTrajectoryPoseToGoal(
@@ -46,11 +68,11 @@ TEST(KinematicPlannerTest, Test_samePoseWithinThresh)
   kinematic_planner.pose_position_equality_threshold = 0.01;
   kinematic_planner.pose_yaw_equality_threshold = 0.05;
 
-  cg_msgs::msg::Pose2D pose1{cg::planning::create_pose2d(0,1,0)};
-  cg_msgs::msg::Pose2D pose2{cg::planning::create_pose2d(0,1.02,0)};
-  cg_msgs::msg::Pose2D pose3{cg::planning::create_pose2d(0,1.005,0)};
-  cg_msgs::msg::Pose2D pose4{cg::planning::create_pose2d(0,1,0.02)};
-  cg_msgs::msg::Pose2D pose5{cg::planning::create_pose2d(0,1,0.06)};
+  cg_msgs::msg::Pose2D pose1{cg::planning::create_pose2d(0, 1, 0)};
+  cg_msgs::msg::Pose2D pose2{cg::planning::create_pose2d(0, 1.02, 0)};
+  cg_msgs::msg::Pose2D pose3{cg::planning::create_pose2d(0, 1.005, 0)};
+  cg_msgs::msg::Pose2D pose4{cg::planning::create_pose2d(0, 1, 0.02)};
+  cg_msgs::msg::Pose2D pose5{cg::planning::create_pose2d(0, 1, 0.06)};
 
   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose2), false);
   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose3), true);
@@ -135,10 +157,137 @@ TEST(KinematicPlannerTest, Test_generateBaseLattice)
 
 }
 
+// Test transformLatticeToPose
+TEST(KinematicPlannerTest, Test_transformLatticeToPose) {
+
+  cg::planning::KinematicPlanner kinematic_planner;
+  cg_msgs::msg::Pose2D current_pose{cg::planning::create_pose2d(3, 3, M_PI/4)};
+  float absolute_range = 1e-6f;
+  
+  std::vector<cg_msgs::msg::Pose2D> lattice_arm{
+    cg::planning::create_pose2d(0, 0, 0),
+    cg::planning::create_pose2d(0, 1, 0),
+    cg::planning::create_pose2d(0, 2, M_PI/4)};
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice{lattice_arm};
+
+  auto transformed_lattice = kinematic_planner.transformLatticeToPose(lattice, current_pose);
+
+  EXPECT_EQ(static_cast<int>(transformed_lattice.size()), 1);
+  EXPECT_EQ(static_cast<int>(transformed_lattice[0].size()), 3);
+
+  // First point
+  EXPECT_NEAR(transformed_lattice[0][0].pt.x, 3, absolute_range);
+  EXPECT_NEAR(transformed_lattice[0][0].pt.y, 3, absolute_range);
+  EXPECT_NEAR(transformed_lattice[0][0].yaw, M_PI/4, absolute_range);
+
+  // Last point
+  EXPECT_NEAR(transformed_lattice[0][2].pt.x, 3 - 2*sin(M_PI/4), absolute_range);
+  EXPECT_NEAR(transformed_lattice[0][2].pt.y, 3 + 2*cos(M_PI/4), absolute_range);
+  EXPECT_NEAR(transformed_lattice[0][2].yaw, M_PI/2, absolute_range);
+}
+
 // isValidTrajectory() need map input
+TEST(KinematicPlannerTest, Test_isValidTrajectory) {
+
+  cg::planning::KinematicPlanner kinematic_planner;
+  cg::mapping::Map<float> map{static_cast<size_t>(2), 
+                      static_cast<size_t>(2), 
+                      static_cast<float>(1)};
+  std::vector<cg_msgs::msg::Pose2D> trajectory;
+
+  trajectory.push_back(cg::planning::create_pose2d(1, 1, 0));
+  EXPECT_TRUE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.push_back(cg::planning::create_pose2d(1, 1, M_PI/2));
+  EXPECT_TRUE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.push_back(cg::planning::create_pose2d(0, 0, 0));
+  EXPECT_TRUE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.push_back(cg::planning::create_pose2d(0, 0, M_PI/2));
+  EXPECT_TRUE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.push_back(cg::planning::create_pose2d(2, 2, 0));
+  EXPECT_FALSE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.pop_back();
+  EXPECT_TRUE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.push_back(cg::planning::create_pose2d(0, -0.01, 0));
+  EXPECT_FALSE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.pop_back();
+  trajectory.push_back(cg::planning::create_pose2d(-0.01, 0, 0));
+  EXPECT_FALSE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.pop_back();
+  trajectory.push_back(cg::planning::create_pose2d(1, 2, 0));
+  EXPECT_FALSE(kinematic_planner.isValidTrajectory(trajectory, map));
+
+  trajectory.pop_back();
+  trajectory.push_back(cg::planning::create_pose2d(2, 1, 0));
+  EXPECT_FALSE(kinematic_planner.isValidTrajectory(trajectory, map));
+}
 
 // Test calculateTopographyCost
+TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
 
-// Test trajectories_heuristic
+  cg::planning::KinematicPlanner kinematic_planner;
+  float absolute_range = 1e-6f;
+  std::vector<float> cells{1, 2, 3, 4};
+  cg::mapping::Map<float> map{static_cast<size_t>(2), 
+                      static_cast<size_t>(2), 
+                      static_cast<float>(1),
+                      cells};
+  std::vector<cg_msgs::msg::Pose2D> trajectory_1{
+    cg::planning::create_pose2d(0, 0, 0)};
+  
+  auto cost_1 = kinematic_planner.topography_weight * kinematic_planner.calculateTopographyCost(trajectory_1, map);
+  EXPECT_NEAR(cost_1, kinematic_planner.topography_weight * 1, absolute_range);
 
-// Test transformLatticeToPose
+  std::vector<cg_msgs::msg::Pose2D> trajectory_2{
+    cg::planning::create_pose2d(0.5, 0.5, 0),
+    cg::planning::create_pose2d(1.5, 0.5, 0),
+    cg::planning::create_pose2d(0.5, 1.5, 0),
+    cg::planning::create_pose2d(1.5, 1.5, 0)};
+
+  auto cost_2 = kinematic_planner.topography_weight * kinematic_planner.calculateTopographyCost(trajectory_2, map);
+  EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 10, absolute_range);
+
+  // std::vector<cg_msgs::msg::Pose2D> trajectory_3{
+  //   cg::planning::create_pose2d(0, -0.5, 0)};
+
+  // auto cost_3 = kinematic_planner.topography_weight * kinematic_planner.calculateTopographyCost(trajectory_3, map);
+  // EXPECT_GT(cost_3, 100);
+
+}
+
+// Test trajectoriesHeuristic
+TEST(KinematicPlannerTest, Test_trajectoriesHeuristic) {
+
+  cg::planning::KinematicPlanner kinematic_planner;
+  float absolute_range = 1e-6f;
+  cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(1, 1, 0)};
+
+  std::vector<cg_msgs::msg::Pose2D> trajectory_1{
+    cg::planning::create_pose2d(0, 0, 0)};
+  std::vector<cg_msgs::msg::Pose2D> trajectory_2{
+    cg::planning::create_pose2d(-1, -1, 0),
+    cg::planning::create_pose2d(0, 0, 0)};
+  std::vector<cg_msgs::msg::Pose2D> trajectory_3{
+    cg::planning::create_pose2d(0, 0, 0),
+    cg::planning::create_pose2d(1, 0, 0),
+    cg::planning::create_pose2d(2, 0, 0),
+    cg::planning::create_pose2d(3, 0, 0)};
+
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> trajectories{
+    trajectory_1, trajectory_2, trajectory_3};
+
+  auto trajectory_heuristic = kinematic_planner.trajectoriesHeuristic(trajectories, goal_pose);
+  EXPECT_NEAR(trajectory_heuristic[0], trajectory_heuristic[1], absolute_range);
+  EXPECT_NEAR(trajectory_heuristic[1], sqrt(2), absolute_range);
+  EXPECT_NEAR(trajectory_heuristic[2], sqrt(5), absolute_range);
+
+}
+
+//

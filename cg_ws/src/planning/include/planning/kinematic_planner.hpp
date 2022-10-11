@@ -89,7 +89,7 @@ public:
     const cg::mapping::Map<float> &map) const;
 
   // Calculate heuristic associated with trajectories
-  std::vector<float> trajectories_heuristic(
+  std::vector<float> trajectoriesHeuristic(
     const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
     const cg_msgs::msg::Pose2D &goal_pose) const;
 
