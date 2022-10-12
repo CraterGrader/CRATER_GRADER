@@ -49,6 +49,7 @@ private:
   // Attributes
   std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (i.e. the non-zero transports)
   std::vector<bool> unvisited_assignments_; // each index corresponds to a TransportAssignment in transport_assignments. true = unvisited, false = visited
+
 };
 
 } // namespace planning
