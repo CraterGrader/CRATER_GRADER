@@ -22,9 +22,38 @@ size_t TransportPlanner::ij_to_index(size_t i, size_t j, size_t width) const {
  * @param map The current map
  * @return cg_msgs::msg::Pose2D The pose to navigate to 
  */
-cg_msgs::msg::Pose2D TransportPlanner::getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map){
-  (void)map; // TODO: actually use this
-  return agent_pose; // TODO: return the actual goal pose
+std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map){
+  (void)map; // map remains unused, legacy of interface 
+  // define a minimum distance starting with the max value of float
+  float min_dist = std::numeric_limits<float>::max();
+  // index of minimium distance of transport_assignmnets
+  size_t arg_min;
+  // iterate through all transport assignemtns
+  for (size_t i = 0; i < transport_assignments_.size(); ++i){
+    // only preform distance checks for unvisted assignments
+    if (unvisited_assignments_.at(i)){
+      // convert transport node to a 2D point for comparison 
+      cg_msgs::msg::Point2D src_point = cg::planning::create_point2d(transport_assignments_.at(i).source_node.x, transport_assignments_.at(i).source_node.y);
+      // calculate distance between pose and transport assignment
+      float dist = cg::planning::euclidean_distance(agent_pose.pt, src_point);
+      // check if dist is new min distance
+      if (dist < min_dist){
+        min_dist = dist;
+        arg_min = i; 
+      } 
+    }
+  }
+  // update unvisited_assignments with false for arg_min
+  unvisited_assignments_.at(arg_min) = false;
+  // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
+  double yaw = static_cast<double>(atan2((transport_assignments_.at(arg_min).sink_node.y-transport_assignments_.at(arg_min).source_node.y),(transport_assignments_.at(arg_min).sink_node.x-transport_assignments_.at(arg_min).source_node.x)));
+  // convert src, sink nodes to poses
+  cg_msgs::msg::Pose2D source_pose_1 = cg::planning::create_pose2d(transport_assignments_.at(arg_min).source_node.x, transport_assignments_.at(arg_min).source_node.y, yaw);
+  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).sink_node.x, transport_assignments_.at(arg_min).sink_node.y, yaw);
+  // TODO: experiment with changing this pose to visualize movement done during push
+  cg_msgs::msg::Pose2D source_pose_2 = source_pose_1;
+  std::vector<cg_msgs::msg::Pose2D> goalPoses{source_pose_1,sink_pose,source_pose_2};
+  return goalPoses;
 }
 
 /**
@@ -127,6 +156,7 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
   size_t num_cells_policy = n_policy * m_policy;
 
   // Create row-major vector to represent the NxM transport matrix
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   std::vector<MPVariable *> transport_plan;
   std::vector<std::string> varNames;
   for (size_t t = 0; t < num_cells_policy; t++)
@@ -236,6 +266,11 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
       }
     }
   }
+
+  // update unvisited assignments, set all to true
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  unvisited_assignments_.clear(); // clear all previous unvisited_assignments 
+  unvisited_assignments_.resize(new_transport_assignments.size(), true); // update to correct size of transport plan, setting all true because they are unvisited
 
   // Display log info
   if (verbose) {

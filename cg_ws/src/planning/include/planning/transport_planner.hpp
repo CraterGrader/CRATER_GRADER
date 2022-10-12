@@ -6,6 +6,7 @@
 #include <mapping/map.hpp>
 #include "ortools/linear_solver/linear_solver.h"
 #include <cmath> // for math operations, sqrt & floor 
+#include <limits> // used for distance
 
 namespace cg {
 namespace planning {
@@ -31,7 +32,7 @@ public:
 
   // Computations()
   float planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z);
-  cg_msgs::msg::Pose2D getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
+  std::vector<cg_msgs::msg::Pose2D> getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
 
   float solveToyProblem(); // For implementation verification purposes only
 
@@ -47,6 +48,8 @@ public:
 private: 
   // Attributes
   std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (i.e. the non-zero transports)
+  std::vector<bool> unvisited_assignments_; // each index corresponds to a TransportAssignment in transport_assignments. true = unvisited, false = visited
+
 };
 
 } // namespace planning

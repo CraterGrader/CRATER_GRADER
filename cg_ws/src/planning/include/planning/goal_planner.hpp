@@ -10,9 +10,8 @@ namespace planning {
 class GoalPlanner {
 
 public:
-  virtual cg_msgs::msg::Pose2D getGoalPose(
+  virtual std::vector<cg_msgs::msg::Pose2D> getGoalPose(
     const cg_msgs::msg::Pose2D& agent_pose, const cg::mapping::Map<float>& map) = 0;
-
 };
 
 } // namespace planning
