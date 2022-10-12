@@ -30,8 +30,9 @@ namespace planning {
     this->get_parameter("resolution", map_resolution);
 
     // Update map parameters
-    height_map_.updateDimensions(map_height, map_width, map_resolution);
-    design_height_map_.updateDimensions(map_height, map_width, map_resolution, designTOPO_);
+    current_height_map_.updateDimensions(map_height, map_width, map_resolution);
+    design_height_map_.updateDimensions(map_height, map_width, map_resolution);
+    design_height_map_.setCellData(designTOPO_);
   }
 
 bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
@@ -51,7 +52,7 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
     auto response = result_future.get();
     // Only update height map if data is valid
     if (response->success) {
-      bool set_data = height_map_.setCellData(response->site_map.height_map);
+      bool set_data = current_height_map_.setCellData(response->site_map.height_map);
       return set_data;
     } 
     return false;
@@ -94,10 +95,17 @@ void BehaviorExecutive::timerCallback()
     replan_transport_.runState();
     break;
   case cg::planning::FSM::State::PLAN_TRANSPORT:
-    plan_transport_.runState();
+    plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, threshold_z_);
     break;
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
-    get_transport_goals_.runState();
+    current_agent_pose_ = cg::planning::create_pose2d(1.0, 1.0, 1.0);
+    num_poses_before_ = current_goal_poses_.size(); // DEBUG
+    get_transport_goals_.runState(current_goal_poses_, transport_planner_, current_agent_pose_, current_height_map_);
+    std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
+    std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    std::cout << "    Pose1 <x,y,yaw>: < " << current_goal_poses_[0].pt.x << ", " << current_goal_poses_[0].pt.y << ", " << current_goal_poses_[0].yaw << " >" << std::endl;
+    std::cout << "    Pose2 <x,y,yaw>: < " << current_goal_poses_[1].pt.x << ", " << current_goal_poses_[1].pt.y << ", " << current_goal_poses_[1].yaw << " >" << std::endl;
+    std::cout << "    Pose3 <x,y,yaw>: < " << current_goal_poses_[2].pt.x << ", " << current_goal_poses_[2].pt.y << ", " << current_goal_poses_[2].yaw << " >" << std::endl;
     break;
   case cg::planning::FSM::State::PLAN_EXPLORATION:
     plan_exploration_.runState();

@@ -33,6 +33,7 @@ ament_target_dependencies(autograder_node
 )
 add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/behavior_executive_node.cpp
+  # State machine
   src/fsm/fsm.cpp
   src/fsm/ready.cpp
   src/fsm/update_map.cpp
@@ -46,12 +47,16 @@ add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/fsm/goals_remaining.cpp
   src/fsm/get_worksystem_trajectory.cpp
   src/fsm/stopped.cpp
+  # Planner modules
+  src/transport_planner.cpp
+  src/common.cpp
 )
 ament_target_dependencies(behavior_executive_node
   rclcpp
   cg_msgs
   mapping
 )
+target_link_libraries(behavior_executive_node ortools::ortools)
 
 # if(BUILD_TESTING)
 #   find_package(ament_lint_auto REQUIRED)
@@ -115,6 +120,7 @@ if(BUILD_TESTING)
     test/fsm_test.cpp
     include/planning/fsm/fsm.hpp
     src/fsm/fsm.cpp
+    # States
     include/planning/fsm/ready.hpp
     src/fsm/ready.cpp
     include/planning/fsm/update_map.hpp
@@ -139,7 +145,16 @@ if(BUILD_TESTING)
     src/fsm/get_worksystem_trajectory.cpp
     include/planning/fsm/stopped.hpp
     src/fsm/stopped.cpp
+    # Planner modules
+    include/planning/transport_planner.hpp
+    src/transport_planner.cpp
+    src/common.cpp
   )
+  ament_target_dependencies(fsm_test
+    cg_msgs
+    mapping
+  )
+  target_link_libraries(fsm_test ortools::ortools)
 endif()
 
 # Install targets

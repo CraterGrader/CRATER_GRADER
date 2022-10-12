@@ -39,7 +39,7 @@ private:
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
   bool updateMapFromService(bool verbose);
 
-  long int timer_callback_ms_ = 1000;
+  long int timer_callback_ms_ = 2000;
   long int service_response_timeout_sec_ = 2;
 
   /* Message data */
@@ -47,9 +47,13 @@ private:
   /* Callbacks */
   void timerCallback(); // For looping publish
 
+  /* Important Objects */
+  cg::planning::TransportPlanner transport_planner_;
+
   /* Variables */
-  cg::mapping::Map<float> height_map_;
+  cg::mapping::Map<float> current_height_map_;
   bool map_updated_ = false;
+  size_t num_poses_before_; // DEBUG
 
   std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -61,6 +65,10 @@ private:
                                 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0, 0};
   cg::mapping::Map<float> design_height_map_;
+  float threshold_z_ = 0.03; // TODO: make this a config parameter
+
+  std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
+  cg_msgs::msg::Pose2D current_agent_pose_;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;
