@@ -14,6 +14,25 @@ TEST(MapTestConstructorTest, emptyInit) {
   EXPECT_EQ(getRes,resolution);
 }
 
+TEST(MapTestConstructorTest, default_init)
+{
+
+  size_t height = 2;
+  size_t width = 2;
+  float resolution = 1.0;
+
+  cg::mapping::Map<float> default_map;
+  default_map.updateDimensions(height, width, resolution);
+
+  // Check values
+  size_t get_height = default_map.getHeight();
+  size_t get_width = default_map.getWidth();
+  float get_resolution = default_map.getResolution();
+  EXPECT_EQ(get_height, height);
+  EXPECT_EQ(get_width, width);
+  EXPECT_EQ(get_resolution, resolution);
+}
+
 TEST(UtilitiesTest, TransformPointIndentity) {
 
   cg_msgs::msg::Point2D pt;

@@ -18,7 +18,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ActuatorState.idl"
   "msg/SiteMap.idl"
   "msg/Trajectory.idl"
-
+  "srv/SiteMap.srv"
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs
 )

@@ -31,6 +31,27 @@ ament_target_dependencies(autograder_node
   rclcpp
   cg_msgs
 )
+add_executable(behavior_executive_node src/behavior_executive_main.cpp
+  src/behavior_executive_node.cpp
+  src/fsm/fsm.cpp
+  src/fsm/ready.cpp
+  src/fsm/update_map.cpp
+  src/fsm/site_work_done.cpp
+  src/fsm/map_explored.cpp
+  src/fsm/replan_transport.cpp
+  src/fsm/plan_transport.cpp
+  src/fsm/get_transport_goals.cpp
+  src/fsm/plan_exploration.cpp
+  src/fsm/get_exploration_goals.cpp
+  src/fsm/goals_remaining.cpp
+  src/fsm/get_worksystem_trajectory.cpp
+  src/fsm/stopped.cpp
+)
+ament_target_dependencies(behavior_executive_node
+  rclcpp
+  cg_msgs
+  mapping
+)
 
 # if(BUILD_TESTING)
 #   find_package(ament_lint_auto REQUIRED)
@@ -89,10 +110,43 @@ if(BUILD_TESTING)
     cg_msgs
     mapping
   )
+
+  ament_add_gtest(fsm_test
+    test/fsm_test.cpp
+    include/planning/fsm/fsm.hpp
+    src/fsm/fsm.cpp
+    include/planning/fsm/ready.hpp
+    src/fsm/ready.cpp
+    include/planning/fsm/update_map.hpp
+    src/fsm/update_map.cpp
+    include/planning/fsm/site_work_done.hpp
+    src/fsm/site_work_done.cpp
+    include/planning/fsm/map_explored.hpp
+    src/fsm/map_explored.cpp
+    include/planning/fsm/replan_transport.hpp
+    src/fsm/replan_transport.cpp
+    include/planning/fsm/plan_transport.hpp
+    src/fsm/plan_transport.cpp
+    include/planning/fsm/get_transport_goals.hpp
+    src/fsm/get_transport_goals.cpp
+    include/planning/fsm/plan_exploration.hpp
+    src/fsm/plan_exploration.cpp
+    include/planning/fsm/get_exploration_goals.hpp
+    src/fsm/get_exploration_goals.cpp
+    include/planning/fsm/goals_remaining.hpp
+    src/fsm/goals_remaining.cpp
+    include/planning/fsm/get_worksystem_trajectory.hpp
+    src/fsm/get_worksystem_trajectory.cpp
+    include/planning/fsm/stopped.hpp
+    src/fsm/stopped.cpp
+  )
 endif()
 
 # Install targets
 install(TARGETS autograder_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS behavior_executive_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

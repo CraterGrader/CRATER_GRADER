@@ -18,6 +18,10 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   // Map Normalization callback 
   // SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(10000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
 
+  // Initialize services
+  site_map_server_ = this->create_service<cg_msgs::srv::SiteMap>(
+      "site_map_server",
+      std::bind(&SiteMapNode::sendSiteMap, this, std::placeholders::_1, std::placeholders::_2));
 
   // Load parameters
   this->declare_parameter<int>("height", 5);
@@ -108,6 +112,14 @@ void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr 
   siteMap_.binPts(incomingPts);
   // UPDATE CELLS 
   siteMap_.updateCellsBayes();
+}
+
+void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res)
+{
+  (void)req; // No request input for cg_msgs/srv/SiteMap.srv, but service needs both Request and Response args so just "touch" the request to hide unused parameter warning
+  cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
+  res->site_map = map_msg;
+  res->success = true;
 }
 
 // void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
