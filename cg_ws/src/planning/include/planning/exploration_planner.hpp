@@ -11,7 +11,7 @@ namespace planning {
 class ExplorationPlanner : public GoalPlanner {
 
 public:
-  cg_msgs::msg::Pose2D getGoalPose(
+  std::vector<cg_msgs::msg::Pose2D> getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
   void planExploration(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::SiteMap &map);
