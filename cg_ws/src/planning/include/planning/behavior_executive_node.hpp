@@ -49,6 +49,7 @@ private:
 
   /* Variables */
   cg::mapping::Map<float> height_map_;
+  bool map_updated_ = false;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;

@@ -63,12 +63,6 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
 
 void BehaviorExecutive::timerCallback()
 {
-  bool map_updated = updateMapFromService();
-  // Check that map was updated correctly
-  RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated ? "true" : "false");
-  // if (map_updated) {
-  //   // TODO: Call planner modules
-  // }
 
   // Run machine
   // std::cout << "~~~~~~~ Running machine..." << std::endl;
@@ -81,6 +75,12 @@ void BehaviorExecutive::timerCallback()
     ready_.runState();
     break;
   case cg::planning::FSM::State::UPDATE_MAP:
+    map_updated_ = updateMapFromService();
+    // Check that map was updated correctly
+    RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated_ ? "true" : "false");
+    // if (map_updated) {
+    //   // TODO: Call planner modules
+    // }
     update_map_.runState();
     break;
   case cg::planning::FSM::State::SITE_WORK_DONE:
