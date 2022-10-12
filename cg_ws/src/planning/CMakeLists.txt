@@ -32,6 +32,19 @@ ament_target_dependencies(autograder_node
 )
 add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/behavior_executive_node.cpp
+  src/fsm/fsm.cpp
+  src/fsm/ready.cpp
+  src/fsm/update_map.cpp
+  src/fsm/site_work_done.cpp
+  src/fsm/map_explored.cpp
+  src/fsm/replan_transport.cpp
+  src/fsm/plan_transport.cpp
+  src/fsm/get_transport_goals.cpp
+  src/fsm/plan_exploration.cpp
+  src/fsm/get_exploration_goals.cpp
+  src/fsm/goals_remaining.cpp
+  src/fsm/get_worksystem_trajectory.cpp
+  src/fsm/stopped.cpp
 )
 ament_target_dependencies(behavior_executive_node
   rclcpp

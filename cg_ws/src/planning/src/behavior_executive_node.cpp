@@ -66,9 +66,58 @@ void BehaviorExecutive::timerCallback()
   bool map_updated = updateMapFromService();
   // Check that map was updated correctly
   RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated ? "true" : "false");
-  if (map_updated) {
-    // TODO: Call planner modules
+  // if (map_updated) {
+  //   // TODO: Call planner modules
+  // }
+
+  // Run machine
+  // std::cout << "~~~~~~~ Running machine..." << std::endl;
+  std::cout << "~~~~~~~ Machine iteration" << std::endl;
+  std::cout << "    Pre-Signal: " << fsm_.preSignalToString() << std::endl;
+  std::cout << "         State: " << fsm_.currStateToString() << std::endl;
+  switch (fsm_.getCurrState())
+  {
+  case cg::planning::FSM::State::READY:
+    ready_.runState();
+    break;
+  case cg::planning::FSM::State::UPDATE_MAP:
+    update_map_.runState();
+    break;
+  case cg::planning::FSM::State::SITE_WORK_DONE:
+    site_work_done_.runState();
+    break;
+  case cg::planning::FSM::State::MAP_EXPLORED:
+    map_explored_.runState();
+    break;
+  case cg::planning::FSM::State::REPLAN_TRANSPORT:
+    replan_transport_.runState();
+    break;
+  case cg::planning::FSM::State::PLAN_TRANSPORT:
+    plan_transport_.runState();
+    break;
+  case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
+    get_transport_goals_.runState();
+    break;
+  case cg::planning::FSM::State::PLAN_EXPLORATION:
+    plan_exploration_.runState();
+    break;
+  case cg::planning::FSM::State::GET_EXPLORATION_GOALS:
+    get_exploration_goals_.runState();
+    break;
+  case cg::planning::FSM::State::GOALS_REMAINING:
+    goals_remaining_.runState();
+    break;
+  case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
+    get_worksystem_trajectory_.runState();
+    break;
+  case cg::planning::FSM::State::STOPPED:
+    stopped_.runState();
+    break;
+  default:
+    std::cout << "~ ~ ~ ~ ! Invalid State !" << std::endl;
+    break;
   }
+  // std::cout << "~~~~~~~ Machine done!" << std::endl;
 }
 
 

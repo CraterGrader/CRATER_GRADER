@@ -5,6 +5,21 @@
 #include <mapping/map.hpp>
 #include <cg_msgs/srv/site_map.hpp> // Service for receiving SiteMap height data
 
+// Finite state machine and states
+#include <planning/fsm/fsm.hpp>
+#include <planning/fsm/ready.hpp>
+#include <planning/fsm/update_map.hpp>
+#include <planning/fsm/site_work_done.hpp>
+#include <planning/fsm/map_explored.hpp>
+#include <planning/fsm/replan_transport.hpp>
+#include <planning/fsm/plan_transport.hpp>
+#include <planning/fsm/get_transport_goals.hpp>
+#include <planning/fsm/plan_exploration.hpp>
+#include <planning/fsm/get_exploration_goals.hpp>
+#include <planning/fsm/goals_remaining.hpp>
+#include <planning/fsm/get_worksystem_trajectory.hpp>
+#include <planning/fsm/stopped.hpp>
+
 namespace cg {
 namespace planning {
 
@@ -34,6 +49,23 @@ private:
 
   /* Variables */
   cg::mapping::Map<float> height_map_;
+
+  // Create Finite State Machine
+  cg::planning::FSM fsm_;
+
+  // Initialize states
+  cg::planning::Ready ready_;
+  cg::planning::UpdateMap update_map_;
+  cg::planning::SiteWorkDone site_work_done_;
+  cg::planning::MapExplored map_explored_;
+  cg::planning::ReplanTransport replan_transport_;
+  cg::planning::PlanTransport plan_transport_;
+  cg::planning::GetTransportGoals get_transport_goals_;
+  cg::planning::PlanExploration plan_exploration_;
+  cg::planning::GetExplorationGoals get_exploration_goals_;
+  cg::planning::GoalsRemaining goals_remaining_;
+  cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
+  cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive
 
