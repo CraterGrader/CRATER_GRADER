@@ -31,6 +31,7 @@ namespace planning {
 
     // Update map parameters
     height_map_.updateDimensions(map_height, map_width, map_resolution);
+    design_height_map_.updateDimensions(map_height, map_width, map_resolution, designTOPO_);
   }
 
 bool BehaviorExecutive::updateMapFromService(bool verbose = false) {

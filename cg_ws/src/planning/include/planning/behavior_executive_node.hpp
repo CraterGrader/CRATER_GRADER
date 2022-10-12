@@ -51,6 +51,17 @@ private:
   cg::mapping::Map<float> height_map_;
   bool map_updated_ = false;
 
+  std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0};
+  cg::mapping::Map<float> design_height_map_;
+
   // Create Finite State Machine
   cg::planning::FSM fsm_;
 
