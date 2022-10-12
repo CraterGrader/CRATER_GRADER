@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    video_device: "/dev/cg_ws/sun_cam"
+    video_device: "/dev/video2"
     framerate: 30.0
     io_method: "mmap"
     frame_id: "camera"
