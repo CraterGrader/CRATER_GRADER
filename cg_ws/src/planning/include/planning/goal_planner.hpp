@@ -2,7 +2,7 @@
 #define PLANNING__GOAL_PLANNER_HPP
 
 #include <planning/common.hpp>
-#include <mapping/site_map.hpp>
+#include <mapping/map.hpp>
 
 namespace cg {
 namespace planning {
@@ -11,8 +11,7 @@ class GoalPlanner {
 
 public:
   virtual std::vector<cg_msgs::msg::Pose2D> getGoalPose(
-    const cg_msgs::msg::Pose2D& agent_pose, const cg::mapping::SiteMap& map) = 0;
-
+    const cg_msgs::msg::Pose2D& agent_pose, const cg::mapping::Map<float>& map) = 0;
 };
 
 } // namespace planning
