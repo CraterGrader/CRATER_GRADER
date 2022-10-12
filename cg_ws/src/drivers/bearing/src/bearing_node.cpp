@@ -44,8 +44,8 @@ void BearingNode::timerCallback() {
   std_msgs::msg::Float32 bearing;
 
   // Frames to be used
-  // std::string fromTag_base = "april_tag";
-  std::string fromTag_base = "STag_tag_";
+  std::string fromTag_base = "april_tag";
+  // std::string fromTag_base = "STag_tag_";
   std::string toLink = "rob_base_link";
 
   // Not sure if good idea as launch file opens node in random order
@@ -126,7 +126,7 @@ void BearingNode::timerCallback() {
     tf_map_to_link.getBasis().getRPY(roll, pitch, yaw);
 
     // Calculate and append bearing
-    bearings.push_back(pitch);
+    bearings.push_back(yaw);
 
     // Get cartesian distance from camera to tag for weighting
     tag_dist_to_cam.push_back(sqrt(pow(cam_to_tag.transform.translation.x,2) + 

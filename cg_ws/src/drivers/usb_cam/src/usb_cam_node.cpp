@@ -28,10 +28,10 @@ UsbCamNode::UsbCamNode(const rclcpp::NodeOptions & node_options)
   // declare params - these do not affect bearing launch, only here as defaults, will load from params.yaml
   this->declare_parameter("camera_name", "default_cam");
   this->declare_parameter("camera_info_url", "");
-  this->declare_parameter("framerate", 60.0);
+  this->declare_parameter("framerate", 30.0);
   this->declare_parameter("frame_id", "camera");
-  this->declare_parameter("image_height", 720);
-  this->declare_parameter("image_width", 1280);
+  this->declare_parameter("image_height", 1080);
+  this->declare_parameter("image_width", 1920);
   this->declare_parameter("io_method", "mmap");
   this->declare_parameter("pixel_format", "yuyv");
   this->declare_parameter("video_device", "/dev/cg_ws/sun_cam");
