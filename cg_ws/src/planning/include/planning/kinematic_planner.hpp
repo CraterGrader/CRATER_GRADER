@@ -37,16 +37,16 @@ public:
 
   // Construct Kinematic Planner
   KinematicPlanner() : 
-      goal_pose_distance_threshold(1e-5), 
-      turn_radii_min(0.8), 
-      turn_radii_max(1.6), 
-      turn_radii_resolution(0.4),
-      max_trajectory_length(0.4),
-      trajectory_resolution(0.05),
-      pose_position_equality_threshold(0.05),
+      goal_pose_distance_threshold(1e-5f), 
+      turn_radii_min(0.8f), 
+      turn_radii_max(1.6f), 
+      turn_radii_resolution(0.4f),
+      max_trajectory_length(0.4f),
+      trajectory_resolution(0.05f),
+      pose_position_equality_threshold(0.05f),
       pose_yaw_equality_threshold(deg2rad(5)),
-      topography_weight(1),
-      trajectory_heuristic_epsilon(1) {};
+      topography_weight(1.0f),
+      trajectory_heuristic_epsilon(1.0f) {};
 
   // Updates the path field in-place
   void generatePath(

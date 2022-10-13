@@ -1,7 +1,7 @@
 #ifndef PLANNING__COMMON_HPP
 #define PLANNING__COMMON_HPP
 
-#include <cmath> // sqrt
+#include <cmath> // sqrt, fmod
 #include <Eigen/Dense> // matrix multiplication
 #include <cg_msgs/msg/point2_d.hpp>
 #include <cg_msgs/msg/pose2_d.hpp>

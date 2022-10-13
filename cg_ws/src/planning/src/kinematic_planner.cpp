@@ -74,7 +74,7 @@ namespace planning {
                 std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
                 std::reverse(traj_copy.begin(), traj_copy.end());
                 final_path.insert(final_path.end(), 
-                                  traj_copy.begin() + (traj_copy.size() - closest_traj_idx), 
+                                  traj_copy.begin() + (traj_copy.size() - 1 - closest_traj_idx), 
                                   traj_copy.end());
                 
                 // Add trajectory segment in reverse order
@@ -166,9 +166,17 @@ namespace planning {
     bool KinematicPlanner::samePoseWithinThresh(
         const cg_msgs::msg::Pose2D &trajectory_end_pose,
         const cg_msgs::msg::Pose2D &goal_pose) const {
+            
+            // Normalize yaw within +- M_PI for distance thresholding
+            float end_pose_yaw = std::fmod(trajectory_end_pose.yaw,2.0*M_PI);
+            if (end_pose_yaw < 0.0f) end_pose_yaw += 2.0*M_PI;
+
+            float goal_pose_yaw = std::fmod(goal_pose.yaw, 2.0*M_PI);
+            if (goal_pose_yaw < 0.0f) goal_pose_yaw += 2.0*M_PI;
+
             return (
                 euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_position_equality_threshold &&
-                abs(trajectory_end_pose.yaw - goal_pose.yaw) <= pose_yaw_equality_threshold);
+                abs(end_pose_yaw - goal_pose_yaw) <= pose_yaw_equality_threshold);
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() const {
@@ -319,7 +327,7 @@ namespace planning {
             for (cg_msgs::msg::Pose2D pose : trajectory) {
 
                 size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
-                topography_cost += abs(map.getDataAtIdx(pose_idx));
+                topography_cost += abs(map.getDataAtIdx(pose_idx)) * trajectory_resolution;
             }
 
             // Weight topography cost
@@ -333,7 +341,9 @@ namespace planning {
         const cg_msgs::msg::Pose2D &goal_pose) const {
             std::vector<float> trajectories_heuristic;
             for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
-                trajectories_heuristic.push_back(euclidean_distance(trajectory.back().pt, goal_pose.pt));
+                trajectories_heuristic.push_back(
+                    euclidean_distance(trajectory.back().pt, goal_pose.pt) + 
+                    (pose_position_equality_threshold/pose_yaw_equality_threshold)*abs(trajectory.back().yaw - goal_pose.yaw));
             }
             // Distance between goal pose and final point of trajectory
             return trajectories_heuristic;
