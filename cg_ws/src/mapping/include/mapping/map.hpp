@@ -14,6 +14,8 @@ namespace mapping {
 template <class T>
 class Map {
   public:
+    // Empty constructor
+    Map(){};
     // Constructor with empty data
     Map(size_t height, size_t width, float resolution);
     // Constructor with data
@@ -35,8 +37,9 @@ class Map {
     std::vector<T> getCellData() const {return cell_data_;}
 
     // Setter functions
-    void setCellData(std::vector<T> input_data) {cell_data_ = input_data;}
+    bool setCellData(std::vector<T> input_data);
     void updateCellElement(T new_element, size_t idx);
+    void updateDimensions(size_t height, size_t width, float resolution);
 
   private:
     // attributes
@@ -60,6 +63,14 @@ Map<T>::Map(size_t height, size_t width, float resolution, std::vector<T> cell_d
   width_ = width;
   resolution_ = resolution;
   cell_data_ = cell_data;
+}
+
+template <class T>
+void Map<T>::updateDimensions(size_t height, size_t width, float resolution)
+{
+  height_ = height;
+  width_ = width;
+  resolution_ = resolution;
 }
 
 template <class T>
@@ -90,7 +101,20 @@ T Map<T>::getDataAtIdx(size_t idx) const {
 
 template <class T>
 bool Map<T>::validIdx(size_t idx) const {
-  return idx < (height_ * width_) && idx < cell_data_.size();
+  bool idx_in_bounds = idx < (height_ * width_);
+  bool data_exists_at_idx = idx < cell_data_.size();
+  return idx_in_bounds && data_exists_at_idx;
+}
+
+template <class T>
+bool Map<T>::setCellData(std::vector<T> input_data) {
+  // Don't update data if the dimensions are wrong
+  if (input_data.size() != (height_ * width_)) {
+    return false;
+  }
+  // Otherwise, ok to update
+  cell_data_ = input_data;
+  return true;
 }
 
 } // mapping namespace

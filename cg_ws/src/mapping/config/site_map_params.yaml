@@ -1,14 +1,25 @@
 site_map:
   ros__parameters:
-  # site assumed to be 5mx5m
-    height: 50 # number of cells in col
-    width: 50 # number cells in row
-    resolution: 0.1 # meters
+    # site assumed to be 5mx5m
+    # Map dimensions; update for behavior_executive too (below)
+    height: 9 #50 # number of cells in col
+    width: 9 #50 # number cells in row
+    resolution: 1.0 # meters
+
+    # SiteMap specific params
     filterMaxTerrain: 0.5 # meters
     filterMinTerrain: -0.5 # meters
-    xTransform: 1.0 # meters
-    yTransform: 1.0 # meters
+    xTransform: -4.5 # meters, from local site_map frame to global map_frame
+    yTransform: -4.5 # meters
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
     cellStartingVariance: 10.0 # meters^2
     minCellVariance: 0.00001 # meters^2
+
+behavior_executive_node:
+  ros__parameters:
+    # site assumed to be 5mx5m
+    # Map dimensions; should match site_map dimensions!
+    height: 9 #50 # number of cells in col
+    width: 9 #50 # number cells in row
+    resolution: 1.0 # meters

@@ -1,0 +1,5 @@
+#request
+---
+#response
+cg_msgs/SiteMap site_map
+bool success
