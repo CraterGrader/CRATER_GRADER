@@ -76,8 +76,10 @@ if(BUILD_TESTING)
 
   ament_add_gtest(exploration_planner_test
     test/exploration_planner_test.cpp
+    ../mapping/src/map_util.cpp
     include/planning/exploration_planner.hpp
     src/exploration_planner.cpp
+    src/common.cpp
   )
   ament_target_dependencies(exploration_planner_test
     cg_msgs
