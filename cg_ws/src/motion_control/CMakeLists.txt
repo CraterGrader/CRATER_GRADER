@@ -40,6 +40,13 @@ ament_target_dependencies(odom_node
   cg_msgs
   tf2_ros
 )
+add_executable(motion_control_node src/motion_control_main.cpp
+  src/motion_control_node.cpp
+)
+ament_target_dependencies(motion_control_node
+  rclcpp
+  cg_msgs
+)
 
 # Code testing
 if(BUILD_TESTING)
