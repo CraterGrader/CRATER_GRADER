@@ -88,5 +88,25 @@ cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, con
     return dest_pt;
 }
 
+/**
+ * @brief 
+ * 
+ * @param map1 
+ * @param map2 
+ * @param threshold 
+ * @return true 
+ * @return false 
+ */
+// bool mapVsMapThreshold(const cg::mapping::Map<float> &map1, const cg::mapping::Map<float> &map2, float threshold){
+//     // compare each cell check within threshold
+//     bool mapsWithinThreshold = true;
+//     for (size_t i=0; i<(map1.getWidth()*map1.getHeight()); i++){
+//         if ((map1.cell_data_[i]-map2.cell_data_[i])>threshold){
+//         tempMapFull = false;
+//         }
+//     }
+//     return mapsWithinThreshold;
+// }
+
 } // mapping namespace
 } // cg namespace

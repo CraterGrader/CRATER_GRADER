@@ -156,23 +156,15 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   return goodPts;
 }
 
-// TODO
-// void SiteMap::normalizeSiteMap(){
-//   bool mapFull = true;
-//   for (size_t i=0; i<getNcells(); i++){
-//     if (heightMap_[i] == 0.0f){
-//       mapFull = false;
-//     }
-//   }
-//   if (mapFull && !siteNormalized){
-//     float sum = 0.0f;
-//     for (size_t i=0; i<getNcells(); i++){
-//       sum += heightMap_[i];
-//     }
-//     zTransform_ = sum / getNcells();
-//     siteNormalized = true;
-//   }
-// }
+void SiteMap::mapCoverage(){
+  bool tempMapFull = true;
+  for (size_t i=0; i<getNcells(); i++){
+    if (heightMap_[i] == unseenGridHeight_){
+      tempMapFull = false;
+    }
+  }
+  if (tempMapFull){siteMapFull_ = true;}
+}
 
 void SiteMap::updateCellsMean(){
   // use view 2 filter map to update values in view 1 height map
