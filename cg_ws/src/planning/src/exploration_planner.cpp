@@ -4,8 +4,13 @@
 namespace cg {
 namespace planning {
 
-ExplorationPlanner::ExplorationPlanner(){}
-
+/**
+ * @brief // this function returns a vector of poses to drive during the exploration phase
+ *
+ * @param agent_pose // not used
+ * @param map // used for parametric driving path
+ * @return std::vector<cg_msgs::msg::Pose2D>
+ */
 std::vector<cg_msgs::msg::Pose2D> ExplorationPlanner::getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg::mapping::Map<float> &map) {

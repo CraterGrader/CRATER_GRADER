@@ -49,6 +49,7 @@ add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/fsm/stopped.cpp
   # Planner modules
   src/transport_planner.cpp
+  src/exploration_planner.cpp
   src/common.cpp
 )
 ament_target_dependencies(behavior_executive_node
