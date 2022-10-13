@@ -2,13 +2,13 @@
 #include <mapping/map.hpp>
 #include <planning/exploration_planner.hpp>
 
-TEST(ExplorationPlannerTest, planExplorationTest) {
+TEST(ExplorationPlannerTest, getGoalPoseTest) {
   cg::planning::ExplorationPlanner ep;
   auto agent_pose = cg::planning::create_pose2d(0, 0, 0);
   size_t map_height = 10, map_width = 10;
   float map_res = 1.0;
   cg::mapping::Map<float> map(map_height, map_width, map_res);
-  auto exploration_waypoints = ep.planExploration(agent_pose, map);
+  auto exploration_waypoints = ep.getGoalPose(agent_pose, map);
   EXPECT_GT(exploration_waypoints.size(), 0ul);
   double center_x = map_width * map_res / 2.0;
   double center_y = map_height * map_res / 2.0;
@@ -36,40 +36,4 @@ TEST(ExplorationPlannerTest, planExplorationTest) {
       }
     }
   }
-}
-
-TEST(ExplorationPlannerTest, getGoalPoseTest) {
-  cg::planning::ExplorationPlanner ep;
-  auto agent_pose = cg::planning::create_pose2d(0, 0, 0);
-  size_t map_height = 10, map_width = 10;
-  float map_res = 1.0;
-  cg::mapping::Map<float> map(map_height, map_width, map_res);
-
-  auto exploration_waypoints = ep.planExploration(agent_pose, map);
-
-  auto pose = ep.getGoalPose(agent_pose, map);
-  EXPECT_NEAR(pose.pt.x, exploration_waypoints[0].pt.x, 1e-5);
-  EXPECT_NEAR(pose.pt.y, exploration_waypoints[0].pt.y, 1e-5);
-  EXPECT_NEAR(pose.yaw, exploration_waypoints[0].yaw, 1e-5);
-
-  pose = ep.getGoalPose(exploration_waypoints[0], map);
-  EXPECT_NEAR(pose.pt.x, exploration_waypoints[1].pt.x, 1e-5);
-  EXPECT_NEAR(pose.pt.y, exploration_waypoints[1].pt.y, 1e-5);
-  EXPECT_NEAR(pose.yaw, exploration_waypoints[1].yaw, 1e-5);
-}
-
-TEST(ExplorationPlannerTest, isExplorationDoneTest) {
-  cg::planning::ExplorationPlanner ep;
-  auto agent_pose = cg::planning::create_pose2d(0, 0, 0);
-  size_t map_height = 10, map_width = 10;
-  float map_res = 1.0;
-  cg::mapping::Map<float> map(map_height, map_width, map_res);
-
-  auto exploration_waypoints = ep.planExploration(agent_pose, map);
-
-  for (const auto & pose : exploration_waypoints) {
-    EXPECT_FALSE(ep.isExplorationDone());
-    ep.getGoalPose(pose, map);
-  }
-  EXPECT_TRUE(ep.isExplorationDone());
 }
