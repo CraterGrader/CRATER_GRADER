@@ -30,6 +30,8 @@ std::vector<cg_msgs::msg::Pose2D> ExplorationPlanner::getGoalPose(
   std::vector<int> thetas_deg = {
     270, 225, 180, 135, 90, 45, 0, 315
   };
+  // Make sure that we close the circle
+  thetas_deg.push_back(thetas_deg[0]);
   for (const auto &theta_deg : thetas_deg) {
     double x = r*std::cos(theta_deg*M_PI/180) + xc;
     double y = r*std::sin(theta_deg*M_PI/180) + yc;
