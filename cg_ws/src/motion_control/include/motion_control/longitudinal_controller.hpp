@@ -12,7 +12,7 @@ class LongitudinalController {
 public:
   LongitudinalController() {}
   LongitudinalController(const PIDParams &params);
-  double computeVelocity(
+  double computeDrive(
     const cg_msgs::msg::Trajectory &target_trajectory,
     const nav_msgs::msg::Odometry &current_state);
 private:
