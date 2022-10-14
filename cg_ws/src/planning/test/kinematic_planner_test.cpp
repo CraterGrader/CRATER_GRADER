@@ -139,7 +139,7 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
   cg::planning::KinematicPlanner kinematic_planner;
   kinematic_planner.pose_position_equality_threshold = 0.05;
   kinematic_planner.pose_yaw_equality_threshold = cg::planning::deg2rad(5);
-  kinematic_planner.turn_radii_resolution = 0.1f;
+  kinematic_planner.turn_radii_resolution = 0.2f; // Finer lattice resolution
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
@@ -154,12 +154,47 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
 
-  std::cout << "Path: \n";
+  std::cout << "Precise Path: \n";
+  std::cout << "Path: size: " << path.size() << std::endl;
   for (auto pose: path) {
     std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
   }
 
-  std::cout << "Path: size: " << path.size() << std::endl;
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+
+}
+
+// Test generatePath()
+TEST(KinematicPlannerTest, Test_generatePathPreciseObstacle) {
+
+  cg::planning::KinematicPlanner kinematic_planner;
+  kinematic_planner.pose_position_equality_threshold = 0.5;
+
+  std::vector<cg_msgs::msg::Pose2D> path;
+  cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(0.5, 0.5, 0)};
+  cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(3.0, 0.5, 0)};
+
+  std::vector<float> cells{
+    1, 10, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    };
+  cg::mapping::Map<float> map{static_cast<size_t>(4), 
+                      static_cast<size_t>(4), 
+                      static_cast<float>(1),
+                      cells};
+  
+  kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
+
+  std::cout << "Obstacle Path: \n";
+  std::cout << "Path: size" << path.size() << std::endl;
+  for (auto pose: path) {
+    std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
+  }
+
   EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
   EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
   EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
@@ -394,6 +429,42 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
 
   auto cost_2 = kinematic_planner.calculateTopographyCost(trajectory_2, map);
   EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 10, absolute_range);
+
+}
+
+
+// Test calculateTopographyCost
+TEST(KinematicPlannerTest, Test_calculateTopographyCostObstacle) {
+
+  cg::planning::KinematicPlanner kinematic_planner;
+  kinematic_planner.trajectory_resolution = 1;
+  float absolute_range = 1e-6f;
+
+  std::vector<float> cells{
+    1, 10, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    };
+  cg::mapping::Map<float> map{static_cast<size_t>(4), 
+                      static_cast<size_t>(4), 
+                      static_cast<float>(1),
+                      cells};
+
+  std::vector<cg_msgs::msg::Pose2D> trajectory_1{
+    cg::planning::create_pose2d(0, 0, 0)};
+  
+  auto cost_1 = kinematic_planner.calculateTopographyCost(trajectory_1, map);
+  EXPECT_NEAR(cost_1, kinematic_planner.topography_weight * 1, absolute_range);
+
+  std::vector<cg_msgs::msg::Pose2D> trajectory_2{
+    cg::planning::create_pose2d(0.5, 0.5, 0),
+    cg::planning::create_pose2d(1.5, 0.5, 0),
+    cg::planning::create_pose2d(2.5, 0.5, 0),
+    cg::planning::create_pose2d(3.5, 0.5, 0)};
+
+  auto cost_2 = kinematic_planner.calculateTopographyCost(trajectory_2, map);
+  EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 13, absolute_range);
 
 }
 

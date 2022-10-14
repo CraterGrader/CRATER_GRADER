@@ -33,7 +33,7 @@ public:
 
   // Cost Parameters
   float topography_weight;
-  float trajectory_heuristic_epsilon;
+  float trajectory_heuristic_epsilon; 
 
   // Construct Kinematic Planner
   KinematicPlanner() : 

@@ -342,7 +342,7 @@ namespace planning {
             std::vector<float> trajectories_heuristic;
             for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
                 trajectories_heuristic.push_back(
-                    euclidean_distance(trajectory.back().pt, goal_pose.pt));
+                    trajectory_heuristic_epsilon * euclidean_distance(trajectory.back().pt, goal_pose.pt));
             }
             // Distance between goal pose and final point of trajectory
             return trajectories_heuristic;
