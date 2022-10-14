@@ -2,13 +2,6 @@
 #include <planning/kinematic_planner.hpp>
 #include <planning/common.hpp>
 
-TEST(KinematicPlannerTest, helloworld)
-{
-  float expected = 0.0f;
-  float actual = 0.0f;
-  float absolute_range = 0.0f;
-  EXPECT_NEAR(expected, actual, absolute_range);
-}
 
 // Test generatePath()
 TEST(KinematicPlannerTest, Test_generatePathForward) {
@@ -27,6 +20,11 @@ TEST(KinematicPlannerTest, Test_generatePathForward) {
                       cells};
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
+
+  std::cout << "Path: \n";
+  for (auto pose: path) {
+    std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
+  }
 
   std::cout << "Path: size" << path.size() << std::endl;
   EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.trajectory_resolution));
@@ -56,9 +54,9 @@ TEST(KinematicPlannerTest, Test_generatePathForwardMultiple) {
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
 
-
+  std::cout << "Path: \n";
   for (auto pose: path) {
-      std::cout << "Path elements " << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
+    std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
   }
 
   std::cout << "Path: size" << path.size() << std::endl;
@@ -87,6 +85,11 @@ TEST(KinematicPlannerTest, Test_generatePathBackwards) {
                       cells};
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
+
+  std::cout << "Path: \n";
+  for (auto pose: path) {
+    std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
+  }
 
   std::cout << "Path: size" << path.size() << std::endl;
   EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.trajectory_resolution));
@@ -117,13 +120,52 @@ TEST(KinematicPlannerTest, Test_generatePathCurved) {
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
 
-  std::cout << "Path: size" << path.size() << std::endl;
-  // EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.trajectory_resolution));
+  std::cout << "Path: \n";
+  for (auto pose: path) {
+    std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
+  }
+
+  std::cout << "Path size: " << path.size() << std::endl;
   EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
   EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
   EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
 
 }
+
+
+// Test generatePath()
+TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
+
+  cg::planning::KinematicPlanner kinematic_planner;
+  kinematic_planner.pose_position_equality_threshold = 0.05;
+  kinematic_planner.pose_yaw_equality_threshold = cg::planning::deg2rad(5);
+  kinematic_planner.turn_radii_resolution = 0.1f;
+
+  std::vector<cg_msgs::msg::Pose2D> path;
+  cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
+  std::cout << "Desired rad: " << cg::planning::deg2rad(30) << std::endl;
+  cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(2, 2, cg::planning::deg2rad(90))};
+
+  std::vector<float> cells(10000, 1);
+  cg::mapping::Map<float> map{static_cast<size_t>(100), 
+                      static_cast<size_t>(100), 
+                      static_cast<float>(0.1),
+                      cells};
+  
+  kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
+
+  std::cout << "Path: \n";
+  for (auto pose: path) {
+    std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
+  }
+
+  std::cout << "Path: size: " << path.size() << std::endl;
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+
+}
+
 
 // Test getClosestTrajectoryPoseToGoal()
 TEST(KinematicPlannerTest, Test_getClosestTrajectoryPoseToGoal)
@@ -152,6 +194,7 @@ TEST(KinematicPlannerTest, Test_getClosestTrajectoryPoseToGoal)
   EXPECT_NEAR(1, closest_traj.second, absolute_range);
 }
 
+
 // Test samePoseWithinThresh
 TEST(KinematicPlannerTest, Test_samePoseWithinThresh)
 {
@@ -172,6 +215,7 @@ TEST(KinematicPlannerTest, Test_samePoseWithinThresh)
   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose2), false);
 
 }
+
 
 // Test generateLatticeArm
 TEST(KinematicPlannerTest, Test_generateLatticeArm)
@@ -221,6 +265,7 @@ TEST(KinematicPlannerTest, Test_generateLatticeArm)
 
 }
 
+
 // Test generateBaseLattice
 TEST(KinematicPlannerTest, Test_generateBaseLattice)
 {
@@ -248,6 +293,7 @@ TEST(KinematicPlannerTest, Test_generateBaseLattice)
   EXPECT_NEAR(lattice_arm_right_forward[9].pt.y, sin(M_PI/2 - 1) - 1, absolute_range);
 
 }
+
 
 // Test transformLatticeToPose
 TEST(KinematicPlannerTest, Test_transformLatticeToPose) {
@@ -277,6 +323,7 @@ TEST(KinematicPlannerTest, Test_transformLatticeToPose) {
   EXPECT_NEAR(transformed_lattice[0][2].pt.y, 3 + 2*cos(M_PI/4), absolute_range);
   EXPECT_NEAR(transformed_lattice[0][2].yaw, M_PI/2, absolute_range);
 }
+
 
 // isValidTrajectory() need map input
 TEST(KinematicPlannerTest, Test_isValidTrajectory) {
@@ -321,6 +368,7 @@ TEST(KinematicPlannerTest, Test_isValidTrajectory) {
   EXPECT_FALSE(kinematic_planner.isValidTrajectory(trajectory, map));
 }
 
+
 // Test calculateTopographyCost
 TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
 
@@ -348,6 +396,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
   EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 10, absolute_range);
 
 }
+
 
 // Test calculateTopographyCost
 TEST(KinematicPlannerTest, Test_calculateTopographyCostSmallResolution) {
@@ -383,6 +432,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCostSmallResolution) {
 
 }
 
+
 // Test trajectoriesHeuristic
 TEST(KinematicPlannerTest, Test_trajectoriesHeuristic) {
 
@@ -410,5 +460,3 @@ TEST(KinematicPlannerTest, Test_trajectoriesHeuristic) {
   EXPECT_NEAR(trajectory_heuristic[2], sqrt(5), absolute_range);
 
 }
-
-//

@@ -243,7 +243,7 @@ namespace planning {
                 cur_rad += rad_increment;
                 x = turn_radius * cos(cur_rad);
                 y = turn_radius * sin(cur_rad) - turn_radius;
-                yaw = M_PI + atan2(-cos(cur_rad), sin(cur_rad));
+                yaw = atan2(-cos(cur_rad), sin(cur_rad));
 
                 cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
@@ -259,7 +259,7 @@ namespace planning {
                 cur_rad += rad_increment;
                 x = turn_radius * cos(cur_rad);
                 y = turn_radius * sin(cur_rad) + turn_radius;
-                yaw = atan2(-cos(cur_rad), sin(cur_rad));
+                yaw = M_PI + atan2(-cos(cur_rad), sin(cur_rad));
 
                 cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
                 lattice_arm.push_back(pose);
@@ -342,8 +342,7 @@ namespace planning {
             std::vector<float> trajectories_heuristic;
             for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
                 trajectories_heuristic.push_back(
-                    euclidean_distance(trajectory.back().pt, goal_pose.pt) + 
-                    (pose_position_equality_threshold/pose_yaw_equality_threshold)*abs(trajectory.back().yaw - goal_pose.yaw));
+                    euclidean_distance(trajectory.back().pt, goal_pose.pt));
             }
             // Distance between goal pose and final point of trajectory
             return trajectories_heuristic;

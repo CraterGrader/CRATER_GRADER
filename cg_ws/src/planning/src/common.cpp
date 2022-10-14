@@ -14,7 +14,7 @@ cg_msgs::msg::Pose2D create_pose2d(const double& x, const double& y, const doubl
   cg_msgs::msg::Pose2D pose;
   pose.pt = create_point2d(x, y);
 
-  // Normalize yaw within +- M_PI for distance thresholding and debugging
+  // Normalize yaw within 0,2*M_PI for distance thresholding and debugging
   float norm_yaw = std::fmod(yaw, 2.0*M_PI);
   if (norm_yaw < 0.0f) norm_yaw += 2.0*M_PI;
 
