@@ -42,11 +42,14 @@ ament_target_dependencies(odom_node
 )
 add_executable(motion_control_node src/motion_control_main.cpp
   src/motion_control_node.cpp
+  src/longitudinal_controller.cpp
+  src/lateral_controller.cpp
   src/pid_controller.cpp
 )
 ament_target_dependencies(motion_control_node
   rclcpp
   cg_msgs
+  nav_msgs
 )
 
 # Code testing
