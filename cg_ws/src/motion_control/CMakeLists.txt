@@ -40,13 +40,13 @@ ament_target_dependencies(odom_node
   cg_msgs
   tf2_ros
 )
-add_executable(motion_control_node src/motion_control_main.cpp
-  src/motion_control_node.cpp
+add_executable(mobility_control_node src/mobility_control_main.cpp
+  src/mobility_control_node.cpp
   src/longitudinal_controller.cpp
   src/lateral_controller.cpp
   src/pid_controller.cpp
 )
-ament_target_dependencies(motion_control_node
+ament_target_dependencies(mobility_control_node
   rclcpp
   cg_msgs
   nav_msgs

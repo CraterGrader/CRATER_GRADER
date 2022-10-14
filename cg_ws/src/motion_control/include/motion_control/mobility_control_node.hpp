@@ -10,10 +10,10 @@
 namespace cg {
 namespace motion_control {
 
-class MotionControlNode : public rclcpp::Node {
+class MobilityControlNode : public rclcpp::Node {
 
 public:
-  MotionControlNode();
+  MobilityControlNode();
 
 private: 
   /* Publishers and Subscribers */
@@ -36,7 +36,7 @@ private:
 
   double lateral_stanley_gain_;
 
-}; // class MotionControlNode
+}; // class MobilityControlNode
 
 } // namespace motion_control
 } // namespace cg
