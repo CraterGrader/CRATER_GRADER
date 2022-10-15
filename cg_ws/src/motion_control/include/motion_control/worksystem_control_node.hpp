@@ -3,6 +3,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
+#include <cg_msgs/srv/send_trajectory.hpp> // Service for updating current trajectory
 #include <nav_msgs/msg/odometry.hpp>
 #include "motion_control/lateral_controller.hpp"
 #include "motion_control/longitudinal_controller.hpp"
@@ -10,10 +11,10 @@
 namespace cg {
 namespace motion_control {
 
-class MobilityControlNode : public rclcpp::Node {
+class WorksystemControlNode : public rclcpp::Node {
 
 public:
-  MobilityControlNode();
+  WorksystemControlNode();
 
 private: 
   /* Publishers and Subscribers */
@@ -24,6 +25,10 @@ private:
   /* Callbacks */
   void trajectoryCallback(const cg_msgs::msg::Trajectory::SharedPtr msg);
   void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+
+  /* Services */
+  rclcpp::Service<cg_msgs::srv::SendTrajectory>::SharedPtr update_trajectory_server_;
+  void updateTrajectory(cg_msgs::srv::SendTrajectory::Request::SharedPtr req, cg_msgs::srv::SendTrajectory::Response::SharedPtr res);
 
   /* Controllers */
   LongitudinalController lon_controller_;
@@ -36,7 +41,10 @@ private:
 
   double lateral_stanley_gain_;
 
-}; // class MobilityControlNode
+  /* Variables */
+  cg_msgs::msg::Trajectory current_trajectory_;
+
+}; // class WorksystemControlNode
 
 } // namespace motion_control
 } // namespace cg

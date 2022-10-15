@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SiteMap.idl"
   "msg/Trajectory.idl"
   "srv/SiteMap.srv"
+  "srv/SendTrajectory.srv"
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs
 )
