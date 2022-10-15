@@ -30,6 +30,29 @@ public:
       topography_weight_(1.0f),
       trajectory_heuristic_epsilon_(1.0f) {};
 
+  // Construct Fully Parametric Planner
+  KinematicPlanner(
+    float goal_pose_distance_threshold,
+    float turn_radii_min,
+    float turn_radii_max,
+    float turn_radii_resolution,
+    float max_trajectory_length,
+    float trajectory_resolution,
+    float pose_position_equality_threshold,
+    float pose_yaw_equality_threshold,
+    float topography_weight,
+    float trajectory_heuristic_epsilon) : 
+      goal_pose_distance_threshold_(goal_pose_distance_threshold), 
+      turn_radii_min_(turn_radii_min), 
+      turn_radii_max_(turn_radii_max), 
+      turn_radii_resolution_(turn_radii_resolution),
+      max_trajectory_length_(max_trajectory_length),
+      trajectory_resolution_(trajectory_resolution),
+      pose_position_equality_threshold_(pose_position_equality_threshold),
+      pose_yaw_equality_threshold_(pose_yaw_equality_threshold),
+      topography_weight_(topography_weight),
+      trajectory_heuristic_epsilon_(trajectory_heuristic_epsilon) {}; 
+
   // Updates the path field in-place
   void generatePath(
     std::vector<cg_msgs::msg::Pose2D> &path,

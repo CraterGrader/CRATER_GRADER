@@ -13,7 +13,7 @@ TEST(KinematicPlannerTest, Test_generatePathForward) {
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
   cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(6, 5, 0)};
 
-  std::vector<float> cells(10000, 1);
+  std::vector<float> cells(10000, 0.0f);
   cg::mapping::Map<float> map{static_cast<size_t>(100), 
                       static_cast<size_t>(100), 
                       static_cast<float>(0.1),
@@ -46,7 +46,7 @@ TEST(KinematicPlannerTest, Test_generatePathForwardMultiple) {
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
   cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(7, 5, 0)};
 
-  std::vector<float> cells(10000, 1);
+  std::vector<float> cells(10000, 0.0f);
   cg::mapping::Map<float> map{static_cast<size_t>(100), 
                       static_cast<size_t>(100), 
                       static_cast<float>(0.1),
@@ -78,7 +78,7 @@ TEST(KinematicPlannerTest, Test_generatePathBackwards) {
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
   cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(4, 5, 0)};
 
-  std::vector<float> cells(10000, 1);
+  std::vector<float> cells(10000, 0.0f);
   cg::mapping::Map<float> map{static_cast<size_t>(100), 
                       static_cast<size_t>(100), 
                       static_cast<float>(0.1),
@@ -112,7 +112,7 @@ TEST(KinematicPlannerTest, Test_generatePathCurved) {
   std::cout << "Desired rad: " << cg::planning::deg2rad(30) << std::endl;
   cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(6, 6, cg::planning::deg2rad(30))};
 
-  std::vector<float> cells(10000, 1);
+  std::vector<float> cells(10000, 0.0f);
   cg::mapping::Map<float> map{static_cast<size_t>(100), 
                       static_cast<size_t>(100), 
                       static_cast<float>(0.1),
@@ -139,14 +139,14 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
   cg::planning::KinematicPlanner kinematic_planner;
   kinematic_planner.setPosePositionEqualityThreshold(0.05);
   kinematic_planner.setPoseYawEqualityThreshold(cg::planning::deg2rad(5));
-  kinematic_planner.setTurnRadiiResolutuion(0.2f); // Finer lattice resolution
+  kinematic_planner.setTurnRadiiResolutuion(0.4f); // Finer lattice resolution
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
   std::cout << "Desired rad: " << cg::planning::deg2rad(30) << std::endl;
   cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(2, 2, cg::planning::deg2rad(90))};
 
-  std::vector<float> cells(10000, 1);
+  std::vector<float> cells(10000, 0.0f);
   cg::mapping::Map<float> map{static_cast<size_t>(100), 
                       static_cast<size_t>(100), 
                       static_cast<float>(0.1),
@@ -177,10 +177,10 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseObstacle) {
   cg_msgs::msg::Pose2D goal_pose{cg::planning::create_pose2d(3.0, 0.5, 0)};
 
   std::vector<float> cells{
-    1, 10, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
+    0, 10, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
     };
   cg::mapping::Map<float> map{static_cast<size_t>(4), 
                       static_cast<size_t>(4), 

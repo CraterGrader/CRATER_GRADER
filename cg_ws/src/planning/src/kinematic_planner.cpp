@@ -32,7 +32,6 @@ namespace planning {
         // List of final trajectories composed from lattice primitives
         std::vector<cg_msgs::msg::Pose2D> final_path;
         
-        // Note: Currently instead of cg_msgs::msg::Trajectory, we are using Pose2D but this can be changed
         std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
         std::vector<AStarNode> visited_nodes;
 
@@ -136,7 +135,7 @@ namespace planning {
                 if (skip_new_node) continue;
 
                 // Update node costs g(s') = g(s) + c(s,s')
-                float succ_g_cost = curr_node.g_cost + trajectories_costs[traj_idx];
+                float succ_g_cost = max_trajectory_length_ + curr_node.g_cost + trajectories_costs[traj_idx];
 
                 // Create new child node
                 AStarNode succ_node = {succ_g_cost, 
@@ -315,8 +314,6 @@ namespace planning {
             if (!map.validPoint(pose.pt)) return false;
         }
         return true;
-        // TODO: Do we need footprint information to make this effective?
-        // Maybe that's in the map data structure?
     }
 
     float KinematicPlanner::calculateTopographyCost(
