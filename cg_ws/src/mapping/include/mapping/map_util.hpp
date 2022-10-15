@@ -5,7 +5,7 @@
 #include <Eigen/Dense> // matrix multiplication
 #include <cg_msgs/msg/point2_d.hpp> // use of cg:msgs::Point2D
 #include <cg_msgs/msg/pose2_d.hpp> // use of cg:msgs::Pose2D
-// #include <mapping/map.hpp>
+#include <iostream>
 
 namespace cg {
 namespace mapping {
@@ -18,10 +18,7 @@ int discreteCoordsToCellIndex(size_t x, size_t y, size_t width);
 int continousCoordsToCellIndex(float x, float y, size_t width, float resolution);
 float convertMaptoSiteMapFrame(float pos, float offset);
 cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, const cg_msgs::msg::Pose2D &dest_frame);
-
-// bool mapVsMapThreshold(const cg::mapping::Map<float> &map1, const cg::mapping::Map<float> &map2, float threshold);
-
-// TODO: add replanTransport(map, desired map, threshold)
+bool mapVsMapThreshold(const std::vector<float> &map1, const std::vector<float> &map2, float threshold);
 
 float rad2deg(float rad);
 float deg2rad(float deg);

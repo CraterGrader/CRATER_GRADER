@@ -93,8 +93,6 @@ void SiteMapNode::PubTimerCallback(){
 void SiteMapNode::SiteNormalizeTimerCallback(){
   // check if map is filled
   siteMap_.mapCoverage();
-
-  // todo add forloop
 }
 
 void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
