@@ -101,8 +101,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(kinematic_planner_test
     test/kinematic_planner_test.cpp
-    include/planning/kinematic_planner.hpp
+    src/common.cpp
     src/kinematic_planner.cpp
+    ../mapping/src/map_util.cpp
   )
   ament_target_dependencies(kinematic_planner_test
     cg_msgs
