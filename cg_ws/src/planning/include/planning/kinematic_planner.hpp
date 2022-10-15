@@ -17,36 +17,18 @@ class KinematicPlanner {
 
 public:
 
-  // Threshold to determine if trajectory end pose is a valid final pose
-  float goal_pose_distance_threshold;
-
-  // Lattice Parameters
-  float turn_radii_min;
-  float turn_radii_max;
-  float turn_radii_resolution;
-  float max_trajectory_length;
-  float trajectory_resolution;
-
-  // Pose equality thresholds
-  float pose_position_equality_threshold;
-  float pose_yaw_equality_threshold;
-
-  // Cost Parameters
-  float topography_weight;
-  float trajectory_heuristic_epsilon; 
-
   // Construct Kinematic Planner
   KinematicPlanner() : 
-      goal_pose_distance_threshold(1e-5f), 
-      turn_radii_min(0.8f), 
-      turn_radii_max(1.6f), 
-      turn_radii_resolution(0.4f),
-      max_trajectory_length(0.4f),
-      trajectory_resolution(0.05f),
-      pose_position_equality_threshold(0.05f),
-      pose_yaw_equality_threshold(deg2rad(5)),
-      topography_weight(1.0f),
-      trajectory_heuristic_epsilon(1.0f) {};
+      goal_pose_distance_threshold_(1e-5f), 
+      turn_radii_min_(0.8f), 
+      turn_radii_max_(1.6f), 
+      turn_radii_resolution_(0.4f),
+      max_trajectory_length_(0.4f),
+      trajectory_resolution_(0.05f),
+      pose_position_equality_threshold_(0.05f),
+      pose_yaw_equality_threshold_(deg2rad(5)),
+      topography_weight_(1.0f),
+      trajectory_heuristic_epsilon_(1.0f) {};
 
   // Updates the path field in-place
   void generatePath(
@@ -96,6 +78,80 @@ public:
   // Generate base lattice based on class parameters
   std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice() const;
   std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right) const;
+
+  // Getters
+  float getGoalPoseDistanceThreshold() {return goal_pose_distance_threshold_;}
+  float getTurnRadiiMin() {return turn_radii_min_;}
+  float getTurnRadiiMax() {return turn_radii_max_;}
+  float getTurnRadiiResolutuion() {return turn_radii_resolution_;}
+  float getMaxTrajectoryLength() {return max_trajectory_length_;}
+  float getTrajectoryResolution() {return trajectory_resolution_;}
+  float getPosePositionEqualityThreshold() {return pose_position_equality_threshold_;}
+  float getPoseYawEqualityThreshold() {return pose_yaw_equality_threshold_;}
+  float getTopographyWeight() {return topography_weight_;}
+  float getTrajectoryHeuristicEpsilon() {return trajectory_heuristic_epsilon_;}
+
+  // Setters
+  void setGoalPoseDistanceThreshold(float val) {
+    goal_pose_distance_threshold_ = val;
+    return;
+    }
+  void setTurnRadiiMin(float val) {
+    turn_radii_min_ = val;
+    return;
+    }
+  void setTurnRadiiMax(float val) {
+    turn_radii_max_ = val;
+    return;
+    }
+  void setTurnRadiiResolutuion(float val) {
+    turn_radii_resolution_ = val;
+    return;
+    }
+  void setMaxTrajectoryLength(float val) {
+    max_trajectory_length_ = val;
+    return;
+    }
+  void setTrajectoryResolution(float val) {
+    trajectory_resolution_ = val;
+    return;
+    }
+  void setPosePositionEqualityThreshold(float val) {
+    pose_position_equality_threshold_ = val;
+    return;
+    }
+  void setPoseYawEqualityThreshold(float val) {
+    pose_yaw_equality_threshold_ = val;
+    return;
+    }
+  void setTopographyWeight(float val) {
+    topography_weight_ = val;
+    return;
+    }
+  void setTrajectoryHeuristicEpsilon(float val) {
+    trajectory_heuristic_epsilon_ = val;
+    return;
+    }
+
+private:
+
+  // Threshold to determine if trajectory end pose is a valid final pose
+  float goal_pose_distance_threshold_;
+
+  // Lattice Parameters
+  float turn_radii_min_;
+  float turn_radii_max_;
+  float turn_radii_resolution_;
+  float max_trajectory_length_;
+  float trajectory_resolution_;
+
+  // Pose equality thresholds
+  float pose_position_equality_threshold_;
+  float pose_yaw_equality_threshold_;
+
+  // Cost Parameters
+  float topography_weight_;
+  float trajectory_heuristic_epsilon_;
 
 };
 

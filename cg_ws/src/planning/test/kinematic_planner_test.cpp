@@ -7,7 +7,7 @@
 TEST(KinematicPlannerTest, Test_generatePathForward) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.01;
+  kinematic_planner.setPosePositionEqualityThreshold(0.01);
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
@@ -27,10 +27,10 @@ TEST(KinematicPlannerTest, Test_generatePathForward) {
   }
 
   std::cout << "Path: size" << path.size() << std::endl;
-  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.trajectory_resolution));
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.getTrajectoryResolution()));
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
 
 }
 
@@ -39,8 +39,8 @@ TEST(KinematicPlannerTest, Test_generatePathForward) {
 TEST(KinematicPlannerTest, Test_generatePathForwardMultiple) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.01;
-  kinematic_planner.topography_weight = 1.0;
+  kinematic_planner.setPosePositionEqualityThreshold(0.01);
+  kinematic_planner.setTopographyWeight(1.0);
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
@@ -60,10 +60,10 @@ TEST(KinematicPlannerTest, Test_generatePathForwardMultiple) {
   }
 
   std::cout << "Path: size" << path.size() << std::endl;
-  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(2.0f/kinematic_planner.trajectory_resolution));
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(2.0f/kinematic_planner.getTrajectoryResolution()));
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
 
 }
 
@@ -72,7 +72,7 @@ TEST(KinematicPlannerTest, Test_generatePathForwardMultiple) {
 TEST(KinematicPlannerTest, Test_generatePathBackwards) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.01;
+  kinematic_planner.setPosePositionEqualityThreshold(0.01);
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
@@ -92,10 +92,10 @@ TEST(KinematicPlannerTest, Test_generatePathBackwards) {
   }
 
   std::cout << "Path: size" << path.size() << std::endl;
-  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.trajectory_resolution));
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.getTrajectoryResolution()));
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
 
 }
 
@@ -104,8 +104,8 @@ TEST(KinematicPlannerTest, Test_generatePathBackwards) {
 TEST(KinematicPlannerTest, Test_generatePathCurved) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.05;
-  kinematic_planner.pose_yaw_equality_threshold = cg::planning::deg2rad(5);
+  kinematic_planner.setPosePositionEqualityThreshold(0.05);
+  kinematic_planner.setPoseYawEqualityThreshold(cg::planning::deg2rad(5));
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
@@ -126,9 +126,9 @@ TEST(KinematicPlannerTest, Test_generatePathCurved) {
   }
 
   std::cout << "Path size: " << path.size() << std::endl;
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
 
 }
 
@@ -137,9 +137,9 @@ TEST(KinematicPlannerTest, Test_generatePathCurved) {
 TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.05;
-  kinematic_planner.pose_yaw_equality_threshold = cg::planning::deg2rad(5);
-  kinematic_planner.turn_radii_resolution = 0.2f; // Finer lattice resolution
+  kinematic_planner.setPosePositionEqualityThreshold(0.05);
+  kinematic_planner.setPoseYawEqualityThreshold(cg::planning::deg2rad(5));
+  kinematic_planner.setTurnRadiiResolutuion(0.2f); // Finer lattice resolution
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(5, 5, 0)};
@@ -160,9 +160,9 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
     std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
   }
 
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
 
 }
 
@@ -170,7 +170,7 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseCurved) {
 TEST(KinematicPlannerTest, Test_generatePathPreciseObstacle) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.5;
+  kinematic_planner.setPosePositionEqualityThreshold(0.05);
 
   std::vector<cg_msgs::msg::Pose2D> path;
   cg_msgs::msg::Pose2D agent_pose{cg::planning::create_pose2d(0.5, 0.5, 0)};
@@ -195,9 +195,9 @@ TEST(KinematicPlannerTest, Test_generatePathPreciseObstacle) {
     std::cout << pose.pt.x << " " << pose.pt.y << " " << pose.yaw << std::endl;
   }
 
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.pose_position_equality_threshold);
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.pose_yaw_equality_threshold);
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
 
 }
 
@@ -235,8 +235,8 @@ TEST(KinematicPlannerTest, Test_samePoseWithinThresh)
 {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.pose_position_equality_threshold = 0.01;
-  kinematic_planner.pose_yaw_equality_threshold = 0.05;
+  kinematic_planner.setPosePositionEqualityThreshold(0.01f);
+  kinematic_planner.setPoseYawEqualityThreshold(0.05f);
 
   cg_msgs::msg::Pose2D pose1{cg::planning::create_pose2d(0, 1, 0)};
   cg_msgs::msg::Pose2D pose2{cg::planning::create_pose2d(0, 1.02, 0)};
@@ -257,8 +257,8 @@ TEST(KinematicPlannerTest, Test_generateLatticeArm)
 {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.max_trajectory_length = 1.0f;
-  kinematic_planner.trajectory_resolution = 0.1f;
+  kinematic_planner.setMaxTrajectoryLength(1.0f);
+  kinematic_planner.setTrajectoryResolution(0.1f);
   float absolute_range = 1e-6f;
 
   // Straight forward lattice arm
@@ -306,11 +306,11 @@ TEST(KinematicPlannerTest, Test_generateBaseLattice)
 {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.turn_radii_max = 2;
-  kinematic_planner.turn_radii_min = 1;
-  kinematic_planner.turn_radii_resolution = 0.5;
-  kinematic_planner.max_trajectory_length = 1.0f;
-  kinematic_planner.trajectory_resolution = 0.1f;
+  kinematic_planner.setTurnRadiiMax(2.0f);
+  kinematic_planner.setTurnRadiiMin(1.0f);
+  kinematic_planner.setTurnRadiiResolutuion(0.5f);
+  kinematic_planner.setMaxTrajectoryLength(1.0f);
+  kinematic_planner.setTrajectoryResolution(0.1f);
   float absolute_range = 1e-6f;
 
   std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = kinematic_planner.generateBaseLattice();
@@ -408,7 +408,7 @@ TEST(KinematicPlannerTest, Test_isValidTrajectory) {
 TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.trajectory_resolution = 1;
+  kinematic_planner.setTrajectoryResolution(1.0f);
   float absolute_range = 1e-6f;
   std::vector<float> cells{1, 2, 3, 4};
   cg::mapping::Map<float> map{static_cast<size_t>(2), 
@@ -419,7 +419,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
     cg::planning::create_pose2d(0, 0, 0)};
   
   auto cost_1 = kinematic_planner.calculateTopographyCost(trajectory_1, map);
-  EXPECT_NEAR(cost_1, kinematic_planner.topography_weight * 1, absolute_range);
+  EXPECT_NEAR(cost_1, kinematic_planner.getTopographyWeight() * 1, absolute_range);
 
   std::vector<cg_msgs::msg::Pose2D> trajectory_2{
     cg::planning::create_pose2d(0.5, 0.5, 0),
@@ -428,7 +428,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
     cg::planning::create_pose2d(1.5, 1.5, 0)};
 
   auto cost_2 = kinematic_planner.calculateTopographyCost(trajectory_2, map);
-  EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 10, absolute_range);
+  EXPECT_NEAR(cost_2, kinematic_planner.getTopographyWeight() * 10, absolute_range);
 
 }
 
@@ -437,7 +437,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCost) {
 TEST(KinematicPlannerTest, Test_calculateTopographyCostObstacle) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.trajectory_resolution = 1;
+  kinematic_planner.setTrajectoryResolution(1.0f);
   float absolute_range = 1e-6f;
 
   std::vector<float> cells{
@@ -455,7 +455,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCostObstacle) {
     cg::planning::create_pose2d(0, 0, 0)};
   
   auto cost_1 = kinematic_planner.calculateTopographyCost(trajectory_1, map);
-  EXPECT_NEAR(cost_1, kinematic_planner.topography_weight * 1, absolute_range);
+  EXPECT_NEAR(cost_1, kinematic_planner.getTopographyWeight() * 1, absolute_range);
 
   std::vector<cg_msgs::msg::Pose2D> trajectory_2{
     cg::planning::create_pose2d(0.5, 0.5, 0),
@@ -464,7 +464,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCostObstacle) {
     cg::planning::create_pose2d(3.5, 0.5, 0)};
 
   auto cost_2 = kinematic_planner.calculateTopographyCost(trajectory_2, map);
-  EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 13, absolute_range);
+  EXPECT_NEAR(cost_2, kinematic_planner.getTopographyWeight() * 13, absolute_range);
 
 }
 
@@ -473,7 +473,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCostObstacle) {
 TEST(KinematicPlannerTest, Test_calculateTopographyCostSmallResolution) {
 
   cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.trajectory_resolution = 0.05;
+  kinematic_planner.setTrajectoryResolution(0.05f);
   float absolute_range = 1e-6f;
   std::vector<float> cells{1, 2, 3, 4};
   cg::mapping::Map<float> map{static_cast<size_t>(2), 
@@ -484,7 +484,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCostSmallResolution) {
     cg::planning::create_pose2d(0, 0, 0)};
   
   auto cost_1 = kinematic_planner.calculateTopographyCost(trajectory_1, map);
-  EXPECT_NEAR(cost_1, kinematic_planner.topography_weight * 0.05, absolute_range);
+  EXPECT_NEAR(cost_1, kinematic_planner.getTopographyWeight() * 0.05, absolute_range);
 
   std::vector<cg_msgs::msg::Pose2D> trajectory_2{
     cg::planning::create_pose2d(0.55, 0.5, 0),
@@ -499,7 +499,7 @@ TEST(KinematicPlannerTest, Test_calculateTopographyCostSmallResolution) {
     cg::planning::create_pose2d(1.0, 0.5, 0)};
 
   float cost_2 = kinematic_planner.calculateTopographyCost(trajectory_2, map);
-  EXPECT_NEAR(cost_2, kinematic_planner.topography_weight * 0.55f, absolute_range);
+  EXPECT_NEAR(cost_2, kinematic_planner.getTopographyWeight() * 0.55f, absolute_range);
 
 }
 

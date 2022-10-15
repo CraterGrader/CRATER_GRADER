@@ -175,20 +175,20 @@ namespace planning {
             if (goal_pose_yaw < 0.0f) goal_pose_yaw += 2.0*M_PI;
 
             return (
-                euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_position_equality_threshold &&
-                abs(end_pose_yaw - goal_pose_yaw) <= pose_yaw_equality_threshold);
+                euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_position_equality_threshold_ &&
+                abs(end_pose_yaw - goal_pose_yaw) <= pose_yaw_equality_threshold_);
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() const {
 
-        assert(turn_radii_min > 0 && turn_radii_max > 0);
+        assert(turn_radii_min_ > 0 && turn_radii_max_ > 0);
 
         // Generate turn_radii vector
         std::vector<float> turn_radii;
-        float cur_radii = turn_radii_min;
-        while (cur_radii <= turn_radii_max) {
+        float cur_radii = turn_radii_min_;
+        while (cur_radii <= turn_radii_max_) {
             turn_radii.push_back(cur_radii);
-            cur_radii += turn_radii_resolution;
+            cur_radii += turn_radii_resolution_;
         }
 
         std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
@@ -216,11 +216,11 @@ namespace planning {
         assert(turn_radius >= 0);
 
         std::vector<cg_msgs::msg::Pose2D> lattice_arm;
-        int num_segments = ceil(max_trajectory_length / trajectory_resolution);
+        int num_segments = ceil(max_trajectory_length_ / trajectory_resolution_);
         float x,y,yaw;
         x = y = yaw = 0.0;
 
-        float max_arm_traj_length = max_trajectory_length;
+        float max_arm_traj_length = max_trajectory_length_;
         if (!forwards) max_arm_traj_length *= -1;
 
         // Straight (forwards and backwards)
@@ -327,11 +327,11 @@ namespace planning {
             for (cg_msgs::msg::Pose2D pose : trajectory) {
 
                 size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
-                topography_cost += abs(map.getDataAtIdx(pose_idx)) * trajectory_resolution;
+                topography_cost += abs(map.getDataAtIdx(pose_idx)) * trajectory_resolution_;
             }
 
             // Weight topography cost
-            float weighted_topography_cost = topography_weight * topography_cost;
+            float weighted_topography_cost = topography_weight_ * topography_cost;
 
             return weighted_topography_cost;
         }
@@ -342,7 +342,7 @@ namespace planning {
             std::vector<float> trajectories_heuristic;
             for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
                 trajectories_heuristic.push_back(
-                    trajectory_heuristic_epsilon * euclidean_distance(trajectory.back().pt, goal_pose.pt));
+                    trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.back().pt, goal_pose.pt));
             }
             // Distance between goal pose and final point of trajectory
             return trajectories_heuristic;
