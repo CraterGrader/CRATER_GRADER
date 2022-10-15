@@ -130,8 +130,7 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
 
       // Send Mobility Commands
       for (int i = 0; i < NUM_ROBOCLAWS_MOBILITY; ++i) {
-        // roboclaws_mobility[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd); // speed no accel decell 
-        roboclaws_mobility[i].SpeedAccelM1(ROBOCLAW_ADDRESS, DRIVE_CTRL_ACCEL_QPPS, roboclaw_signs[i]*drive_cmd); // testing for accell decll
+        roboclaws_mobility[i].SpeedAccelM1(ROBOCLAW_ADDRESS, DRIVE_CTRL_ACCEL_QPPS, roboclaw_signs[i]*drive_cmd); // speed command uses QPPS ramping
         roboclaws_mobility[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
       }
 
