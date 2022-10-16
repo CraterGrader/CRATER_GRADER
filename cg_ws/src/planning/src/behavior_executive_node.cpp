@@ -6,13 +6,16 @@ namespace planning {
   BehaviorExecutive::BehaviorExecutive() : Node("behavior_executive_node")
   {
     /* Initialize publishers and subscribers */
+    viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>(
+        "/viz/current_path", 1);
 
     /* Initialize services */
     // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
     site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     update_trajectory_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     enable_worksystem_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    fsm_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    viz_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
     // Create the service client, joined to the callback group
     site_map_client_ = this->create_client<cg_msgs::srv::SiteMap>("site_map_server", rmw_qos_profile_services_default, site_map_client_group_);
@@ -20,7 +23,8 @@ namespace planning {
     enable_worksystem_client_ = this->create_client<cg_msgs::srv::EnableWorksystem>("enable_worksystem_server", rmw_qos_profile_services_default, enable_worksystem_client_group_);
 
     // Timer callback, joined to the callback group
-    timer_ = this->create_wall_timer(std::chrono::milliseconds(timer_callback_ms_), std::bind(&BehaviorExecutive::timerCallback, this), timer_cb_group_);
+    fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
+    viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 
     // Load parameters
     size_t map_height;
@@ -38,6 +42,24 @@ namespace planning {
     design_height_map_.updateDimensions(map_height, map_width, map_resolution);
     design_height_map_.setCellData(designTOPO_);
   }
+
+void BehaviorExecutive::vizTimerCallback()
+{
+  viz_path_.poses.clear();
+  for (cg_msgs::msg::Pose2D goal_pose : current_goal_poses_) {
+    geometry_msgs::msg::PoseStamped pose_stamped;
+    pose_stamped.pose.position.x = goal_pose.pt.x;
+    pose_stamped.pose.position.y = goal_pose.pt.y;
+    pose_stamped.header.stamp = this->get_clock()->now();
+    pose_stamped.header.frame_id = "map";
+
+    viz_path_.poses.push_back(pose_stamped);
+  }
+  viz_path_.header.stamp = this->get_clock()->now();
+  viz_path_.header.frame_id = "map";
+
+  viz_path_pub_->publish(viz_path_);
+}
 
 bool BehaviorExecutive::updateTrajectoryService(bool verbose = false) {
   // Create a request for the UpdateTrajectory service call
@@ -124,7 +146,7 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
   }
 }
 
-void BehaviorExecutive::timerCallback()
+void BehaviorExecutive::fsmTimerCallback()
 {
 
   // Run machine
@@ -199,7 +221,7 @@ void BehaviorExecutive::timerCallback()
     // Stop the worksystem
     enable_worksystem_ = false;
     enableWorksystemService(true);
-    
+
     // Run state
     stopped_.runState();
     break;

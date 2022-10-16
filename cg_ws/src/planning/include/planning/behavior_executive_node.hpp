@@ -22,6 +22,8 @@
 #include <planning/fsm/get_worksystem_trajectory.hpp>
 #include <planning/fsm/following_trajectory.hpp>
 #include <planning/fsm/stopped.hpp>
+#include <nav_msgs/msg/path.hpp> // For visualizing the current trajectory
+#include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory
 
 namespace cg {
 namespace planning {
@@ -33,14 +35,21 @@ public:
 
 private: 
   /* Publishers and Subscribers */
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
   rclcpp::CallbackGroup::SharedPtr site_map_client_group_;
   rclcpp::CallbackGroup::SharedPtr update_trajectory_client_group_;
   rclcpp::CallbackGroup::SharedPtr enable_worksystem_client_group_;
-  rclcpp::CallbackGroup::SharedPtr timer_cb_group_;
-  rclcpp::TimerBase::SharedPtr timer_; // For controlled looping map updates
+
+  rclcpp::CallbackGroup::SharedPtr fsm_timer_cb_group_;
+  rclcpp::TimerBase::SharedPtr fsm_timer_; // For controlled looping fsm updates
+
+  rclcpp::CallbackGroup::SharedPtr viz_timer_cb_group_;
+  rclcpp::TimerBase::SharedPtr viz_timer_; // For controlled looping viz updates
+  long int viz_timer_callback_ms_ = 500;
+
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
   rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
   rclcpp::Client<cg_msgs::srv::EnableWorksystem>::SharedPtr enable_worksystem_client_;
@@ -48,13 +57,15 @@ private:
   bool updateTrajectoryService(bool verbose);
   bool enableWorksystemService(bool verbose);
 
-  long int timer_callback_ms_ = 2000;
+  long int fsm_timer_callback_ms_ = 2000;
   long int service_response_timeout_sec_ = 2;
 
   /* Message data */
+  nav_msgs::msg::Path viz_path_;
 
   /* Callbacks */
-  void timerCallback(); // For looping publish
+  void fsmTimerCallback(); // For looping publish
+  void vizTimerCallback(); // For looping publish
 
   /* Important Objects */
   cg::planning::TransportPlanner transport_planner_;
