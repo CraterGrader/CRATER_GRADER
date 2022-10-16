@@ -185,6 +185,9 @@ void BehaviorExecutive::timerCallback()
     updateTrajectoryService(true);
     enableWorksystemService(true);
     break;
+  case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:
+    following_trajectory_.runState();
+    break;
   case cg::planning::FSM::State::STOPPED:
     stopped_.runState();
     break;

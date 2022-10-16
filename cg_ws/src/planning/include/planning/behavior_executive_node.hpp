@@ -20,6 +20,7 @@
 #include <planning/fsm/get_exploration_goals.hpp>
 #include <planning/fsm/goals_remaining.hpp>
 #include <planning/fsm/get_worksystem_trajectory.hpp>
+#include <planning/fsm/following_trajectory.hpp>
 #include <planning/fsm/stopped.hpp>
 
 namespace cg {
@@ -94,6 +95,7 @@ private:
   cg::planning::GetExplorationGoals get_exploration_goals_;
   cg::planning::GoalsRemaining goals_remaining_;
   cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
+  cg::planning::FollowingTrajectory following_trajectory_;
   cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive
