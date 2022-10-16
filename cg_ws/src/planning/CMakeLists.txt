@@ -99,16 +99,16 @@ if(BUILD_TESTING)
   )
   target_link_libraries(transport_planner_test ortools::ortools)
 
-  ament_add_gtest(kinematic_planner_test
-    test/kinematic_planner_test.cpp
-    src/common.cpp
-    src/kinematic_planner.cpp
-    ../mapping/src/map_util.cpp
-  )
-  ament_target_dependencies(kinematic_planner_test
-    cg_msgs
-    mapping
-  )
+  # ament_add_gtest(kinematic_planner_test
+  #   test/kinematic_planner_test.cpp
+  #   src/common.cpp
+  #   src/kinematic_planner.cpp
+  #   ../mapping/src/map_util.cpp
+  # )
+  # ament_target_dependencies(kinematic_planner_test
+  #   cg_msgs
+  #   mapping
+  # )
 
   ament_add_gtest(velocity_planner_test
     test/velocity_planner_test.cpp
@@ -124,41 +124,7 @@ if(BUILD_TESTING)
     test/fsm_test.cpp
     include/planning/fsm/fsm.hpp
     src/fsm/fsm.cpp
-    # States
-    include/planning/fsm/ready.hpp
-    src/fsm/ready.cpp
-    include/planning/fsm/update_map.hpp
-    src/fsm/update_map.cpp
-    include/planning/fsm/site_work_done.hpp
-    src/fsm/site_work_done.cpp
-    include/planning/fsm/map_explored.hpp
-    src/fsm/map_explored.cpp
-    include/planning/fsm/replan_transport.hpp
-    src/fsm/replan_transport.cpp
-    include/planning/fsm/plan_transport.hpp
-    src/fsm/plan_transport.cpp
-    include/planning/fsm/get_transport_goals.hpp
-    src/fsm/get_transport_goals.cpp
-    include/planning/fsm/plan_exploration.hpp
-    src/fsm/plan_exploration.cpp
-    include/planning/fsm/get_exploration_goals.hpp
-    src/fsm/get_exploration_goals.cpp
-    include/planning/fsm/goals_remaining.hpp
-    src/fsm/goals_remaining.cpp
-    include/planning/fsm/get_worksystem_trajectory.hpp
-    src/fsm/get_worksystem_trajectory.cpp
-    include/planning/fsm/stopped.hpp
-    src/fsm/stopped.cpp
-    # Planner modules
-    include/planning/transport_planner.hpp
-    src/transport_planner.cpp
-    src/common.cpp
   )
-  ament_target_dependencies(fsm_test
-    cg_msgs
-    mapping
-  )
-  target_link_libraries(fsm_test ortools::ortools)
 endif()
 
 # Install targets

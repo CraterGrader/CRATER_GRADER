@@ -8,6 +8,7 @@ TEST(ExplorationPlannerTest, getGoalPoseTest) {
   size_t map_height = 10, map_width = 10;
   float map_res = 1.0;
   cg::mapping::Map<float> map(map_height, map_width, map_res);
+  ep.planExploration(map);
   auto exploration_waypoints = ep.getGoalPose(agent_pose, map);
   EXPECT_GT(exploration_waypoints.size(), 0ul);
   double center_x = map_width * map_res / 2.0;
