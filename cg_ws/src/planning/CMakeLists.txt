@@ -19,6 +19,7 @@ find_package(ortools CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(nav_msgs REQUIRED) # viz
 find_package(geometry_msgs REQUIRED) # viz
+find_package(tf2_ros REQUIRED) # viz
 
 # Add Eigen3 Library
 INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
@@ -61,6 +62,7 @@ ament_target_dependencies(behavior_executive_node
   mapping
   nav_msgs # viz
   geometry_msgs # viz
+  tf2_ros # viz
 )
 target_link_libraries(behavior_executive_node ortools::ortools)
 

@@ -23,7 +23,9 @@
 #include <planning/fsm/following_trajectory.hpp>
 #include <planning/fsm/stopped.hpp>
 #include <nav_msgs/msg/path.hpp> // For visualizing the current trajectory
-#include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory
+#include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory and agent pose
+#include <geometry_msgs/msg/pose_array.hpp> // For visualizing the current goal poses
+#include <tf2/LinearMath/Quaternion.h> // For visualizing the current goal poses
 
 namespace cg {
 namespace planning {
@@ -36,6 +38,8 @@ public:
 private: 
   /* Publishers and Subscribers */
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_goals_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_agent_pub_;
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
@@ -62,6 +66,8 @@ private:
 
   /* Message data */
   nav_msgs::msg::Path viz_path_;
+  geometry_msgs::msg::PoseArray viz_goals_;
+  geometry_msgs::msg::PoseStamped viz_agent_;
 
   /* Callbacks */
   void fsmTimerCallback(); // For looping publish
@@ -73,24 +79,39 @@ private:
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
+  cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
+
   bool map_updated_ = false;
   size_t num_poses_before_; // DEBUG
 
-  std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0};
+  // DEBUG: test maps
+  // std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                               0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
   cg::mapping::Map<float> design_height_map_;
   float threshold_z_ = 0.03; // TODO: make this a config parameter
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
-  cg_msgs::msg::Pose2D current_agent_pose_;
+  cg_msgs::msg::Pose2D current_agent_pose_; // TODO: make callback so this gets updated, assumed to be in local map frame!
   bool enable_worksystem_ = false;
+  cg_msgs::msg::Trajectory current_trajectory_; // TODO: actually use this
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;

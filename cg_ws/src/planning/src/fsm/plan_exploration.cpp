@@ -8,13 +8,16 @@ void PlanExploration::runState(cg::planning::ExplorationPlanner &exploration_pla
   std::cout << "PLAN_EXPLORATION" << std::endl;
 
   exploration_planned_ = exploration_planner.planExploration(map);
-
-  // Only update for shared current state and the precursing signal for valid plan
-  if (exploration_planned_) {
-    pre_signal_ = Signal::EXPLORATION_PLANNED;
-    curr_state_ = State::GET_EXPLORATION_GOALS;
-    exploration_planned_ = false; // Reset for next cycle
+  
+  // Don't move to next state if planning was unsuccessful
+  if (!exploration_planned_) {
+    return;
   }
+
+  // Update for shared current state and the precursing signal
+  pre_signal_ = Signal::EXPLORATION_PLANNED;
+  curr_state_ = State::GET_EXPLORATION_GOALS;
+  exploration_planned_ = false; // Reset for next cycle
 }
 
 } // planning namespace
