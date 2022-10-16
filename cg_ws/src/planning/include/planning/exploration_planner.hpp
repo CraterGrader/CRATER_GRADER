@@ -12,13 +12,13 @@ class ExplorationPlanner : public GoalPlanner {
 
 public:
   ExplorationPlanner() {};
- 
-  void init_nodes(const cg::mapping::Map<float> &current_height_map);
+  bool planExploration(const cg::mapping::Map<float> &map);
   std::vector<cg_msgs::msg::Pose2D> getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
 
 private:
   static constexpr double min_dist_from_map_boundary_ = 0.5;
+  std::vector<cg_msgs::msg::Pose2D> exploration_waypoints_;
 };
 
 } // namespace planning

@@ -2,8 +2,8 @@
 colors
 @enduml
 
-@startuml PlanningFSM_20221011_REV01
-mainframe PlanningFSM_20221011_REV01
+@startuml PlanningFSM_20221015_REV02
+mainframe PlanningFSM_20221015_REV02
 ' Formatting
 ' ------------------------------------
 hide empty description
@@ -69,25 +69,23 @@ state FallBack #Gainsboro {
 }
 
 ' Driving states
-state DriveToGoals #Magenta {
-  state FollowTrajectory #Magenta
-  state EscapeManeuver #Magenta
-  state GetWorksystemTrajectory #Magenta
-    GetWorksystemTrajectory : Call Kinematic, Velocity, Tool planners
-  state GoalsRemaining <<choice>>
-    note right of GoalsRemaining
-      GoalsRemaining?
-    end note
+state FollowingTrajectory #Magenta
+state EscapeManeuver #Magenta
+state GetWorksystemTrajectory #Magenta
+  GetWorksystemTrajectory : Call Kinematic, Velocity, Tool planners
+state GoalsRemaining <<choice>>
+  note right of GoalsRemaining
+    GoalsRemaining?
+  end note
 
-  ' Driving state interactions
-  GoalsRemaining --> GetWorksystemTrajectory : yes
-    GetWorksystemTrajectory --> FollowTrajectory : follow_trajectory
-      FollowTrajectory --> GoalsRemaining : goal_reached
-      FollowTrajectory --> EscapeManeuver : stuck
-        EscapeManeuver --> FollowTrajectory : not_stuck
-        EscapeManeuver -->  CallForHelp : abort
-  GoalsRemaining --> UpdateMap : no
-} 
+' Driving state interactions
+GoalsRemaining --> GetWorksystemTrajectory : yes
+  GetWorksystemTrajectory --> FollowingTrajectory : follow_trajectory
+    FollowingTrajectory --> GoalsRemaining : goal_reached
+    FollowingTrajectory --> EscapeManeuver : stuck
+      EscapeManeuver --> FollowingTrajectory : not_stuck
+      EscapeManeuver -->  CallForHelp : abort
+GoalsRemaining --> UpdateMap : no
 
 ' Global state interactions
 [*] --> UpdateMap : start

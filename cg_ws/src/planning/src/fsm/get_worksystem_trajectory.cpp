@@ -27,8 +27,8 @@ namespace planning {
   std::cout << "GET_WORKSYSTEM_TRAJECTORY" << std::endl;
 
   // Update shared current state and the precursing signal
-  pre_signal_ = Signal::STOP;
-  curr_state_ = State::STOPPED;
+  pre_signal_ = Signal::FOLLOW_TRAJECTORY;
+  curr_state_ = State::FOLLOWING_TRAJECTORY;
 }
 
 } // planning namespace
