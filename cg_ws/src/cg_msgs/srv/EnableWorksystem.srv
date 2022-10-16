@@ -1,0 +1,5 @@
+#request
+bool enable_worksystem
+---
+#response
+bool worksystem_enabled
