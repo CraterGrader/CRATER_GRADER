@@ -15,7 +15,7 @@ colcon build --symlink-install --packages-up-to planning
 
 2. Run the tests.
 ```
-colcon test --symlink-install --packages-select planning --event-handlers console_cohesion+
+colcon test --packages-select planning --event-handlers console_cohesion+
 ```
 
 ## Visualization
