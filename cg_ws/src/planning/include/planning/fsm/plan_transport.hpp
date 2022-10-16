@@ -2,6 +2,7 @@
 #define PLANNING__PLAN_TRANSPORT_HPP
 
 #include <planning/fsm/fsm.hpp>
+#include <planning/transport_planner.hpp>
 
 namespace cg {
 namespace planning {
@@ -10,7 +11,7 @@ namespace planning {
 class PlanTransport : public FSM {
 
 public:
-  void runState(); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(cg::planning::TransportPlanner &transport_planner, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z); // Main function to run current state; optionally modifies signal and state for transition
 
 }; // class State
 

@@ -2,6 +2,7 @@
 #define PLANNING__PLAN_EXPLORATION_HPP
 
 #include <planning/fsm/fsm.hpp>
+#include <planning/exploration_planner.hpp>
 
 namespace cg {
 namespace planning {
@@ -10,7 +11,10 @@ namespace planning {
 class PlanExploration : public FSM {
 
 public:
-  void runState(); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(cg::planning::ExplorationPlanner &exploration_planner, const cg::mapping::Map<float> &map); // Main function to run current state; optionally modifies signal and state for transition
+
+private:
+  bool exploration_planned_ = false;
 
 }; // class State
 

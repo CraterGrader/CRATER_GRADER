@@ -42,6 +42,8 @@ std::string FSM::currStateToString() {
       return "GOALS_REMAINING";
     case State::GET_WORKSYSTEM_TRAJECTORY:
       return "GET_WORKSYSTEM_TRAJECTORY";
+    case State::FOLLOWING_TRAJECTORY:
+      return "FOLLOWING_TRAJECTORY";
     case State::STOPPED:
       return "STOPPED";
     default:
@@ -68,6 +70,10 @@ std::string FSM::preSignalToString()
       return "EXPLORATION_PLANNED";
     case Signal::DRIVE:
       return "DRIVE";
+    case Signal::FOLLOW_TRAJECTORY:
+      return "FOLLOW_TRAJECTORY";
+    case Signal::GOAL_REACHED:
+      return "GOAL_REACHED";
     default:
       return "Signal not recognized!";
   }

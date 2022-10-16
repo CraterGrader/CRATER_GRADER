@@ -40,6 +40,17 @@ ament_target_dependencies(odom_node
   cg_msgs
   tf2_ros
 )
+add_executable(worksystem_control_node src/worksystem_control_main.cpp
+  src/worksystem_control_node.cpp
+  src/longitudinal_controller.cpp
+  src/lateral_controller.cpp
+  src/pid_controller.cpp
+)
+ament_target_dependencies(worksystem_control_node
+  rclcpp
+  cg_msgs
+  nav_msgs
+)
 
 # Code testing
 if(BUILD_TESTING)
@@ -52,6 +63,9 @@ install(TARGETS cmd_mux
   DESTINATION lib/${PROJECT_NAME}
 )
 install(TARGETS odom_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS worksystem_control_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
