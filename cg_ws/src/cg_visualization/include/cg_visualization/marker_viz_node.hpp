@@ -4,7 +4,6 @@
 #include <cg_msgs/msg/actuator_state.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
-#include <>
 
 namespace cg
 {
