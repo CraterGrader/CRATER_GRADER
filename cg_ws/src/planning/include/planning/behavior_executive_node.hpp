@@ -4,6 +4,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <mapping/map.hpp>
 #include <cg_msgs/srv/site_map.hpp> // Service for receiving SiteMap height data
+#include <cg_msgs/srv/update_trajectory.hpp>   // Service for updating current trajectory
+#include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
 
 // Finite state machine and states
 #include <planning/fsm/fsm.hpp>
@@ -33,11 +35,17 @@ private:
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
-  rclcpp::CallbackGroup::SharedPtr client_cb_group_;
+  rclcpp::CallbackGroup::SharedPtr site_map_client_group_;
+  rclcpp::CallbackGroup::SharedPtr update_trajectory_client_group_;
+  rclcpp::CallbackGroup::SharedPtr enable_worksystem_client_group_;
   rclcpp::CallbackGroup::SharedPtr timer_cb_group_;
   rclcpp::TimerBase::SharedPtr timer_; // For controlled looping map updates
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
+  rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
+  rclcpp::Client<cg_msgs::srv::EnableWorksystem>::SharedPtr enable_worksystem_client_;
   bool updateMapFromService(bool verbose);
+  bool updateTrajectoryService(bool verbose);
+  bool enableWorksystemService(bool verbose);
 
   long int timer_callback_ms_ = 2000;
   long int service_response_timeout_sec_ = 2;

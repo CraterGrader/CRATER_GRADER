@@ -6,7 +6,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include "motion_control/lateral_controller.hpp"
 #include "motion_control/longitudinal_controller.hpp"
-#include <cg_msgs/srv/send_trajectory.hpp> // Service for updating current trajectory
+#include <cg_msgs/srv/update_trajectory.hpp> // Service for updating current trajectory
 #include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
 
 namespace cg {
@@ -28,9 +28,9 @@ private:
   void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
   /* Services */
-  rclcpp::Service<cg_msgs::srv::SendTrajectory>::SharedPtr update_trajectory_server_;
+  rclcpp::Service<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_server_;
   rclcpp::Service<cg_msgs::srv::EnableWorksystem>::SharedPtr enable_worksystem_server_;
-  void updateTrajectory(cg_msgs::srv::SendTrajectory::Request::SharedPtr req, cg_msgs::srv::SendTrajectory::Response::SharedPtr res);
+  void updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res);
   void enableWorksystem(cg_msgs::srv::EnableWorksystem::Request::SharedPtr req, cg_msgs::srv::EnableWorksystem::Response::SharedPtr res);
 
   /* Controllers */

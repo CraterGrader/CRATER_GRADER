@@ -9,11 +9,15 @@ namespace planning {
 
     /* Initialize services */
     // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
-    client_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    update_trajectory_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    enable_worksystem_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
     timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
     // Create the service client, joined to the callback group
-    site_map_client_ = this->create_client<cg_msgs::srv::SiteMap>("site_map_server", rmw_qos_profile_services_default, client_cb_group_);
+    site_map_client_ = this->create_client<cg_msgs::srv::SiteMap>("site_map_server", rmw_qos_profile_services_default, site_map_client_group_);
+    update_trajectory_client_ = this->create_client<cg_msgs::srv::UpdateTrajectory>("update_trajectory_server", rmw_qos_profile_services_default, update_trajectory_client_group_);
+    enable_worksystem_client_ = this->create_client<cg_msgs::srv::EnableWorksystem>("enable_worksystem_server", rmw_qos_profile_services_default, enable_worksystem_client_group_);
 
     // Timer callback, joined to the callback group
     timer_ = this->create_wall_timer(std::chrono::milliseconds(timer_callback_ms_), std::bind(&BehaviorExecutive::timerCallback, this), timer_cb_group_);
@@ -35,12 +39,69 @@ namespace planning {
     design_height_map_.setCellData(designTOPO_);
   }
 
+bool BehaviorExecutive::updateTrajectoryService(bool verbose = false) {
+  // Create a request for the UpdateTrajectory service call
+  auto request = std::make_shared<cg_msgs::srv::UpdateTrajectory::Request>();
+  cg_msgs::msg::Trajectory new_traj; // DEBUG
+  std::vector<cg_msgs::msg::Pose2D> path = {create_pose2d(0.0, 0.0, 0.0), create_pose2d(1.0, 0.0, 0.0)};
+  std::vector<float> velocity_targets = {1.0, 1.0};
+  std::vector<float> tool_positions = {0.0, 0.0};
+  new_traj.path = path;
+  new_traj.velocity_targets = velocity_targets;
+  new_traj.tool_positions = tool_positions;
+  request->trajectory = new_traj;
+
+  // Send request
+  if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending UpdateTrajectory request");}
+  auto result_future = update_trajectory_client_->async_send_request(request);
+
+  // Wait for response, until timeout at maximum
+  std::future_status status = result_future.wait_for(std::chrono::seconds(service_response_timeout_sec_));
+
+  // Get response data and indicate if map was successfully updated or not
+  if (status == std::future_status::ready) {
+    if (verbose) {RCLCPP_INFO(this->get_logger(), "Received UpdateTrajectory response");}
+    auto response = result_future.get();
+    // Report response status
+    return response->updated_trajectory;
+  }
+  else {
+    if (verbose) {RCLCPP_INFO(this->get_logger(), "No UpdateTrajectory response");}
+    return false;
+  }
+}
+
+bool BehaviorExecutive::enableWorksystemService(bool verbose = false) {
+  // Create a request for the EnableWorksystem service call
+  auto request = std::make_shared<cg_msgs::srv::EnableWorksystem::Request>();
+  request->enable_worksystem = true;
+
+  // Send request
+  if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending EnableWorksystem request");}
+  auto result_future = enable_worksystem_client_->async_send_request(request);
+
+  // Wait for response, until timeout at maximum
+  std::future_status status = result_future.wait_for(std::chrono::seconds(service_response_timeout_sec_));
+
+  // Get response data and indicate if map was successfully updated or not
+  if (status == std::future_status::ready) {
+    if (verbose) {RCLCPP_INFO(this->get_logger(), "Received EnableWorksystem response");}
+    auto response = result_future.get();
+    // Report response status
+    return response->worksystem_enabled;
+  }
+  else {
+    if (verbose) {RCLCPP_INFO(this->get_logger(), "No EnableWorksystem response");}
+    return false;
+  }
+}
+
 bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
   // Create a request for the SiteMap service call
   auto request = std::make_shared<cg_msgs::srv::SiteMap::Request>();
 
   // Send request
-  if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending request");}
+  if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending SiteMap request");}
   auto result_future = site_map_client_->async_send_request(request);
 
   // Wait for response, until timeout at maximum
@@ -48,7 +109,7 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
 
   // Get response data and indicate if map was successfully updated or not
   if (status == std::future_status::ready) {
-    if (verbose) {RCLCPP_INFO(this->get_logger(), "Received response");}
+    if (verbose) {RCLCPP_INFO(this->get_logger(), "Received SiteMap response");}
     auto response = result_future.get();
     // Only update height map if data is valid
     if (response->success) {
@@ -58,7 +119,7 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
     return false;
   }
   else {
-    if (verbose) {RCLCPP_INFO(this->get_logger(), "No response");}
+    if (verbose) {RCLCPP_INFO(this->get_logger(), "No SiteMap response");}
     return false;
   }
 }
@@ -121,6 +182,8 @@ void BehaviorExecutive::timerCallback()
     break;
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
     get_worksystem_trajectory_.runState();
+    updateTrajectoryService(true);
+    enableWorksystemService(true);
     break;
   case cg::planning::FSM::State::STOPPED:
     stopped_.runState();

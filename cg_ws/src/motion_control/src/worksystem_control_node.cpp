@@ -6,7 +6,7 @@ namespace motion_control {
 WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node") {
 
   // Initialize services
-  update_trajectory_server_ = this->create_service<cg_msgs::srv::SendTrajectory>(
+  update_trajectory_server_ = this->create_service<cg_msgs::srv::UpdateTrajectory>(
       "update_trajectory_server",
       std::bind(&WorksystemControlNode::updateTrajectory, this, std::placeholders::_1, std::placeholders::_2));
   enable_worksystem_server_ = this->create_service<cg_msgs::srv::EnableWorksystem>(
@@ -24,7 +24,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
 }
 
-void WorksystemControlNode::updateTrajectory(cg_msgs::srv::SendTrajectory::Request::SharedPtr req, cg_msgs::srv::SendTrajectory::Response::SharedPtr res)
+void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)
 {
   current_trajectory_ = req->trajectory; // Update current trajectory
   res->updated_trajectory = true; // Set response confirmation
