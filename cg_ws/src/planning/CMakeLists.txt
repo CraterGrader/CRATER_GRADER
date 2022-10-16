@@ -55,6 +55,9 @@ add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/transport_planner.cpp
   src/exploration_planner.cpp
   src/common.cpp
+  src/kinematic_planner.cpp
+  # External Linkings
+  ../mapping/src/map_util.cpp
 )
 ament_target_dependencies(behavior_executive_node
   rclcpp
