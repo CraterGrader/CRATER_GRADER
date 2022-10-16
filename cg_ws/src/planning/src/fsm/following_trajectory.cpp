@@ -5,7 +5,7 @@ namespace cg {
 namespace planning {
 
 void FollowingTrajectory::runState() {
-  std::cout << "FOLLOW_TRAJECTORY" << std::endl;
+  std::cout << "FOLLOWING_TRAJECTORY" << std::endl;
 
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::GOAL_REACHED;

@@ -74,7 +74,7 @@ bool BehaviorExecutive::updateTrajectoryService(bool verbose = false) {
 bool BehaviorExecutive::enableWorksystemService(bool verbose = false) {
   // Create a request for the EnableWorksystem service call
   auto request = std::make_shared<cg_msgs::srv::EnableWorksystem::Request>();
-  request->enable_worksystem = true;
+  request->enable_worksystem = enable_worksystem_;
 
   // Send request
   if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending EnableWorksystem request");}
@@ -182,13 +182,25 @@ void BehaviorExecutive::timerCallback()
     break;
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
     get_worksystem_trajectory_.runState();
-    updateTrajectoryService(true);
+    // TODO: actually send the real trajectory
+    if(updateTrajectoryService(true)) {
+      // The trajectory was updated, so enable worksystem
+      enable_worksystem_ = true;
+    } else {
+      // Don't enable the worksystem for invalid trajectory
+      enable_worksystem_ = false;
+    }
     enableWorksystemService(true);
     break;
   case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:
     following_trajectory_.runState();
     break;
   case cg::planning::FSM::State::STOPPED:
+    // Stop the worksystem
+    enable_worksystem_ = false;
+    enableWorksystemService(true);
+    
+    // Run state
     stopped_.runState();
     break;
   default:

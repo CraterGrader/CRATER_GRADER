@@ -79,6 +79,7 @@ private:
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   cg_msgs::msg::Pose2D current_agent_pose_;
+  bool enable_worksystem_ = false;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;
