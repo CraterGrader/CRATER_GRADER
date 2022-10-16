@@ -1,18 +1,6 @@
 #include <gtest/gtest.h>
 // Finite state machine and states
 #include <planning/fsm/fsm.hpp>
-#include <planning/fsm/ready.hpp>
-#include <planning/fsm/update_map.hpp>
-#include <planning/fsm/site_work_done.hpp>
-#include <planning/fsm/map_explored.hpp>
-#include <planning/fsm/replan_transport.hpp>
-#include <planning/fsm/plan_transport.hpp>
-#include <planning/fsm/get_transport_goals.hpp>
-#include <planning/fsm/plan_exploration.hpp>
-#include <planning/fsm/get_exploration_goals.hpp>
-#include <planning/fsm/goals_remaining.hpp>
-#include <planning/fsm/get_worksystem_trajectory.hpp>
-#include <planning/fsm/stopped.hpp>
 
 TEST(FSMTest, init_manual_test)
 { 

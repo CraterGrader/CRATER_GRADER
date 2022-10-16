@@ -169,7 +169,7 @@ void BehaviorExecutive::timerCallback()
     std::cout << "    Pose3 <x,y,yaw>: < " << current_goal_poses_[2].pt.x << ", " << current_goal_poses_[2].pt.y << ", " << current_goal_poses_[2].yaw << " >" << std::endl;
     break;
   case cg::planning::FSM::State::PLAN_EXPLORATION:
-    plan_exploration_.runState();
+    plan_exploration_.runState(exploration_planner_, current_height_map_);
     break;
   case cg::planning::FSM::State::GET_EXPLORATION_GOALS:
     get_exploration_goals_.runState(current_goal_poses_, exploration_planner_, current_agent_pose_, current_height_map_);
