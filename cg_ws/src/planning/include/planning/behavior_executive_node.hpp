@@ -50,6 +50,7 @@ private:
   /* Important Objects */
   cg::planning::TransportPlanner transport_planner_;
   cg::planning::ExplorationPlanner exploration_planner_;
+  cg::planning::KinematicPlanner kinematic_planner_;
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
@@ -70,6 +71,7 @@ private:
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   cg_msgs::msg::Pose2D current_agent_pose_;
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;
@@ -80,12 +82,12 @@ private:
   cg::planning::SiteWorkDone site_work_done_;
   cg::planning::MapExplored map_explored_;
   cg::planning::ReplanTransport replan_transport_;
-  cg::planning::PlanTransport plan_transport_;
+  cg::planning::PlanTransport plan_transport_; // Transport Planner
   cg::planning::GetTransportGoals get_transport_goals_;
-  cg::planning::PlanExploration plan_exploration_;
-  cg::planning::GetExplorationGoals get_exploration_goals_;
+  cg::planning::PlanExploration plan_exploration_; // Exploration Planner
+  cg::planning::GetExplorationGoals get_exploration_goals_; 
   cg::planning::GoalsRemaining goals_remaining_;
-  cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
+  cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_; // Kinematic Planner
   cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive

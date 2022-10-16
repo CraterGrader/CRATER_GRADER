@@ -120,7 +120,13 @@ void BehaviorExecutive::timerCallback()
     goals_remaining_.runState();
     break;
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
-    get_worksystem_trajectory_.runState();
+    get_worksystem_trajectory_.runState(kinematic_planner_, current_goal_poses_, current_trajectories_, current_agent_pose_, current_height_map_);
+    for (size_t i = 0; i < current_trajectories_.size(); ++i) {
+      std::cout << "Trajectory " << std::to_string(i) << std::endl;
+      for (cg_msgs::msg::Pose2D pose: current_trajectories_[i]) {
+        std::cout << "< " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << " >" << std::endl;
+      }
+    }
     break;
   case cg::planning::FSM::State::STOPPED:
     stopped_.runState();
