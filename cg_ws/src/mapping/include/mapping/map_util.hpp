@@ -17,7 +17,7 @@ int discreteCoordsToCellIndex(size_t x, size_t y, size_t width);
 int continousCoordsToCellIndex(float x, float y, size_t width, float resolution);
 float convertMaptoSiteMapFrame(float pos, float offset);
 cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, const cg_msgs::msg::Pose2D &dest_frame);
-bool mapVsMapThreshold(const std::vector<float> &map1, const std::vector<float> &map2, float threshold);
+bool mapSimilarityWithinThreshold(const std::vector<float> &map1, const std::vector<float> &map2, float threshold);
 
 float rad2deg(float rad);
 float deg2rad(float deg);

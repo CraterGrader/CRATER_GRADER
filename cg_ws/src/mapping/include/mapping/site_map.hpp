@@ -97,7 +97,7 @@ class SiteMap {
   void binPts(std::vector<mapPoint> rawPts); // method to bin points into map
   void updateCellsMean(); // method to update cells based on modified points
   void updateCellsBayes(); // method to update cells based on modified points
-  void mapCoverage(); // method to check if map is all seen or not
+  void updateMapCoverage(); // method to check if map is all seen or not
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
 
   // conversion methods

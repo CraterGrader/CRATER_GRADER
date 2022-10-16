@@ -156,7 +156,7 @@ std::vector<cg::mapping::indexPoint> SiteMap::postProcess(std::vector<cg::mappin
   return goodPts;
 }
 
-void SiteMap::mapCoverage(){
+void SiteMap::updateMapCoverage(){
   bool tempMapFull = true;
   for (size_t i=0; i<getNcells(); i++){
     if (heightMap_[i] == unseenGridHeight_){

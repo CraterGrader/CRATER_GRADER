@@ -92,7 +92,7 @@ void SiteMapNode::PubTimerCallback(){
 
 void SiteMapNode::SiteNormalizeTimerCallback(){
   // check if map is filled
-  siteMap_.mapCoverage();
+  siteMap_.updateMapCoverage();
 }
 
 void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
@@ -121,6 +121,7 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
   res->success = true;
+  siteMap_.updateMapCoverage();
   res->map_fully_explored = siteMap_.getSiteMapFullStatus();
 }
 
