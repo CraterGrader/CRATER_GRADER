@@ -36,7 +36,7 @@ private:
 
   /* Parameters */
   double design_blade_pos_;
-  double max_des_blade_pos_;
+  double raised_blade_pos_;
 
 }; // class AutoGraderNode
 

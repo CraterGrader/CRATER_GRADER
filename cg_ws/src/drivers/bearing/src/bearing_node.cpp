@@ -144,8 +144,8 @@ void BearingNode::timerCallback() {
     
     // Variables for average bearing over the buffer length
     double avg_bearing;
-    double sum_y;
-    double sum_x;
+    double sum_y_angle;
+    double sum_x_angle;
     
     // Instead of averaging the bearing, sum the unit vectors
     this->rolling_sin.push_back(std::sin(best_bearing));
@@ -155,13 +155,14 @@ void BearingNode::timerCallback() {
     if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
+
     }
 
     // Average the unit vectors and get angle
-    sum_y = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
-    sum_x = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
-    avg_bearing = std::atan2(sum_y, sum_x);
-
+    sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
+    sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
+    avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
+    
     // Set the PoseWithCovarianceStamped message's position to 0
     bearing.pose.pose.position.x = 0.0;
     bearing.pose.pose.position.y = 0.0;
@@ -169,7 +170,7 @@ void BearingNode::timerCallback() {
 
     // Convert yaw back into a quarternion for orientation
     tf2::Quaternion q;
-    q.setRPY(0, 0, avg_bearing);
+    q.setRPY(0.0, 0.0, avg_bearing);
 
     // Set the quarternion in the message
     bearing.pose.pose.orientation.x = q.x();
@@ -182,12 +183,12 @@ void BearingNode::timerCallback() {
     bearing.header.frame_id = tf_map_frame;
 
     // Set covariance
-    bearing.pose.covariance =  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                0.0, 0.0, 0.0, 0.0, 0.0, this->bearing_covariance};
+    bearing.pose.covariance =  {0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                0.0,  0.0,  0.0,  0.0,  0.0,  this->bearing_covariance};
 
     // Publish the estimated bearing  
     bearing_pub_->publish(bearing);

@@ -9,11 +9,16 @@ def generate_launch_description():
         'config',
         'terrain_filtering_params.yaml'
     )
-    point_cloud_registration_params =  os.path.join(
+    # point_cloud_registration_params =  os.path.join(
+    #     get_package_share_directory('mapping'),
+    #     'config',
+    #     'point_cloud_registration_params.yaml'
+    # )
+    site_map_params = os.path.join(
         get_package_share_directory('mapping'),
         'config',
-        'point_cloud_registration_params.yaml'
-    )
+        'site_map_params.yaml'
+    ) 
 
 
     return LaunchDescription([
@@ -24,11 +29,11 @@ def generate_launch_description():
             output='screen',
             parameters=[terrain_filtering_params]
         ),
-        # Node(
-        #     package='mapping',
-        #     executable='point_cloud_registration',
-        #     name='point_cloud_registration',
-        #     output='screen',
-        #     parameters=[point_cloud_registration_params]
-        # )
+        Node(
+            package='mapping',
+            executable='site_map',
+            name='site_map',
+            output='screen',
+            parameters=[site_map_params]
+        )
     ])

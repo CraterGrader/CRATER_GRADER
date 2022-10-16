@@ -33,6 +33,7 @@ private:
   // Stores moving average
   std::vector<double> rolling_sin;
   std::vector<double> rolling_cos;
+  std::vector<double> rolling_bearing;
 
   int pub_freq;
   double tf_discard_time;
