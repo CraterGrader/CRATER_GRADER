@@ -109,16 +109,16 @@ if(BUILD_TESTING)
   )
   target_link_libraries(transport_planner_test ortools::ortools)
 
-  # ament_add_gtest(kinematic_planner_test
-  #   test/kinematic_planner_test.cpp
-  #   src/common.cpp
-  #   src/kinematic_planner.cpp
-  #   ../mapping/src/map_util.cpp
-  # )
-  # ament_target_dependencies(kinematic_planner_test
-  #   cg_msgs
-  #   mapping
-  # )
+  ament_add_gtest(kinematic_planner_test
+    test/kinematic_planner_test.cpp
+    src/common.cpp
+    src/kinematic_planner.cpp
+    ../mapping/src/map_util.cpp
+  )
+  ament_target_dependencies(kinematic_planner_test
+    cg_msgs
+    mapping
+  )
 
   ament_add_gtest(velocity_planner_test
     test/velocity_planner_test.cpp
