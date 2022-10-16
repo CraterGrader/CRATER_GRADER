@@ -2,7 +2,6 @@
 #define MAPPING__TERRAIN_FILTER_NODE_HPP
 
 // TODO: FIND WHICH PACKAGES ARE ACTUALLY NEEDED
-
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -41,26 +40,20 @@ public:
   std::string source_frame_;
   sensor_msgs::msg::PointCloud2 cloud_in_, cloud_out_;
   sensor_msgs::msg::PointCloud2 box_cloud_out_;
-
   pcl::CropBox<pcl::PointXYZ> crop;
-
 
 private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_points_pub_;
-  // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr below_points_pub_;
-  // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr above_points_pub_;
-  // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr plane_points_pub_;
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr raw_points_sub_;
 
   /* Callbacks */
   void rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 
+  /* Parameters */
   bool use_sor_;
   int sor_mean_k_;
   double sor_stddev_mul_thresh_;
-  bool use_plane_seg_;
-  double plane_seg_dist_thresh_;
 };
 
 
