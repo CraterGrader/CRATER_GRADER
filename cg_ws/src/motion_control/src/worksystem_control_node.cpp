@@ -13,6 +13,20 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
       "enable_worksystem_server",
       std::bind(&WorksystemControlNode::enableWorksystem, this, std::placeholders::_1, std::placeholders::_2));
 
+  // Initialize subscribers
+  // Casting to std::function is necessary when defining callbacks with additional parameters
+  // due to a bug in ROS2 (More info: https://answers.ros.org/question/308386/ros2-add-arguments-to-callback/)
+  std::function<void(const nav_msgs::msg::Odometry::SharedPtr msg)> global_callback_fn = std::bind(
+      &WorksystemControlNode::robotStateCallback, this, std::placeholders::_1, global_robot_state_
+  );
+  std::function<void(const nav_msgs::msg::Odometry::SharedPtr msg)> local_callback_fn = std::bind(
+      &WorksystemControlNode::robotStateCallback, this, std::placeholders::_1, local_robot_state_
+  );
+  global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+    "/odometry/filtered/ekf_global_node",1, global_callback_fn);
+  local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+    "/odometry/filtered/ekf_odom_node",1, local_callback_fn);
+
   // Load parameters
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
   this->get_parameter("longitudinal_velocity_kp", longitudinal_velocity_kp_);
@@ -28,6 +42,10 @@ void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Req
 {
   current_trajectory_ = req->trajectory; // Update current trajectory
   res->updated_trajectory = true; // Set response confirmation
+}
+
+void WorksystemControlNode::robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg) {
+  out_msg = *msg;
 }
 
 void WorksystemControlNode::enableWorksystem(cg_msgs::srv::EnableWorksystem::Request::SharedPtr req, cg_msgs::srv::EnableWorksystem::Response::SharedPtr res)

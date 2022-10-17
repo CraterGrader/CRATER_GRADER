@@ -20,12 +20,11 @@ public:
 private: 
   /* Publishers and Subscribers */
   rclcpp::Publisher<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_pub_;
-  rclcpp::Subscription<cg_msgs::msg::Trajectory>::SharedPtr trajectory_sub_;
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr robot_state_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr local_robot_state_sub_;
 
   /* Callbacks */
-  void trajectoryCallback(const cg_msgs::msg::Trajectory::SharedPtr msg);
-  void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+  void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg);
 
   /* Services */
   rclcpp::Service<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_server_;
@@ -47,7 +46,8 @@ private:
   /* Variables */
   cg_msgs::msg::Trajectory current_trajectory_;
   bool worksystem_enabled_;
-
+  nav_msgs::msg::Odometry global_robot_state_;
+  nav_msgs::msg::Odometry local_robot_state_;
 }; // class WorksystemControlNode
 
 } // namespace motion_control
