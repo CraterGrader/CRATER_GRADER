@@ -27,6 +27,10 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "/odometry/filtered/ekf_odom_node",1, local_callback_fn);
 
+  // Initialize publishers
+  cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
+    "/autonomous_control_cmd", 1);
+
   // Load parameters
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
   this->get_parameter("longitudinal_velocity_kp", longitudinal_velocity_kp_);
