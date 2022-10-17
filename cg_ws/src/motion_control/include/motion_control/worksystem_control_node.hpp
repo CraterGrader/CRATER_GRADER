@@ -22,9 +22,11 @@ private:
   rclcpp::Publisher<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_pub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr local_robot_state_sub_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */
   void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg);
+  void timerCallback();
 
   /* Services */
   rclcpp::Service<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_server_;

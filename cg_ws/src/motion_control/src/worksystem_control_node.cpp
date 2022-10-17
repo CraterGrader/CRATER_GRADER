@@ -31,6 +31,11 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
     "/autonomous_control_cmd", 1);
 
+  timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(100),
+    std::bind(&WorksystemControlNode::timerCallback, this)
+  );
+
   // Load parameters
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
   this->get_parameter("longitudinal_velocity_kp", longitudinal_velocity_kp_);
@@ -40,6 +45,10 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_kd", longitudinal_velocity_kd_);
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
+}
+
+void WorksystemControlNode::timerCallback() {
+  // TODO
 }
 
 void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)
