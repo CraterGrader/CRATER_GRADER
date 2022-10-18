@@ -35,8 +35,8 @@ private:
   void enableWorksystem(cg_msgs::srv::EnableWorksystem::Request::SharedPtr req, cg_msgs::srv::EnableWorksystem::Response::SharedPtr res);
 
   /* Controllers */
-  LongitudinalController lon_controller_;
-  LateralController lat_controller_;
+  std::unique_ptr<LongitudinalController> lon_controller_;
+  std::unique_ptr<LateralController> lat_controller_;
 
   /* Parameters */  
   PIDParams pid_params_;

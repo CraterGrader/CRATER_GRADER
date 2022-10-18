@@ -10,7 +10,6 @@ namespace motion_control {
 
 class LongitudinalController {
 public:
-  LongitudinalController() {}
   LongitudinalController(const PIDParams &params);
   double computeDrive(
     // TODO should this be refactored to take a single TrajectoryPoint?

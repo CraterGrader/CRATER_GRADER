@@ -57,7 +57,9 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
 
-
+  // Initialize controllers
+  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_));
+  lat_controller_ = std::make_unique<LateralController>(LateralController(lateral_stanley_gain_));
 }
 
 void WorksystemControlNode::timerCallback() {
