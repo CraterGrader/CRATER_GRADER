@@ -107,7 +107,8 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     break;
   case cg::planning::FSM::State::GOALS_REMAINING:
-    goals_remaining_.runState();
+    goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
+    std::cout << "    Current Pose <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     break;
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
     get_worksystem_trajectory_.runState(kinematic_planner_, current_goal_poses_, current_trajectories_, current_agent_pose_, current_height_map_);

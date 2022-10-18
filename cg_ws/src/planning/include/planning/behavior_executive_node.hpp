@@ -110,6 +110,7 @@ private:
   float threshold_z_ = 0.03; // TODO: make this a config parameter
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
+  cg_msgs::msg::Pose2D current_goal_pose_;
   cg_msgs::msg::Pose2D current_agent_pose_; // TODO: make callback so this gets updated, assumed to be in local map frame!
   bool enable_worksystem_ = false;
   cg_msgs::msg::Trajectory current_trajectory_; // TODO: actually use this
