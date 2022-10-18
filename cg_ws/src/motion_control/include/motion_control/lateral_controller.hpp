@@ -1,7 +1,11 @@
 #pragma once
 
+#include <cmath> // arctangent
 #include <cg_msgs/msg/trajectory.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <planning/common.hpp>
+#include <tf2/LinearMath/Quaternion.h> // For visualizing the current goal poses
+#include <tf2/utils.h> // Yaw getter
 
 namespace cg {
 namespace motion_control {
@@ -11,7 +15,6 @@ public:
   LateralController() {}
   LateralController(double k, double stanley_softening_constant_);
   double computeSteer(
-    // TODO should this be refactored to take a single TrajectoryPoint?
     const cg_msgs::msg::Trajectory &target_trajectory,
     const nav_msgs::msg::Odometry &current_state);
 
@@ -26,4 +29,3 @@ private:
 
 } // namespace motion_control
 } // namespace cg
-
