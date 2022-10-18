@@ -9,7 +9,7 @@ namespace motion_control {
 class LateralController {
 public:
   LateralController() {}
-  LateralController(double k);
+  LateralController(double k, double stanley_softening_constant_);
   double computeSteer(
     // TODO should this be refactored to take a single TrajectoryPoint?
     const cg_msgs::msg::Trajectory &target_trajectory,
@@ -21,6 +21,7 @@ private:
     const double cross_track_err,
     const double velocity) const;
   double k_;  // Stanley controller gain
+  double stanley_softening_constant_;
 };
 
 } // namespace motion_control
