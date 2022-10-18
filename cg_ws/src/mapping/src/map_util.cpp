@@ -88,5 +88,24 @@ cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, con
     return dest_pt;
 }
 
+/**
+ * @brief
+ *
+ * @param map1
+ * @param map2
+ * @param threshold
+ * @return true
+ * @return false
+ */
+bool mapSimilarityWithinThreshold(const std::vector<float> &map1, const std::vector<float> &map2, float threshold){
+    // compare each cell check within threshold
+    for (size_t i=0; i<(map1.size()); i++){
+        if (fabs(map1[i] - map2[i]) > threshold){
+            return false;
+        }
+    }
+    return true;
+}
+
 } // mapping namespace
 } // cg namespace

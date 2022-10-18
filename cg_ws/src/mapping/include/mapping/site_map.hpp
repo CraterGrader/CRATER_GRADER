@@ -97,7 +97,7 @@ class SiteMap {
   void binPts(std::vector<mapPoint> rawPts); // method to bin points into map
   void updateCellsMean(); // method to update cells based on modified points
   void updateCellsBayes(); // method to update cells based on modified points
-  // void normalizeSiteMap(); // method to update cells based on modified points
+  void updateMapCoverage(); // method to check if map is all seen or not
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
 
   // conversion methods
@@ -113,14 +113,15 @@ class SiteMap {
   std::vector<float> getHeightMap() const {return heightMap_;}
   float getXTransform() const {return xTransform_;}
   float getYTransform() const {return yTransform_;}
+  bool getSiteMapFullStatus() const {return siteMapFull_;}
 
   private:
+  // Uncomment this line when not testing 
   // std::vector<float> heightMap_;       // "view 1"
   std::vector<CellHistory> filterMap_; // "view 2" 
   std::vector<CellBayes> varianceMap_; // "view 3" 
+  bool siteMapFull_ = false; 
   float zTransform_ = 0.0f;
-  bool siteNormalized = false;
-  bool siteMapFull = false; 
 
   // DEBUG: test maps
   // std::vector<float> heightMap_{0,    0,    0,    0,    0,    0,    0,    0,    0, 
