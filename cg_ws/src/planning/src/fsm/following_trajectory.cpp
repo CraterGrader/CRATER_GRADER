@@ -4,7 +4,7 @@
 namespace cg {
 namespace planning {
 
-void FollowingTrajectory::runState() {
+void FollowingTrajectory::runState(const cg_msgs::msg::Pose2D &current_agent_pose, const cg_msgs::msg::Pose2D &current_goal_pose) {
   std::cout << "FOLLOWING_TRAJECTORY" << std::endl;
 
   // Update shared current state and the precursing signal

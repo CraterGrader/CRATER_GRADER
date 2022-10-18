@@ -2,6 +2,7 @@
 #define PLANNING__FOLLOWING_TRAJECTORY_HPP
 
 #include <planning/fsm/fsm.hpp>
+#include <cg_msgs/msg/pose2_d.hpp>
 
 namespace cg {
 namespace planning {
@@ -10,7 +11,7 @@ namespace planning {
 class FollowingTrajectory : public FSM {
 
 public:
-  void runState(); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(const cg_msgs::msg::Pose2D &current_agent_pose, const cg_msgs::msg::Pose2D &current_goal_pose); // Main function to run current state; optionally modifies signal and state for transition
 
 }; // class State
 

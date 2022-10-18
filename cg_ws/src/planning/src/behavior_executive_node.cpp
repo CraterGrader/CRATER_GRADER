@@ -150,7 +150,7 @@ void BehaviorExecutive::fsmTimerCallback()
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
   case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:
-    following_trajectory_.runState();
+    following_trajectory_.runState(current_agent_pose_, current_goal_pose_);
     break;
   case cg::planning::FSM::State::STOPPED:
     // Stop the worksystem

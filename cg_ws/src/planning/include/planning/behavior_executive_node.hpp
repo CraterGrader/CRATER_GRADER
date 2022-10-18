@@ -163,7 +163,8 @@ private:
 
 /**
  * TODO
- * - Agent callback
- * - Check if goal is reached to transition out of following
- * - Map checks
+ * [X] Agent callback
+ * [ ] Check if goal is reached to transition out of following
+ * [ ] Map checks
+ * [ ] Make check for autonomous mode
  */
