@@ -13,7 +13,7 @@ namespace motion_control {
 class LongitudinalController {
 public:
   LongitudinalController(const PIDParams &params);
-  PIDController& getVelocityController() {return *velocity_controller_;}
+  void setGains(const double kp, const double ki, const double kd);
   double computeDrive(
     // TODO should this be refactored to take a single TrajectoryPoint?
     const cg_msgs::msg::Trajectory &target_trajectory,

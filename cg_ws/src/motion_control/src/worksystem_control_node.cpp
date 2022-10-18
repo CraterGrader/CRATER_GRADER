@@ -64,7 +64,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 
 void WorksystemControlNode::timerCallback() {
   // TODO implement gain scheduling if deemed necessary
-  lon_controller_->getVelocityController().setGains(pid_params_.kp, pid_params_.ki, pid_params_.kd);
+  lon_controller_->setGains(pid_params_.kp, pid_params_.ki, pid_params_.kd);
 }
 
 void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)
