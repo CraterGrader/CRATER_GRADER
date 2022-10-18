@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-#include <planning/velocity_planner.hpp>
+#include <planning/tool_planner.hpp>
 
 namespace cg {
 namespace planning {
 
 
-TEST(VelocityPlannerTest, constructorTest)
+TEST(ToolPlannerTest, constructorTest)
 {
 
   cg_msgs::msg::Pose2D start_pose = create_pose2d(0,0,deg2rad(0));
@@ -16,23 +16,27 @@ TEST(VelocityPlannerTest, constructorTest)
     cg::planning::create_pose2d(0.5, 1.5, deg2rad(0)),
     cg::planning::create_pose2d(1.5, 1.5, deg2rad(0))};
 
-  double constant_vel = 1.5;
-  VelocityPlanner velocity_planner = VelocityPlanner(constant_vel);
+  double design_blade_height = 0;
+  double raised_blade_height = 1;
+  ToolPlanner tool_planner = ToolPlanner(design_blade_height, raised_blade_height);
+
 
   cg_msgs::msg::Trajectory trajectory;
   trajectory.set__path(path);
 
   cg::mapping::Map<float> map;
 
-  velocity_planner.generateVelocityTargets(
+  tool_planner.generateToolTargets(
     trajectory,
     start_pose,
     map);
 
-  std::cout << "Velocity targets:\n";
-  for (float velocity: trajectory.velocity_targets) {
-    EXPECT_NEAR(velocity, constant_vel, 0.001);
+  std::cout << "Tool positions:\n";
+  for (float tool_pos: trajectory.tool_positions) {
+    std::cout << tool_pos << std::endl;
   }
+
+  EXPECT_EQ(trajectory.tool_positions[0], 0);
 
 }
 

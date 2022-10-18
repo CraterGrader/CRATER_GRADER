@@ -3,7 +3,8 @@
 
 #include <planning/fsm/fsm.hpp>
 #include <planning/kinematic_planner.hpp>
-
+#include <planning/tool_planner.hpp>
+#include <planning/velocity_planner.hpp>
 
 namespace cg {
 namespace planning {

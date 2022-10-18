@@ -92,6 +92,8 @@ private:
   cg::planning::TransportPlanner transport_planner_;
   cg::planning::ExplorationPlanner exploration_planner_;
   cg::planning::KinematicPlanner kinematic_planner_;
+  cg::planning::ToolPlanner tool_planner_;
+  cg::planning::VelocityPlanner velocity_planner_;
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;

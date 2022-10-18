@@ -131,8 +131,11 @@ void BehaviorExecutive::fsmTimerCallback()
       kinematic_planner_.generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
 
       // TODO: update velocity trajectory
+      velocity_planner_.generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);
 
       // TODO: update tool trajectory
+      tool_planner_.generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+
       calculated_trajectory_ = true;
     }
 

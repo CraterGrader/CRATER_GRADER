@@ -56,6 +56,8 @@ add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/exploration_planner.cpp
   src/common.cpp
   src/kinematic_planner.cpp
+  src/tool_planner.cpp
+  src/velocity_planner.cpp
   # External Linkings
   ../mapping/src/map_util.cpp
 )
@@ -124,8 +126,24 @@ if(BUILD_TESTING)
     test/velocity_planner_test.cpp
     include/planning/velocity_planner.hpp
     src/velocity_planner.cpp
+    src/common.cpp
+    ../mapping/src/map.cpp
+    ../mapping/src/map_util.cpp
   )
   ament_target_dependencies(velocity_planner_test
+    cg_msgs
+    mapping
+  )
+
+  ament_add_gtest(tool_planner_test
+    test/tool_planner_test.cpp
+    include/planning/tool_planner.hpp
+    src/tool_planner.cpp
+    src/common.cpp
+    ../mapping/src/map.cpp
+    ../mapping/src/map_util.cpp
+  )
+  ament_target_dependencies(tool_planner_test
     cg_msgs
     mapping
   )
