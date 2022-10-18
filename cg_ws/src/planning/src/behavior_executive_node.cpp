@@ -11,6 +11,11 @@ namespace planning {
     viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/current_agent", 1);
     viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/current_goal", 1);
 
+    global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+        "/odometry/filtered/ekf_global_node", 1, std::bind(&BehaviorExecutive::globalRobotStateCallback, this, std::placeholders::_1));
+    odom_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+        "/odometry/filtered/ekf_odom_node", 1, std::bind(&BehaviorExecutive::odomRobotStateCallback, this, std::placeholders::_1));
+
     /* Initialize services */
     // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
     site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -52,9 +57,7 @@ namespace planning {
 
     // Create pose of local map, assumed with no rotation
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
-
-    // Initialize agent pose, relative to local frame!
-    current_agent_pose_ = create_pose2d(1.5, 0.5, 3.14159);
+    global_map_relative_to_local_frame_ = create_pose2d(-xTransform, -yTransform, 0.0);
   }
 
 void BehaviorExecutive::fsmTimerCallback()
@@ -241,6 +244,31 @@ bool BehaviorExecutive::enableWorksystemService(const bool enable_worksystem, bo
     if (verbose) {RCLCPP_INFO(this->get_logger(), "No EnableWorksystem response");}
     return false;
   }
+}
+
+void BehaviorExecutive::globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  // Read in the message
+  global_robot_state_ = *msg;
+
+  // Convert to pose
+  tf2::Quaternion q(global_robot_state_.pose.pose.orientation.x,
+                    global_robot_state_.pose.pose.orientation.y,
+                    global_robot_state_.pose.pose.orientation.z,
+                    global_robot_state_.pose.pose.orientation.w);
+  tf2::Matrix3x3 m(q);
+  double global_robot_roll, global_robot_pitch, global_robot_yaw;
+  m.getRPY(global_robot_roll, global_robot_pitch, global_robot_yaw);
+
+  cg_msgs::msg::Pose2D global_robot_pose = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
+                                                                       global_robot_state_.pose.pose.position.x,
+                                                                       global_robot_yaw);
+
+  // Convert pose to local map frame
+  current_agent_pose_ = cg::planning::transformPose(global_robot_pose, global_map_relative_to_local_frame_);
+}
+
+void BehaviorExecutive::odomRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  odom_robot_state_ = *msg;
 }
 
 void BehaviorExecutive::vizTimerCallback() {

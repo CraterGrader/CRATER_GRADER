@@ -6,6 +6,8 @@
 #include <cg_msgs/srv/site_map.hpp> // Service for receiving SiteMap height data
 #include <cg_msgs/srv/update_trajectory.hpp>   // Service for updating current trajectory
 #include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
+#include <nav_msgs/msg/odometry.hpp> // Callback for pose
+#include <tf2/LinearMath/Matrix3x3.h> // For converting from nav_msgs quaternions to rpy
 
 // Finite state machine and states
 #include <planning/fsm/fsm.hpp>
@@ -22,6 +24,8 @@
 #include <planning/fsm/get_worksystem_trajectory.hpp>
 #include <planning/fsm/following_trajectory.hpp>
 #include <planning/fsm/stopped.hpp>
+
+// Viz
 #include <nav_msgs/msg/path.hpp> // For visualizing the current trajectory
 #include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory and agent pose
 #include <geometry_msgs/msg/pose_array.hpp> // For visualizing the current goal poses
@@ -41,6 +45,9 @@ private:
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_goals_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_agent_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_curr_goal_pub_;
+
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_robot_state_sub_;
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
@@ -71,9 +78,15 @@ private:
   geometry_msgs::msg::PoseStamped viz_agent_;
   geometry_msgs::msg::PoseStamped viz_curr_goal_;
 
+  nav_msgs::msg::Odometry global_robot_state_;
+  nav_msgs::msg::Odometry odom_robot_state_;
+
   /* Callbacks */
   void fsmTimerCallback(); // For looping publish
   void vizTimerCallback(); // For looping publish
+
+  void globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+  void odomRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
   /* Important Objects */
   cg::planning::TransportPlanner transport_planner_;
@@ -83,6 +96,7 @@ private:
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
   cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
+  cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
@@ -119,8 +133,8 @@ private:
   cg_msgs::msg::Pose2D current_goal_pose_;
   cg_msgs::msg::Pose2D current_agent_pose_; // TODO: make callback so this gets updated, assumed to be in local map frame!
   bool enable_worksystem_ = false;
-  cg_msgs::msg::Trajectory current_trajectory_; // TODO: actually use this
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;
+  cg_msgs::msg::Trajectory current_trajectory_; 
+  // std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;
@@ -146,3 +160,10 @@ private:
 } // namespace cg
 
 #endif // PLANNING__BEHAVIOR_EXECUTIVE_HPP
+
+/**
+ * TODO
+ * - Agent callback
+ * - Check if goal is reached to transition out of following
+ * - Map checks
+ */
