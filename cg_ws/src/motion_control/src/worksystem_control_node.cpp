@@ -73,6 +73,7 @@ void WorksystemControlNode::timerCallback() {
 
   // Compute control command
   cg_msgs::msg::ActuatorCommand cmd;
+  cmd.header.stamp = this->get_clock()->now();
   cmd.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
   cmd.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
   // TODO compute cmd.tool_position once ToolController is available
