@@ -40,6 +40,7 @@ private:
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_goals_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_agent_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_curr_goal_pub_;
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
@@ -58,8 +59,8 @@ private:
   rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
   rclcpp::Client<cg_msgs::srv::EnableWorksystem>::SharedPtr enable_worksystem_client_;
   bool updateMapFromService(bool verbose);
-  bool updateTrajectoryService(bool verbose);
-  bool enableWorksystemService(bool verbose);
+  bool updateTrajectoryService(const cg_msgs::msg::Trajectory &current_trajectory, bool verbose);
+  bool enableWorksystemService(const bool enable_worksystem, bool verbose);
 
   long int fsm_timer_callback_ms_ = 2000;
   long int service_response_timeout_sec_ = 2;
@@ -68,6 +69,7 @@ private:
   nav_msgs::msg::Path viz_path_;
   geometry_msgs::msg::PoseArray viz_goals_;
   geometry_msgs::msg::PoseStamped viz_agent_;
+  geometry_msgs::msg::PoseStamped viz_curr_goal_;
 
   /* Callbacks */
   void fsmTimerCallback(); // For looping publish
@@ -82,7 +84,11 @@ private:
   cg::mapping::Map<float> current_height_map_;
   cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
 
+  // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
+  bool updated_trajectory_ = false;
+  bool calculated_trajectory_ = false;
+  bool worksystem_enabled_ = false;
   size_t num_poses_before_; // DEBUG
 
   // DEBUG: test maps
@@ -132,7 +138,6 @@ private:
   cg::planning::GoalsRemaining goals_remaining_;
   cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
   cg::planning::FollowingTrajectory following_trajectory_;
-
   cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive

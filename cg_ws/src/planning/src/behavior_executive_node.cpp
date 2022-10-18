@@ -9,6 +9,7 @@ namespace planning {
     viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/current_path", 1);
     viz_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/current_goals", 1);
     viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/current_agent", 1);
+    viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/current_goal", 1);
 
     /* Initialize services */
     // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
@@ -53,7 +54,7 @@ namespace planning {
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
 
     // Initialize agent pose, relative to local frame!
-    current_agent_pose_ = create_pose2d(1.0, 0.5, 0.0);
+    current_agent_pose_ = create_pose2d(1.5, 0.5, 3.14159);
   }
 
 void BehaviorExecutive::fsmTimerCallback()
@@ -108,25 +109,42 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   case cg::planning::FSM::State::GOALS_REMAINING:
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
-    std::cout << "    Current Pose <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
+    std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
+    std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
     break;
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
-    get_worksystem_trajectory_.runState(kinematic_planner_, current_goal_poses_, current_trajectories_, current_agent_pose_, current_height_map_);
-    for (size_t i = 0; i < current_trajectories_.size(); ++i) {
-      std::cout << "Trajectory " << std::to_string(i) << std::endl;
-      for (cg_msgs::msg::Pose2D pose: current_trajectories_[i]) {
-        std::cout << "< " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << " >" << std::endl;
+    // Get the trajectory
+    // get_worksystem_trajectory_.runStateMultiGoal(kinematic_planner_, current_goal_poses_, current_trajectories_, current_agent_pose_, current_height_map_);
+    // for (size_t i = 0; i < current_trajectories_.size(); ++i) {
+    //   std::cout << "Trajectory " << std::to_string(i) << std::endl;
+    //   for (cg_msgs::msg::Pose2D pose: current_trajectories_[i]) {
+    //     std::cout << "< " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << " >" << std::endl;
+    //   }
+    // }
+
+    // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
+    if (!calculated_trajectory_) {
+      // Update path trajectory
+      kinematic_planner_.generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
+
+      // TODO: update velocity trajectory
+
+      // TODO: update tool trajectory
+      calculated_trajectory_ = true;
+    }
+
+    if (calculated_trajectory_) {
+      // Send the trajectory to the controller
+      updated_trajectory_ = updateTrajectoryService(current_trajectory_, true);
+      if (updated_trajectory_) {
+        // The controller trajectory was updated, so enable worksystem
+        enable_worksystem_ = true;
+        worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
     }
-    // TODO: actually send the real trajectory
-    if(updateTrajectoryService(true)) {
-      // The trajectory was updated, so enable worksystem
-      enable_worksystem_ = true;
-    } else {
-      // Don't enable the worksystem for invalid trajectory
-      enable_worksystem_ = false;
-    }
-    enableWorksystemService(true);
+    
+    // Update shared current state and the precursing signal if worksystem is now enabled
+    get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
   case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:
     following_trajectory_.runState();
@@ -134,7 +152,7 @@ void BehaviorExecutive::fsmTimerCallback()
   case cg::planning::FSM::State::STOPPED:
     // Stop the worksystem
     enable_worksystem_ = false;
-    enableWorksystemService(true);
+    enableWorksystemService(enable_worksystem_, true);
 
     // Run state
     stopped_.runState();
@@ -174,17 +192,11 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
   }
 }
 
-bool BehaviorExecutive::updateTrajectoryService(bool verbose = false) {
+bool BehaviorExecutive::updateTrajectoryService(const cg_msgs::msg::Trajectory &current_trajectory, bool verbose = false)
+{
   // Create a request for the UpdateTrajectory service call
   auto request = std::make_shared<cg_msgs::srv::UpdateTrajectory::Request>();
-  cg_msgs::msg::Trajectory new_traj; // DEBUG
-  std::vector<cg_msgs::msg::Pose2D> path = {create_pose2d(0.0, 0.0, 0.0), create_pose2d(1.0, 0.0, 0.0)};
-  std::vector<float> velocity_targets = {1.0, 1.0};
-  std::vector<float> tool_positions = {0.0, 0.0};
-  new_traj.path = path;
-  new_traj.velocity_targets = velocity_targets;
-  new_traj.tool_positions = tool_positions;
-  request->trajectory = new_traj;
+  request->trajectory = current_trajectory;
 
   // Send request
   if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending UpdateTrajectory request");}
@@ -206,10 +218,10 @@ bool BehaviorExecutive::updateTrajectoryService(bool verbose = false) {
   }
 }
 
-bool BehaviorExecutive::enableWorksystemService(bool verbose = false) {
+bool BehaviorExecutive::enableWorksystemService(const bool enable_worksystem, bool verbose = false) {
   // Create a request for the EnableWorksystem service call
   auto request = std::make_shared<cg_msgs::srv::EnableWorksystem::Request>();
-  request->enable_worksystem = enable_worksystem_;
+  request->enable_worksystem = enable_worksystem;
 
   // Send request
   if (verbose) {RCLCPP_INFO(this->get_logger(), "Sending EnableWorksystem request");}
@@ -237,17 +249,34 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_agent_.pose.position.x = global_agent_pose.pt.x;
   viz_agent_.pose.position.y = global_agent_pose.pt.y;
 
-  tf2::Quaternion q;
-  q.setRPY(0, 0, global_agent_pose.yaw);
-  viz_agent_.pose.orientation.x = q.x();
-  viz_agent_.pose.orientation.y = q.y();
-  viz_agent_.pose.orientation.z = q.z();
-  viz_agent_.pose.orientation.w = q.w();
+  tf2::Quaternion q_agent;
+  q_agent.setRPY(0, 0, global_agent_pose.yaw);
+  viz_agent_.pose.orientation.x = q_agent.x();
+  viz_agent_.pose.orientation.y = q_agent.y();
+  viz_agent_.pose.orientation.z = q_agent.z();
+  viz_agent_.pose.orientation.w = q_agent.w();
 
   viz_agent_.header.stamp = this->get_clock()->now();
   viz_agent_.header.frame_id = "map";
 
   viz_agent_pub_->publish(viz_agent_);
+
+  // Current goal
+  cg_msgs::msg::Pose2D global_curr_goal_pose = cg::planning::transformPose(current_goal_pose_, local_map_relative_to_global_frame_);
+  viz_curr_goal_.pose.position.x = global_curr_goal_pose.pt.x;
+  viz_curr_goal_.pose.position.y = global_curr_goal_pose.pt.y;
+
+  tf2::Quaternion q_curr_goal;
+  q_curr_goal.setRPY(0, 0, global_curr_goal_pose.yaw);
+  viz_curr_goal_.pose.orientation.x = q_curr_goal.x();
+  viz_curr_goal_.pose.orientation.y = q_curr_goal.y();
+  viz_curr_goal_.pose.orientation.z = q_curr_goal.z();
+  viz_curr_goal_.pose.orientation.w = q_curr_goal.w();
+
+  viz_curr_goal_.header.stamp = this->get_clock()->now();
+  viz_curr_goal_.header.frame_id = "map";
+
+  viz_curr_goal_pub_->publish(viz_curr_goal_);
 
   // Goal poses
   viz_goals_.poses.clear();
@@ -271,17 +300,17 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_goals_.header.frame_id = "map";
   viz_goals_pub_->publish(viz_goals_);
 
-  // Trajectory: TODO: use the real trajectory object that should be updated by GET_WORKSYSTEM_TRAJECTORY state
+  // Trajectory
   viz_path_.poses.clear();
-  for (cg_msgs::msg::Pose2D goal_pose : current_goal_poses_) {
-    cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(goal_pose, local_map_relative_to_global_frame_);
+  for (cg_msgs::msg::Pose2D traj_pose : current_trajectory_.path) {
+    cg_msgs::msg::Pose2D global_traj_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
 
     geometry_msgs::msg::PoseStamped pose_stamped;
-    pose_stamped.pose.position.x = global_goal_pose.pt.x;
-    pose_stamped.pose.position.y = global_goal_pose.pt.y;
+    pose_stamped.pose.position.x = global_traj_pose.pt.x;
+    pose_stamped.pose.position.y = global_traj_pose.pt.y;
 
     tf2::Quaternion q;
-    q.setRPY(0, 0, global_goal_pose.yaw);
+    q.setRPY(0, 0, global_traj_pose.yaw);
     pose_stamped.pose.orientation.x = q.x();
     pose_stamped.pose.orientation.y = q.y();
     pose_stamped.pose.orientation.z = q.z();

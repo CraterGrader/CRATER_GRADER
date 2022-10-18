@@ -365,6 +365,26 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /viz/current_agent
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz_default_plugins/Pose
+      Color: 0; 255; 0
+      Enabled: true
+      Head Length: 0.20000000298023224
+      Head Radius: 0.20000000298023224
+      Name: Pose
+      Shaft Length: 0.20000000298023224
+      Shaft Radius: 0.10000000149011612
+      Shape: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /viz/current_goal
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
