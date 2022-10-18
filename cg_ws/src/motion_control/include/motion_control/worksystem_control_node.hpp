@@ -39,10 +39,7 @@ private:
   LateralController lat_controller_;
 
   /* Parameters */  
-  double longitudinal_velocity_kp_;
-  double longitudinal_velocity_ki_;
-  double longitudinal_velocity_kd_;
-
+  PIDParams pid_params_;
   double lateral_stanley_gain_;
 
   /* Variables */

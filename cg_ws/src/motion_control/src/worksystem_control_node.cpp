@@ -1,3 +1,4 @@
+#include <limits>
 #include "motion_control/worksystem_control_node.hpp"
 
 namespace cg {
@@ -38,13 +39,25 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 
   // Load parameters
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
-  this->get_parameter("longitudinal_velocity_kp", longitudinal_velocity_kp_);
+  this->get_parameter("longitudinal_velocity_kp", pid_params_.kp);
   this->declare_parameter<double>("longitudinal_velocity_ki", 0.0);
-  this->get_parameter("longitudinal_velocity_ki", longitudinal_velocity_ki_);
+  this->get_parameter("longitudinal_velocity_ki", pid_params_.ki);
   this->declare_parameter<double>("longitudinal_velocity_kd", 0.0);
-  this->get_parameter("longitudinal_velocity_kd", longitudinal_velocity_kd_);
+  this->get_parameter("longitudinal_velocity_kd", pid_params_.kd);
+  this->declare_parameter<double>("longitudinal_velocity_dt", 0.01);
+  this->get_parameter("longitudinal_velocity_dt", pid_params_.dt);
+  this->declare_parameter<double>("longitudinal_velocity_integral_sat_min", -std::numeric_limits<double>::infinity());
+  this->get_parameter("longitudinal_velocity_integral_sat_min", pid_params_.integral_sat_min);
+  this->declare_parameter<double>("longitudinal_velocity_integral_sat_max", std::numeric_limits<double>::infinity());
+  this->get_parameter("longitudinal_velocity_integral_sat_max", pid_params_.integral_sat_max);
+  this->declare_parameter<double>("longitudinal_velocity_output_sat_min", -std::numeric_limits<double>::infinity());
+  this->get_parameter("longitudinal_velocity_output_sat_min", pid_params_.output_sat_min);
+  this->declare_parameter<double>("longitudinal_velocity_output_sat_max", std::numeric_limits<double>::infinity());
+  this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
+
+
 }
 
 void WorksystemControlNode::timerCallback() {
