@@ -65,6 +65,20 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 void WorksystemControlNode::timerCallback() {
   // TODO implement gain scheduling if deemed necessary
   lon_controller_->setGains(pid_params_.kp, pid_params_.ki, pid_params_.kd);
+
+  // Use global position from map frame and smooth velocity from odom frame as current state
+  nav_msgs::msg::Odometry current_state = global_robot_state_;
+  current_state.child_frame_id = local_robot_state_.child_frame_id;
+  current_state.twist = local_robot_state_.twist;
+
+  // Compute control command
+  cg_msgs::msg::ActuatorCommand cmd;
+  cmd.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
+  cmd.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
+  // TODO compute cmd.tool_position once ToolController is available
+
+  // Publish control command
+  cmd_pub_->publish(cmd);
 }
 
 void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)
