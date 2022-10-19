@@ -17,6 +17,11 @@ find_package(nav_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(diagnostic_updater REQUIRED)
+find_package(planning REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+# Add Eigen3 Library
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 # Find package header files
 include_directories(include)
@@ -45,11 +50,13 @@ add_executable(worksystem_control_node src/worksystem_control_main.cpp
   src/longitudinal_controller.cpp
   src/lateral_controller.cpp
   src/pid_controller.cpp
+  ../planning/src/common.cpp
 )
 ament_target_dependencies(worksystem_control_node
   rclcpp
   cg_msgs
   nav_msgs
+  planning
 )
 
 # Code testing
