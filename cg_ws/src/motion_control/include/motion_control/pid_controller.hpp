@@ -16,14 +16,15 @@ struct PIDParams {
 
 class PIDController {
 public:
-  PIDController() {}
-  PIDController(const PIDParams &params);
+  PIDController(const PIDParams &params) : params_(params) {}
   // Computes control command given error
   double control(double error);
   // Clears integral buildup, previous error states, etc.
   void reset();
   // Sets PID gains dynamically e.g. for gain scheduling
   void setGains(const double kp, const double ki, const double kd);
+
+  PIDParams params_;
 };
 
 }  // namespace motion_control

@@ -3,10 +3,6 @@
 namespace cg {
 namespace motion_control {
 
-PIDController::PIDController(const PIDParams &params) {
-  // TODO
-}
-
 void PIDController::setGains(const double kp, const double ki, const double kd) {
   // TODO
 }
