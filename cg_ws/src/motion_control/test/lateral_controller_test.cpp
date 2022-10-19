@@ -29,8 +29,12 @@ TEST(LateralControllerTest, offset_test) {
     current_state.pose.pose.orientation.y = 0;
     current_state.pose.pose.orientation.z = 0; 
     current_state.pose.pose.orientation.w = 1;
+
     current_state.pose.pose.position.x = 1;
     current_state.pose.pose.position.y = 2;
+    
+    current_state.twist.twist.linear.x = 1;
+    current_state.twist.twist.linear.y = 1;
 
     double des_steer = lateral_controller.computeSteer(
         traj, current_state);
@@ -40,8 +44,12 @@ TEST(LateralControllerTest, offset_test) {
     current_state_2.pose.pose.orientation.y = 0;
     current_state_2.pose.pose.orientation.z = 0; 
     current_state_2.pose.pose.orientation.w = 1;
+    
     current_state_2.pose.pose.position.x = -1;
     current_state_2.pose.pose.position.y = 2;
+    
+    current_state_2.twist.twist.linear.x = 1;
+    current_state_2.twist.twist.linear.y = 1;
 
     double des_steer_2 = lateral_controller.computeSteer(
         traj, current_state_2);

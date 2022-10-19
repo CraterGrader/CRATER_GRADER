@@ -25,14 +25,25 @@ double LateralController::computeSteer(
         tf2::getYaw(q));
 
     // Get closest trajectory reference point
-    double closest_cross_track_error = std::numeric_limits<double>::infinity();
+    double closest_cross_track_error;
+    double closest_euclidian_error = std::numeric_limits<double>::infinity();
     double closest_heading_error;
     for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
         double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
         
         // If trajectory point closer, then update considered target point
-        if (dist < closest_traj_distance) {
-            closest_cross_track_error = dist;
+        if (dist < closest_euclidian_error) {
+            
+            // Transform both traj_pose and reference pose by the opposite of reference pose
+            cg_msgs::msg::Point2D transformed_error = cg::planning::transformPoint(
+                cur_pose.pt, 
+                cg::planning::create_pose2d(
+                    -target_trajectory.path[i].pt.x, 
+                    -target_trajectory.path[i].pt.y, 
+                    -target_trajectory.path[i].yaw));
+
+            closest_euclidian_error = dist;
+            closest_cross_track_error = transformed_error.x;
             closest_heading_error = cg::planning::angle_difference(
               target_trajectory.path[i].yaw,
               cur_pose.yaw);
@@ -60,7 +71,7 @@ double LateralController::stanleyControlLaw(
     const double velocity) const {
 
     double steer_correct_angle = std::atan2(
-        k_ * -cross_track_err, 
+        k_ * cross_track_err, 
         velocity + stanley_softening_constant_);
 
     return heading_err + steer_correct_angle;
