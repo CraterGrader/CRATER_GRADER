@@ -156,4 +156,7 @@ install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}/
 )
 
+# Export library files so other packages can link
+ament_export_include_directories(include)
+
 ament_package()
