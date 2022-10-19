@@ -4,7 +4,7 @@ namespace cg {
 namespace motion_control {
 
 LongitudinalController::LongitudinalController(const PIDParams &params) {
-  // TODO
+  velocity_controller_ = std::make_unique<PIDController>(PIDController(params));
 }
 
 void LongitudinalController::setGains(const double kp, const double ki, const double kd) {
