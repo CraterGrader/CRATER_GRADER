@@ -16,7 +16,7 @@ struct PIDParams {
 
 class PIDController {
 public:
-  PIDController(const PIDParams &params) : params_(params) {}
+  PIDController(const PIDParams &params);
   // Computes control command given error
   double control(double error);
   // Clears integral buildup, previous error states, etc.
@@ -25,6 +25,8 @@ public:
   void setGains(const double kp, const double ki, const double kd);
 
   PIDParams params_;
+  double prev_error_;
+  double integral_error_;
 };
 
 }  // namespace motion_control
