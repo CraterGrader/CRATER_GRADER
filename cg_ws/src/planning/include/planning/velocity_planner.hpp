@@ -2,7 +2,7 @@
 #define PLANNING__VELOCITY_PLANNER_HPP
 
 #include <planning/common.hpp>
-#include <mapping/site_map.hpp>
+#include <mapping/map.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
 
 namespace cg {
@@ -12,10 +12,19 @@ class VelocityPlanner {
 
 public:
   // Updates the trajectory.velocity_targets field in-place
+  VelocityPlanner() {}
+  VelocityPlanner(double velocity_constant) :
+    constant_velocity_(velocity_constant) {}
+
   void generateVelocityTargets(
     cg_msgs::msg::Trajectory &trajectory,
     const cg_msgs::msg::Pose2D &agent_pose,
-    const cg::mapping::SiteMap &map);
+    const cg::mapping::Map<float> &map);
+
+private:
+
+  double constant_velocity_;
+
 };
 
 } // namespace planning
