@@ -4,7 +4,9 @@ namespace cg {
 namespace motion_control {
 
 void PIDController::setGains(const double kp, const double ki, const double kd) {
-  // TODO
+  params_.kp = kp;
+  params_.ki = ki;
+  params_.kd = kd;
 }
 
 }  // namespace motion_control
