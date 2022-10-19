@@ -27,6 +27,7 @@ public:
   PIDParams params_;
   double prev_error_;
   double integral_error_;
+  bool first_timestep_;
 };
 
 }  // namespace motion_control
