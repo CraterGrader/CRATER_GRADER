@@ -25,27 +25,30 @@ double LateralController::computeSteer(
         tf2::getYaw(q));
 
     // Get closest trajectory reference point
-    double closest_cross_track_error;
-    double closest_traj_distance = INFINITY;
+    double closest_cross_track_error = std::numeric_limits<double>::infinity();
     double closest_heading_error;
-    double closest_velocity_target;
     for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
         double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
         
         // If trajectory point closer, then update considered target point
         if (dist < closest_traj_distance) {
-            closest_traj_distance = dist;
-            closest_cross_track_error = target_trajectory.path[i].pt.x - cur_pose.pt.x;
-            closest_heading_error = target_trajectory.path[i].yaw - cur_pose.yaw;
-            closest_velocity_target = target_trajectory.velocity_targets[i];
+            closest_cross_track_error = dist;
+            closest_heading_error = cg::planning::angle_difference(
+              target_trajectory.path[i].yaw,
+              cur_pose.yaw);
         }
     }
+
+    // Considering only planar velocity since trajectory is planar
+    double current_velocity = std::sqrt(
+      std::pow(current_state.twist.twist.linear.x, 2) + 
+      std::pow(current_state.twist.twist.linear.y, 2));
 
     // Compute stanley control law
     double desired_steer = LateralController::stanleyControlLaw(
         closest_heading_error,
         closest_cross_track_error,
-        closest_velocity_target);
+        current_velocity);
 
     return desired_steer;
     }
