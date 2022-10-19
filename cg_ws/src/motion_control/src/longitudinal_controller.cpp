@@ -8,7 +8,7 @@ LongitudinalController::LongitudinalController(const PIDParams &params) {
 }
 
 void LongitudinalController::setGains(const double kp, const double ki, const double kd) {
-  // TODO
+  velocity_controller_->setGains(kp, ki, kd);
 }
 
 double LongitudinalController::computeDrive(
