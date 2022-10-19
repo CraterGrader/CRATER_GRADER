@@ -29,6 +29,13 @@ cg_msgs::msg::Pose2D transformPose(
   const cg_msgs::msg::Pose2D &source_pose, 
   const cg_msgs::msg::Pose2D &transforming_pose);
 
+// Find smallest difference between two angles, all units in radians
+double smallest_angle_difference(double angle1, double angle2);
+
+// Checks if trajectory_end_pose is within distance threshold of goal_pose
+bool samePoseWithinThresh(
+    const cg_msgs::msg::Pose2D &pose1,
+    const cg_msgs::msg::Pose2D &pose2);
 
 } // planning namespace
 } // cg namespace

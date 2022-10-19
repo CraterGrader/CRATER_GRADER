@@ -62,5 +62,34 @@ cg_msgs::msg::Pose2D transformPose(
   return create_pose2d(transformed_point.x, transformed_point.y, source_pose.yaw + transforming_pose.yaw);
 }
 
+// Find smallest difference between two angles, all units in radians
+double smallest_angle_difference(double angle1, double angle2) {
+  // Normalize angles to [0, 2*pi]
+  double normalized_angle1 = std::fmod(angle1, 2.0 * M_PI);
+  double normalized_angle2 = std::fmod(angle2, 2.0 * M_PI);
+
+  // Normalize absolute difference to [0, 2*pi]
+  double diff_head = std::fmod(abs(normalized_angle1 - normalized_angle2), 2.0 * M_PI);
+
+  // Use smaller overall angle, i.e. in [0, pi]
+  if (diff_head > (2.0 * M_PI)) {
+      diff_head = abs(diff_head - (2.0 * M_PI));
+  }
+  return diff_head;
+}
+
+bool samePoseWithinThresh(const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg::Pose2D &pose2, const float thresh_pos, const float thresh_head) {
+  // Calculate position difference
+  float diff_pos = euclidean_distance(pose1.pt, pose2.pt);
+
+  // Calculate heading difference
+  double diff_head = smallest_angle_difference(pose1.yaw, pose2.yaw);
+
+  if (diff_pos <= thresh_pos && diff_head <= thresh_head) {
+    return true;
+  }
+  return false;
+}
+
 } // planning namespace
 } // cg namespace

@@ -12,6 +12,7 @@
   <depend>cg_msgs</depend>
   <depend>rclcpp</depend>
   <depend>nav_msgs</depend>
+  <depend>planning</depend>
   <depend>tf2_ros</depend>
   <depend>planning</depend>
   <depend>diagnostic_updater</depend>

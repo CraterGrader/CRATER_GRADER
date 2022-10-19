@@ -3,11 +3,9 @@
 namespace cg {
 namespace motion_control {
 
-
 LateralController::LateralController(double k, double stanley_softening_constant) :
     k_(k),
     stanley_softening_constant_(stanley_softening_constant) {}
-
 
 double LateralController::computeSteer(
     const cg_msgs::msg::Trajectory &target_trajectory,
@@ -80,4 +78,3 @@ double LateralController::stanleyControlLaw(
 
 } // namespace motion_control
 } // namespace cg
-

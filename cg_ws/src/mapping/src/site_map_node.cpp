@@ -16,7 +16,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   PubTimer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::PubTimerCallback, this));
 
   // Map Normalization callback 
-  // SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(10000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
+  SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(1000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
 
   // Initialize services
   site_map_server_ = this->create_service<cg_msgs::srv::SiteMap>(
@@ -90,9 +90,10 @@ void SiteMapNode::PubTimerCallback(){
   visualization_pub_->publish(site_map_viz_msg);
 }
 
-// void SiteMapNode::SiteNormalizeTimerCallback(){
-//   siteMap_.normalizeSiteMap();
-// }
+void SiteMapNode::SiteNormalizeTimerCallback(){
+  // check if map is filled
+  siteMap_.updateMapCoverage();
+}
 
 void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
 
@@ -120,6 +121,8 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
   res->success = true;
+  siteMap_.updateMapCoverage();
+  res->map_fully_explored = siteMap_.getSiteMapFullStatus();
 }
 
 // void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
