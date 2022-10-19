@@ -56,10 +56,12 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
+  this->declare_parameter<double>("lateral_stanley_softening_constant", 1.0);
+  this->get_parameter("lateral_stanley_softening_constant", lateral_stanley_softening_constant_);
 
   // Initialize controllers
   lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_));
-  lat_controller_ = std::make_unique<LateralController>(LateralController(lateral_stanley_gain_));
+  lat_controller_ = std::make_unique<LateralController>(LateralController(lateral_stanley_gain_, lateral_stanley_softening_constant_));
 }
 
 void WorksystemControlNode::timerCallback() {

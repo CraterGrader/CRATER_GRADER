@@ -58,6 +58,7 @@ namespace planning {
     // Create pose of local map, assumed with no rotation
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
     global_map_relative_to_local_frame_ = create_pose2d(-xTransform, -yTransform, 0.0);
+    current_agent_pose_ = create_pose2d(1.5, 0.5, 3.14159);
   }
 
 void BehaviorExecutive::fsmTimerCallback()
@@ -153,7 +154,7 @@ void BehaviorExecutive::fsmTimerCallback()
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
   case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:
-    following_trajectory_.runState(current_agent_pose_, current_goal_pose_);
+    following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_);
     break;
   case cg::planning::FSM::State::STOPPED:
     // Stop the worksystem

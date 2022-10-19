@@ -4,3 +4,4 @@ worksystem_control_node:
     longitudinal_velocity_ki: 0.0
     longitudinal_velocity_kd: 0.0
     lateral_stanley_gain: 1.0
+    lateral_stanley_softening_constant: 1.0

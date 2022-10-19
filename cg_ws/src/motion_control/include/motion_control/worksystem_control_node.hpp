@@ -41,6 +41,7 @@ private:
   /* Parameters */  
   PIDParams pid_params_;
   double lateral_stanley_gain_;
+  double lateral_stanley_softening_constant_;
 
   /* Variables */
   cg_msgs::msg::Trajectory current_trajectory_;

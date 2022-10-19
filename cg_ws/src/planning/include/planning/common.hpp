@@ -34,8 +34,8 @@ double smallest_angle_difference(double angle1, double angle2);
 
 // Checks if trajectory_end_pose is within distance threshold of goal_pose
 bool samePoseWithinThresh(
-    const cg_msgs::msg::Pose2D &pose1,
-    const cg_msgs::msg::Pose2D &pose2);
+    const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg::Pose2D &pose2,
+    const float thresh_pos, const double thresh_head);
 
 } // planning namespace
 } // cg namespace

@@ -78,7 +78,7 @@ double smallest_angle_difference(double angle1, double angle2) {
   return diff_head;
 }
 
-bool samePoseWithinThresh(const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg::Pose2D &pose2, const float thresh_pos, const float thresh_head) {
+bool samePoseWithinThresh(const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg::Pose2D &pose2, const float thresh_pos, const double thresh_head) {
   // Calculate position difference
   float diff_pos = euclidean_distance(pose1.pt, pose2.pt);
 
