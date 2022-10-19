@@ -14,6 +14,7 @@
   <depend>nav_msgs</depend>
   <depend>planning</depend>
   <depend>tf2_ros</depend>
+  <depend>planning</depend>
   <depend>diagnostic_updater</depend>
 
   <test_depend>ament_lint_auto</test_depend>

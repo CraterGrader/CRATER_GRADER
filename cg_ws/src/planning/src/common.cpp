@@ -26,6 +26,11 @@ float euclidean_distance(const cg_msgs::msg::Point2D& pt1, const cg_msgs::msg::P
   return std::sqrt((pt2.x - pt1.x) * (pt2.x - pt1.x) + (pt2.y - pt1.y) * (pt2.y - pt1.y));
 }
 
+float angle_difference(const float angle_1, const float angle_2) {
+  float angle_difference = std::fmod((angle_1 - angle_2) + M_PI, 2.0*M_PI) - M_PI;
+  return angle_difference;
+}
+
 float rad2deg(float rad) {
   return 180 * (rad / M_PI);
 }

@@ -61,8 +61,18 @@ ament_target_dependencies(worksystem_control_node
 
 # Code testing
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(lateral_controller_test
+        test/lateral_controller_test.cpp
+        ../planning/src/common.cpp
+        src/lateral_controller.cpp
+        )
+  ament_target_dependencies(lateral_controller_test
+    rclcpp
+    cg_msgs
+    nav_msgs
+    planning
+  )
 endif()
 
 # Install targets
