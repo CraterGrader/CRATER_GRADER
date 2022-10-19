@@ -8,10 +8,8 @@ namespace motion_control {
 
 class LateralController {
 public:
-  LateralController() {}
   LateralController(double k);
   double computeSteer(
-    // TODO should this be refactored to take a single TrajectoryPoint?
     const cg_msgs::msg::Trajectory &target_trajectory,
     const nav_msgs::msg::Odometry &current_state);
 
