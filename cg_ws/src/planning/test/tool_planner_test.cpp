@@ -23,6 +23,8 @@ TEST(ToolPlannerTest, constructorTest)
 
   cg_msgs::msg::Trajectory trajectory;
   trajectory.set__path(path);
+  std::vector<float> velocity_targets{1,-1,1,1};
+  trajectory.set__velocity_targets(velocity_targets);
 
   cg::mapping::Map<float> map;
 
@@ -37,6 +39,9 @@ TEST(ToolPlannerTest, constructorTest)
   }
 
   EXPECT_EQ(trajectory.tool_positions[0], 0);
+  EXPECT_EQ(trajectory.tool_positions[1], 1);
+  EXPECT_EQ(trajectory.tool_positions[2], 0);
+  EXPECT_EQ(trajectory.tool_positions[3], 0);
 
 }
 

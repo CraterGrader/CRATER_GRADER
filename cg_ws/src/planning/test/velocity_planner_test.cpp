@@ -29,10 +29,10 @@ TEST(VelocityPlannerTest, constructorTest)
     start_pose,
     map);
 
-  std::cout << "Velocity targets:\n";
-  for (float velocity: trajectory.velocity_targets) {
-    EXPECT_NEAR(velocity, constant_vel, 0.001);
-  }
+  EXPECT_NEAR(trajectory.velocity_targets[0], constant_vel, 0.001);
+  EXPECT_NEAR(trajectory.velocity_targets[1], -constant_vel, 0.001);
+  EXPECT_NEAR(trajectory.velocity_targets[2], constant_vel, 0.001);
+  EXPECT_NEAR(trajectory.velocity_targets[3], constant_vel, 0.001);
 
 }
 
