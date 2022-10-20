@@ -14,10 +14,10 @@ void LongitudinalController::setGains(const double kp, const double ki, const do
 }
 
 // TODO this should probably be a util function, pretty much the same thing is done for lateral controller
-int getClosestPointIndex(
-  const cg_msgs::msg::Trajectory &target_trajectory,
-  const nav_msgs::msg::Odometry &current_state
-) {
+int LongitudinalController::getClosestPointIndex(
+    const cg_msgs::msg::Trajectory &target_trajectory,
+    const nav_msgs::msg::Odometry &current_state)
+{
   tf2::Quaternion q = tf2::Quaternion(
       current_state.pose.pose.orientation.x,
       current_state.pose.pose.orientation.y,
@@ -31,11 +31,12 @@ int getClosestPointIndex(
 
   double min_dist = std::numeric_limits<double>::infinity();
   int min_idx = -1;
-  for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
+  for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
     if (dist < min_dist) {
         min_dist = dist;
         min_idx = i;
+        prev_traj_idx_ = i;
     }
   }
   return min_idx;
@@ -50,8 +51,22 @@ double LongitudinalController::computeDrive(
   double target_velocity = target_trajectory.path.size() ?
       target_trajectory.velocity_targets[getClosestPointIndex(target_trajectory, current_state)] : 0.0;
 
+
+  // TODO: cur velocity is in m/s, target is currently in %fs
   double error = target_velocity - curr_velocity;
-  return velocity_controller_->control(error);
+  double desired_drive = velocity_controller_->control(error);
+
+  return scaleToDriveActuators(desired_drive);
+}
+
+double LongitudinalController::scaleToDriveActuators(double desired_drive) {
+  // Calculated using % full scale of steering angle [%FS / (steer angle in radians)]
+  double transfer_function_qpps_to_mps = 0.003795275591;
+  return (1/transfer_function_qpps_to_mps) * desired_drive;
+}
+
+void LongitudinalController::resetPrevTrajIdx() {
+  prev_traj_idx_ = 0;
 }
 
 

@@ -13,6 +13,9 @@ void ToolPlanner::generateToolTargets(
         // When trajectory is going forward (based on adjacent poses)
         // Then blade is lifted
 
+        (void)agent_pose; // Silence unused errors
+        (void)map; // Silence unused errors
+
         // Forward is determined by transforming poses by the yaw value
         std::vector<float> tool_positions;
         for (float velocity_target: trajectory.velocity_targets) {

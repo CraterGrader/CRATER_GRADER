@@ -26,24 +26,30 @@ double LateralController::computeSteer(
     double closest_cross_track_error;
     double closest_euclidian_error = std::numeric_limits<double>::infinity();
     double closest_heading_error;
-    for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
+    for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
         double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
         
         // If trajectory point closer, then update considered target point
         if (dist < closest_euclidian_error) {
             
             // Transform both traj_pose and reference pose by the opposite of reference pose
-            cg_msgs::msg::Point2D transformed_error = cg::planning::transformPoint(
-                cur_pose.pt, 
-                cg::planning::create_pose2d(
-                    -target_trajectory.path[i].pt.x, 
-                    -target_trajectory.path[i].pt.y, 
-                    -target_trajectory.path[i].yaw));
+            // cg_msgs::msg::Point2D transformed_error = cg::planning::transformPoint(
+            //     cur_pose.pt, 
+            //     cg::planning::create_pose2d(
+            //         -target_trajectory.path[i].pt.x, 
+            //         -target_trajectory.path[i].pt.y, 
+            //         -target_trajectory.path[i].yaw));
+            cg_msgs::msg::Point2D transformed_error = cg::planning::transformPointGlobalToLocal(cur_pose.pt, target_trajectory.path[i]);
 
             closest_euclidian_error = dist;
-            // closest_cross_track_error = transformed_error.x;
-            closest_cross_track_error = closest_euclidian_error; // DEBUG
+            closest_cross_track_error = transformed_error.y;
+
+            // std::cout << "      Trajectory Yaw - Radian: " << target_trajectory.path[i].yaw << ", Current Yaw - Radian:" << cur_pose.yaw << std::endl;
+
+            // target_trajectory.path[i].yaw, cur_pose.yaw std::endl;
             closest_heading_error = cg::planning::smallest_angle_difference(target_trajectory.path[i].yaw, cur_pose.yaw);
+            // std::cout << "      Error : " << closest_heading_error << std::endl;
+            prev_traj_idx_ = i;
         }
     }
 
@@ -78,6 +84,10 @@ double LateralController::scaleToSteerActuators(double desired_steer){
   double transfer_function_to_steer_position = -360.712;
 
   return transfer_function_to_steer_position * desired_steer;
+}
+
+void LateralController::resetPrevTrajIdx() {
+    prev_traj_idx_ = 0;
 }
 
 } // namespace motion_control

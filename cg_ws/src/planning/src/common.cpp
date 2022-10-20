@@ -39,7 +39,15 @@ float deg2rad(float deg) {
   return M_PI * (deg / 180);
 }
 
-cg_msgs::msg::Point2D transformPointLocalToGlobal(const cg_msgs::msg::Point2D &global_pt, const cg_msgs::msg::Pose2D &local_frame) {
+
+/**
+ * @brief This transforms a point into a local frame, where both point and local frame are relative to the global frame.
+ * 
+ * @param global_pt The point to be transformed to the local frame, relative to global frame
+ * @param local_frame The frame to transform the point into, should be relative to global frame
+ * @return cg_msgs::msg::Point2D 
+ */
+cg_msgs::msg::Point2D transformPointGlobalToLocal(const cg_msgs::msg::Point2D &global_pt, const cg_msgs::msg::Pose2D &local_frame) {
 
   // Create local frame matrix
   Eigen::Vector2f trans{local_frame.pt.x, local_frame.pt.y};

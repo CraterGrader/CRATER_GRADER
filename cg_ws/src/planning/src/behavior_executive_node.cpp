@@ -33,7 +33,8 @@ namespace planning {
     fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
     viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 
-    // Load parameters
+    /* Load parameters */
+    // Map parameters
     size_t map_height;
     size_t map_width;
     float map_resolution;
@@ -49,10 +50,57 @@ namespace planning {
     this->get_parameter("xTransform", xTransform);
     this->declare_parameter<float>("yTransform", 1.0);
     this->get_parameter("yTransform", yTransform);
+
+    // Thresholds for reaching following goal
     this->declare_parameter<double>("thresh_pos", 1.0);
     this->get_parameter("thresh_pos", thresh_pos_);
     this->declare_parameter<double>("thresh_head", 1.0);
     this->get_parameter("thresh_head", thresh_head_);
+
+    // Kinematic planner
+    float goal_pose_distance_threshold;
+    float turn_radii_min;
+    float turn_radii_max;
+    float turn_radii_resolution;
+    float max_trajectory_length;
+    float trajectory_resolution;
+    float pose_position_equality_threshold;
+    float pose_yaw_equality_threshold;
+    float topography_weight;
+    float trajectory_heuristic_epsilon;
+    this->declare_parameter<float>("goal_pose_distance_threshold,", 0.00001);
+    this->get_parameter("goal_pose_distance_threshold,", goal_pose_distance_threshold);
+    this->declare_parameter<float>("turn_radii_min,", 1.6);
+    this->get_parameter("turn_radii_min,", turn_radii_min);
+    this->declare_parameter<float>("turn_radii_max,", 2.8);
+    this->get_parameter("turn_radii_max,", turn_radii_max);
+    this->declare_parameter<float>("turn_radii_resolution,", 0.4);
+    this->get_parameter("turn_radii_resolution,", turn_radii_resolution);
+    this->declare_parameter<float>("max_trajectory_length,", 0.4);
+    this->get_parameter("max_trajectory_length,", max_trajectory_length);
+    this->declare_parameter<float>("trajectory_resolution,", 0.05);
+    this->get_parameter("trajectory_resolution,", trajectory_resolution);
+    this->declare_parameter<float>("pose_position_equality_threshold,", 0.05);
+    this->get_parameter("pose_position_equality_threshold,", pose_position_equality_threshold);
+    this->declare_parameter<float>("pose_yaw_equality_threshold,", 0.0872665);
+    this->get_parameter("pose_yaw_equality_threshold,", pose_yaw_equality_threshold);
+    this->declare_parameter<float>("topography_weight,", 1.0);
+    this->get_parameter("topography_weight,", topography_weight);
+    this->declare_parameter<float>("trajectory_heuristic_epsilon,", 1.0);
+    this->get_parameter("trajectory_heuristic_epsilon,", trajectory_heuristic_epsilon);
+
+    cg::planning::KinematicPlanner param_kinematic_planner = cg::planning::KinematicPlanner(
+        goal_pose_distance_threshold,
+        turn_radii_min,
+        turn_radii_max,
+        turn_radii_resolution,
+        max_trajectory_length,
+        trajectory_resolution,
+        pose_position_equality_threshold,
+        pose_yaw_equality_threshold,
+        topography_weight,
+        trajectory_heuristic_epsilon);
+    kinematic_planner_ = param_kinematic_planner;
 
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);

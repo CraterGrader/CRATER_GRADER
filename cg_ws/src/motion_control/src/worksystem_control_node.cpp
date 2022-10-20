@@ -148,6 +148,10 @@ void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Req
 {
   current_trajectory_ = req->trajectory; // Update current trajectory
   res->updated_trajectory = true; // Set response confirmation
+
+  // Reset controller tracking indices
+  lon_controller_->resetPrevTrajIdx();
+  lat_controller_->resetPrevTrajIdx();
 }
 
 // void WorksystemControlNode::robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg) {

@@ -23,7 +23,8 @@ public:
 
 private:
 
-  double constant_velocity_ = 25; // TODO: 1) make param 2) transfer function for m/s to %FS
+  // double constant_velocity_ = 15; // TODO: 1) make param 2) transfer function for m/s to %FS
+  double constant_velocity_ = 15*0.003795275591; // m/s TODO: 1) make param 
 
 };
 

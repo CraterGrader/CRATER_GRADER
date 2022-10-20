@@ -22,7 +22,7 @@ float deg2rad(float deg);
 
 // float angle_difference(const float angle_1, const float angle_2);
 
-cg_msgs::msg::Point2D transformPointLocalToGlobal(
+cg_msgs::msg::Point2D transformPointGlobalToLocal(
     const cg_msgs::msg::Point2D &global_pt,
     const cg_msgs::msg::Pose2D &local_frame);
 

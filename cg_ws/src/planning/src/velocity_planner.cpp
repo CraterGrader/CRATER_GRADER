@@ -10,14 +10,14 @@ void VelocityPlanner::generateVelocityTargets(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg::mapping::Map<float> &map) {
 
+        (void)map; // Silence unused errors
+
         cg_msgs::msg::Pose2D reference_pose = agent_pose;
         std::vector<float> velocity_targets;
         for (size_t i = 0; i < trajectory.path.size(); ++i) {
 
             // Transform both traj_pose and reference pose by the opposite of reference pose
-            cg_msgs::msg::Point2D curr_vec_transformed = transformPoint(
-                trajectory.path[i].pt, 
-                create_pose2d(-reference_pose.pt.x, -reference_pose.pt.y, -reference_pose.yaw));
+            cg_msgs::msg::Point2D curr_vec_transformed = cg::planning::transformPointGlobalToLocal(trajectory.path[i].pt, reference_pose);
             std::cout << " ++++++++++ traj pose <x,y,yaw>: < " << trajectory.path[i].pt.x << ", " << trajectory.path[i].pt.y << ", " << trajectory.path[i].yaw << std::endl;
             std::cout << " ++++++++++ ref pose <x,y,yaw>: < " << reference_pose.pt.x << ", " << reference_pose.pt.y << ", " << reference_pose.yaw << std::endl;
             std::cout << " ++++++++++ curr_vec_transformed <x,y>: < " << curr_vec_transformed.x << ", " << curr_vec_transformed.y << std::endl;
@@ -25,11 +25,10 @@ void VelocityPlanner::generateVelocityTargets(
             reference_pose = trajectory.path[i];
             // If pose as positive x component, it's going forward
             // Currently using constant velocity
-            // TODO: had to change sign?
             if (curr_vec_transformed.x >= 0) {
-                velocity_targets.push_back(-constant_velocity_);
-            } else {
                 velocity_targets.push_back(constant_velocity_);
+            } else {
+                velocity_targets.push_back(-constant_velocity_);
             }
         }
 

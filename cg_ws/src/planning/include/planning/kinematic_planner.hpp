@@ -21,8 +21,8 @@ public:
   // TODO: make these params
   KinematicPlanner() : 
       goal_pose_distance_threshold_(1e-5f), 
-      turn_radii_min_(1.2f), 
-      turn_radii_max_(2.4f), 
+      turn_radii_min_(1.6f), 
+      turn_radii_max_(2.8f), 
       turn_radii_resolution_(0.4f),
       max_trajectory_length_(0.4f),
       trajectory_resolution_(0.05f),
