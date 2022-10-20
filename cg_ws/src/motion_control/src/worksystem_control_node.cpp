@@ -65,6 +65,11 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 }
 
 void WorksystemControlNode::timerCallback() {
+  // Don't publish anything if the worksystem is not enabled
+  if (!worksystem_enabled_) {
+    return;
+  }
+
   // TODO implement gain scheduling if deemed necessary
   lon_controller_->setGains(pid_params_.kp, pid_params_.ki, pid_params_.kd);
 

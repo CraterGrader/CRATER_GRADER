@@ -19,7 +19,7 @@ float euclidean_distance(const cg_msgs::msg::Point2D& pt1, const cg_msgs::msg::P
 float rad2deg(float rad);
 float deg2rad(float deg);
 
-float angle_difference(const float angle_1, const float angle_2);
+// float angle_difference(const float angle_1, const float angle_2);
 
 cg_msgs::msg::Point2D transformPoint(
   const cg_msgs::msg::Point2D &source_pt, 

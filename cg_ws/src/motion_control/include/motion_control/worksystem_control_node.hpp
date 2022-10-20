@@ -45,7 +45,7 @@ private:
 
   /* Variables */
   cg_msgs::msg::Trajectory current_trajectory_;
-  bool worksystem_enabled_;
+  bool worksystem_enabled_ = false;
   nav_msgs::msg::Odometry global_robot_state_;
   nav_msgs::msg::Odometry local_robot_state_;
 }; // class WorksystemControlNode

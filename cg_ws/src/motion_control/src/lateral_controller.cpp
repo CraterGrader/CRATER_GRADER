@@ -42,9 +42,9 @@ double LateralController::computeSteer(
 
             closest_euclidian_error = dist;
             closest_cross_track_error = transformed_error.x;
-            closest_heading_error = cg::planning::angle_difference(
-              target_trajectory.path[i].yaw,
-              cur_pose.yaw);
+            closest_heading_error = static_cast<float>(cg::planning::smallest_angle_difference(
+                static_cast<double>(target_trajectory.path[i].yaw),
+                static_cast<double>(cur_pose.yaw)));
         }
     }
 

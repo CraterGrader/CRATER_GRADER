@@ -9,6 +9,12 @@ def generate_launch_description():
         get_package_share_directory('mapping'),
         'config',
         'site_map_params.yaml'
+    )
+
+    behavior_executive_params = os.path.join(
+        get_package_share_directory('planning'),
+        'config',
+        'behavior_executive_params.yaml'
     ) 
 
     return LaunchDescription([
@@ -17,6 +23,6 @@ def generate_launch_description():
             executable='behavior_executive_node',
             name='behavior_executive_node',
             output='screen',
-            parameters=[site_map_params]
+            parameters=[site_map_params, behavior_executive_params]
         )
     ])

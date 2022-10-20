@@ -101,8 +101,8 @@ private:
   cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
   // TODO: these could be params?
-  float thresh_pos_ = 0.5;
-  double thresh_head_ = 0.5;
+  double thresh_pos_;
+  double thresh_head_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;

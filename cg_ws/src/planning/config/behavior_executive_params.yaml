@@ -1,0 +1,5 @@
+behavior_executive_node:
+  ros__parameters:
+      # Thresholds for reaching goal
+      thresh_pos: 2.0 
+      thresh_head: 3.0

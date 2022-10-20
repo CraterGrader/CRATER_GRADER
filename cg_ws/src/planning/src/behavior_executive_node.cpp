@@ -49,6 +49,10 @@ namespace planning {
     this->get_parameter("xTransform", xTransform);
     this->declare_parameter<float>("yTransform", 1.0);
     this->get_parameter("yTransform", yTransform);
+    this->declare_parameter<double>("thresh_pos", 1.0);
+    this->get_parameter("thresh_pos", thresh_pos_);
+    this->declare_parameter<double>("thresh_head", 1.0);
+    this->get_parameter("thresh_head", thresh_head_);
 
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
