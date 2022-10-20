@@ -117,7 +117,7 @@ class SiteMap {
 
   private:
   // Uncomment this line when not testing 
-  // std::vector<float> heightMap_;       // "view 1"
+  std::vector<float> heightMap_;       // "view 1"
   std::vector<CellHistory> filterMap_; // "view 2" 
   std::vector<CellBayes> varianceMap_; // "view 3" 
   bool siteMapFull_ = false; 
@@ -133,16 +133,16 @@ class SiteMap {
   //                               0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,
   //                               0,    0,    0,    0,    0,    0,    0,    0,    0,
   //                               0,    0,    0,    0,    0,    0,    0,    0,    0};
-  std::vector<float> heightMap_{0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
-                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-                                0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,    0,
-                                0,    0,  1.0,    0, -2.0,    0,  1.0,    0,    0,    0,
-                                0,    0,  1.0, -2.0, -4.0, -2.0,  1.0,    0,    0,    0,
-                                0,    0,  1.0,    0, -2.0,    0,  1.0,    0,    0,    0,
-                                0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,    0,
-                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-                                0,    0,    0,    0,    0,    0,    0,    0,    0,    0};
+  // std::vector<float> heightMap_{0,    0,    0,    0,    0,    0,    0,    0,    0,    0, 
+  //                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+  //                               0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,    0,
+  //                               0,    0,  1.0,    0, -2.0,    0,  1.0,    0,    0,    0,
+  //                               0,    0,  1.0, -2.0, -4.0, -2.0,  1.0,    0,    0,    0,
+  //                               0,    0,  1.0,    0, -2.0,    0,  1.0,    0,    0,    0,
+  //                               0,    0,    0,  1.0,  1.0,  1.0,    0,    0,    0,    0,
+  //                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+  //                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+  //                               0,    0,    0,    0,    0,    0,    0,    0,    0,    0};
 
   // attributes
   size_t height_; // the vertical number of cells in the map 

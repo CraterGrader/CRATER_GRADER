@@ -9,7 +9,7 @@
 #include "motion_control/longitudinal_controller.hpp"
 #include <cg_msgs/srv/update_trajectory.hpp> // Service for updating current trajectory
 #include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
-
+#include <nav_msgs/msg/path.hpp>             // For visualizing the current trajectory
 namespace cg {
 namespace motion_control {
 
@@ -26,6 +26,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Debugging publishers */
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
+  nav_msgs::msg::Path viz_path_;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr lat_debug_cross_track_err_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr lat_debug_heading_err_pub_;
 

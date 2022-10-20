@@ -29,6 +29,8 @@ private:
     const double heading_err,
     const double cross_track_err,
     const double velocity) const;
+
+  double scaleToSteerActuators(double desired_steer);
   double k_;  // Stanley controller gain
   double stanley_softening_constant_;
   LateralControllerDebug debug_;

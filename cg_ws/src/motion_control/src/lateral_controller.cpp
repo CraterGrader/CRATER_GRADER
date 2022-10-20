@@ -41,10 +41,9 @@ double LateralController::computeSteer(
                     -target_trajectory.path[i].yaw));
 
             closest_euclidian_error = dist;
-            closest_cross_track_error = transformed_error.x;
-            closest_heading_error = static_cast<float>(cg::planning::smallest_angle_difference(
-                static_cast<double>(target_trajectory.path[i].yaw),
-                static_cast<double>(cur_pose.yaw)));
+            // closest_cross_track_error = transformed_error.x;
+            closest_cross_track_error = closest_euclidian_error; // DEBUG
+            closest_heading_error = cg::planning::smallest_angle_difference(target_trajectory.path[i].yaw, cur_pose.yaw);
         }
     }
 
@@ -58,31 +57,29 @@ double LateralController::computeSteer(
 
     // Compute stanley control law
     double desired_steer = LateralController::stanleyControlLaw(
-        closest_heading_error,
-        closest_cross_track_error,
-        current_velocity);
-
-    // Scale steer to actuator limits
-    // TODO: make this into a function!
-    desired_steer = -desired_steer; // Actuator convention is negative for right turn; flip
-    desired_steer *= 10;
-
-    return desired_steer;
-    }
-
+      closest_heading_error,
+      closest_cross_track_error,
+      current_velocity);
+    // Scale the desired steer angle to actuator steer position
+    return scaleToSteerActuators(desired_steer);
+}
 
 double LateralController::stanleyControlLaw(
     const double heading_err,
     const double cross_track_err,
     const double velocity) const {
 
-    double steer_correct_angle = std::atan2(
-        k_ * cross_track_err, 
-        velocity + stanley_softening_constant_);
+    double steer_correct_angle = std::atan2(k_ * cross_track_err, velocity + stanley_softening_constant_);
 
+    double debug = heading_err + steer_correct_angle;
     return heading_err + steer_correct_angle;
     }
+double LateralController::scaleToSteerActuators(double desired_steer){
+  // Calculated using % full scale of steering angle [%FS / (steer angle in radians)]
+  double transfer_function_to_steer_position = -360.712;
 
+  return transfer_function_to_steer_position * desired_steer;
+}
 
 } // namespace motion_control
 } // namespace cg

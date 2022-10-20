@@ -27,7 +27,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   //   "/odometry/filtered/ekf_global_node",1, global_callback_fn);
   // local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
   //   "/odometry/filtered/ekf_odom_node",1, local_callback_fn);
-
+  viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/worksystem_current_path", 1);
   global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/odometry/filtered/ekf_global_node", 1, std::bind(&WorksystemControlNode::globalRobotStateCallback, this, std::placeholders::_1));
 
@@ -77,6 +77,36 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 }
 
 void WorksystemControlNode::timerCallback() {
+
+  // -----------------------------------------------
+  // Trajectory
+  viz_path_.poses.clear();
+  for (cg_msgs::msg::Pose2D traj_pose : current_trajectory_.path) {
+    // cg_msgs::msg::Pose2D global_traj_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+    cg_msgs::msg::Pose2D global_traj_pose = traj_pose; // DEBUG
+
+    geometry_msgs::msg::PoseStamped pose_stamped;
+    pose_stamped.pose.position.x = global_traj_pose.pt.x;
+    pose_stamped.pose.position.y = global_traj_pose.pt.y;
+
+    tf2::Quaternion q;
+    q.setRPY(0, 0, global_traj_pose.yaw);
+    pose_stamped.pose.orientation.x = q.x();
+    pose_stamped.pose.orientation.y = q.y();
+    pose_stamped.pose.orientation.z = q.z();
+    pose_stamped.pose.orientation.w = q.w();
+
+    pose_stamped.header.stamp = this->get_clock()->now();
+    pose_stamped.header.frame_id = "map";
+
+    viz_path_.poses.push_back(pose_stamped);
+  }
+  viz_path_.header.stamp = this->get_clock()->now();
+  viz_path_.header.frame_id = "map";
+
+  viz_path_pub_->publish(viz_path_);
+  // -----------------------------------------------
+
   // Don't publish anything if the worksystem is not enabled
   if (!worksystem_enabled_) {
     return;

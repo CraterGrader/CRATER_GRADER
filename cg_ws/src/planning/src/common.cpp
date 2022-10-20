@@ -69,11 +69,11 @@ double smallest_angle_difference(double angle1, double angle2) {
   double normalized_angle2 = std::fmod(angle2, 2.0 * M_PI);
 
   // Normalize absolute difference to [0, 2*pi]
-  double diff_head = std::fmod(abs(normalized_angle1 - normalized_angle2), 2.0 * M_PI);
+  double diff_head = std::fmod(fabs(normalized_angle1 - normalized_angle2), 2.0 * M_PI);
 
   // Use smaller overall angle, i.e. in [0, pi]
   if (diff_head > (2.0 * M_PI)) {
-      diff_head = abs(diff_head - (2.0 * M_PI));
+      diff_head = fabs(diff_head - (2.0 * M_PI));
   }
   return diff_head;
 }

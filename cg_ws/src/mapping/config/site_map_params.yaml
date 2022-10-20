@@ -2,9 +2,9 @@ site_map:
   ros__parameters:
     # site assumed to be 5mx5m
     # Map dimensions; update for behavior_executive too (below)
-    height: 10 #50 # number of cells in col
-    width: 10 #50 # number cells in row
-    resolution: 0.5 # meters
+    height: 50 # number of cells in col
+    width: 50 # number cells in row
+    resolution: 0.1 # meters
     xTransform: 1.0 # meters
     yTransform: 1.0 # meters
 
@@ -20,8 +20,8 @@ behavior_executive_node:
   ros__parameters:
     # site assumed to be 5mx5m
     # Map dimensions; should match site_map dimensions!
-    height: 10 #50 # number of cells in col
-    width: 10 #50 # number cells in row
-    resolution: 0.5 # meters
+    height: 50 # number of cells in col
+    width: 50 # number cells in row
+    resolution: 0.1 # meters
     xTransform: 1.0 # meters
     yTransform: 1.0 # meters

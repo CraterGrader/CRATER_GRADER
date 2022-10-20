@@ -145,13 +145,21 @@ void BehaviorExecutive::fsmTimerCallback()
 
       // TODO: update tool trajectory
       tool_planner_.generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+      
+      // Convert to global frame
+      for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {
+        cg_msgs::msg::Pose2D global_path_pose = cg::planning::transformPose(current_trajectory_.path[i], local_map_relative_to_global_frame_);
+        current_trajectory_.path[i] = global_path_pose;
+      }
+
       for (size_t i =0; i < current_trajectory_.path.size(); ++i){
         std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
-    }
+      }
       calculated_trajectory_ = true;
     }
 
     if (calculated_trajectory_) {
+
       // Send the trajectory to the controller
       updated_trajectory_ = updateTrajectoryService(current_trajectory_, true);
       if (updated_trajectory_) {
@@ -160,7 +168,7 @@ void BehaviorExecutive::fsmTimerCallback()
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
     }
-    
+
     // Update shared current state and the precursing signal if worksystem is now enabled
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
@@ -346,7 +354,8 @@ void BehaviorExecutive::vizTimerCallback() {
   // Trajectory
   viz_path_.poses.clear();
   for (cg_msgs::msg::Pose2D traj_pose : current_trajectory_.path) {
-    cg_msgs::msg::Pose2D global_traj_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+    // cg_msgs::msg::Pose2D global_traj_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+    cg_msgs::msg::Pose2D global_traj_pose = traj_pose; // DEBUG
 
     geometry_msgs::msg::PoseStamped pose_stamped;
     pose_stamped.pose.position.x = global_traj_pose.pt.x;
