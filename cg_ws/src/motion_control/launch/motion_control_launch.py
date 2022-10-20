@@ -49,6 +49,7 @@ def generate_launch_description():
             package='motion_control',
             executable='worksystem_control_node',
             name='worksystem_control_node',
+            output='screen',
             parameters=[worksystem_params]
         ),
         included_launch

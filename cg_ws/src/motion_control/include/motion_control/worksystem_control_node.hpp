@@ -25,7 +25,9 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Callbacks */
-  void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg);
+  // void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg);
+  void globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+  void localRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void timerCallback();
 
   /* Services */

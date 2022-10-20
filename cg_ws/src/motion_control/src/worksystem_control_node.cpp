@@ -1,6 +1,6 @@
 #include <limits>
 #include "motion_control/worksystem_control_node.hpp"
-
+#include <iostream> // DEBUG
 namespace cg {
 namespace motion_control {
 
@@ -17,16 +17,22 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   // Initialize subscribers
   // Casting to std::function is necessary when defining callbacks with additional parameters
   // due to a bug in ROS2 (More info: https://answers.ros.org/question/308386/ros2-add-arguments-to-callback/)
-  std::function<void(const nav_msgs::msg::Odometry::SharedPtr msg)> global_callback_fn = std::bind(
-      &WorksystemControlNode::robotStateCallback, this, std::placeholders::_1, global_robot_state_
-  );
-  std::function<void(const nav_msgs::msg::Odometry::SharedPtr msg)> local_callback_fn = std::bind(
-      &WorksystemControlNode::robotStateCallback, this, std::placeholders::_1, local_robot_state_
-  );
+  // std::function<void(const nav_msgs::msg::Odometry::SharedPtr msg)> global_callback_fn = std::bind(
+  //     &WorksystemControlNode::robotStateCallback, this, std::placeholders::_1, global_robot_state_
+  // );
+  // std::function<void(const nav_msgs::msg::Odometry::SharedPtr msg)> local_callback_fn = std::bind(
+  //     &WorksystemControlNode::robotStateCallback, this, std::placeholders::_1, local_robot_state_
+  // );
+  // global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+  //   "/odometry/filtered/ekf_global_node",1, global_callback_fn);
+  // local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+  //   "/odometry/filtered/ekf_odom_node",1, local_callback_fn);
+
   global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    "/odometry/filtered/ekf_global_node",1, global_callback_fn);
+      "/odometry/filtered/ekf_global_node", 1, std::bind(&WorksystemControlNode::globalRobotStateCallback, this, std::placeholders::_1));
+
   local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-    "/odometry/filtered/ekf_odom_node",1, local_callback_fn);
+      "/odometry/filtered/ekf_odom_node", 1, std::bind(&WorksystemControlNode::localRobotStateCallback, this, std::placeholders::_1));
 
   // Initialize publishers
   cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
@@ -79,14 +85,19 @@ void WorksystemControlNode::timerCallback() {
   current_state.twist = local_robot_state_.twist;
 
   // Compute control command
-  cg_msgs::msg::ActuatorCommand cmd;
-  cmd.header.stamp = this->get_clock()->now();
-  cmd.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
-  cmd.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
+  cg_msgs::msg::ActuatorCommand cmd_msg;
+  cmd_msg.header.stamp = this->get_clock()->now();
+  cmd_msg.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
+  cmd_msg.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
   // TODO compute cmd.tool_position once ToolController is available
 
+  // Clamp these commands just in case cmd_mux doesn't handle acutator limits
+  cmd_msg.wheel_velocity = std::max(-100.0, std::min(cmd_msg.wheel_velocity, 100.0)); // [-100.0, 100.0]
+  cmd_msg.steer_position = std::max(-100.0, std::min(cmd_msg.steer_position, 100.0)); // [-100.0, 100.0]
+  cmd_msg.tool_position = std::max(0.0, std::min(cmd_msg.tool_position, 100.0));       // [0.0, 100.0]
+
   // Publish control command
-  cmd_pub_->publish(cmd);
+  cmd_pub_->publish(cmd_msg);
 }
 
 void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)
@@ -95,8 +106,17 @@ void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Req
   res->updated_trajectory = true; // Set response confirmation
 }
 
-void WorksystemControlNode::robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg) {
-  out_msg = *msg;
+// void WorksystemControlNode::robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg) {
+//   out_msg = *msg;
+// }
+
+void WorksystemControlNode::localRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  local_robot_state_ = *msg;
+}
+
+void WorksystemControlNode::globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
+{
+  global_robot_state_ = *msg;
 }
 
 void WorksystemControlNode::enableWorksystem(cg_msgs::srv::EnableWorksystem::Request::SharedPtr req, cg_msgs::srv::EnableWorksystem::Response::SharedPtr res)
