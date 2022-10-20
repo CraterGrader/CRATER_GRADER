@@ -30,6 +30,8 @@ namespace planning {
     enable_worksystem_client_ = this->create_client<cg_msgs::srv::EnableWorksystem>("enable_worksystem_server", rmw_qos_profile_services_default, enable_worksystem_client_group_);
 
     // Timer callback, joined to the callback group
+    this->declare_parameter<int>("fsm_timer_callback_ms,", 2000);
+    this->get_parameter("fsm_timer_callback_ms,", fsm_timer_callback_ms_);
     fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
     viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 

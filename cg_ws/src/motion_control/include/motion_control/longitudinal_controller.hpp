@@ -24,7 +24,7 @@ private:
   std::unique_ptr<PIDController> velocity_controller_;
   size_t prev_traj_idx_ = 0;
   double scaleToDriveActuators(double desired_drive);
-  int LongitudinalController::getClosestPointIndex(
+  int getClosestPointIndex(
       const cg_msgs::msg::Trajectory &target_trajectory,
       const nav_msgs::msg::Odometry &current_state);
 };

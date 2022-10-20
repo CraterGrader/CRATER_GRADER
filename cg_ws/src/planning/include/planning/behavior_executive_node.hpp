@@ -69,7 +69,7 @@ private:
   bool updateTrajectoryService(const cg_msgs::msg::Trajectory &current_trajectory, bool verbose);
   bool enableWorksystemService(const bool enable_worksystem, bool verbose);
 
-  long int fsm_timer_callback_ms_ = 2000;
+  int fsm_timer_callback_ms_;
   long int service_response_timeout_sec_ = 2;
 
   /* Message data */

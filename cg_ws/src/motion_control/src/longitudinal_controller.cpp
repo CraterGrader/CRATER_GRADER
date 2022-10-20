@@ -31,7 +31,7 @@ int LongitudinalController::getClosestPointIndex(
 
   double min_dist = std::numeric_limits<double>::infinity();
   int min_idx = -1;
-  for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
+  for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
     if (dist < min_dist) {
         min_dist = dist;
@@ -54,9 +54,11 @@ double LongitudinalController::computeDrive(
 
   // TODO: cur velocity is in m/s, target is currently in %fs
   double error = target_velocity - curr_velocity;
-  double desired_drive = velocity_controller_->control(error);
+  // double desired_drive = velocity_controller_->control(error);
+  double desired_drive = target_velocity; // DEBUG
 
-  return scaleToDriveActuators(desired_drive);
+  // return scaleToDriveActuators(desired_drive);
+  return desired_drive; // DEBUG
 }
 
 double LongitudinalController::scaleToDriveActuators(double desired_drive) {
