@@ -48,6 +48,9 @@ double LateralController::computeSteer(
         }
     }
 
+    debug_.cross_track_err = closest_cross_track_error;
+    debug_.heading_err = closest_heading_error;
+
     // Considering only planar velocity since trajectory is planar
     double current_velocity = std::sqrt(
       std::pow(current_state.twist.twist.linear.x, 2) + 

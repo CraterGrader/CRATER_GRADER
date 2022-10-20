@@ -43,6 +43,12 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
     std::bind(&WorksystemControlNode::timerCallback, this)
   );
 
+  // Debug publishers
+  lat_debug_cross_track_err_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+      "/lat_control_debug/cross_track_error", 1);
+  lat_debug_heading_err_pub_ = this->create_publisher<std_msgs::msg::Float64>(
+      "/lat_control_debug/heading_error", 1);
+
   // Load parameters
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
   this->get_parameter("longitudinal_velocity_kp", pid_params_.kp);
@@ -98,6 +104,14 @@ void WorksystemControlNode::timerCallback() {
 
   // Publish control command
   cmd_pub_->publish(cmd_msg);
+
+  // Publish debug variables
+  auto debug = lat_controller_->getDebug();
+  std_msgs::msg::Float64 debug_msg;
+  debug_msg.data = debug.cross_track_err;
+  lat_debug_cross_track_err_pub_->publish(debug_msg);
+  debug_msg.data = debug.heading_err;
+  lat_debug_heading_err_pub_->publish(debug_msg);
 }
 
 void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)

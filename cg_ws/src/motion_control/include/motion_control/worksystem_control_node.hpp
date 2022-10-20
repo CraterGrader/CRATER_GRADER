@@ -4,6 +4,7 @@
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <std_msgs/msg/float64.hpp>
 #include "motion_control/lateral_controller.hpp"
 #include "motion_control/longitudinal_controller.hpp"
 #include <cg_msgs/srv/update_trajectory.hpp> // Service for updating current trajectory
@@ -23,6 +24,10 @@ private:
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr local_robot_state_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
+
+  /* Debugging publishers */
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr lat_debug_cross_track_err_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr lat_debug_heading_err_pub_;
 
   /* Callbacks */
   // void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg);
