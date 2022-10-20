@@ -62,7 +62,7 @@ double LateralController::computeSteer(
     // Scale steer to actuator limits
     // TODO: make this into a function!
     desired_steer = -desired_steer; // Actuator convention is negative for right turn; flip
-    desired_steer *= 100;
+    desired_steer *= 10;
 
     return desired_steer;
     }

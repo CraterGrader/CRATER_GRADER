@@ -117,9 +117,9 @@ void BehaviorExecutive::fsmTimerCallback()
   case cg::planning::FSM::State::GOALS_REMAINING:{
     // ---------------------------------------
     // DEBUG
-    cg_msgs::msg::Pose2D manual_goal = create_pose2d(1.5, 4.5, 3.14159);
-    current_goal_poses_.clear();
-    current_goal_poses_.push_back(manual_goal);
+    // cg_msgs::msg::Pose2D manual_goal = create_pose2d(1.5, 4.5, 3.14159);
+    // current_goal_poses_.clear();
+    // current_goal_poses_.push_back(manual_goal);
     // ---------------------------------------
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;

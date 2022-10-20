@@ -1,5 +1,5 @@
 behavior_executive_node:
   ros__parameters:
-      # Absolutle thresholds for reaching goal
-      thresh_pos: 0.1 # meters
-      thresh_head: 0.174533 # radians
+      # Absolutle +/- thresholds for reaching goal
+      thresh_pos: 0.5 # meters
+      thresh_head: 0.785398 # radians
