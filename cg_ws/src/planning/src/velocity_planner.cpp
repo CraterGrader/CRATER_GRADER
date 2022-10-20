@@ -21,10 +21,11 @@ void VelocityPlanner::generateVelocityTargets(
             reference_pose = trajectory.path[i];
             // If pose as positive x component, it's going forward
             // Currently using constant velocity
+            // TODO: had to change sign?
             if (curr_vec_transformed.x >= 0) {
-                velocity_targets.push_back(constant_velocity_);
-            } else {
                 velocity_targets.push_back(-constant_velocity_);
+            } else {
+                velocity_targets.push_back(constant_velocity_);
             }
         }
 

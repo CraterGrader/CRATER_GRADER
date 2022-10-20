@@ -30,7 +30,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 
   // Initialize publishers
   cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
-    "/autonomous_control_cmd", 1);
+      "/autonomy_cmd", 1);
 
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(100),

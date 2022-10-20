@@ -62,7 +62,6 @@ namespace planning {
     // Create pose of local map, assumed with no rotation
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
     global_map_relative_to_local_frame_ = create_pose2d(-xTransform, -yTransform, 0.0);
-    current_agent_pose_ = create_pose2d(1.5, 0.5, 3.14159);
   }
 
 void BehaviorExecutive::fsmTimerCallback()
@@ -115,11 +114,17 @@ void BehaviorExecutive::fsmTimerCallback()
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
     }
     break;
-  case cg::planning::FSM::State::GOALS_REMAINING:
+  case cg::planning::FSM::State::GOALS_REMAINING:{
+    // ---------------------------------------
+    // DEBUG
+    cg_msgs::msg::Pose2D manual_goal = create_pose2d(1.5, 4.5, 3.14159);
+    current_goal_poses_.clear();
+    current_goal_poses_.push_back(manual_goal);
+    // ---------------------------------------
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
-    break;
+    break;}
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
     // Get the trajectory
     // get_worksystem_trajectory_.runStateMultiGoal(kinematic_planner_, current_goal_poses_, current_trajectories_, current_agent_pose_, current_height_map_);
@@ -140,7 +145,9 @@ void BehaviorExecutive::fsmTimerCallback()
 
       // TODO: update tool trajectory
       tool_planner_.generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
-
+      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+        std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+    }
       calculated_trajectory_ = true;
     }
 
@@ -268,7 +275,7 @@ void BehaviorExecutive::globalRobotStateCallback(const nav_msgs::msg::Odometry::
   m.getRPY(global_robot_roll, global_robot_pitch, global_robot_yaw);
 
   cg_msgs::msg::Pose2D global_robot_pose = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
-                                                                       global_robot_state_.pose.pose.position.x,
+                                                                       global_robot_state_.pose.pose.position.y,
                                                                        global_robot_yaw);
 
   // Convert pose to local map frame
