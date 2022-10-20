@@ -71,7 +71,6 @@ double LateralController::stanleyControlLaw(
 
     double steer_correct_angle = std::atan2(k_ * cross_track_err, velocity + stanley_softening_constant_);
 
-    double debug = heading_err + steer_correct_angle;
     return heading_err + steer_correct_angle;
     }
 double LateralController::scaleToSteerActuators(double desired_steer){

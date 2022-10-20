@@ -1,4 +1,5 @@
 #include <planning/velocity_planner.hpp>
+#include <iostream> // DEBUG
 
 namespace cg {
 namespace planning {
@@ -17,7 +18,10 @@ void VelocityPlanner::generateVelocityTargets(
             cg_msgs::msg::Point2D curr_vec_transformed = transformPoint(
                 trajectory.path[i].pt, 
                 create_pose2d(-reference_pose.pt.x, -reference_pose.pt.y, -reference_pose.yaw));
-            
+            std::cout << " ++++++++++ traj pose <x,y,yaw>: < " << trajectory.path[i].pt.x << ", " << trajectory.path[i].pt.y << ", " << trajectory.path[i].yaw << std::endl;
+            std::cout << " ++++++++++ ref pose <x,y,yaw>: < " << reference_pose.pt.x << ", " << reference_pose.pt.y << ", " << reference_pose.yaw << std::endl;
+            std::cout << " ++++++++++ curr_vec_transformed <x,y>: < " << curr_vec_transformed.x << ", " << curr_vec_transformed.y << std::endl;
+            std::cout << " ++++++++++" << std::endl;
             reference_pose = trajectory.path[i];
             // If pose as positive x component, it's going forward
             // Currently using constant velocity

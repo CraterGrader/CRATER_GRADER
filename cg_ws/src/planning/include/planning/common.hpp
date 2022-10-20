@@ -3,6 +3,7 @@
 
 #include <cmath> // sqrt, fmod
 #include <Eigen/Dense> // matrix multiplication
+#include <Eigen/Geometry> // homogenous transforms
 #include <cg_msgs/msg/point2_d.hpp>
 #include <cg_msgs/msg/pose2_d.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
@@ -20,6 +21,10 @@ float rad2deg(float rad);
 float deg2rad(float deg);
 
 // float angle_difference(const float angle_1, const float angle_2);
+
+cg_msgs::msg::Point2D transformPointLocalToGlobal(
+    const cg_msgs::msg::Point2D &global_pt,
+    const cg_msgs::msg::Pose2D &local_frame);
 
 cg_msgs::msg::Point2D transformPoint(
   const cg_msgs::msg::Point2D &source_pt, 

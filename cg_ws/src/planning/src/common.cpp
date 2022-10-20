@@ -39,6 +39,31 @@ float deg2rad(float deg) {
   return M_PI * (deg / 180);
 }
 
+cg_msgs::msg::Point2D transformPointLocalToGlobal(const cg_msgs::msg::Point2D &global_pt, const cg_msgs::msg::Pose2D &local_frame) {
+
+  // Create local frame matrix
+  Eigen::Vector2f trans{local_frame.pt.x, local_frame.pt.y};
+  Eigen::Transform<float, 2, Eigen::Affine> T;
+  T = Eigen::Translation<float, 2>(trans);
+
+  T.rotate(Eigen::Rotation2Df(local_frame.yaw));
+
+  // Invert
+  T = T.inverse();
+
+  Eigen::Matrix3f mat;
+  mat = T.matrix();
+
+  // // Create vector
+  Eigen::Vector3f global_vec{static_cast<float>(global_pt.x), static_cast<float>(global_pt.y), 1.0f};
+
+  // Multiply to get point transformed to local frame
+  Eigen::Vector3f local_pt;
+  local_pt = mat * global_vec;
+  return create_point2d(local_pt.coeff(0), local_pt.coeff(1));
+  // return create_point2d(0.0, 0.0);
+}
+
 cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, const cg_msgs::msg::Pose2D &pose) {
 
   // Generate Transformation matrix from pose, based on yaw z-rotation
