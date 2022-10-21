@@ -96,7 +96,7 @@ cg_msgs::msg::Pose2D transformPose(
 }
 
 // Find smallest difference between two angles, all units in radians
-double smallest_angle_difference(double angle1, double angle2) {
+double smallest_angle_difference_signed(double angle1, double angle2) {
   // Normalize angles to [0, 2*pi]
   double normalized_angle1 = std::fmod(angle1, 2.0 * M_PI);
   double normalized_angle2 = std::fmod(angle2, 2.0 * M_PI);
@@ -104,10 +104,17 @@ double smallest_angle_difference(double angle1, double angle2) {
   // Normalize absolute difference to [0, 2*pi]
   double diff_head = std::fmod(fabs(normalized_angle1 - normalized_angle2), 2.0 * M_PI);
 
+
   // Use smaller overall angle, i.e. in [0, pi]
   if (diff_head > (2.0 * M_PI)) {
       diff_head = fabs(diff_head - (2.0 * M_PI));
   }
+
+  // Use signed angle
+  if (normalized_angle2 > normalized_angle1) {
+    diff_head = -diff_head;
+  }
+
   return diff_head;
 }
 
@@ -116,7 +123,7 @@ bool samePoseWithinThresh(const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg:
   float diff_pos = euclidean_distance(pose1.pt, pose2.pt);
 
   // Calculate heading difference
-  double diff_head = smallest_angle_difference(pose1.yaw, pose2.yaw);
+  double diff_head = static_cast<double>(std::fabs(static_cast<float>(smallest_angle_difference_signed(pose1.yaw, pose2.yaw))));
 
   if (diff_pos <= thresh_pos && diff_head <= thresh_head) {
     return true;

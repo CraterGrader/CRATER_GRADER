@@ -27,7 +27,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   //   "/odometry/filtered/ekf_global_node",1, global_callback_fn);
   // local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
   //   "/odometry/filtered/ekf_odom_node",1, local_callback_fn);
-  viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/worksystem_current_path", 1);
+
   global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/odometry/filtered/ekf_global_node", 1, std::bind(&WorksystemControlNode::globalRobotStateCallback, this, std::placeholders::_1));
 
@@ -78,62 +78,35 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
 
 void WorksystemControlNode::timerCallback() {
 
-  // -----------------------------------------------
-  // Trajectory
-  viz_path_.poses.clear();
-  for (cg_msgs::msg::Pose2D traj_pose : current_trajectory_.path) {
-    // cg_msgs::msg::Pose2D global_traj_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
-    cg_msgs::msg::Pose2D global_traj_pose = traj_pose; // DEBUG
+  if (worksystem_enabled_) {
+    // TODO implement gain scheduling if deemed necessary
+    lon_controller_->setGains(pid_params_.kp, pid_params_.ki, pid_params_.kd);
 
-    geometry_msgs::msg::PoseStamped pose_stamped;
-    pose_stamped.pose.position.x = global_traj_pose.pt.x;
-    pose_stamped.pose.position.y = global_traj_pose.pt.y;
+    // Use global position from map frame and smooth velocity from odom frame as current state
+    nav_msgs::msg::Odometry current_state = global_robot_state_;
+    current_state.child_frame_id = local_robot_state_.child_frame_id;
+    current_state.twist = local_robot_state_.twist;
 
-    tf2::Quaternion q;
-    q.setRPY(0, 0, global_traj_pose.yaw);
-    pose_stamped.pose.orientation.x = q.x();
-    pose_stamped.pose.orientation.y = q.y();
-    pose_stamped.pose.orientation.z = q.z();
-    pose_stamped.pose.orientation.w = q.w();
-
-    pose_stamped.header.stamp = this->get_clock()->now();
-    pose_stamped.header.frame_id = "map";
-
-    viz_path_.poses.push_back(pose_stamped);
-  }
-  viz_path_.header.stamp = this->get_clock()->now();
-  viz_path_.header.frame_id = "map";
-
-  viz_path_pub_->publish(viz_path_);
-  // -----------------------------------------------
-
-  // Don't publish anything if the worksystem is not enabled
-  if (!worksystem_enabled_) {
-    return;
-  }
-
-  // TODO implement gain scheduling if deemed necessary
-  lon_controller_->setGains(pid_params_.kp, pid_params_.ki, pid_params_.kd);
-
-  // Use global position from map frame and smooth velocity from odom frame as current state
-  nav_msgs::msg::Odometry current_state = global_robot_state_;
-  current_state.child_frame_id = local_robot_state_.child_frame_id;
-  current_state.twist = local_robot_state_.twist;
-
-  // Compute control command
-  cg_msgs::msg::ActuatorCommand cmd_msg;
-  cmd_msg.header.stamp = this->get_clock()->now();
-  cmd_msg.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
-  cmd_msg.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
+    // Compute control command
+    cmd_msg_.header.stamp = this->get_clock()->now();
+    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
+    cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
   // TODO compute cmd.tool_position once ToolController is available
 
+  } else {
+    // Publish zero state if the worksystem is not enabled
+    cmd_msg_.header.stamp = this->get_clock()->now();
+    cmd_msg_.wheel_velocity = 0.0;
+    cmd_msg_.steer_position = 0.0;
+  }
+
   // Clamp these commands just in case cmd_mux doesn't handle acutator limits
-  cmd_msg.wheel_velocity = std::max(-100.0, std::min(cmd_msg.wheel_velocity, 100.0)); // [-100.0, 100.0]
-  cmd_msg.steer_position = std::max(-100.0, std::min(cmd_msg.steer_position, 100.0)); // [-100.0, 100.0]
-  cmd_msg.tool_position = std::max(0.0, std::min(cmd_msg.tool_position, 100.0));       // [0.0, 100.0]
+  cmd_msg_.wheel_velocity = std::max(-100.0, std::min(cmd_msg_.wheel_velocity, 100.0)); // [-100.0, 100.0]
+  cmd_msg_.steer_position = std::max(-100.0, std::min(cmd_msg_.steer_position, 100.0)); // [-100.0, 100.0]
+  cmd_msg_.tool_position = std::max(0.0, std::min(cmd_msg_.tool_position, 100.0));       // [0.0, 100.0]
 
   // Publish control command
-  cmd_pub_->publish(cmd_msg);
+  cmd_pub_->publish(cmd_msg_);
 
   // Publish debug variables
   auto debug = lat_controller_->getDebug();

@@ -158,19 +158,21 @@ void BehaviorExecutive::fsmTimerCallback()
   case cg::planning::FSM::State::PLAN_EXPLORATION:
     plan_exploration_.runState(exploration_planner_, current_height_map_);
     break;
-  case cg::planning::FSM::State::GET_EXPLORATION_GOALS:
+  case cg::planning::FSM::State::GET_EXPLORATION_GOALS:{
     get_exploration_goals_.runState(current_goal_poses_, exploration_planner_, current_agent_pose_, current_height_map_);
     for (size_t i =0; i < current_goal_poses_.size(); ++i){
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
     }
-    break;
-  case cg::planning::FSM::State::GOALS_REMAINING:{
     // ---------------------------------------
     // DEBUG
-    // cg_msgs::msg::Pose2D manual_goal = create_pose2d(1.5, 4.5, 3.14159);
+    // cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(3.0, 1.5, 3.14159);
+    // cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 3.0, 3.14159);
     // current_goal_poses_.clear();
-    // current_goal_poses_.push_back(manual_goal);
+    // current_goal_poses_.push_back(manual_goal1);
+    // current_goal_poses_.push_back(manual_goal2);
     // ---------------------------------------
+    break;}
+  case cg::planning::FSM::State::GOALS_REMAINING:{
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
@@ -184,6 +186,12 @@ void BehaviorExecutive::fsmTimerCallback()
     //     std::cout << "< " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << " >" << std::endl;
     //   }
     // }
+
+    // Stop worksystem for replanning
+    if (enable_worksystem_) {
+      enable_worksystem_ = false;
+      worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
+    }
 
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
     if (!calculated_trajectory_) {

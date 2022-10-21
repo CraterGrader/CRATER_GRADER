@@ -31,7 +31,7 @@ int LongitudinalController::getClosestPointIndex(
 
   double min_dist = std::numeric_limits<double>::infinity();
   int min_idx = -1;
-  for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
+  for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
     if (dist < min_dist) {
         min_dist = dist;
@@ -39,6 +39,23 @@ int LongitudinalController::getClosestPointIndex(
         prev_traj_idx_ = i;
     }
   }
+
+  // check if we are at last index
+  if (prev_traj_idx_ + 1 == target_trajectory.path.size()){
+    return prev_traj_idx_;
+  }
+
+  // get x componant of pose in traj frame
+
+  // get velocity componant
+  velocity_of_traj = target_trajectory.velocity_targets[prev_traj_idx_];
+
+  // perform sign(velocity) * sign(x_componant of pose in traj frame) 
+  // if product is positive 
+    // remove the index, because we are in front of a forward drive pose, or behind a reverse drive node
+    // prev_traj_idx_ += 1 
+
+    
   return min_idx;
 }
 

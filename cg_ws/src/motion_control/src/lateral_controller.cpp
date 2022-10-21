@@ -37,12 +37,11 @@ double LateralController::computeSteer(
 
             closest_euclidian_error = dist;
             closest_cross_track_error = transformed_error.y;
-            
-            closest_heading_error = cg::planning::smallest_angle_difference(target_trajectory.path[i].yaw, cur_pose.yaw);
+
+            closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[i].yaw, cur_pose.yaw);
             prev_traj_idx_ = i;
         }
     }
-
     debug_.cross_track_err = closest_cross_track_error;
     debug_.heading_err = closest_heading_error;
 
@@ -57,6 +56,7 @@ double LateralController::computeSteer(
       closest_cross_track_error,
       current_velocity);
     // Scale the desired steer angle to actuator steer position
+    std::cout << " ++++++ desired: " << target_trajectory.path[prev_traj_idx_].yaw << ", current: " << cur_pose.yaw << ", error: " << closest_heading_error << ", steer command: " << desired_steer << std::endl;
     return scaleToSteerActuators(desired_steer);
 }
 
@@ -67,11 +67,11 @@ double LateralController::stanleyControlLaw(
 
     double steer_correct_angle = std::atan2(k_ * cross_track_err, velocity + stanley_softening_constant_);
 
-    return heading_err + steer_correct_angle;
+    return heading_err; // DEBUG + steer_correct_angle;
     }
 double LateralController::scaleToSteerActuators(double desired_steer){
   // Calculated using % full scale of steering angle [%FS / (steer angle in radians)]
-  double transfer_function_to_steer_position = -360.712;
+  double transfer_function_to_steer_position = 360.712;
 
   return transfer_function_to_steer_position * desired_steer;
 }

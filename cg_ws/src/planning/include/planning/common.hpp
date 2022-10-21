@@ -35,7 +35,7 @@ cg_msgs::msg::Pose2D transformPose(
   const cg_msgs::msg::Pose2D &transforming_pose);
 
 // Find smallest difference between two angles, all units in radians
-double smallest_angle_difference(double angle1, double angle2);
+double smallest_angle_difference_signed(double angle1, double angle2);
 
 // Checks if trajectory_end_pose is within distance threshold of goal_pose
 bool samePoseWithinThresh(
