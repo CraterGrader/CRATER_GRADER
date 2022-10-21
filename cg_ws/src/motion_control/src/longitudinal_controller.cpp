@@ -29,6 +29,10 @@ int LongitudinalController::getClosestPointIndex(
       current_state.pose.pose.position.y,
       tf2::getYaw(q));
 
+  cg_msgs::msg::Point2D cur_point = cg::planning::create_point2d(
+      current_state.pose.pose.position.x,
+      current_state.pose.pose.position.y);
+
   double min_dist = std::numeric_limits<double>::infinity();
   int min_idx = -1;
   for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
@@ -45,18 +49,22 @@ int LongitudinalController::getClosestPointIndex(
     return prev_traj_idx_;
   }
 
+  // make local frame using path and yaw
+  cg_msgs::msg::Point2D point_rel_to_traj = cg::planning::transformPointGlobalToLocal(cur_point, target_trajectory.path[prev_traj_idx_]);
+
   // get x componant of pose in traj frame
+  double x_of_point_in_traj_frame = point_rel_to_traj.x;
 
   // get velocity componant
-  velocity_of_traj = target_trajectory.velocity_targets[prev_traj_idx_];
+  double velocity_of_traj = target_trajectory.velocity_targets[prev_traj_idx_];
 
-  // perform sign(velocity) * sign(x_componant of pose in traj frame) 
   // if product is positive 
-    // remove the index, because we are in front of a forward drive pose, or behind a reverse drive node
-    // prev_traj_idx_ += 1 
-
+  // remove the index, because we are in front of a forward drive pose, or behind a reverse drive node
+  if ((velocity_of_traj * x_of_point_in_traj_frame) > 0){
+    prev_traj_idx_ += 1;
+  }
     
-  return min_idx;
+  return prev_traj_idx_;
 }
 
 double LongitudinalController::computeDrive(
@@ -68,11 +76,10 @@ double LongitudinalController::computeDrive(
   double target_velocity = target_trajectory.path.size() ?
       target_trajectory.velocity_targets[getClosestPointIndex(target_trajectory, current_state)] : 0.0;
 
-
   // TODO: cur velocity is in m/s, target is currently in %fs
-  double error = target_velocity - curr_velocity;
+  // double error = target_velocity - curr_velocity;
   // double desired_drive = velocity_controller_->control(error);
-  double desired_drive = target_velocity; // DEBUG
+  double desired_drive = target_velocity; // DEBUG PID  on PID is non relevent for our usecase
 
   // return scaleToDriveActuators(desired_drive);
   return desired_drive; // DEBUG

@@ -98,6 +98,7 @@ void WorksystemControlNode::timerCallback() {
     cmd_msg_.header.stamp = this->get_clock()->now();
     cmd_msg_.wheel_velocity = 0.0;
     cmd_msg_.steer_position = 0.0;
+    // Don't update the field for tool position yet
   }
 
   // Clamp these commands just in case cmd_mux doesn't handle acutator limits

@@ -30,8 +30,8 @@ namespace planning {
     enable_worksystem_client_ = this->create_client<cg_msgs::srv::EnableWorksystem>("enable_worksystem_server", rmw_qos_profile_services_default, enable_worksystem_client_group_);
 
     // Timer callback, joined to the callback group
-    this->declare_parameter<int>("fsm_timer_callback_ms,", 2000);
-    this->get_parameter("fsm_timer_callback_ms,", fsm_timer_callback_ms_);
+    this->declare_parameter<int>("fsm_timer_callback_ms", 2000);
+    this->get_parameter("fsm_timer_callback_ms", fsm_timer_callback_ms_);
     fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
     viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 
@@ -70,26 +70,26 @@ namespace planning {
     float pose_yaw_equality_threshold;
     float topography_weight;
     float trajectory_heuristic_epsilon;
-    this->declare_parameter<float>("goal_pose_distance_threshold,", 0.00001);
-    this->get_parameter("goal_pose_distance_threshold,", goal_pose_distance_threshold);
-    this->declare_parameter<float>("turn_radii_min,", 1.6);
-    this->get_parameter("turn_radii_min,", turn_radii_min);
-    this->declare_parameter<float>("turn_radii_max,", 2.8);
-    this->get_parameter("turn_radii_max,", turn_radii_max);
-    this->declare_parameter<float>("turn_radii_resolution,", 0.4);
-    this->get_parameter("turn_radii_resolution,", turn_radii_resolution);
-    this->declare_parameter<float>("max_trajectory_length,", 0.4);
-    this->get_parameter("max_trajectory_length,", max_trajectory_length);
-    this->declare_parameter<float>("trajectory_resolution,", 0.05);
-    this->get_parameter("trajectory_resolution,", trajectory_resolution);
-    this->declare_parameter<float>("pose_position_equality_threshold,", 0.05);
-    this->get_parameter("pose_position_equality_threshold,", pose_position_equality_threshold);
-    this->declare_parameter<float>("pose_yaw_equality_threshold,", 0.0872665);
-    this->get_parameter("pose_yaw_equality_threshold,", pose_yaw_equality_threshold);
-    this->declare_parameter<float>("topography_weight,", 1.0);
-    this->get_parameter("topography_weight,", topography_weight);
-    this->declare_parameter<float>("trajectory_heuristic_epsilon,", 1.0);
-    this->get_parameter("trajectory_heuristic_epsilon,", trajectory_heuristic_epsilon);
+    this->declare_parameter<float>("goal_pose_distance_threshold", 0.00001);
+    this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
+    this->declare_parameter<float>("turn_radii_min", 1.6);
+    this->get_parameter("turn_radii_min", turn_radii_min);
+    this->declare_parameter<float>("turn_radii_max", 2.8);
+    this->get_parameter("turn_radii_max", turn_radii_max);
+    this->declare_parameter<float>("turn_radii_resolution", 0.4);
+    this->get_parameter("turn_radii_resolution", turn_radii_resolution);
+    this->declare_parameter<float>("max_trajectory_length", 0.4);
+    this->get_parameter("max_trajectory_length", max_trajectory_length);
+    this->declare_parameter<float>("trajectory_resolution", 0.05);
+    this->get_parameter("trajectory_resolution", trajectory_resolution);
+    this->declare_parameter<float>("pose_position_equality_threshold", 0.05);
+    this->get_parameter("pose_position_equality_threshold", pose_position_equality_threshold);
+    this->declare_parameter<float>("pose_yaw_equality_threshold", 0.0872665);
+    this->get_parameter("pose_yaw_equality_threshold", pose_yaw_equality_threshold);
+    this->declare_parameter<float>("topography_weight", 1.0);
+    this->get_parameter("topography_weight", topography_weight);
+    this->declare_parameter<float>("trajectory_heuristic_epsilon", 1.0);
+    this->get_parameter("trajectory_heuristic_epsilon", trajectory_heuristic_epsilon);
 
     cg::planning::KinematicPlanner param_kinematic_planner = cg::planning::KinematicPlanner(
         goal_pose_distance_threshold,
@@ -165,11 +165,11 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     // ---------------------------------------
     // DEBUG
-    // cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(3.0, 1.5, 3.14159);
-    // cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 3.0, 3.14159);
-    // current_goal_poses_.clear();
-    // current_goal_poses_.push_back(manual_goal1);
-    // current_goal_poses_.push_back(manual_goal2);
+    cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(2.5, 1.5, 2.007);
+    cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 4.0, 3.14159);
+    current_goal_poses_.clear();
+    current_goal_poses_.push_back(manual_goal1);
+    current_goal_poses_.push_back(manual_goal2);
     // ---------------------------------------
     break;}
   case cg::planning::FSM::State::GOALS_REMAINING:{
@@ -179,20 +179,6 @@ void BehaviorExecutive::fsmTimerCallback()
     break;}
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
     // Get the trajectory
-    // get_worksystem_trajectory_.runStateMultiGoal(kinematic_planner_, current_goal_poses_, current_trajectories_, current_agent_pose_, current_height_map_);
-    // for (size_t i = 0; i < current_trajectories_.size(); ++i) {
-    //   std::cout << "Trajectory " << std::to_string(i) << std::endl;
-    //   for (cg_msgs::msg::Pose2D pose: current_trajectories_[i]) {
-    //     std::cout << "< " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << " >" << std::endl;
-    //   }
-    // }
-
-    // Stop worksystem for replanning
-    if (enable_worksystem_) {
-      enable_worksystem_ = false;
-      worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
-    }
-
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
     if (!calculated_trajectory_) {
       // Update path trajectory
@@ -217,7 +203,6 @@ void BehaviorExecutive::fsmTimerCallback()
     }
 
     if (calculated_trajectory_) {
-
       // Send the trajectory to the controller
       updated_trajectory_ = updateTrajectoryService(current_trajectory_, true);
       if (updated_trajectory_) {
@@ -230,9 +215,16 @@ void BehaviorExecutive::fsmTimerCallback()
     // Update shared current state and the precursing signal if worksystem is now enabled
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
-  case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:
-    following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_);
-    break;
+  case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:{
+    bool goal_reached = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_);
+    
+    // Disable worksystem if goal is reached
+    if (goal_reached) {
+      enable_worksystem_ = false;
+      worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
+    }
+
+    break;}
   case cg::planning::FSM::State::STOPPED:
     // Stop the worksystem
     enable_worksystem_ = false;
