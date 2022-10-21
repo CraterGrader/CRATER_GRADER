@@ -87,10 +87,13 @@ void WorksystemControlNode::timerCallback() {
     current_state.child_frame_id = local_robot_state_.child_frame_id;
     current_state.twist = local_robot_state_.twist;
 
+    // get closest trajectory index from the worksystem
+    traj_idx_ = cg::planning::getClosestTrajIndex(current_trajectory_, current_state, traj_idx_);
+
     // Compute control command
     cmd_msg_.header.stamp = this->get_clock()->now();
-    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state);
-    cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state);
+    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_);
+    cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
   // TODO compute cmd.tool_position once ToolController is available
 
   } else {
@@ -123,14 +126,9 @@ void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Req
   current_trajectory_ = req->trajectory; // Update current trajectory
   res->updated_trajectory = true; // Set response confirmation
 
-  // Reset controller tracking indices
-  lon_controller_->resetPrevTrajIdx();
-  lat_controller_->resetPrevTrajIdx();
+  // Reset controller tracking index
+  traj_idx_ = 0;
 }
-
-// void WorksystemControlNode::robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg) {
-//   out_msg = *msg;
-// }
 
 void WorksystemControlNode::localRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
   local_robot_state_ = *msg;

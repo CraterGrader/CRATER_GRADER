@@ -29,7 +29,6 @@ private:
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr lat_debug_heading_err_pub_;
 
   /* Callbacks */
-  // void robotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg, nav_msgs::msg::Odometry &out_msg);
   void globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void localRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void timerCallback();
@@ -54,6 +53,7 @@ private:
   bool worksystem_enabled_ = false;
   nav_msgs::msg::Odometry global_robot_state_;
   nav_msgs::msg::Odometry local_robot_state_;
+  int traj_idx_ = 0; // used for tracking what index on trajectory is closest to current pose, monotonically increasing, reset when new traj given
 
   cg_msgs::msg::ActuatorCommand cmd_msg_;
 }; // class WorksystemControlNode

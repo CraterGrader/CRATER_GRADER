@@ -131,5 +131,51 @@ bool samePoseWithinThresh(const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg:
   return false;
 }
 
+int getClosestTrajIndex(const cg_msgs::msg::Trajectory &target_trajectory, const nav_msgs::msg::Odometry &current_state, int prev_traj_idx){
+
+  tf2::Quaternion q = tf2::Quaternion(
+      current_state.pose.pose.orientation.x,
+      current_state.pose.pose.orientation.y,
+      current_state.pose.pose.orientation.z,
+      current_state.pose.pose.orientation.w);
+
+  cg_msgs::msg::Pose2D cur_pose = cg::planning::create_pose2d(
+      current_state.pose.pose.position.x,
+      current_state.pose.pose.position.y,
+      tf2::getYaw(q));
+
+  cg_msgs::msg::Point2D cur_point = cg::planning::create_point2d(
+      current_state.pose.pose.position.x,
+      current_state.pose.pose.position.y);
+
+  double min_dist = std::numeric_limits<double>::infinity();
+  int min_idx = -1;
+  for (size_t i = prev_traj_idx; i < target_trajectory.path.size(); ++i) {
+    double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
+    if (dist < min_dist) {
+        min_dist = dist;
+        min_idx = i;
+    }
+  }
+
+  // check if we are at last index, if so, dont exceed 
+  if (min_idx + 1 == target_trajectory.path.size()){
+    return min_idx;
+  }
+
+  // check if we are ahead of a forward drive, or behind a backup drive 
+  // make local frame using path and yaw
+  cg_msgs::msg::Point2D point_rel_to_traj = cg::planning::transformPointGlobalToLocal(cur_point, target_trajectory.path[min_idx]);
+  // get x componant of pose in traj frame
+  double x_of_point_in_traj_frame = point_rel_to_traj.x;
+  // get velocity componant
+  double velocity_of_traj = target_trajectory.velocity_targets[min_idx];
+  // if product is positive remove the index, because we are in front of a forward drive pose, or behind a reverse drive node
+  if ((velocity_of_traj * x_of_point_in_traj_frame) > 0){
+    min_idx += 1;
+  }
+  return min_idx;
+}
+
 } // planning namespace
 } // cg namespace

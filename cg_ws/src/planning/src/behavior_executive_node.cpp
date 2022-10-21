@@ -165,11 +165,11 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     // ---------------------------------------
     // DEBUG
-    cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(2.5, 1.5, 2.007);
-    cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 4.0, 3.14159);
-    current_goal_poses_.clear();
-    current_goal_poses_.push_back(manual_goal1);
-    current_goal_poses_.push_back(manual_goal2);
+    // cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(2.5, 1.5, 2.007);
+    // cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 4.0, 3.14159);
+    // current_goal_poses_.clear();
+    // current_goal_poses_.push_back(manual_goal1);
+    // current_goal_poses_.push_back(manual_goal2);
     // ---------------------------------------
     break;}
   case cg::planning::FSM::State::GOALS_REMAINING:{

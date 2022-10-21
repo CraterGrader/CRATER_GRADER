@@ -9,7 +9,9 @@ LateralController::LateralController(double k, double stanley_softening_constant
 
 double LateralController::computeSteer(
     const cg_msgs::msg::Trajectory &target_trajectory,
-    const nav_msgs::msg::Odometry &current_state) {
+    const nav_msgs::msg::Odometry &current_state,
+    const size_t traj_idx)
+{
 
     tf2::Quaternion q = tf2::Quaternion(
         current_state.pose.pose.orientation.x,
@@ -23,25 +25,27 @@ double LateralController::computeSteer(
         tf2::getYaw(q));
 
     // Get closest trajectory reference point
-    double closest_cross_track_error;
-    double closest_euclidian_error = std::numeric_limits<double>::infinity();
-    double closest_heading_error;
-    for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
-        double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
+    cg_msgs::msg::Point2D transformed_error = cg::planning::transformPointGlobalToLocal(cur_pose.pt, target_trajectory.path[traj_idx]);
+    double closest_cross_track_error = transformed_error.y;
+    // double closest_euclidian_error = std::numeric_limits<double>::infinity();
+    double closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[traj_idx].yaw, cur_pose.yaw);
+    // for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
+    //     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
         
-        // If trajectory point closer, then update considered target point
-        if (dist < closest_euclidian_error) {
+    //     // If trajectory point closer, then update considered target point
+    //     if (dist < closest_euclidian_error) {
             
-            // Transform both traj_pose and reference pose by the opposite of reference pose
-            cg_msgs::msg::Point2D transformed_error = cg::planning::transformPointGlobalToLocal(cur_pose.pt, target_trajectory.path[i]);
+    //         // Transform both traj_pose and reference pose by the opposite of reference pose
+    //         cg_msgs::msg::Point2D transformed_error = cg::planning::transformPointGlobalToLocal(cur_pose.pt, target_trajectory.path[i]);
 
-            closest_euclidian_error = dist;
-            closest_cross_track_error = transformed_error.y;
+    //         closest_euclidian_error = dist;
+    //         closest_cross_track_error = transformed_error.y;
 
-            closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[i].yaw, cur_pose.yaw);
-            prev_traj_idx_ = i;
-        }
-    }
+    //         closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[i].yaw, cur_pose.yaw);
+    //         prev_traj_idx_ = i;
+    //     }
+    // }
+    
     debug_.cross_track_err = closest_cross_track_error;
     debug_.heading_err = closest_heading_error;
 
@@ -55,8 +59,13 @@ double LateralController::computeSteer(
       closest_heading_error,
       closest_cross_track_error,
       current_velocity);
+
+    // Reverse driving needs to flip sign
+    if (target_trajectory.velocity_targets[traj_idx] < 0) {
+        desired_steer = -desired_steer;
+    }
+
     // Scale the desired steer angle to actuator steer position
-    std::cout << " ++++++ desired: " << target_trajectory.path[prev_traj_idx_].yaw << ", current: " << cur_pose.yaw << ", error: " << closest_heading_error << ", steer command: " << desired_steer << std::endl;
     return scaleToSteerActuators(desired_steer);
 }
 
@@ -74,10 +83,6 @@ double LateralController::scaleToSteerActuators(double desired_steer){
   double transfer_function_to_steer_position = 360.712;
 
   return transfer_function_to_steer_position * desired_steer;
-}
-
-void LateralController::resetPrevTrajIdx() {
-    prev_traj_idx_ = 0;
 }
 
 } // namespace motion_control

@@ -7,6 +7,10 @@
 #include <cg_msgs/msg/point2_d.hpp>
 #include <cg_msgs/msg/pose2_d.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <limits>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/utils.h>
 
 namespace cg {
 namespace planning {
@@ -41,6 +45,9 @@ double smallest_angle_difference_signed(double angle1, double angle2);
 bool samePoseWithinThresh(
     const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg::Pose2D &pose2,
     const float thresh_pos, const double thresh_head);
+
+// checks what the new closest index should be on a trajectory based on localization
+int getClosestTrajIndex(const cg_msgs::msg::Trajectory &target_trajectory, const nav_msgs::msg::Odometry &current_state, int prev_traj_idx);
 
 } // planning namespace
 } // cg namespace

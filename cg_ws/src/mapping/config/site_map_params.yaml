@@ -1,15 +1,12 @@
 site_map:
   ros__parameters:
-    # Map dimensions
+    # Map dimensions; UPDATE FOR BEHAVIORE EXECUTIVE BELOW
     # site assumed to be 5mx5m
-    ## --------------------------
-    ## THESE PARAMETERS MUST MATCH WITH: planning/config/behavior_executive_params.yaml
     height: 50 # number of cells in col
     width: 50 # number cells in row
     resolution: 0.1 # meters
     xTransform: 1.0 # meters
     yTransform: 1.0 # meters
-    ## --------------------------
 
     # SiteMap specific params
     filterMaxTerrain: 0.5 # meters

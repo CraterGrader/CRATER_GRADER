@@ -20,10 +20,10 @@ public:
   LateralController() {}
   LateralController(double k, double stanley_softening_constant);
   double computeSteer(
-    const cg_msgs::msg::Trajectory &target_trajectory,
-    const nav_msgs::msg::Odometry &current_state);
+      const cg_msgs::msg::Trajectory &target_trajectory,
+      const nav_msgs::msg::Odometry &current_state,
+      const size_t traj_idx);
   LateralControllerDebug getDebug() const {return debug_;}
-  void resetPrevTrajIdx();
 
 private:
   double stanleyControlLaw(
@@ -35,7 +35,6 @@ private:
   double k_;  // Stanley controller gain
   double stanley_softening_constant_;
   LateralControllerDebug debug_;
-  size_t prev_traj_idx_ = 0;
 };
 
 } // namespace motion_control

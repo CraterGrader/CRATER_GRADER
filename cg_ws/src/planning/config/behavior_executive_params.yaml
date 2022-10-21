@@ -18,14 +18,3 @@ behavior_executive_node:
 
     # Finite state machine
     fsm_timer_callback_ms: 500 # milliseconds
-    
-    # Map dimensions
-    # site assumed to be 5mx5m
-    ## --------------------------
-    ## THESE PARAMETERS MUST MATCH WITH: mapping/config/site_map_params.yaml
-    # height: 50 # number of cells in col
-    # width: 50 # number cells in row
-    # resolution: 0.1 # meters
-    # xTransform: 1.0 # meters
-    # yTransform: 1.0 # meters
-    ## --------------------------

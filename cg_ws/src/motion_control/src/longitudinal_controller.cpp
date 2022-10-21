@@ -14,67 +14,74 @@ void LongitudinalController::setGains(const double kp, const double ki, const do
 }
 
 // TODO this should probably be a util function, pretty much the same thing is done for lateral controller
-int LongitudinalController::getClosestPointIndex(
-    const cg_msgs::msg::Trajectory &target_trajectory,
-    const nav_msgs::msg::Odometry &current_state)
-{
-  tf2::Quaternion q = tf2::Quaternion(
-      current_state.pose.pose.orientation.x,
-      current_state.pose.pose.orientation.y,
-      current_state.pose.pose.orientation.z,
-      current_state.pose.pose.orientation.w);
+// int LongitudinalController::getClosestPointIndex(
+//     const cg_msgs::msg::Trajectory &target_trajectory,
+//     const nav_msgs::msg::Odometry &current_state)
+// {
+//   tf2::Quaternion q = tf2::Quaternion(
+//       current_state.pose.pose.orientation.x,
+//       current_state.pose.pose.orientation.y,
+//       current_state.pose.pose.orientation.z,
+//       current_state.pose.pose.orientation.w);
 
-  cg_msgs::msg::Pose2D cur_pose = cg::planning::create_pose2d(
-      current_state.pose.pose.position.x,
-      current_state.pose.pose.position.y,
-      tf2::getYaw(q));
+//   cg_msgs::msg::Pose2D cur_pose = cg::planning::create_pose2d(
+//       current_state.pose.pose.position.x,
+//       current_state.pose.pose.position.y,
+//       tf2::getYaw(q));
 
-  cg_msgs::msg::Point2D cur_point = cg::planning::create_point2d(
-      current_state.pose.pose.position.x,
-      current_state.pose.pose.position.y);
+//   cg_msgs::msg::Point2D cur_point = cg::planning::create_point2d(
+//       current_state.pose.pose.position.x,
+//       current_state.pose.pose.position.y);
 
-  double min_dist = std::numeric_limits<double>::infinity();
-  int min_idx = -1;
-  for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
-    double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
-    if (dist < min_dist) {
-        min_dist = dist;
-        min_idx = i;
-        prev_traj_idx_ = i;
-    }
-  }
+//   double min_dist = std::numeric_limits<double>::infinity();
+//   int min_idx = -1;
+//   for (size_t i = prev_traj_idx_; i < target_trajectory.path.size(); ++i) {
+//     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
+//     if (dist < min_dist) {
+//         min_dist = dist;
+//         min_idx = i;
+//         prev_traj_idx_ = i;
+//     }
+//   }
 
-  // check if we are at last index
-  if (prev_traj_idx_ + 1 == target_trajectory.path.size()){
-    return prev_traj_idx_;
-  }
+//   // check if we are at last index
+//   if (prev_traj_idx_ + 1 == target_trajectory.path.size()){
+//     return prev_traj_idx_;
+//   }
 
-  // make local frame using path and yaw
-  cg_msgs::msg::Point2D point_rel_to_traj = cg::planning::transformPointGlobalToLocal(cur_point, target_trajectory.path[prev_traj_idx_]);
+//   // make local frame using path and yaw
+//   cg_msgs::msg::Point2D point_rel_to_traj = cg::planning::transformPointGlobalToLocal(cur_point, target_trajectory.path[prev_traj_idx_]);
 
-  // get x componant of pose in traj frame
-  double x_of_point_in_traj_frame = point_rel_to_traj.x;
+//   // get x componant of pose in traj frame
+//   double x_of_point_in_traj_frame = point_rel_to_traj.x;
 
-  // get velocity componant
-  double velocity_of_traj = target_trajectory.velocity_targets[prev_traj_idx_];
+//   // get velocity componant
+//   double velocity_of_traj = target_trajectory.velocity_targets[prev_traj_idx_];
 
-  // if product is positive 
-  // remove the index, because we are in front of a forward drive pose, or behind a reverse drive node
-  if ((velocity_of_traj * x_of_point_in_traj_frame) > 0){
-    prev_traj_idx_ += 1;
-  }
+//   // if product is positive 
+//   // remove the index, because we are in front of a forward drive pose, or behind a reverse drive node
+//   if ((velocity_of_traj * x_of_point_in_traj_frame) > 0){
+//     prev_traj_idx_ += 1;
+//   }
     
-  return prev_traj_idx_;
-}
+//   return prev_traj_idx_;
+// }
 
 double LongitudinalController::computeDrive(
     const cg_msgs::msg::Trajectory &target_trajectory,
-    const nav_msgs::msg::Odometry &current_state) {
+    const nav_msgs::msg::Odometry &current_state,
+    const size_t traj_idx)
+{
   // double target_velocity, curr_velocity;
   double curr_velocity = current_state.twist.twist.linear.x;
 
-  double target_velocity = target_trajectory.path.size() ?
-      target_trajectory.velocity_targets[getClosestPointIndex(target_trajectory, current_state)] : 0.0;
+  // Get target velocity by using "closest" index
+  double target_velocity = 0.0;
+  if (target_trajectory.path.size() > 0) {
+    target_velocity = target_trajectory.velocity_targets[traj_idx];
+  }
+  // double target_velocity = target_trajectory.path.size() ?
+  //     target_trajectory.velocity_targets[getClosestPointIndex(target_trajectory, current_state)] : 0.0;
 
   // TODO: cur velocity is in m/s, target is currently in %fs
   // double error = target_velocity - curr_velocity;
@@ -91,9 +98,6 @@ double LongitudinalController::scaleToDriveActuators(double desired_drive) {
   return (1/transfer_function_qpps_to_mps) * desired_drive;
 }
 
-void LongitudinalController::resetPrevTrajIdx() {
-  prev_traj_idx_ = 0;
-}
 
 
 }  // namespace motion_control
