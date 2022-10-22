@@ -55,7 +55,6 @@ void BeaconTransformer::beacon_callback_0(const geometry_msgs::msg::PoseWithCova
       tf2::doTransform(updated_pose_0_, updated_pose_0_, tag_0_transformStamped);
       tag_0_pub_->publish(updated_pose_0_);
       pub_tag_0 = true;
-      std::cout << "PUB TAG 0" << std::endl;
     }
     else if (got_imu) {
       tag_0_transformStamped.transform.rotation = imu_last.orientation;
@@ -74,7 +73,6 @@ void BeaconTransformer::beacon_callback_1(const geometry_msgs::msg::PoseWithCova
       tf2::doTransform(updated_pose_1_, updated_pose_1_, tag_1_transformStamped);
       tag_1_pub_->publish(updated_pose_1_);
       pub_tag_1 = true;
-      std::cout << "PUB TAG 1" << std::endl;
     }
     else if (got_imu) {
       tag_1_transformStamped.transform.rotation = imu_last.orientation;
@@ -106,7 +104,7 @@ void BeaconTransformer::average_Beacon_Callback()
     average_pose_.pose.pose.position.x = tag_0_weight * (raw_pose_0_.pose.pose.position.x) + tag_1_weight * (raw_pose_1_.pose.pose.position.x);
     average_pose_.pose.pose.position.y = tag_0_weight * (raw_pose_0_.pose.pose.position.y) + tag_1_weight * (raw_pose_1_.pose.pose.position.y);
     average_pose_.pose.pose.position.z = tag_0_weight * (raw_pose_0_.pose.pose.position.z) + tag_1_weight * (raw_pose_1_.pose.pose.position.z);
-    average_pose_.pose.pose.position.z = 0; // TODO z position is temporarily fixed at 0 until we can get better z estimates 
+    // average_pose_.pose.pose.position.z = 0; // TODO z position is temporarily fixed at 0 until we can get better z estimates 
     average_pose_.header = raw_pose_0_.header;
     average_pose_.pose.covariance = raw_pose_0_.pose.covariance;
     average_tag_pub_->publish(average_pose_);

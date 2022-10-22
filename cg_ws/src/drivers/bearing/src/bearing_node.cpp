@@ -221,6 +221,7 @@ void BearingNode::timerCallback() {
       // this->rolling_bearing.erase(rolling_bearing.begin());
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
+
     }
 
     // if ((int)rolling_avg_buffer > 2 && (int)this->rolling_bearing.size() == rolling_avg_buffer) {
