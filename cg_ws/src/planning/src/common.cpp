@@ -98,16 +98,15 @@ cg_msgs::msg::Pose2D transformPose(
 // Find smallest difference between two angles, all units in radians
 double smallest_angle_difference_signed(double angle1, double angle2) {
   // Normalize angles to [0, 2*pi]
-  double normalized_angle1 = std::fmod(angle1, 2.0 * M_PI);
-  double normalized_angle2 = std::fmod(angle2, 2.0 * M_PI);
+  float normalized_angle1 = std::fmod(static_cast<float>(angle1), 2.0 * M_PI);
+  float normalized_angle2 = std::fmod(static_cast<float>(angle2), 2.0 * M_PI);
 
   // Normalize absolute difference to [0, 2*pi]
-  double diff_head = std::fmod(fabs(normalized_angle1 - normalized_angle2), 2.0 * M_PI);
-
+  float diff_head = std::fmod(fabs(normalized_angle1 - normalized_angle2), 2.0 * M_PI);
 
   // Use smaller overall angle, i.e. in [0, pi]
-  if (diff_head > (2.0 * M_PI)) {
-      diff_head = fabs(diff_head - (2.0 * M_PI));
+  if (diff_head > (M_PI)) {
+    diff_head = fabs((2.0 * M_PI) - diff_head);
   }
 
   // Use signed angle
@@ -115,7 +114,7 @@ double smallest_angle_difference_signed(double angle1, double angle2) {
     diff_head = -diff_head;
   }
 
-  return diff_head;
+  return static_cast<double>(diff_head);
 }
 
 bool samePoseWithinThresh(const cg_msgs::msg::Pose2D &pose1, const cg_msgs::msg::Pose2D &pose2, const float thresh_pos, const double thresh_head) {
@@ -150,7 +149,8 @@ int getClosestTrajIndex(const cg_msgs::msg::Trajectory &target_trajectory, const
 
   double min_dist = std::numeric_limits<double>::infinity();
   int min_idx = -1;
-  for (size_t i = prev_traj_idx; i < target_trajectory.path.size(); ++i) {
+  size_t search_window = 1; // Number of points to search ahead from
+  for (size_t i = prev_traj_idx; i < std::min(prev_traj_idx + search_window, target_trajectory.path.size()); ++i) {
     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
     if (dist < min_dist) {
         min_dist = dist;
@@ -159,7 +159,7 @@ int getClosestTrajIndex(const cg_msgs::msg::Trajectory &target_trajectory, const
   }
 
   // check if we are at last index, if so, dont exceed 
-  if (min_idx + 1 == target_trajectory.path.size()){
+  if (static_cast<long unsigned int>(min_idx + 1) == target_trajectory.path.size()){
     return min_idx;
   }
 

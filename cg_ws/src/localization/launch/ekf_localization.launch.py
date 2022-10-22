@@ -36,11 +36,6 @@ def generate_launch_description():
     ),
     Node(
             package='localization',
-            executable='beacon_transformer',
-            name='beacon_transformer',
-            output='screen'),
-    Node(
-            package='localization',
             executable='ts_prism_transformer',
             name='ts_prism_transformer',
             output='screen')

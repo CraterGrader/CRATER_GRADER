@@ -20,14 +20,8 @@ def generate_launch_description():
       os.path.join(get_package_share_directory('realsense'), 'launch/realsense_launch.py')
     )
   )
-  uwb_beacon_launch = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(
-      os.path.join(get_package_share_directory('uwb_beacon_rtls'), 'launch/uwb_beacon_rtls.launch.py')
-    )
-  )
   return LaunchDescription([
     bearing_launch,
     imu_launch,
-    realsense_launch,
-    uwb_beacon_launch
+    realsense_launch
   ])

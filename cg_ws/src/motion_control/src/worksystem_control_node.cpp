@@ -90,6 +90,8 @@ void WorksystemControlNode::timerCallback() {
     // get closest trajectory index from the worksystem
     traj_idx_ = cg::planning::getClosestTrajIndex(current_trajectory_, current_state, traj_idx_);
 
+    std::cout << "Trajectory Length : " << current_trajectory_.path.size() << ", Index of trajectory: " << traj_idx_ << std::endl;
+
     // Compute control command
     cmd_msg_.header.stamp = this->get_clock()->now();
     cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_);

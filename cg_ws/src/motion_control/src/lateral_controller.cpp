@@ -1,4 +1,5 @@
 #include "motion_control/lateral_controller.hpp"
+#include <iostream> // DEBUG
 
 namespace cg {
 namespace motion_control {
@@ -28,6 +29,7 @@ double LateralController::computeSteer(
     cg_msgs::msg::Point2D transformed_error = cg::planning::transformPointGlobalToLocal(cur_pose.pt, target_trajectory.path[traj_idx]);
     double closest_cross_track_error = transformed_error.y;
     // double closest_euclidian_error = std::numeric_limits<double>::infinity();
+    std::cout << " ++++++ target yaw: " << target_trajectory.path[traj_idx].yaw << ", current yaw: " << cur_pose.yaw << std::endl;
     double closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[traj_idx].yaw, cur_pose.yaw);
     // for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
     //     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
@@ -55,10 +57,7 @@ double LateralController::computeSteer(
       std::pow(current_state.twist.twist.linear.y, 2));
 
     // Compute stanley control law
-    double desired_steer = LateralController::stanleyControlLaw(
-      closest_heading_error,
-      closest_cross_track_error,
-      current_velocity);
+    double desired_steer = LateralController::stanleyControlLaw(closest_heading_error, closest_cross_track_error, current_velocity);
 
     // Reverse driving needs to flip sign
     if (target_trajectory.velocity_targets[traj_idx] < 0) {
@@ -74,9 +73,11 @@ double LateralController::stanleyControlLaw(
     const double cross_track_err,
     const double velocity) const {
 
-    double steer_correct_angle = std::atan2(k_ * cross_track_err, velocity + stanley_softening_constant_);
+    // double steer_correct_angle = std::atan2(k_ * cross_track_err, velocity + stanley_softening_constant_);
+    double steer_correct_angle = -1 * std::atan2(k_ * cross_track_err, 1); // Positive cross track error should result in a negative steering control because of z-up coordinate system
 
-    return heading_err; // DEBUG + steer_correct_angle;
+    std::cout << " +++++++++ heading_err: " << heading_err << ", cross_track_err: " << cross_track_err << ", velocity: " << velocity << ", steer_correct_angle: " << steer_correct_angle << std::endl;
+    return heading_err + steer_correct_angle; 
     }
 double LateralController::scaleToSteerActuators(double desired_steer){
   // Calculated using % full scale of steering angle [%FS / (steer angle in radians)]
