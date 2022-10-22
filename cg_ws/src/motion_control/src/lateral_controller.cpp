@@ -31,22 +31,6 @@ double LateralController::computeSteer(
     // double closest_euclidian_error = std::numeric_limits<double>::infinity();
     std::cout << " ++++++ target yaw: " << target_trajectory.path[traj_idx].yaw << ", current yaw: " << cur_pose.yaw << std::endl;
     double closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[traj_idx].yaw, cur_pose.yaw);
-    // for (size_t i = 0; i < target_trajectory.path.size(); ++i) {
-    //     double dist = cg::planning::euclidean_distance(target_trajectory.path[i].pt, cur_pose.pt);
-        
-    //     // If trajectory point closer, then update considered target point
-    //     if (dist < closest_euclidian_error) {
-            
-    //         // Transform both traj_pose and reference pose by the opposite of reference pose
-    //         cg_msgs::msg::Point2D transformed_error = cg::planning::transformPointGlobalToLocal(cur_pose.pt, target_trajectory.path[i]);
-
-    //         closest_euclidian_error = dist;
-    //         closest_cross_track_error = transformed_error.y;
-
-    //         closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[i].yaw, cur_pose.yaw);
-    //         prev_traj_idx_ = i;
-    //     }
-    // }
     
     debug_.cross_track_err = closest_cross_track_error;
     debug_.heading_err = closest_heading_error;
