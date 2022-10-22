@@ -21,24 +21,32 @@ private:
   /* Publishers and Subscribers */ 
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr new_points_sub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_pub_;
-  rclcpp::TimerBase::SharedPtr timer_; // For looping publish
+  rclcpp::TimerBase::SharedPtr PubTimer_; // For looping publish
+  rclcpp::TimerBase::SharedPtr SiteNormalizeTimer_; // For looping publish
+
 
   // rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr telem_sub_;
 
   /* Callbacks */
   void newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
-  void timerCallback(); // For looping publish
-  // void telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg);
-
+  void PubTimerCallback(); // For looping publish
+  void SiteNormalizeTimerCallback(); // For looping publish
 
   /* Variables */
   cg::mapping::SiteMap siteMap_;
-  // float driveSpeed = 0.0f;
 
   /* Parameters */
   int height_;
   int width_; 
   float resolution_;
+  float filterMaxTerrain_;
+  float filterMinTerrain_;
+  float xTransform_;
+  float yTransform_;
+  float unseenGridHeight_;
+  float incomingPointVariance_;
+  float cellStartingVariance_;
+  float minCellVariance_;
 
 }; // class SiteMapNode
 

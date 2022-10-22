@@ -60,6 +60,23 @@ target_link_libraries(
   beacon_transformer
 )
 
+# build nodes
+add_executable(ts_prism_transformer src/ts_prism_transformer_main.cpp
+  src/ts_prism_transformer.cpp
+)
+ament_target_dependencies(ts_prism_transformer
+  rclcpp
+  geometry_msgs
+  sensor_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  Eigen3
+)
+target_link_libraries(
+  ts_prism_transformer
+)
+
 # Code Testing
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -72,6 +89,9 @@ install(TARGETS slip_estimate_node
 
 # Install targets
 install(TARGETS beacon_transformer
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS ts_prism_transformer
   DESTINATION lib/${PROJECT_NAME}
 )
 

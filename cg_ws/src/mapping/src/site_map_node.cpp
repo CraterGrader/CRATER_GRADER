@@ -12,24 +12,52 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   // telem_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
   //   "/encoder_telemetry", 1, std::bind(&SiteMapNode::telemCallback, this, std::placeholders::_1));
 
-  // Timer callback
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::timerCallback, this));
+  // Viz Timer callback
+  PubTimer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::PubTimerCallback, this));
+
+  // Map Normalization callback 
+  // SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(10000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
+
 
   // Load parameters
   this->declare_parameter<int>("height", 5);
   this->get_parameter("height", height_);
-
   this->declare_parameter<int>("width", 5);
   this->get_parameter("width", width_);
-
   this->declare_parameter<float>("resolution", 1.0);
   this->get_parameter("resolution", resolution_);
+  this->declare_parameter<float>("filterMaxTerrain", 5);
+  this->get_parameter("filterMaxTerrain", filterMaxTerrain_);
+  this->declare_parameter<float>("filterMinTerrain", 5);
+  this->get_parameter("filterMinTerrain", filterMinTerrain_);
+  this->declare_parameter<float>("xTransform", 5);
+  this->get_parameter("xTransform", xTransform_);
+  this->declare_parameter<float>("yTransform", 5);
+  this->get_parameter("yTransform", yTransform_);
+  this->declare_parameter<float>("unseenGridHeight", 5);
+  this->get_parameter("unseenGridHeight", unseenGridHeight_);
+  this->declare_parameter<float>("incomingPointVariance", 5);
+  this->get_parameter("incomingPointVariance", incomingPointVariance_);
+  this->declare_parameter<float>("cellStartingVariance", 5);
+  this->get_parameter("cellStartingVariance", cellStartingVariance_);
+  this->declare_parameter<float>("minCellVariance", 5);
+  this->get_parameter("minCellVariance", minCellVariance_);
 
-  cg::mapping::SiteMap temp(height_,width_,resolution_);
+  cg::mapping::SiteMap temp(height_, 
+                              width_, 
+                              resolution_, 
+                              filterMaxTerrain_, 
+                              filterMinTerrain_, 
+                              xTransform_, 
+                              yTransform_, 
+                              unseenGridHeight_, 
+                              incomingPointVariance_, 
+                              cellStartingVariance_, 
+                              minCellVariance_);
   siteMap_ = temp;
 }
 
-void SiteMapNode::timerCallback(){
+void SiteMapNode::PubTimerCallback(){
   // get a temp map from siteMap
   std::vector<float> tempMap = siteMap_.getHeightMap();
   size_t iterator = 0; 
@@ -40,8 +68,8 @@ void SiteMapNode::timerCallback(){
   for (int col=0; col<static_cast<int>(siteMap_.getWidth()); col++) {
     for (int row=0; row < static_cast<int>(siteMap_.getHeight()); row++) {
       pcl::PointXYZ newPoint;
-      newPoint.x = (col * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
-      newPoint.y = row * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
+      newPoint.x = (row * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
+      newPoint.y = col * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
       newPoint.z =  tempMap[iterator]; // cell height in map frame
       myCloud.points.push_back(newPoint);
       iterator++; 
@@ -58,6 +86,10 @@ void SiteMapNode::timerCallback(){
   visualization_pub_->publish(site_map_viz_msg);
 }
 
+// void SiteMapNode::SiteNormalizeTimerCallback(){
+//   siteMap_.normalizeSiteMap();
+// }
+
 void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
 
   pcl::PCLPointCloud2 pcl_pc2;
@@ -72,14 +104,10 @@ void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr 
     incomingPts[i].y = temp_cloud->points[i].y; 
     incomingPts[i].z = temp_cloud->points[i].z; 
   }
-
   // BIN POINTS 
   siteMap_.binPts(incomingPts);
-
   // UPDATE CELLS 
-  // siteMap_.updateCellsMean();
   siteMap_.updateCellsBayes();
-  // siteMap_.updateCellsMean()
 }
 
 // void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
