@@ -109,8 +109,15 @@ double smallest_angle_difference_signed(double angle1, double angle2) {
     diff_head = fabs((2.0 * M_PI) - diff_head);
   }
 
+  // Check z-component of 3d cross product of headings
+  float z_component = sin(normalized_angle1) * cos(normalized_angle2) - cos(normalized_angle1) * sin(normalized_angle2);
+  float sin_identity = sin(normalized_angle1 - normalized_angle2);
+  std::cout << " ~~~~~~~~ normang1: " << normalized_angle1 << ", normang2: " << normalized_angle2 << std::endl;
+  std::cout << " ~~~~~~~~ z_comp: " << z_component << ", sin(ang1 - ang2)" << sin_identity << std::endl;
+
   // Use signed angle
-  if (normalized_angle2 > normalized_angle1) {
+  // if (normalized_angle2 > normalized_angle1) {
+  if (z_component < 0) {
     diff_head = -diff_head;
   }
 
