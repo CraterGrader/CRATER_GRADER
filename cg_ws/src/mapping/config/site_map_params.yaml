@@ -9,8 +9,6 @@ site_map:
     yTransform: 1.0 # meters
 
     # SiteMap specific params
-    filterMaxTerrain: 5.5 # meters
-    filterMinTerrain: -5.5 # meters
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
     cellStartingVariance: 10.0 # meters^2

@@ -52,6 +52,12 @@ add_executable(site_map src/site_map_main.cpp
   src/site_map.cpp
   include/mapping/map_util.hpp
   src/map_util.cpp
+  src/cell_bayes.cpp
+  include/mapping/cell_bayes.hpp
+  src/cell_buffer.cpp
+  include/mapping/cell_buffer.hpp
+  include/mapping/index_point.hpp
+  include/mapping/map_point.hpp
 )
 
 ament_target_dependencies(site_map
@@ -76,6 +82,12 @@ if(BUILD_TESTING)
         src/site_map.cpp
         include/mapping/map_util.hpp
         src/map_util.cpp
+        src/cell_bayes.cpp
+        include/mapping/cell_bayes.hpp
+        src/cell_buffer.cpp
+        include/mapping/cell_buffer.hpp
+        include/mapping/index_point.hpp
+        include/mapping/map_point.hpp
         )
   ament_target_dependencies(site_map_test
     cg_msgs

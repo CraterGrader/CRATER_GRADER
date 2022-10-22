@@ -5,18 +5,11 @@ namespace mapping {
 
 SiteMapNode::SiteMapNode() : Node("site_map_node") {
   // Initialize publishers and subscribers
-  new_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-    "/terrain/filtered", 1, std::bind(&SiteMapNode::newPtsCallback, this, std::placeholders::_1));
-  visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
-    "/site_map_viz", 1);
-  // telem_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
-  //   "/encoder_telemetry", 1, std::bind(&SiteMapNode::telemCallback, this, std::placeholders::_1));
+  new_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain/filtered", 1, std::bind(&SiteMapNode::new_pts_callback, this, std::placeholders::_1));
+  visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_viz", 1);
 
   // Viz Timer callback
-  PubTimer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::PubTimerCallback, this));
-
-  // Map Normalization callback 
-  SiteNormalizeTimer_ = this->create_wall_timer(std::chrono::milliseconds(1000), std::bind(&SiteMapNode::SiteNormalizeTimerCallback, this));
+  viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::map_viz_callback, this));
 
   // Initialize services
   site_map_server_ = this->create_service<cg_msgs::srv::SiteMap>(
@@ -30,10 +23,6 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   this->get_parameter("width", width_);
   this->declare_parameter<float>("resolution", 1.0);
   this->get_parameter("resolution", resolution_);
-  this->declare_parameter<float>("filterMaxTerrain", 5);
-  this->get_parameter("filterMaxTerrain", filterMaxTerrain_);
-  this->declare_parameter<float>("filterMinTerrain", 5);
-  this->get_parameter("filterMinTerrain", filterMinTerrain_);
   this->declare_parameter<float>("xTransform", 5);
   this->get_parameter("xTransform", xTransform_);
   this->declare_parameter<float>("yTransform", 5);
@@ -50,8 +39,6 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   cg::mapping::SiteMap temp(height_, 
                               width_, 
                               resolution_, 
-                              filterMaxTerrain_, 
-                              filterMinTerrain_, 
                               xTransform_, 
                               yTransform_, 
                               unseenGridHeight_, 
@@ -61,7 +48,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   siteMap_ = temp;
 }
 
-void SiteMapNode::PubTimerCallback(){
+void SiteMapNode::map_viz_callback(){
   // get a temp map from siteMap
   std::vector<float> tempMap = siteMap_.getHeightMap();
   size_t iterator = 0; 
@@ -90,12 +77,7 @@ void SiteMapNode::PubTimerCallback(){
   visualization_pub_->publish(site_map_viz_msg);
 }
 
-void SiteMapNode::SiteNormalizeTimerCallback(){
-  // check if map is filled
-  // siteMap_.updateMapCoverage();
-}
-
-void SiteMapNode::newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
+void SiteMapNode::new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
 
   pcl::PCLPointCloud2 pcl_pc2;
   pcl_conversions::toPCL(*msg,pcl_pc2);
@@ -121,13 +103,9 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
   res->success = true;
-  // siteMap_.updateMapCoverage();
-  res->map_fully_explored = false;
+  siteMap_.updateMapCoverage();
+  res->map_fully_explored = siteMap_.getSiteMapFullStatus();
 }
-
-// void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
-//     driveSpeed = static_cast<float> msg->drive_vel_rear; 
-// }
 
 }  // namespace mapping
 }  // namespace cg

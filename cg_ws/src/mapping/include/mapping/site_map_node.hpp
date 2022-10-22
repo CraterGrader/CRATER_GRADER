@@ -7,7 +7,6 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
 #include <cg_msgs/srv/site_map.hpp> // Service for sending SiteMap height data
-// #include <cg_msgs/msg/encoder_telemetry.hpp>
 
 
 namespace cg {
@@ -22,19 +21,17 @@ private:
   /* Publishers and Subscribers */ 
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr new_points_sub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_pub_;
-  rclcpp::TimerBase::SharedPtr PubTimer_; // For looping publish
-  rclcpp::TimerBase::SharedPtr SiteNormalizeTimer_; // For looping publish
+
+  // timer
+  rclcpp::TimerBase::SharedPtr viz_timer_;
 
   /* Services */
   rclcpp::Service<cg_msgs::srv::SiteMap>::SharedPtr site_map_server_;
   void sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res);
 
-  // rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr telem_sub_;
-
   /* Callbacks */
-  void newPtsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
-  void PubTimerCallback(); // For looping publish
-  void SiteNormalizeTimerCallback(); // For looping publish
+  void new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+  void map_viz_callback();
 
   /* Variables */
   cg::mapping::SiteMap siteMap_;
@@ -43,8 +40,6 @@ private:
   int height_;
   int width_; 
   float resolution_;
-  float filterMaxTerrain_;
-  float filterMinTerrain_;
   float xTransform_;
   float yTransform_;
   float unseenGridHeight_;
