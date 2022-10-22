@@ -56,7 +56,8 @@ def generate_launch_description():
             package='bearing',
             executable='bearing_node',
             name='bearing_node',
-            parameters=[bearing_params_path]
+            parameters=[bearing_params_path],
+            output='screen'
         ),
         # Base link to camera transform
         Node(

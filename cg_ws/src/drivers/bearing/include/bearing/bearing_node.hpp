@@ -27,7 +27,7 @@ public:
 private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr bearing_pub_;
-  // rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr bearing_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr bearing_float_pub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr pose_sub_;
 
   /* Callbacks */
