@@ -121,8 +121,8 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
   res->success = true;
-  siteMap_.updateMapCoverage();
-  res->map_fully_explored = siteMap_.getSiteMapFullStatus();
+  // siteMap_.updateMapCoverage();
+  res->map_fully_explored = false;
 }
 
 // void SiteMapNode::telemCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg){
