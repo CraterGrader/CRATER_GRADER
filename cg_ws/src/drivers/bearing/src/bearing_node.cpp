@@ -57,7 +57,7 @@ void BearingNode::poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr ms
   double z = odom_pose.pose.pose.orientation.z;
   double w = odom_pose.pose.pose.orientation.w;
   robot_pitch = std::atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z);
-  robot_x = x*std::cos(robot_pitch) + z*std::sin(robot_pitch);
+  robot_x = x;
   robot_y = y;
 }
 
@@ -144,9 +144,9 @@ void BearingNode::timerCallback() {
     // tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
 
     // Get x and y location of the tag relative to the base link
-    double link_to_tag_x = tag_to_link.transform.translation.x;
+    double link_to_tag_x = tag_to_link.transform.translation.x * x*std::cos(robot_pitch) + 
+                            tag_to_link.transform.translation.z * z*std::sin(robot_pitch);
     double link_to_tag_y = tag_to_link.transform.translation.y;
-    double link_to_tag_z = tag_to_link.transform.translation.z;
 
     if (robot_x == -1) {4
       RCLCPP_INFO(this->get_logger(), "No robot position from EKF yet");
