@@ -13,7 +13,7 @@ apriltag:
       refine-edges: 1 # snap to strong gradients
       threads: 4 # number of threads
       refine-decode: 0 # increase the number of detected tags
-      refine-pose: 0 # increase the accuracy of the extracted pose
+      refine-pose: 1 # increase the accuracy of the extracted pose
       debug: 0 # write additional debugging images to current working directory
 
       tag_ids: [0, 1, 2, 3] # tag IDs for which to publish transform
