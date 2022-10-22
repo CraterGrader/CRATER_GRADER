@@ -1,6 +1,6 @@
 terrain_filtering:
   ros__parameters:
     ## Statistical Outlier Removal Params ##
-    use_sor: false
+    use_sor: true
     sor_mean_k: 120
     sor_stddev_mul_thresh: 1.5

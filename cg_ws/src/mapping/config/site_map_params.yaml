@@ -9,12 +9,12 @@ site_map:
     yTransform: 1.0 # meters
 
     # SiteMap specific params
-    filterMaxTerrain: 0.5 # meters
-    filterMinTerrain: -0.5 # meters
+    filterMaxTerrain: 5.5 # meters
+    filterMinTerrain: -5.5 # meters
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
     cellStartingVariance: 10.0 # meters^2
-    minCellVariance: 0.00001 # meters^2
+    minCellVariance: 0.001 # meters^2
 
 behavior_executive_node:
   ros__parameters:
