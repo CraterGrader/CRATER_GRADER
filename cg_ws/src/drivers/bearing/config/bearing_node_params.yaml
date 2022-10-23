@@ -7,12 +7,12 @@ bearing_node:
         y: ['7.279027', '3.562075', '-0.00215', '3.6699']
         z: ['0.74825', '0.80415', '0.80195', '0.76385']
       orientation: # rad
-        x: ['1.5708', '1.5708', '1.5708', '1.5708']
-        y: ['0', '0', '0', '0']
-        z: ['0', '-1.5708', '3.1416', '1.5708']
-        # x: ['1.6421','-1.5953','-1.5725','0.2308']
-        # y: ['0.0','-1.5349','0.0204','1.5695']
-        # z: ['0.0','1.5593','-0.0204','0.2305']
+        x: ['1.6421','1.5717','1.5725','1.5695']
+        y: ['0.0','0.0','0.0','0.0']
+        z: ['0.0','-1.6067','3.1212','1.5705']
+        # x: ['1.5708', '1.5708', '1.5708', '1.5708']
+        # y: ['0', '0', '0', '0']
+        # z: ['0', '-1.5708', '3.1416', '1.5708']
     # Camera position relative to the robot base frame
     base_cam_tf:
       position: # m
@@ -28,6 +28,6 @@ bearing_node:
     # Time before transform is discarded / not considered in calculation
     tf_discard_time: 0.8
     # Buffer for calculating average angle
-    rolling_avg_buffer: 5
+    rolling_avg_buffer: 1
     # Frequency of angle publishing
     pub_freq: 10
