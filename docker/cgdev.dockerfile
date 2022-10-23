@@ -118,10 +118,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   ros-$ROS_DISTRO-camera-info-manager \
   ros-$ROS_DISTRO-apriltag \
   # Health monitoring gui
-  ros-$ROS_DISTRO-rosbridge-suite \
-  # Yaml CPP for STag
-  libyaml-cpp-dev
-
+  ros-$ROS_DISTRO-rosbridge-suite
 
 # Prep for colcon build, but don't build anything yet
 WORKDIR /root/CRATER_GRADER/cg_ws
