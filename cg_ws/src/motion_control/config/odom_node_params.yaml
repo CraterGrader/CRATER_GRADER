@@ -11,9 +11,9 @@ odom_node:
     pose_cov_r: 0.01
     pose_cov_p: 0.01
     pose_cov_yaw: 0.01
-    twist_cov_x: 0.01
-    twist_cov_y: 0.01
-    twist_cov_z: 0.01
-    twist_cov_r: 0.01
-    twist_cov_p: 0.01
-    twist_cov_yaw: 0.01
+    twist_cov_x: 0.1
+    twist_cov_y: 0.1
+    twist_cov_z: 0.1
+    twist_cov_r: 0.1
+    twist_cov_p: 0.1
+    twist_cov_yaw: 0.1

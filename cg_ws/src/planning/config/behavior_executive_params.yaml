@@ -1,7 +1,7 @@
 behavior_executive_node:
   ros__parameters:
     # Absolute +/- thresholds for reaching goal
-    thresh_pos: 0.3 # meters
+    thresh_pos: 0.5 # meters
     thresh_head: 0.523599 # radians
 
     # Kinematic planner (all params are floats)
