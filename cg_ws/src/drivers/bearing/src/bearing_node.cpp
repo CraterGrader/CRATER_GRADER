@@ -91,10 +91,11 @@ void BearingNode::timerCallback() {
     }
 
     // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
+    // Compensate base link to camera offset as z-direction always measured away from camera
     double cam_to_tag_x = cam_to_tag.transform.translation.x;
     // double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_pitch_rad) + 
     //                         cam_to_tag.transform.translation.y * std::sin(robot_pitch_rad);
-    double cam_to_tag_z = cam_to_tag.transform.translation.z;
+    double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam_x;
 
     if (robot_x == -1) {
       RCLCPP_INFO(this->get_logger(), "No robot position from EKF yet");

@@ -35,14 +35,10 @@ private:
   void poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
   // Stores moving average
-  std::vector<double> rolling_sin;
-  std::vector<double> rolling_cos;
-  std::vector<double> rolling_bearing;
   std::vector<double> tag_x = {3.49563, 6.939225, 3.44706, 0.02744};
   std::vector<double> tag_y = {7.279027, 3.562075, -0.00215, 3.6699};
   double link_to_cam_x = 0.2257;
-  double link_to_cam_z = 0.5269;
-  
+
   // Stores current robot x and y
   double robot_x;
   double robot_y;
@@ -50,7 +46,6 @@ private:
 
   int pub_freq;
   double tf_discard_time;
-  int rolling_avg_buffer;
   double bearing_covariance;
 
   rclcpp::TimerBase::SharedPtr timer_{nullptr};
