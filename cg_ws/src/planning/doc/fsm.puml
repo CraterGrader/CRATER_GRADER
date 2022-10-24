@@ -2,8 +2,8 @@
 colors
 @enduml
 
-@startuml PlanningFSM_20221015_REV02
-mainframe PlanningFSM_20221015_REV02
+@startuml PlanningFSM_20221023_REV03
+mainframe PlanningFSM_20221023_REV03
 ' Formatting
 ' ------------------------------------
 hide empty description
@@ -82,6 +82,7 @@ state GoalsRemaining <<choice>>
 GoalsRemaining --> GetWorksystemTrajectory : yes
   GetWorksystemTrajectory --> FollowingTrajectory : follow_trajectory
     FollowingTrajectory --> GoalsRemaining : goal_reached
+    FollowingTrajectory --> GetWorksystemTrajectory : replan
     FollowingTrajectory --> EscapeManeuver : stuck
       EscapeManeuver --> FollowingTrajectory : not_stuck
       EscapeManeuver -->  CallForHelp : abort
