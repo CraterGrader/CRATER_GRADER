@@ -8,10 +8,6 @@ BearingNode::BearingNode() : Node("bearing_node") {
   this->declare_parameter<int>("pub_freq", 10);
   this->get_parameter("pub_freq", pub_freq);
 
-  // Rolling average buffer length for yaw
-  this->declare_parameter<int>("rolling_avg_buffer", 5);
-  this->get_parameter("rolling_avg_buffer", this->rolling_avg_buffer);
-
   // Time before transforms are considered old and discarded [s]
   this->declare_parameter<double>("tf_discard_time", 0.3);
   this->get_parameter("tf_discard_time", this->tf_discard_time);
@@ -23,9 +19,6 @@ BearingNode::BearingNode() : Node("bearing_node") {
   // Initialize publishers and subscribers
   bearing_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
     "/bearing", 1
-  );
-  bearing_float_pub_ = this->create_publisher<std_msgs::msg::Float32>(
-    "/bearing_float", 1
   );
   pose_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "/odometry/filtered/ekf_global_node", 1, std::bind(&BearingNode::poseUpdateCallback,
@@ -63,7 +56,6 @@ void BearingNode::poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr ms
 void BearingNode::timerCallback() {
   // Radians
   geometry_msgs::msg::PoseWithCovarianceStamped bearing;
-  std_msgs::msg::Float32 bearing_float;
 
   // Frames to be used
   std::string fromTag_base = "april_tag";
@@ -110,7 +102,6 @@ void BearingNode::timerCallback() {
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.3 seconds old, discard
       double dt = (this->get_clock()->now() - tf_time).seconds();
-      
 
       if (dt > this->tf_discard_time) {
         continue;
@@ -138,13 +129,6 @@ void BearingNode::timerCallback() {
       continue;
     }
 
-    // Convert messages to tf
-    tf2::fromMsg(tag_to_link.transform, tf_tag_to_link);
-    tf2::fromMsg(map_to_tag.transform, tf_map_to_tag);
-
-    // Calculate tag to base link
-    // tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
-
     // Get x and y location of the tag relative to the base link
     double cam_to_tag_x = cam_to_tag.transform.translation.x;
     // double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_pitch_rad) + 
@@ -157,55 +141,36 @@ void BearingNode::timerCallback() {
     }
 
     double camera_tag_yaw_offset = std::atan(cam_to_tag_x/cam_to_tag_z);
-    RCLCPP_INFO(this->get_logger(), "Printing camera yaw offset");
-    RCLCPP_INFO(this->get_logger(), std::to_string(cam_to_tag_x).c_str());
-    RCLCPP_INFO(this->get_logger(), std::to_string(cam_to_tag_z).c_str());
-    RCLCPP_INFO(this->get_logger(), std::to_string(robot_pitch_rad).c_str());
-    RCLCPP_INFO(this->get_logger(), std::to_string(camera_tag_yaw_offset).c_str());
-
     double yaw = camera_tag_yaw_offset;
     double yaw_pose_offset;
     switch(i) {
       case 0:
         yaw_pose_offset = M_PI/2 + std::atan2((robot_x - tag_x[i]),(tag_y[i] - robot_y));
-        yaw += yaw_pose_offset;
         break;
       case 1:
         yaw_pose_offset = std::atan2((tag_y[i] - robot_y),(tag_x[i] - robot_x));
-        yaw += yaw_pose_offset;
         break;
       case 2:
         yaw_pose_offset = -M_PI/2 + std::atan2((tag_x[i] - robot_x),(robot_y - tag_y[i]));
-        yaw += yaw_pose_offset;
         break;
       case 3:
         yaw_pose_offset = M_PI + std::atan2((robot_y - tag_y[i]),(robot_x - tag_x[i]));
-        yaw += yaw_pose_offset;
         break;
       default:
         RCLCPP_INFO(this->get_logger(), "Unknown tag");
         break;
     }
-    RCLCPP_INFO(this->get_logger(), "Yaw Pose Offset");
-    RCLCPP_INFO(this->get_logger(), std::to_string(yaw_pose_offset).c_str());
-    RCLCPP_INFO(this->get_logger(), "Overall Yaw");
-    RCLCPP_INFO(this->get_logger(), std::to_string(yaw).c_str());
-    RCLCPP_INFO(this->get_logger(), "- - - - -s");
+    yaw += yaw_pose_offset;
+    RCLCPP_INFO(this->get_logger(), "Current Yaw");
+    RCLCPP_INFO(this->get_logger(), std::to_string(yaw*180/M_PI).c_str());
 
-    camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);
     // Calculate and append bearing
+    camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);
     bearings.push_back(yaw);
-
-    // Get cartesian distance from camera to tag for weighting
-    //   tag_dist_to_cam.push_back(sqrt(pow(cam_to_tag.transform.translation.x,2) +
-    //     pow(cam_to_tag.transform.translation.y,2) +
-    //     pow(cam_to_tag.transform.translation.z,2)));
   }
   if (bearings.size() > 0) {
     // Find the best tag to get angle from
     double best_bearing = bearings[0];
-    // double min_dist = tag_dist_to_cam[0];
-    // double min_offset_from_90s = M_PI/2;
     double min_cam_angle_offset = std::abs(camera_tag_yaw_offsets[0]);
     for (int j = 0; j < static_cast<int>(bearings.size()); j++) {
       if (std::abs(camera_tag_yaw_offsets[j]) < min_cam_angle_offset) {
@@ -214,27 +179,6 @@ void BearingNode::timerCallback() {
       }
     }
     
-    // Variables for average bearing over the buffer length
-    double avg_bearing;
-    std::vector<double> sorted_bearings;
-    double sum_y_angle = 0.0;
-    double sum_x_angle = 0.0;
-    
-    // Instead of averaging the bearing, sum the unit vectors
-    this->rolling_sin.push_back(std::sin(best_bearing));
-    this->rolling_cos.push_back(std::cos(best_bearing));
-
-    // Erase the oldest bearing if the buffer is longer than the limit
-    if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
-      this->rolling_sin.erase(rolling_sin.begin());
-      this->rolling_cos.erase(rolling_cos.begin());
-    }
-
-    // Accumulate rolling average
-    sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
-    sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
-    avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
-    
     // Set the PoseWithCovarianceStamped message's position to 0
     bearing.pose.pose.position.x = 0.0;
     bearing.pose.pose.position.y = 0.0;
@@ -242,7 +186,7 @@ void BearingNode::timerCallback() {
 
     // Convert yaw back into a quarternion for orientation
     tf2::Quaternion q;
-    q.setRPY(0.0, 0.0, avg_bearing);
+    q.setRPY(0.0, 0.0, best_bearing);
 
     // Set the quarternion in the message
     bearing.pose.pose.orientation.x = q.x();
@@ -264,10 +208,6 @@ void BearingNode::timerCallback() {
 
     // Publish the estimated bearing  
     bearing_pub_->publish(bearing);
-
-    // Test for bearing in degrees
-    bearing_float.data = avg_bearing * 180.0 / 3.14159;
-    bearing_float_pub_->publish(bearing_float);
   }
   else {
     RCLCPP_WARN(this->get_logger(), "No bearing tags were detected.");

@@ -36,7 +36,8 @@ private:
     std::unordered_map<int, std::string> tag_frames;
     std::unordered_map<int, double> tag_sizes;
 
-    Mat3 K; // = {359.23290304, 0., 629.64159832, 0., 359.26041139, 321.40026019, 0., 0., 1.};
+    // Intrinsics to be set during initialization
+    Mat3 K;
     
     const bool z_up;
 
