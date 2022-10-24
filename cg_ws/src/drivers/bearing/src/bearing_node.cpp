@@ -5,7 +5,7 @@ namespace bearing {
 
 BearingNode::BearingNode() : Node("bearing_node") {
   // Publishing frequency for callback function
-  this->declare_parameter<int>("pub_freq", 30);
+  this->declare_parameter<int>("pub_freq", 10);
   this->get_parameter("pub_freq", pub_freq);
 
   // Rolling average buffer length for yaw
@@ -21,9 +21,11 @@ BearingNode::BearingNode() : Node("bearing_node") {
   this->get_parameter("bearing_covariance", this->bearing_covariance);
 
   // Initialize publishers and subscribers
-  // bearing_pub_ = this->create_publisher<std_msgs::msg::Float32>(
   bearing_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
     "/bearing", 1
+  );
+  bearing_float_pub_ = this->create_publisher<std_msgs::msg::Float32>(
+    "/bearing_float", 1
   );
   pose_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
     "/odometry/filtered/ekf_global_node", 1, std::bind(&BearingNode::poseUpdateCallback,
@@ -36,7 +38,7 @@ BearingNode::BearingNode() : Node("bearing_node") {
   // Initialize robot position to invalid value
   robot_x = -1;
   robot_y = -1;
-  robot_pitch = -1;
+  robot_pitch_rad = -1;
 
   // Call on_timer function at a specified frequency
   timer_ = this->create_wall_timer(
@@ -49,22 +51,19 @@ BearingNode::BearingNode() : Node("bearing_node") {
 
 void BearingNode::poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
   auto odom_pose = *msg;
-  double x = odom_pose.pose.pose.position.x;
-  double y = odom_pose.pose.pose.position.y;
-  double z = odom_pose.pose.pose.position.z;
+  robot_x = odom_pose.pose.pose.position.x;
+  robot_y = odom_pose.pose.pose.position.y;
   double x = odom_pose.pose.pose.orientation.x;
   double y = odom_pose.pose.pose.orientation.y;
   double z = odom_pose.pose.pose.orientation.z;
   double w = odom_pose.pose.pose.orientation.w;
-  robot_pitch = std::atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z);
-  robot_x = x*std::cos(robot_pitch) + z*std::sin(robot_pitch);
-  robot_y = y;
+  robot_pitch_rad = std::atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z);
 }
 
 void BearingNode::timerCallback() {
   // Radians
   geometry_msgs::msg::PoseWithCovarianceStamped bearing;
-  // std_msgs::msg::Float32 bearing;
+  std_msgs::msg::Float32 bearing_float;
 
   // Frames to be used
   std::string fromTag_base = "april_tag";
@@ -89,6 +88,9 @@ void BearingNode::timerCallback() {
 
   // Get overall transform from map to base link
   geometry_msgs::msg::TransformStamped map_to_link;
+
+  // Store Camera Angle Offsets to Determine Best Tag for yaw
+  std::vector<double> camera_tag_yaw_offsets;
 
   // Look up for the transformation from tag to base_link
   for (int i = 0; i < 4; i++) {
@@ -144,41 +146,53 @@ void BearingNode::timerCallback() {
     // tf_map_to_link = tf_map_to_tag.inverse() * tf_tag_to_link.inverse();
 
     // Get x and y location of the tag relative to the base link
-    double link_to_tag_x = tag_to_link.transform.translation.x;
-    double link_to_tag_y = tag_to_link.transform.translation.y;
-    double link_to_tag_z = tag_to_link.transform.translation.z;
+    double cam_to_tag_x = cam_to_tag.transform.translation.x;
+    // double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_pitch_rad) + 
+    //                         cam_to_tag.transform.translation.y * std::sin(robot_pitch_rad);
+    double cam_to_tag_z = cam_to_tag.transform.translation.z;
 
-    if (robot_x == -1) {4
+    if (robot_x == -1) {
       RCLCPP_INFO(this->get_logger(), "No robot position from EKF yet");
       return;
     }
 
-    double yaw;
+    double camera_tag_yaw_offset = std::atan(cam_to_tag_x/cam_to_tag_z);
+    RCLCPP_INFO(this->get_logger(), "Printing camera yaw offset");
+    RCLCPP_INFO(this->get_logger(), std::to_string(cam_to_tag_x).c_str());
+    RCLCPP_INFO(this->get_logger(), std::to_string(cam_to_tag_z).c_str());
+    RCLCPP_INFO(this->get_logger(), std::to_string(robot_pitch_rad).c_str());
+    RCLCPP_INFO(this->get_logger(), std::to_string(camera_tag_yaw_offset).c_str());
+
+    double yaw = camera_tag_yaw_offset;
+    double yaw_pose_offset;
     switch(i) {
       case 0:
-        yaw = M_PI/2 + std::tan((robot_x - tag_x[i])/(tag_y[i] - robot_y));
+        yaw_pose_offset = M_PI/2 + std::atan2((robot_x - tag_x[i]),(tag_y[i] - robot_y));
+        yaw += yaw_pose_offset;
         break;
       case 1:
-        yaw = std::tan((tag_y[i] - robot_y)/(tag_x[i] - robot_x));
+        yaw_pose_offset = std::atan2((tag_y[i] - robot_y),(tag_x[i] - robot_x));
+        yaw += yaw_pose_offset;
         break;
       case 2:
-        yaw = -M_PI/2 + std::tan((tag_x[i] - robot_x)/(robot_y - tag_y[i]));
+        yaw_pose_offset = -M_PI/2 + std::atan2((tag_x[i] - robot_x),(robot_y - tag_y[i]));
+        yaw += yaw_pose_offset;
         break;
       case 3:
-        yaw = M_PI + std::tan((robot_y - tag_y[i])/(robot_x - tag_x[i]));
+        yaw_pose_offset = M_PI + std::atan2((robot_y - tag_y[i]),(robot_x - tag_x[i]));
+        yaw += yaw_pose_offset;
         break;
-
       default:
-        // code block
-    double camera_tag_yaw_offset = std::tan(link_to_tag_x/link_to_tag_y);
+        RCLCPP_INFO(this->get_logger(), "Unknown tag");
+        break;
+    }
+    RCLCPP_INFO(this->get_logger(), "Yaw Pose Offset");
+    RCLCPP_INFO(this->get_logger(), std::to_string(yaw_pose_offset).c_str());
+    RCLCPP_INFO(this->get_logger(), "Overall Yaw");
+    RCLCPP_INFO(this->get_logger(), std::to_string(yaw).c_str());
+    RCLCPP_INFO(this->get_logger(), "- - - - -s");
 
-    yaw += camera_tag_yaw_offset;
-}
-
-    // Get Yaw
-    // double roll, pitch, yaw;
-    // tf_map_to_link.getBasis().getRPY(roll, pitch, yaw);
-
+    camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);
     // Calculate and append bearing
     bearings.push_back(yaw);
 
@@ -191,17 +205,12 @@ void BearingNode::timerCallback() {
     // Find the best tag to get angle from
     double best_bearing = bearings[0];
     // double min_dist = tag_dist_to_cam[0];
-    double min_offset_from_90s = M_PI/2;
+    // double min_offset_from_90s = M_PI/2;
+    double min_cam_angle_offset = std::abs(camera_tag_yaw_offsets[0]);
     for (int j = 0; j < static_cast<int>(bearings.size()); j++) {
-      double x_angle = std::cos(bearings[j]);
-      double y_angle = std::sin(bearings[j]);
-      double offset_from_90 = std::min(std::min(std::pow(x_angle - angle_90_inc_x[0], 2) + std::pow(y_angle - angle_90_inc_y[0], 2),
-                                      std::pow(x_angle - angle_90_inc_x[1], 2) + std::pow(y_angle - angle_90_inc_y[1], 2)),
-                                      std::min(std::pow(x_angle - angle_90_inc_x[2], 2) + std::pow(y_angle - angle_90_inc_y[2], 2),
-                                      std::pow(x_angle - angle_90_inc_x[3], 2) + std::pow(y_angle - angle_90_inc_y[3], 2)));
-      if (offset_from_90 < min_offset_from_90s) {
+      if (std::abs(camera_tag_yaw_offsets[j]) < min_cam_angle_offset) {
         best_bearing = bearings[j];
-        min_offset_from_90s = offset_from_90;
+        min_cam_angle_offset = std::abs(camera_tag_yaw_offsets[j]);
       }
     }
     
@@ -212,35 +221,18 @@ void BearingNode::timerCallback() {
     double sum_x_angle = 0.0;
     
     // Instead of averaging the bearing, sum the unit vectors
-    // this->rolling_bearing.push_back(best_bearing);
     this->rolling_sin.push_back(std::sin(best_bearing));
     this->rolling_cos.push_back(std::cos(best_bearing));
 
     // Erase the oldest bearing if the buffer is longer than the limit
     if (this->rolling_sin.size() > (long unsigned int)rolling_avg_buffer) {
-      // this->rolling_bearing.erase(rolling_bearing.begin());
       this->rolling_sin.erase(rolling_sin.begin());
       this->rolling_cos.erase(rolling_cos.begin());
     }
 
-    // if ((int)rolling_avg_buffer > 2 && (int)this->rolling_bearing.size() == rolling_avg_buffer) {
-    //   std::vector<int> indices(rolling_bearing.size());
-    //   std::iota(indices.begin(), indices.end(), 0);
-    //   std::sort(indices.begin(), indices.end(),
-    //             [&](int A, int B) -> bool {
-    //                 return rolling_bearing[A] < rolling_bearing[B];
-    //             });
-
-    //   // Average the unit vectors and get angle
-    //   for (int i = 0; i < (int)rolling_avg_buffer - 4; i++) {
-    //     sum_y_angle += this->rolling_sin[indices[i+2]];
-    //     sum_x_angle += this->rolling_cos[indices[i+2]];
-    //   }
-    // }
-    // else {
+    // Accumulate rolling average
+    sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
     sum_y_angle = std::accumulate(this->rolling_sin.begin(), this->rolling_sin.end(), 0.0);
-     sum_x_angle = std::accumulate(this->rolling_cos.begin(), this->rolling_cos.end(), 0.0);
-    // }
     avg_bearing = std::atan2(sum_y_angle, sum_x_angle);
     
     // Set the PoseWithCovarianceStamped message's position to 0
@@ -274,8 +266,8 @@ void BearingNode::timerCallback() {
     bearing_pub_->publish(bearing);
 
     // Test for bearing in degrees
-    // bearing.data = avg_bearing * 180.0 / 3.14159;
-    // bearing_pub_->publish(bearing);
+    bearing_float.data = avg_bearing * 180.0 / 3.14159;
+    bearing_float_pub_->publish(bearing_float);
   }
   else {
     RCLCPP_WARN(this->get_logger(), "No bearing tags were detected.");

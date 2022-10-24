@@ -22,6 +22,11 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
+find_package(cg_msgs REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+# Add Eigen3 Library
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 include_directories(include)
 
@@ -73,6 +78,8 @@ add_executable(site_map src/site_map_main.cpp
   src/site_map_node.cpp
   include/mapping/site_map.hpp
   src/site_map.cpp
+  include/mapping/map_util.hpp
+  src/map_util.cpp
 )
 
 ament_target_dependencies(site_map
@@ -86,6 +93,7 @@ ament_target_dependencies(site_map
   tf2_eigen
   tf2_geometry_msgs
   tf2_sensor_msgs
+  cg_msgs
 )
 
 if(BUILD_TESTING)
@@ -94,7 +102,22 @@ if(BUILD_TESTING)
         test/site_map_test.cpp
         include/mapping/site_map.hpp
         src/site_map.cpp
+        include/mapping/map_util.hpp
+        src/map_util.cpp
         )
+  ament_target_dependencies(site_map_test
+    cg_msgs
+  )
+  ament_add_gtest(map_test
+    test/map_test.cpp
+    include/mapping/map.hpp
+    src/map.cpp
+    include/mapping/map_util.hpp
+    src/map_util.cpp
+  )
+  ament_target_dependencies(map_test
+    cg_msgs
+  )
 endif()
 
 
@@ -125,5 +148,8 @@ install(DIRECTORY launch
 install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}/
 )
+
+# Export library files so other packages can link
+ament_export_include_directories(include)
 
 ament_package()
