@@ -1,6 +1,34 @@
 // #include <gtest/gtest.h>
 // #include <mapping/map.hpp>
 
+// TEST(MapWithCSV, write_to_file) {
+
+//   size_t height = 2;
+//   size_t width = 2; 
+//   float resolution = 1.0;
+//   std::vector<float> map_data{0.1, -0.2, 0.0, 0.4};
+  
+//   cg::mapping::Map<float> map(height, width, resolution, map_data);
+
+//   // Write test
+//   std::string filepath = "map_test.csv";
+//   map.write_map_to_file(filepath);
+//   EXPECT_EQ(1.0,1.0);
+// }
+
+// TEST(MapWithCSV, read_from_file) {
+  
+//   cg::mapping::Map<float> map;
+
+//   // Write test
+//   std::string filepath = "/root/CRATER_GRADER/cg_ws/src/mapping/test/50x50_zeros_height_map.csv";
+//   map.load_map_from_file(filepath);
+//   EXPECT_EQ(2500, map.getCellData().size());
+//   EXPECT_EQ(50, map.getHeight());
+//   EXPECT_EQ(50, map.getWidth());
+//   EXPECT_NEAR(0.1, map.getResolution(), 1e-6);
+// }
+
 // TEST(MapTestConstructorTest, emptyInit) {
 
 //   size_t height = 2;
