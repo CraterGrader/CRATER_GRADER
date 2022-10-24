@@ -43,7 +43,7 @@ void SiteMap::binPts(std::vector<mapPoint> rawPts){
     float y_pos_site_map_frame = cg::mapping::convertMaptoSiteMapFrame(rawPts[i].y, yTransform_);
     discretePoints[i].x = cg::mapping::pointToDiscreteCoord(x_pos_site_map_frame, getResolution());
     discretePoints[i].y = cg::mapping::pointToDiscreteCoord(y_pos_site_map_frame, getResolution());
-    discretePoints[i].z = rawPts[i].z;
+    discretePoints[i].z = rawPts[i].z - plane_offset_;
   }
   
   // use postProcess method 
@@ -108,6 +108,24 @@ void SiteMap::updateCellsBayes(){
     }
     // get the cell elevation for the map
     heightMap_[i] = varianceMap_[i].getCellElevation();
+  }
+}
+
+void SiteMap::normalizeHeightMap(){
+  float sum = 0.0f;
+  // for every cell, sum to get mean
+  for (size_t i=0; i<getNcells(); i++){
+    sum += heightMap_[i];
+  }
+  plane_offset_ = sum / getNcells();
+  std::cout << "  offset" << plane_offset_ << std::endl;
+  // for every cell, subtract mean
+  for (size_t i=0; i<getNcells(); i++){
+    // std::cout << "    before" << heightMap_[i] << std::endl;
+    heightMap_[i] -= plane_offset_;
+    bufferMap_[i].offset_height(plane_offset_);
+    varianceMap_[i].offset_height(plane_offset_);
+    // std::cout << "      after" << heightMap_[i] << std::endl;
   }
 }
 

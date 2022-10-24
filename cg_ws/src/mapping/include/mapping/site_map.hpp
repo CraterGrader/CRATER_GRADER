@@ -5,6 +5,7 @@
 #include <math.h>
 #include <assert.h>
 #include <numeric>
+#include <iostream>
 #include <cg_msgs/msg/site_map.hpp>
 #include "mapping/map_util.hpp"
 #include "mapping/index_point.hpp"
@@ -35,6 +36,7 @@ class SiteMap {
   void updateCellsBayes(); // method to update cells based on modified points
   void updateMapCoverage(); // method to check if map is all seen or not
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
+  void normalizeHeightMap();
 
   // conversion methods
   cg_msgs::msg::SiteMap toMsg() const;
@@ -59,7 +61,8 @@ class SiteMap {
   std::vector<int> seenPointsMap_; // "view 4" 
 
   // variables
-  bool siteMapFull_ = false; 
+  bool siteMapFull_ = false;
+  float plane_offset_ = 0.0f;
 
   // attributes
   size_t height_ = 1; // the vertical number of cells in the map 

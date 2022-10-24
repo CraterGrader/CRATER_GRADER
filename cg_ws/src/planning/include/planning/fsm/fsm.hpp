@@ -36,6 +36,7 @@ public:
     DRIVE,
     FOLLOW_TRAJECTORY,
     GOAL_REACHED,
+    REPLAN
   };
 
   // Constructors()

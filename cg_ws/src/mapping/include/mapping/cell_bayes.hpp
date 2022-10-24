@@ -19,6 +19,7 @@ class CellBayes {
   // methods
   void updateElvationStatic(float ptHeight, float ptVariance);
   void updateVarianceStatic(float ptVariance);
+  void offset_height(float offset){cellElevation_ -= offset;}
 
   //getters
   float getCellElevation(){return cellElevation_;}

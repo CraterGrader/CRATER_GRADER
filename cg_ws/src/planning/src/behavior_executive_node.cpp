@@ -58,6 +58,8 @@ namespace planning {
     this->get_parameter("thresh_pos", thresh_pos_);
     this->declare_parameter<double>("thresh_head", 1.0);
     this->get_parameter("thresh_head", thresh_head_);
+    this->declare_parameter<double>("thresh_euclidean_replan", 1.0);
+    this->get_parameter("thresh_euclidean_replan", thresh_euclidean_replan_);
 
     // Kinematic planner
     float goal_pose_distance_threshold;
@@ -181,13 +183,13 @@ void BehaviorExecutive::fsmTimerCallback()
     // Get the trajectory
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
     if (!calculated_trajectory_) {
-      // Update path trajectory
+      // Calculate path trajectory
       kinematic_planner_.generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
 
-      // TODO: update velocity trajectory
+      // Calculate velocity trajectory
       velocity_planner_.generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);
 
-      // TODO: update tool trajectory
+      // Calculate tool trajectory
       tool_planner_.generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
       
       // Convert to global frame
@@ -196,6 +198,7 @@ void BehaviorExecutive::fsmTimerCallback()
         current_trajectory_.path[i] = global_path_pose;
       }
 
+      // DEBUG
       for (size_t i =0; i < current_trajectory_.path.size(); ++i){
         std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
       }
@@ -216,10 +219,10 @@ void BehaviorExecutive::fsmTimerCallback()
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
   case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:{
-    bool goal_reached = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_);
-    
+    bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_);
+
     // Disable worksystem if goal is reached
-    if (goal_reached) {
+    if (!keep_following) {
       enable_worksystem_ = false;
       worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
     }

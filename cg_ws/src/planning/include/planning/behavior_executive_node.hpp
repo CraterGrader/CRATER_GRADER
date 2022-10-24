@@ -100,9 +100,10 @@ private:
   cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
   cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
-  // TODO: these could be params?
+  // Params
   double thresh_pos_;
   double thresh_head_;
+  float thresh_euclidean_replan_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
@@ -136,8 +137,8 @@ private:
   float threshold_z_ = 0.03; // TODO: make this a config parameter
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
-  cg_msgs::msg::Pose2D current_goal_pose_;
-  cg_msgs::msg::Pose2D current_agent_pose_; // TODO: make callback so this gets updated, assumed to be in local map frame!
+  cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
+  cg_msgs::msg::Pose2D current_agent_pose_; // Assumed to be in local map frame!
   bool enable_worksystem_ = false;
   cg_msgs::msg::Trajectory current_trajectory_; 
   // std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;

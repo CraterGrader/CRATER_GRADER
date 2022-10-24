@@ -74,6 +74,8 @@ std::string FSM::preSignalToString()
       return "FOLLOW_TRAJECTORY";
     case Signal::GOAL_REACHED:
       return "GOAL_REACHED";
+    case Signal::REPLAN:
+      return "REPLAN";
     default:
       return "Signal not recognized!";
   }

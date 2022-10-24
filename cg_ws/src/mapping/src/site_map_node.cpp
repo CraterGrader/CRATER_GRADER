@@ -104,6 +104,7 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   res->site_map = map_msg;
   res->success = true;
   siteMap_.updateMapCoverage();
+  siteMap_.normalizeHeightMap();
   res->map_fully_explored = siteMap_.getSiteMapFullStatus();
 }
 

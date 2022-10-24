@@ -13,17 +13,20 @@ class FollowingTrajectory : public FSM {
 
 public:
   /**
-   * @brief 
-   * 
-   * @param current_agent_pose 
-   * @param current_goal_pose 
-   * @param thresh_pos 
-   * @param thresh_head 
-   * @return true If goal pose reached
-   * @return false If goal pose not reached
+   * @brief
+   *
+   * @param current_agent_pose
+   * @param current_goal_pose
+   * @param thresh_pos
+   * @param thresh_head
+   * @return true If robot should keep following
+   * @return false If robot should stop following
    */
-  bool runState(const cg_msgs::msg::Pose2D &current_agent_pose, const cg_msgs::msg::Pose2D &current_goal_pose, const float thresh_pos, const double thresh_head); // Main function to run current state; optionally modifies signal and state for transition
+  bool runState(const cg_msgs::msg::Pose2D &current_agent_pose, const cg_msgs::msg::Pose2D &current_goal_pose, const float thresh_pos, const double thresh_head, const float thresh_euclidean_replan, const cg_msgs::msg::Trajectory &current_trajectory, const nav_msgs::msg::Odometry &global_robot_state); // Main function to run current state; optionally modifies signal and state for transition
 
+private:
+  int traj_idx_ = 0; // used for tracking what index on trajectory is closest to current pose, monotonically increasing, reset when new traj given
+  float euclidean_distance_to_trajectory_point_;
 
 }; // class State
 
