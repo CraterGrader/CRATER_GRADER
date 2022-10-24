@@ -59,19 +59,6 @@ def generate_launch_description():
             parameters=[bearing_params_path],
             output='screen'
         ),
-        # Base link to camera transform
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            arguments = [bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['position']['x'],
-                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['position']['y'],
-                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['position']['z'],
-                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['z'],
-                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['y'],
-                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['x'],
-                        'rob_base_link', 
-                        'camera']
-        ),
         Node(
             package='usb_cam', 
             executable='usb_cam_node_exe', 
@@ -80,22 +67,6 @@ def generate_launch_description():
             parameters=[usb_cam_path]
         )
     ]
-
-    # Transforms for all tags declared in parameters above - 'map' to 'tagX'
-    for i in range(len(bearing_params['bearing_node']['ros__parameters']['tags']['position']['x'])):
-        nodes.append(Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            arguments=[bearing_params['bearing_node']['ros__parameters']['tags']['position']['x'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['position']['y'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['position']['z'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['orientation']['z'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['orientation']['y'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['orientation']['x'][i],
-                    'tag_map',
-                    'tag' + str(i)]
-        ))
-    print(bearing_params['bearing_node']['ros__parameters']['base_cam_tf'])
 
     # AprilTag node with remapping - adjust here if changes to rectified image name
     composable_node = ComposableNode(

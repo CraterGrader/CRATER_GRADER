@@ -40,7 +40,9 @@ private:
   std::vector<double> rolling_bearing;
   std::vector<double> tag_x = {3.49563, 6.939225, 3.44706, 0.02744};
   std::vector<double> tag_y = {7.279027, 3.562075, -0.00215, 3.6699};
-
+  double link_to_cam_x = 0.2257;
+  double link_to_cam_z = 0.5269;
+  
   // Stores current robot x and y
   double robot_x;
   double robot_y;
