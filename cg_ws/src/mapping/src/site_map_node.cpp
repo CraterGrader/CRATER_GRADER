@@ -111,8 +111,8 @@ void SiteMapNode::map_viz_callback(){
   pcl::toROSMsg(myCloudSeen, site_map_viz_seen_msg);
 
   // Publish the message
-  site_map_viz_msg.header.frame_id = "map";
-  site_map_viz_msg.header.stamp = this->get_clock()->now();
+  site_map_viz_seen_msg.header.frame_id = "map";
+  site_map_viz_seen_msg.header.stamp = this->get_clock()->now();
   visualization_seen_map_pub_->publish(site_map_viz_seen_msg);
 
 
@@ -143,8 +143,8 @@ void SiteMapNode::map_viz_callback(){
   pcl::toROSMsg(myCloudVariance, site_map_viz_variance_msg);
 
   // Publish the message
-  site_map_viz_msg.header.frame_id = "map";
-  site_map_viz_msg.header.stamp = this->get_clock()->now();
+  site_map_viz_variance_msg.header.frame_id = "map";
+  site_map_viz_variance_msg.header.stamp = this->get_clock()->now();
   visualization_variance_map_pub_->publish(site_map_viz_variance_msg);
 
 }
