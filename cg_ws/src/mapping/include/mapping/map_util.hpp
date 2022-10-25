@@ -5,9 +5,7 @@
 #include <Eigen/Dense> // matrix multiplication
 #include <cg_msgs/msg/point2_d.hpp> // use of cg:msgs::Point2D
 #include <cg_msgs/msg/pose2_d.hpp> // use of cg:msgs::Pose2D
-
-// Map write/read with csv file
-#include <iostream>
+#include <iostream> // map i/o
 
 namespace cg {
 namespace mapping {
