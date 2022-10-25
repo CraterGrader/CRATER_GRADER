@@ -15,8 +15,11 @@ site_map:
     minCellVariance: 0.01 # meters^2
 
     # Loading from a map filepath
-    load_height_map_from_filepath: False
-    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/config/half_auton_half_manual_exploration.csv" # use absolute path
+    static_map: True
+    load_height_map_from_filepath: True
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_9x9.csv" # use absolute path
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_3x3.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001.csv" # use absolute path
 
 behavior_executive_node:
   ros__parameters:

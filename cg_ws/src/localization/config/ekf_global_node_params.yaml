@@ -143,7 +143,7 @@ ekf_global_node:
     # Only setting velocities (vx, vy, vyaw) to true, as per Configuring robot_localization -> Fusing Unmeasured Variables, available here: 
     # http://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
     odom0_config: [
-      false, false, false,  # TODO test if these should be set to false
+      false, false, false, 
       false, false, false,
       true, true, false,
       false, false, true,

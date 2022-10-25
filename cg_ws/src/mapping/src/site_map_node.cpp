@@ -47,6 +47,9 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   this->get_parameter("load_height_map_filepath", load_height_map_filepath);
   this->declare_parameter<bool>("load_height_map_from_filepath", false);
   this->get_parameter("load_height_map_from_filepath", load_height_map_from_filepath);
+  this->declare_parameter<bool>("static_map", false);
+  this->get_parameter("static_map", static_map_);
+
 
   cg::mapping::SiteMap temp(height_, 
                               width_, 
@@ -190,10 +193,13 @@ void SiteMapNode::new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPt
     incomingPts[i].y = temp_cloud->points[i].y; 
     incomingPts[i].z = temp_cloud->points[i].z; 
   }
-  // BIN POINTS 
-  siteMap_.binPts(incomingPts);
-  // UPDATE CELLS 
-  siteMap_.updateCellsBayes();
+  // if the map should be updated
+  if(!static_map_){
+    // BIN POINTS
+    siteMap_.binPts(incomingPts);
+    // UPDATE CELLS
+    siteMap_.updateCellsBayes();
+  }
 }
 
 void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res)
@@ -202,8 +208,8 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
   res->success = true;
-  siteMap_.updateMapCoverage();
-  siteMap_.normalizeHeightMap();
+  // siteMap_.updateMapCoverage();
+  // siteMap_.normalizeHeightMap();
   res->map_fully_explored = siteMap_.getSiteMapFullStatus();
 }
 

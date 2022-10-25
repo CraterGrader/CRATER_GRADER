@@ -54,6 +54,7 @@ private:
   float incomingPointVariance_;
   float cellStartingVariance_;
   float minCellVariance_;
+  bool static_map_;
 
 }; // class SiteMapNode
 
