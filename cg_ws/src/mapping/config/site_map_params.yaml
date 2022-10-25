@@ -12,7 +12,7 @@ site_map:
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
     cellStartingVariance: 10.0 # meters^2
-    minCellVariance: 0.001 # meters^2
+    minCellVariance: 0.01 # meters^2
 
 behavior_executive_node:
   ros__parameters:

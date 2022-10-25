@@ -88,19 +88,14 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 curr_idx = visited_nodes[curr_idx].parent_idx;
             }
 
-            // Add first segment
-            traj_copy = visited_trajectories[curr_idx];
-            for (cg_msgs::msg::Pose2D pose : traj_copy) {
-                std::cout << "traj pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
-            }
-            std::reverse(traj_copy.begin(), traj_copy.end());
-            final_path.insert(final_path.end(), traj_copy.begin(), traj_copy.end());
-
             // Insert initial agent pose
-            // final_path.insert(final_path.end(), start_trajectory.begin(), start_trajectory.end());
+            final_path.push_back(agent_pose);
 
             // Since we have been pushing onto final_path backwards, reverse it
             std::reverse(final_path.begin(), final_path.end());
+            for (cg_msgs::msg::Pose2D pose : final_path) {
+                std::cout << "final path pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
+            }
             
             // Break since found end point
             break;

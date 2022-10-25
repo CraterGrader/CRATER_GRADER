@@ -152,7 +152,7 @@ ekf_global_node:
     odom0_queue_size: 2
     odom0_nodelay: true
     odom0_differential: true
-    odom0_relative: true
+    odom0_relative: false
 
     # IMU
     imu0: imu/data/base_link
