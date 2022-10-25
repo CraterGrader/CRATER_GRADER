@@ -11,7 +11,7 @@
 //   cg::mapping::Map<float> map(height, width, resolution, map_data);
 
 //   // Write test
-//   std::string filepath = "map_test.csv";
+//   std::string filepath = "/root/CRATER_GRADER/cg_ws/src/mapping/test/map_test.csv";
 //   map.write_map_to_file(filepath);
 //   EXPECT_EQ(1.0,1.0);
 // }
