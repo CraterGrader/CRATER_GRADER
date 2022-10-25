@@ -118,7 +118,7 @@ namespace planning {
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
     bool design_height_map_initialized = design_height_map_.load_map_from_file(design_topo_filepath);
-    
+
     if (!design_height_map_initialized) {
       RCLCPP_FATAL(this->get_logger(), "Design map loading error");
       rclcpp::shutdown();
@@ -171,11 +171,15 @@ void BehaviorExecutive::fsmTimerCallback()
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
     get_transport_goals_.runState(current_goal_poses_, transport_planner_, current_agent_pose_, current_height_map_);
+    // ---------------------------------------
+    // DEBUG
     std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
     std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
-    std::cout << "    Pose1 <x,y,yaw>: < " << current_goal_poses_[0].pt.x << ", " << current_goal_poses_[0].pt.y << ", " << current_goal_poses_[0].yaw << " >" << std::endl;
-    std::cout << "    Pose2 <x,y,yaw>: < " << current_goal_poses_[1].pt.x << ", " << current_goal_poses_[1].pt.y << ", " << current_goal_poses_[1].yaw << " >" << std::endl;
-    std::cout << "    Pose3 <x,y,yaw>: < " << current_goal_poses_[2].pt.x << ", " << current_goal_poses_[2].pt.y << ", " << current_goal_poses_[2].yaw << " >" << std::endl;
+    
+    for (size_t i =0; i < current_goal_poses_.size(); ++i){
+      std::cout << "    Pose " << i<< " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    }
+    // ---------------------------------------
     break;
   case cg::planning::FSM::State::PLAN_EXPLORATION:
     plan_exploration_.runState(exploration_planner_, current_height_map_);
@@ -196,8 +200,11 @@ void BehaviorExecutive::fsmTimerCallback()
     break;}
   case cg::planning::FSM::State::GOALS_REMAINING:{
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
+    // ---------------------------------------
+    // DEBUG
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    // ---------------------------------------
     break;}
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
     // Get the trajectory

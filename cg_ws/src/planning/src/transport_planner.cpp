@@ -23,7 +23,15 @@ size_t TransportPlanner::ij_to_index(size_t i, size_t j, size_t width) const {
  * @return cg_msgs::msg::Pose2D The pose to navigate to 
  */
 std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map){
-  (void)map; // map remains unused, legacy of interface 
+  (void)map; // map remains unused, legacy of interface
+
+  std::vector<cg_msgs::msg::Pose2D> goalPoses;
+  
+  // Return empty poses if there are no assigments
+  if (transport_assignments_.size() == 0) {
+    return goalPoses;
+  }
+
   // define a minimum distance starting with the max value of float
   float min_dist = std::numeric_limits<float>::max();
   // index of minimium distance of transport_assignmnets
@@ -45,14 +53,20 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
   }
   // update unvisited_assignments with false for arg_min
   unvisited_assignments_.at(arg_min) = false;
+  
   // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
   double yaw = static_cast<double>(atan2((transport_assignments_.at(arg_min).sink_node.y-transport_assignments_.at(arg_min).source_node.y),(transport_assignments_.at(arg_min).sink_node.x-transport_assignments_.at(arg_min).source_node.x)));
+  
   // convert src, sink nodes to poses
   cg_msgs::msg::Pose2D source_pose_1 = cg::planning::create_pose2d(transport_assignments_.at(arg_min).source_node.x, transport_assignments_.at(arg_min).source_node.y, yaw);
   cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).sink_node.x, transport_assignments_.at(arg_min).sink_node.y, yaw);
+
   // TODO: experiment with changing this pose to visualize movement done during push
   cg_msgs::msg::Pose2D source_pose_2 = source_pose_1;
-  std::vector<cg_msgs::msg::Pose2D> goalPoses{source_pose_1,sink_pose,source_pose_2};
+  goalPoses.push_back(source_pose_1);
+  goalPoses.push_back(sink_pose);
+  goalPoses.push_back(source_pose_2);
+
   return goalPoses;
 }
 
