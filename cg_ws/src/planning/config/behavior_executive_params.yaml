@@ -19,7 +19,7 @@ behavior_executive_node:
 
     # Timer callbacks
     fsm_timer_callback_ms: 1000 # milliseconds
-    service_response_timeout_ms: 500 # milliseconds
+    service_response_timeout_ms: 2000 # milliseconds
     viz_timer_callback_ms: 500 # milliseconds
 
     # Map loading
