@@ -56,6 +56,7 @@ private:
   bool worksystem_enabled_ = false;
   nav_msgs::msg::Odometry global_robot_state_;
   nav_msgs::msg::Odometry local_robot_state_;
+  cg_msgs::msg::ActuatorCommand cmd_msg_;
   int traj_idx_ = 0; // used for tracking what index on trajectory is closest to current pose, monotonically increasing, reset when new traj given
 
   float steer_speed_ = 0.0f;
@@ -64,8 +65,13 @@ private:
   double tlast_;
   double delta_t_; 
 
+  std::list<float> steer_velocity_window_;
+  size_t steer_speed_filter_window_size_;
 
-  cg_msgs::msg::ActuatorCommand cmd_msg_;
+  /* Helpers */
+  // Update list of values for moving average, modify the list being passed as an argument
+  float updateMovingAverage(std::list<float> &list, const float &new_val, const size_t &window_size);
+
 }; // class WorksystemControlNode
 
 } // namespace motion_control

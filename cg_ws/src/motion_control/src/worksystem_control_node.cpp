@@ -52,7 +52,8 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   lat_debug_heading_err_pub_ = this->create_publisher<std_msgs::msg::Float64>(
       "/lat_control_debug/heading_error", 1);
 
-  // Load parameters
+  /* Parameters */
+  // Longitudinal controller
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
   this->get_parameter("longitudinal_velocity_kp", pid_params_.kp);
   this->declare_parameter<double>("longitudinal_velocity_ki", 0.0);
@@ -69,6 +70,9 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_output_sat_min", pid_params_.output_sat_min);
   this->declare_parameter<double>("longitudinal_velocity_output_sat_max", std::numeric_limits<double>::infinity());
   this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
+  this->declare_parameter<double>("steer_speed_filter_window_size", 10);
+  this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
+  // Lateral controller
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
   this->declare_parameter<double>("lateral_stanley_softening_constant", 1.0);
@@ -154,7 +158,10 @@ void WorksystemControlNode::encoderTelemetryCallback(const cg_msgs::msg::Encoder
   float speed_front = std::fabs((last_steer_pos_front_ - steer_pos_front)/static_cast<float>(delta_t_));
   float speed_rear = std::fabs((last_steer_pos_rear_ - steer_pos_rear)/static_cast<float>(delta_t_));
   // average front and rear 
-  steer_speed_ = (speed_rear + speed_front) /2;
+  float curr_steer_speed_ = (speed_rear + speed_front) /2;
+  // Use moving average to smooth slip estimate
+  steer_speed_ = updateMovingAverage(steer_velocity_window_, curr_steer_speed_, steer_speed_filter_window_size_);
+
   // update last steer position
   last_steer_pos_front_ = steer_pos_front;
   last_steer_pos_rear_ = steer_pos_rear;
@@ -165,6 +172,17 @@ void WorksystemControlNode::enableWorksystem(cg_msgs::srv::EnableWorksystem::Req
 {
   worksystem_enabled_ = req->enable_worksystem; // Enable/disable worksystem using service request
   res->worksystem_enabled = worksystem_enabled_; // Set response confirmation
+}
+
+float WorksystemControlNode::updateMovingAverage(std::list<float> &list, const float &new_val, const size_t &window_size) {
+  // Build up the filter
+  list.push_front(new_val);
+  if (list.size() > window_size) {
+    list.pop_back(); // remove oldest value
+  }
+
+  // Update the filter
+  return std::accumulate(list.begin(), list.end(), 0.0) / list.size();
 }
 
 }  // namespace motion_control
