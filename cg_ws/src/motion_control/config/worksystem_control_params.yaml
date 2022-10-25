@@ -6,4 +6,4 @@ worksystem_control_node:
     steer_speed_filter_window_size: 10
 
     lateral_stanley_gain: 1.0
-    lateral_stanley_softening_constant: 0.0 #0.000001 # 1e-6
+    lateral_stanley_softening_constant: 0.0 # unused

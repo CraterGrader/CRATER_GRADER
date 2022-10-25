@@ -42,6 +42,9 @@ class SiteMap {
   cg_msgs::msg::SiteMap toMsg() const;
   void setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg);
 
+  // setters
+  bool setHeightMap(std::vector<float> input_data);
+
   // getter funcitons 
   size_t getNcells() const {return height_*width_;}
   size_t getWidth() const {return width_;}
@@ -55,7 +58,7 @@ class SiteMap {
   std::vector<int> getSeenMap() const {return seenPointsMap_;}
   std::vector<float> getVarianceMapFloats();
 
-  private:
+private:
   // map views
   std::vector<float> heightMap_;       // "view 1"
   std::vector<CellBuffer> bufferMap_;  // "view 2" 

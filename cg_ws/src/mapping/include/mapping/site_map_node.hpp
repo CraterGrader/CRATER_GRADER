@@ -42,7 +42,7 @@ private:
 
   /* Variables */
   cg::mapping::SiteMap siteMap_;
-  cg::mapping::Map<float> saveMap_; // height map to use for saving siteMap_ data to a file (probably best to use inheritence but some refactor needed)
+  cg::mapping::Map<float> fileMap_; // height map to use for saving siteMap_ data to a file (probably best to use inheritence but some refactor needed)
 
   /* Parameters */
   int height_;

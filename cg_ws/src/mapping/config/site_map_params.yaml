@@ -14,6 +14,10 @@ site_map:
     cellStartingVariance: 10.0 # meters^2
     minCellVariance: 0.01 # meters^2
 
+    # Loading from a map filepath
+    load_height_map_from_filepath: False
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/config/half_auton_half_manual_exploration.csv" # use absolute path
+
 behavior_executive_node:
   ros__parameters:
     # site assumed to be 5mx5m

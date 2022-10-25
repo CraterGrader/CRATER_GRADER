@@ -41,6 +41,13 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   this->declare_parameter<float>("minCellVariance", 5);
   this->get_parameter("minCellVariance", minCellVariance_);
 
+  std::string load_height_map_filepath;
+  bool load_height_map_from_filepath;
+  this->declare_parameter<std::string>("load_height_map_filepath", "/root/CRATER_GRADER/cg_ws/src/mapping/config/half_auton_half_manual_exploration.csv");
+  this->get_parameter("load_height_map_filepath", load_height_map_filepath);
+  this->declare_parameter<bool>("load_height_map_from_filepath", false);
+  this->get_parameter("load_height_map_from_filepath", load_height_map_from_filepath);
+
   cg::mapping::SiteMap temp(height_, 
                               width_, 
                               resolution_, 
@@ -51,6 +58,26 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
                               cellStartingVariance_, 
                               minCellVariance_);
   siteMap_ = temp;
+
+  // Load map from file
+  if (load_height_map_from_filepath) {
+    bool load_height_map_initialized = fileMap_.load_map_from_file(load_height_map_filepath);
+    if (!load_height_map_initialized) {
+      RCLCPP_FATAL(this->get_logger(), "Loading from file map error");
+      rclcpp::shutdown();
+    }
+
+    if ((fileMap_.getHeight() != siteMap_.getHeight()) \
+          || (fileMap_.getWidth() != siteMap_.getWidth()) \
+          || (fileMap_.getResolution() != siteMap_.getResolution())) {
+      RCLCPP_FATAL(this->get_logger(), "Map dimensions do not align!\n    Site map <height, width, resolution, data.size()> <%ld, %ld, %f, %ld>\n    Design map <height, width, resolution, data.size()>: <%ld, %ld, %f, %ld>", siteMap_.getHeight(), siteMap_.getWidth(), siteMap_.getResolution(), siteMap_.getHeightMap().size(), fileMap_.getHeight(), fileMap_.getWidth(), fileMap_.getResolution(), fileMap_.getCellData().size());
+      rclcpp::shutdown();
+    }
+
+    // Set the cell data
+    siteMap_.setHeightMap(fileMap_.getCellData());
+  }
+
 }
 
 void SiteMapNode::map_viz_callback(){
@@ -182,10 +209,10 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
 
 void SiteMapNode::saveMap(cg_msgs::srv::SaveMap::Request::SharedPtr req, cg_msgs::srv::SaveMap::Response::SharedPtr res) {
   // Update map parameters and data
-  saveMap_.updateDimensions(siteMap_.getHeight(), siteMap_.getWidth(), siteMap_.getResolution());
-  saveMap_.setCellData(siteMap_.getHeightMap());
+  fileMap_.updateDimensions(siteMap_.getHeight(), siteMap_.getWidth(), siteMap_.getResolution());
+  fileMap_.setCellData(siteMap_.getHeightMap());
   // Save the map using input filepath and return status
-  res->map_saved = saveMap_.write_map_to_file(req->filepath);
+  res->map_saved = fileMap_.write_map_to_file(req->filepath);
 }
 
 }  // namespace mapping
