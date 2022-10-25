@@ -46,11 +46,18 @@ void BearingNode::poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr ms
   auto odom_pose = *msg;
   robot_x = odom_pose.pose.pose.position.x;
   robot_y = odom_pose.pose.pose.position.y;
-  double x = odom_pose.pose.pose.orientation.x;
-  double y = odom_pose.pose.pose.orientation.y;
-  double z = odom_pose.pose.pose.orientation.z;
-  double w = odom_pose.pose.pose.orientation.w;
-  robot_pitch_rad = std::atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z);
+
+  tf2::Quaternion q(
+        odom_pose.pose.pose.orientation.x,
+        odom_pose.pose.pose.orientation.y,
+        odom_pose.pose.pose.orientation.z,
+        odom_pose.pose.pose.orientation.w);
+  tf2::Matrix3x3 m(q);
+  double roll, pitch, yaw;
+  m.getRPY(roll, pitch, yaw);
+  robot_pitch_rad = yaw;
+  RCLCPP_INFO(this->get_logger(), "Robot Roll");
+  RCLCPP_INFO(this->get_logger(), std::to_string(robot_pitch_rad).c_str());
 }
 
 void BearingNode::timerCallback() {
@@ -92,9 +99,9 @@ void BearingNode::timerCallback() {
 
     // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
     // Compensate base link to camera offset as z-direction always measured away from camera
-    double cam_to_tag_x = cam_to_tag.transform.translation.x;
-    // double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_pitch_rad) + 
-    //                         cam_to_tag.transform.translation.y * std::sin(robot_pitch_rad);
+    // double cam_to_tag_x = cam_to_tag.transform.translation.x;
+    double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_pitch_rad) + 
+                            cam_to_tag.transform.translation.y * std::sin(robot_pitch_rad);
     double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam_x;
 
     if (robot_x == -1) {
