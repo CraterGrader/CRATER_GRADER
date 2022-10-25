@@ -59,6 +59,19 @@ def generate_launch_description():
             parameters=[bearing_params_path],
             output='screen'
         ),
+        # Base link to camera transform
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments = [bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['position']['x'],
+                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['position']['y'],
+                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['position']['z'],
+                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['z'],
+                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['y'],
+                        bearing_params['bearing_node']['ros__parameters']['base_cam_tf']['orientation']['x'],
+                        'rob_base_link', 
+                        'camera']
+        ),
         Node(
             package='usb_cam', 
             executable='usb_cam_node_exe', 

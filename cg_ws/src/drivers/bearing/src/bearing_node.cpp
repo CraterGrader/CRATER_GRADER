@@ -67,6 +67,7 @@ void BearingNode::timerCallback() {
   // Frame names
   std::string fromTag_base = "april_tag";
   std::string toCamera = "camera";
+  std::string toLink = "rob_base_link";
   std::string tf_map_frame = "map";
   
   // Store bearing estimates and distances
@@ -79,6 +80,7 @@ void BearingNode::timerCallback() {
   // Look up for the transformation from tag to base_link
   for (int i = 0; i < 4; i++) {
     geometry_msgs::msg::TransformStamped cam_to_tag;
+    geometry_msgs::msg::TransformStamped link_to_tag;
     std::string fromTag = fromTag_base + std::to_string(i);
 
     // Get camera to tag transform - matters the most, needs to not only include most recent transform
@@ -97,6 +99,15 @@ void BearingNode::timerCallback() {
       continue;
     }
 
+    // Get tag to base link transform
+    try {
+      link_to_tag = tf_buffer_->lookupTransform(
+        toLink, fromTag,
+        tf2::TimePointZero);
+    } catch (tf2::TransformException & ex) {
+      continue;
+    }
+
     if (robot_x == -1) {
       RCLCPP_INFO(this->get_logger(), "No robot position from EKF yet");
       return;
@@ -104,12 +115,11 @@ void BearingNode::timerCallback() {
 
     // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
     // Compensate base link to camera offset as z-direction always measured away from camera
-    // double cam_to_tag_x = cam_to_tag.transform.translation.x;
-    double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_roll_rad) + 
-                            cam_to_tag.transform.translation.y * std::sin(robot_roll_rad);
-    double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam_x;
+    double link_to_tag_x = link_to_tag.transform.translation.x;
+    double link_to_tag_y = link_to_tag.transform.translation.y * std::cos(robot_roll_rad) - 
+                            link_to_tag.transform.translation.z * std::sin(robot_roll_rad);
 
-    double camera_tag_yaw_offset = std::atan(cam_to_tag_x/cam_to_tag_z);
+    double camera_tag_yaw_offset = std::atan(link_to_tag_y/link_to_tag_x);
     camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);
     double yaw = camera_tag_yaw_offset;
     double yaw_pose_offset;
@@ -130,7 +140,7 @@ void BearingNode::timerCallback() {
         RCLCPP_INFO(this->get_logger(), "Unknown tag");
         break;
     }
-    yaw += yaw_pose_offset;
+    yaw -= yaw_pose_offset;
     bearings.push_back(yaw);
 
     RCLCPP_INFO(this->get_logger(), "Current Yaw");

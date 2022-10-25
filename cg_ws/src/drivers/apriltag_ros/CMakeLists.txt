@@ -37,6 +37,4 @@ install(TARGETS AprilTagNode
 
 install(DIRECTORY cfg/ DESTINATION share/${PROJECT_NAME}/cfg)
 
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-
 ament_package()
