@@ -32,6 +32,10 @@ namespace planning {
     // Timer callback, joined to the callback group
     this->declare_parameter<int>("fsm_timer_callback_ms", 2000);
     this->get_parameter("fsm_timer_callback_ms", fsm_timer_callback_ms_);
+    this->declare_parameter<int>("service_response_timeout_ms", 2000);
+    this->get_parameter("service_response_timeout_ms", service_response_timeout_ms_);
+    this->declare_parameter<int>("viz_timer_callback_ms", 500);
+    this->get_parameter("viz_timer_callback_ms", viz_timer_callback_ms_);
     fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
     viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 
@@ -42,6 +46,7 @@ namespace planning {
     float map_resolution;
     float xTransform;
     float yTransform;
+    std::string design_topo_filepath;
     this->declare_parameter<int>("height", 50);
     this->get_parameter("height", map_height);
     this->declare_parameter<int>("width", 50);
@@ -52,6 +57,10 @@ namespace planning {
     this->get_parameter("xTransform", xTransform);
     this->declare_parameter<float>("yTransform", 1.0);
     this->get_parameter("yTransform", yTransform);
+
+    this->declare_parameter<std::string>("design_topo_filepath", "/root/CRATER_GRADER/cg_ws/src/planning/config/50x50_zeros_height_map.csv");
+    this->get_parameter("design_topo_filepath", design_topo_filepath);
+    
 
     // Thresholds for reaching following goal
     this->declare_parameter<double>("thresh_pos", 1.0);
@@ -108,8 +117,15 @@ namespace planning {
 
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
-    design_height_map_.updateDimensions(map_height, map_width, map_resolution);
-    design_height_map_.setCellData(designTOPO_);
+    design_height_map_.load_map_from_file(design_topo_filepath);
+    if ((design_height_map_.getHeight() != current_height_map_.getHeight()) \
+          || (design_height_map_.getWidth() != current_height_map_.getWidth()) \
+          || (design_height_map_.getResolution() != current_height_map_.getResolution())) {
+      RCLCPP_FATAL(this->get_logger(), "Map dimensions do not align!\n    Site map <height, width, resolution, data.size()> <%ld, %ld, %f, %ld>\n    Design map <height, width, resolution, data.size()>: <%ld, %ld, %f, %ld>", current_height_map_.getHeight(), current_height_map_.getWidth(), current_height_map_.getResolution(), current_height_map_.getCellData().size(), design_height_map_.getHeight(), design_height_map_.getWidth(), design_height_map_.getResolution(), design_height_map_.getCellData().size());
+      rclcpp::shutdown();
+    }
+      // design_height_map_.updateDimensions(map_height, map_width, map_resolution);
+      // design_height_map_.setCellData(designTOPO_);
 
     // Create pose of local map, assumed with no rotation
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
@@ -252,7 +268,7 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
   auto result_future = site_map_client_->async_send_request(request);
 
   // Wait for response, until timeout at maximum
-  std::future_status status = result_future.wait_for(std::chrono::seconds(service_response_timeout_sec_));
+  std::future_status status = result_future.wait_for(std::chrono::milliseconds(service_response_timeout_ms_));
 
   // Get response data and indicate if map was successfully updated or not
   if (status == std::future_status::ready) {
@@ -282,7 +298,7 @@ bool BehaviorExecutive::updateTrajectoryService(const cg_msgs::msg::Trajectory &
   auto result_future = update_trajectory_client_->async_send_request(request);
 
   // Wait for response, until timeout at maximum
-  std::future_status status = result_future.wait_for(std::chrono::seconds(service_response_timeout_sec_));
+  std::future_status status = result_future.wait_for(std::chrono::milliseconds(service_response_timeout_ms_));
 
   // Get response data and indicate if map was successfully updated or not
   if (status == std::future_status::ready) {
@@ -307,7 +323,7 @@ bool BehaviorExecutive::enableWorksystemService(const bool enable_worksystem, bo
   auto result_future = enable_worksystem_client_->async_send_request(request);
 
   // Wait for response, until timeout at maximum
-  std::future_status status = result_future.wait_for(std::chrono::seconds(service_response_timeout_sec_));
+  std::future_status status = result_future.wait_for(std::chrono::milliseconds(service_response_timeout_ms_));
 
   // Get response data and indicate if map was successfully updated or not
   if (status == std::future_status::ready) {

@@ -155,7 +155,7 @@ template <class T>
 void Map<T>::write_map_to_file(const std::string& filepath) {
   // Modify name if file already exists
   std::string write_filepath = filepath;
-  while (file_exists(write_filepath)) {
+  while (cg::mapping::file_exists(write_filepath)) {
     std::string::size_type pos = write_filepath.find('.');
     write_filepath = write_filepath.substr(0, pos) + "_repeat" + ".csv";
   }
@@ -207,7 +207,7 @@ void Map<T>::load_map_from_file(const std::string& filepath){
   }
 
   if (csv_height * csv_width != csv_data.size()) {
-    std::cout << "[MAP I/O ERROR] Dimensions do not align for: csv height = " << csv_height << ", csv width = " << csv_width << ", csv data size = " << csv_data.size() << std::endl;
+    std::cout << "[MAP I/O ERROR] Dimensions do not align for: csv height = " << csv_height << ", csv width = " << csv_width << ", csv data size = " << csv_data.size() << " with file: " << filepath << std::endl;
     return;
   }
 
