@@ -139,6 +139,7 @@ private:
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D current_agent_pose_; // Assumed to be in local map frame!
+  cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!
   bool enable_worksystem_ = false;
   cg_msgs::msg::Trajectory current_trajectory_; 
   // std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;

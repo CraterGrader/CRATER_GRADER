@@ -35,9 +35,13 @@ double LongitudinalController::computeDrive(
   // double desired_drive = velocity_controller_->control(error);
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
   float steer_scale_factor = std::max((max_steer_speed_ - steer_velocity)/(max_steer_speed_),min_drive_speed_scaler_);
 
   double desired_drive = steer_scale_factor * target_velocity; 
+
+  std::cout << " *************** Target Velocity : " << target_velocity << "Steer Velocity :" << steer_velocity << " Steer-Speed Scale Factor :" << steer_scale_factor << std::endl;
+  std::cout << "Desired Drive Speed : " << desired_drive << std::endl; 
 
   return desired_drive; // DEBUG
 }

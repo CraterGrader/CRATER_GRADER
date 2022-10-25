@@ -219,7 +219,7 @@ void BehaviorExecutive::fsmTimerCallback()
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
   case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:{
-    bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_);
+    bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_, global_robot_pose_);
 
     // Disable worksystem if goal is reached
     if (!keep_following) {
@@ -335,12 +335,12 @@ void BehaviorExecutive::globalRobotStateCallback(const nav_msgs::msg::Odometry::
   double global_robot_roll, global_robot_pitch, global_robot_yaw;
   m.getRPY(global_robot_roll, global_robot_pitch, global_robot_yaw);
 
-  cg_msgs::msg::Pose2D global_robot_pose = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
+  cg_msgs::msg::Pose2D global_robot_pose_ = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
                                                                        global_robot_state_.pose.pose.position.y,
                                                                        global_robot_yaw);
 
   // Convert pose to local map frame
-  current_agent_pose_ = cg::planning::transformPose(global_robot_pose, global_map_relative_to_local_frame_);
+  current_agent_pose_ = cg::planning::transformPose(global_robot_pose_, global_map_relative_to_local_frame_);
 }
 
 void BehaviorExecutive::odomRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
