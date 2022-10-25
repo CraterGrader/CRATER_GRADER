@@ -129,6 +129,16 @@ void SiteMap::normalizeHeightMap(){
   }
 }
 
+std::vector<float> SiteMap::getVarianceMapFloats() {
+
+  std::vector<float> map_of_variances;
+
+  for (size_t i=0; i<getNcells(); i++){
+    map_of_variances.push_back(varianceMap_[i].getCellVariance());
+  }
+  return map_of_variances;
+}
+
 cg_msgs::msg::SiteMap SiteMap::toMsg() const {
   cg_msgs::msg::SiteMap map_msg;
   map_msg.height_map = heightMap_;

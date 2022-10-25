@@ -7,6 +7,8 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   // Initialize publishers and subscribers
   new_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain/filtered", 1, std::bind(&SiteMapNode::new_pts_callback, this, std::placeholders::_1));
   visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_viz", 1);
+  visualization_seen_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_seen_viz", 1);
+  visualization_variance_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_variance_viz", 1);
 
   // Viz Timer callback
   viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::map_viz_callback, this));
@@ -52,11 +54,14 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
 }
 
 void SiteMapNode::map_viz_callback(){
+  // HEIGHT MAP
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // get a temp map from siteMap
   std::vector<float> tempMap = siteMap_.getHeightMap();
-  size_t iterator = 0; 
+  size_t iterator0 = 0;
 
   // Pack data
+  // TODO turn this into util
   pcl::PointCloud<pcl::PointXYZ> myCloud;
 
   for (int col=0; col<static_cast<int>(siteMap_.getWidth()); col++) {
@@ -64,9 +69,9 @@ void SiteMapNode::map_viz_callback(){
       pcl::PointXYZ newPoint;
       newPoint.x = (row * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
       newPoint.y = col * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
-      newPoint.z =  tempMap[iterator]; // cell height in map frame
+      newPoint.z =  tempMap[iterator0]; // cell height in map frame
       myCloud.points.push_back(newPoint);
-      iterator++; 
+      iterator0++;
     }
   }
 
@@ -78,6 +83,70 @@ void SiteMapNode::map_viz_callback(){
   site_map_viz_msg.header.frame_id = "map";
   site_map_viz_msg.header.stamp = this->get_clock()->now();
   visualization_pub_->publish(site_map_viz_msg);
+
+
+  // Seen MAP
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // get a temp map from siteMap
+  std::vector<int> tempMapSeen = siteMap_.getSeenMap();
+  size_t iterator1 = 0;
+
+  // Pack data
+  // TODO turn this into util
+  pcl::PointCloud<pcl::PointXYZ> myCloudSeen;
+
+  for (int col=0; col<static_cast<int>(siteMap_.getWidth()); col++) {
+    for (int row=0; row < static_cast<int>(siteMap_.getHeight()); row++) {
+      pcl::PointXYZ newPoint;
+      newPoint.x = (row * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
+      newPoint.y = col * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
+      newPoint.z = static_cast<float>(tempMapSeen[iterator1]); // cell height in map frame
+      myCloudSeen.points.push_back(newPoint);
+      iterator1++;
+    }
+  }
+
+  // Convert to ROS data type
+  sensor_msgs::msg::PointCloud2 site_map_viz_seen_msg;
+  pcl::toROSMsg(myCloudSeen, site_map_viz_seen_msg);
+
+  // Publish the message
+  site_map_viz_msg.header.frame_id = "map";
+  site_map_viz_msg.header.stamp = this->get_clock()->now();
+  visualization_seen_map_pub_->publish(site_map_viz_seen_msg);
+
+
+
+  // Variance Map
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // get a temp map from siteMap
+  std::vector<float> tempMapVariance = siteMap_.getVarianceMapFloats();
+  size_t iterator2 = 0;
+
+  // Pack data
+  // TODO turn this into util
+  pcl::PointCloud<pcl::PointXYZ> myCloudVariance;
+
+  for (int col=0; col<static_cast<int>(siteMap_.getWidth()); col++) {
+    for (int row=0; row < static_cast<int>(siteMap_.getHeight()); row++) {
+      pcl::PointXYZ newPoint;
+      newPoint.x = (row * siteMap_.getResolution()) + siteMap_.getXTransform() + (siteMap_.getResolution()/2); // cell x-coordinate in map frame
+      newPoint.y = col * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
+      newPoint.z = tempMapVariance[iterator2]; // cell height in map frame
+      myCloudVariance.points.push_back(newPoint);
+      iterator2++;
+    }
+  }
+
+  // Convert to ROS data type
+  sensor_msgs::msg::PointCloud2 site_map_viz_variance_msg;
+  pcl::toROSMsg(myCloudVariance, site_map_viz_variance_msg);
+
+  // Publish the message
+  site_map_viz_msg.header.frame_id = "map";
+  site_map_viz_msg.header.stamp = this->get_clock()->now();
+  visualization_variance_map_pub_->publish(site_map_viz_variance_msg);
+
 }
 
 void SiteMapNode::new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){

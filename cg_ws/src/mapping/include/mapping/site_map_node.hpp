@@ -22,6 +22,8 @@ private:
   /* Publishers and Subscribers */ 
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr new_points_sub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_seen_map_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_variance_map_pub_;
 
   // timer
   rclcpp::TimerBase::SharedPtr viz_timer_;
@@ -35,6 +37,8 @@ private:
   /* Callbacks */
   void new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
   void map_viz_callback();
+
+  /* Methods */
 
   /* Variables */
   cg::mapping::SiteMap siteMap_;

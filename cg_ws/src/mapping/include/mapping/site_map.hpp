@@ -52,6 +52,8 @@ class SiteMap {
   bool getSiteMapFullStatus() const {return siteMapFull_;}
   std::vector<CellBuffer> getBufferMap() const {return bufferMap_;}
   std::vector<float> getHeightMap() const {return heightMap_;}
+  std::vector<int> getSeenMap() const {return seenPointsMap_;}
+  std::vector<float> getVarianceMapFloats();
 
   private:
   // map views
