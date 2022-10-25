@@ -70,8 +70,10 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_output_sat_min", pid_params_.output_sat_min);
   this->declare_parameter<double>("longitudinal_velocity_output_sat_max", std::numeric_limits<double>::infinity());
   this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
-  this->declare_parameter<double>("steer_speed_filter_window_size", 10);
+  
+  this->declare_parameter<int>("steer_speed_filter_window_size", 10);
   this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
+
   // Lateral controller
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
