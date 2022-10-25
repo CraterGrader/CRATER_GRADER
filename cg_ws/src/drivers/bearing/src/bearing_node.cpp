@@ -31,7 +31,7 @@ BearingNode::BearingNode() : Node("bearing_node") {
   // Initialize robot position to invalid value
   robot_x = -1;
   robot_y = -1;
-  robot_pitch_rad = -1;
+  robot_roll_rad = -1;
 
   // Call on_timer function at a specified frequency
   timer_ = this->create_wall_timer(
@@ -55,9 +55,9 @@ void BearingNode::poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr ms
   tf2::Matrix3x3 m(q);
   double roll, pitch, yaw;
   m.getRPY(roll, pitch, yaw);
-  robot_pitch_rad = yaw;
+  robot_roll_rad = roll;
   RCLCPP_INFO(this->get_logger(), "Robot Roll");
-  RCLCPP_INFO(this->get_logger(), std::to_string(robot_pitch_rad).c_str());
+  RCLCPP_INFO(this->get_logger(), std::to_string(robot_roll_rad).c_str());
 }
 
 void BearingNode::timerCallback() {
@@ -97,17 +97,17 @@ void BearingNode::timerCallback() {
       continue;
     }
 
-    // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
-    // Compensate base link to camera offset as z-direction always measured away from camera
-    // double cam_to_tag_x = cam_to_tag.transform.translation.x;
-    double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_pitch_rad) + 
-                            cam_to_tag.transform.translation.y * std::sin(robot_pitch_rad);
-    double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam_x;
-
     if (robot_x == -1) {
       RCLCPP_INFO(this->get_logger(), "No robot position from EKF yet");
       return;
     }
+
+    // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
+    // Compensate base link to camera offset as z-direction always measured away from camera
+    // double cam_to_tag_x = cam_to_tag.transform.translation.x;
+    double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_roll_rad) + 
+                            cam_to_tag.transform.translation.y * std::sin(robot_roll_rad);
+    double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam_x;
 
     double camera_tag_yaw_offset = std::atan(cam_to_tag_x/cam_to_tag_z);
     camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);

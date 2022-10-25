@@ -42,7 +42,7 @@ private:
   // Stores current robot x and y
   double robot_x;
   double robot_y;
-  double robot_pitch_rad;
+  double robot_roll_rad;
 
   int pub_freq;
   double tf_discard_time;
