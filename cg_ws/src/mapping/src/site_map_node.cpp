@@ -15,6 +15,9 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   site_map_server_ = this->create_service<cg_msgs::srv::SiteMap>(
       "site_map_server",
       std::bind(&SiteMapNode::sendSiteMap, this, std::placeholders::_1, std::placeholders::_2));
+  save_map_server_ = this->create_service<cg_msgs::srv::SaveMap>(
+      "save_map_server",
+      std::bind(&SiteMapNode::saveMap, this, std::placeholders::_1, std::placeholders::_2));
 
   // Load parameters
   this->declare_parameter<int>("height", 5);
@@ -106,6 +109,14 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   siteMap_.updateMapCoverage();
   siteMap_.normalizeHeightMap();
   res->map_fully_explored = siteMap_.getSiteMapFullStatus();
+}
+
+void SiteMapNode::saveMap(cg_msgs::srv::SaveMap::Request::SharedPtr req, cg_msgs::srv::SaveMap::Response::SharedPtr res) {
+  // Update map parameters and data
+  saveMap_.updateDimensions(siteMap_.getHeight(), siteMap_.getWidth(), siteMap_.getResolution());
+  saveMap_.setCellData(siteMap_.getHeightMap());
+  // Save the map using input filepath and return status
+  res->map_saved = saveMap_.write_map_to_file(req->filepath);
 }
 
 }  // namespace mapping

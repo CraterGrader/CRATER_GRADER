@@ -56,7 +56,7 @@ class Map {
      *
      * @param filepath The filepath to write to
      */
-    void write_map_to_file(const std::string &filepath);
+    bool write_map_to_file(const std::string &filepath);
 
     /**
      * @brief Helper to read map data from a filepath
@@ -73,7 +73,7 @@ class Map {
      *
      * @param filepath The filepath to read from
      */
-    void load_map_from_file(const std::string &filepath);
+    bool load_map_from_file(const std::string &filepath);
 
   private:
     // attributes
@@ -152,7 +152,7 @@ bool Map<T>::setCellData(std::vector<T> input_data) {
 }
 
 template <class T>
-void Map<T>::write_map_to_file(const std::string& filepath) {
+bool Map<T>::write_map_to_file(const std::string& filepath) {
   // Modify name if file already exists
   std::string write_filepath = filepath;
   while (cg::mapping::file_exists(write_filepath)) {
@@ -163,6 +163,12 @@ void Map<T>::write_map_to_file(const std::string& filepath) {
   // Open file for writing
   std::ofstream myfile;
   myfile.open(write_filepath);
+  
+  if (!myfile) {
+    // There was a problem opening the file
+    std::cout << "[MAP I/O ERROR] Could not write to file: " << filepath << std::endl;
+    return false;
+  }
 
   // Write the data
   myfile << height_ << std::endl;
@@ -174,10 +180,11 @@ void Map<T>::write_map_to_file(const std::string& filepath) {
 
   // Close file
   myfile.close();
+  return true;
 }
 
 template <class T>
-void Map<T>::load_map_from_file(const std::string& filepath){
+bool Map<T>::load_map_from_file(const std::string& filepath){
 
   // Read lines
   std::vector<std::string> content;
@@ -190,7 +197,7 @@ void Map<T>::load_map_from_file(const std::string& filepath){
   }
   else {
     std::cout << "[MAP I/O ERROR] Could not open the file: " << filepath << std::endl;
-    return;
+    return false;
   }
   file.close();
 
@@ -208,7 +215,7 @@ void Map<T>::load_map_from_file(const std::string& filepath){
 
   if (csv_height * csv_width != csv_data.size()) {
     std::cout << "[MAP I/O ERROR] Dimensions do not align for: csv height = " << csv_height << ", csv width = " << csv_width << ", csv data size = " << csv_data.size() << " with file: " << filepath << std::endl;
-    return;
+    return false;
   }
 
   // Set data
@@ -216,6 +223,7 @@ void Map<T>::load_map_from_file(const std::string& filepath){
   width_ = csv_width;
   resolution_ = csv_resolution;
   cell_data_ = csv_data;
+  return true;
 }
 
 } // mapping namespace

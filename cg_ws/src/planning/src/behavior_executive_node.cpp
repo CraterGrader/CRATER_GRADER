@@ -117,15 +117,19 @@ namespace planning {
 
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
-    design_height_map_.load_map_from_file(design_topo_filepath);
+    bool design_height_map_initialized = design_height_map_.load_map_from_file(design_topo_filepath);
+    
+    if (!design_height_map_initialized) {
+      RCLCPP_FATAL(this->get_logger(), "Design map loading error");
+      rclcpp::shutdown();
+    }
+
     if ((design_height_map_.getHeight() != current_height_map_.getHeight()) \
           || (design_height_map_.getWidth() != current_height_map_.getWidth()) \
           || (design_height_map_.getResolution() != current_height_map_.getResolution())) {
       RCLCPP_FATAL(this->get_logger(), "Map dimensions do not align!\n    Site map <height, width, resolution, data.size()> <%ld, %ld, %f, %ld>\n    Design map <height, width, resolution, data.size()>: <%ld, %ld, %f, %ld>", current_height_map_.getHeight(), current_height_map_.getWidth(), current_height_map_.getResolution(), current_height_map_.getCellData().size(), design_height_map_.getHeight(), design_height_map_.getWidth(), design_height_map_.getResolution(), design_height_map_.getCellData().size());
       rclcpp::shutdown();
     }
-      // design_height_map_.updateDimensions(map_height, map_width, map_resolution);
-      // design_height_map_.setCellData(designTOPO_);
 
     // Create pose of local map, assumed with no rotation
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);

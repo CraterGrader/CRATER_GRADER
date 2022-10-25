@@ -118,7 +118,7 @@ void SiteMap::normalizeHeightMap(){
     sum += heightMap_[i];
   }
   plane_offset_ = sum / getNcells();
-  std::cout << "  offset" << plane_offset_ << std::endl;
+  std::cout << "  offset " << plane_offset_ << std::endl;
   // for every cell, subtract mean
   for (size_t i=0; i<getNcells(); i++){
     // std::cout << "    before" << heightMap_[i] << std::endl;
