@@ -1,13 +1,16 @@
 #ifndef MAPPING__MAP_HPP
 #define MAPPING__MAP_HPP
 
-#include <vector> // holding map data
-#include <string> // for frame name
+#include <vector> // holding map data, and map i/o
+#include <string> // for frame name, and map i/o
 #include <cassert> // checking for valid input
 #include <cmath> // math.floor function
 #include <mapping/map_util.hpp> // helper functions
 #include <cg_msgs/msg/point2_d.hpp> // use of cg:msgs::Point2D
 
+// Map write/read with csv file
+#include <iostream>
+#include <fstream>
 namespace cg {
 namespace mapping {
 

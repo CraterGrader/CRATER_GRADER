@@ -8,9 +8,6 @@
 
 // Map write/read with csv file
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
 
 namespace cg {
 namespace mapping {
