@@ -23,7 +23,7 @@ public:
 
 private:
 
-  double constant_velocity_ = 15; // TODO: 1) make param DEBUG
+  double constant_velocity_ = 50; // TODO: 1) make param DEBUG
   // double constant_velocity_ = 15*0.003795275591; // m/s TODO: 1) make param 
 
 };

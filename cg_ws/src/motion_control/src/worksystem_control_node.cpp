@@ -34,6 +34,9 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/odometry/filtered/ekf_odom_node", 1, std::bind(&WorksystemControlNode::localRobotStateCallback, this, std::placeholders::_1));
 
+  encoder_telemetry_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
+      "/encoder_telemetry", 1, std::bind(&WorksystemControlNode::encoderTelemetryCallback, this, std::placeholders::_1));
+
   // Initialize publishers
   cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
       "/autonomy_cmd", 1);
@@ -94,7 +97,7 @@ void WorksystemControlNode::timerCallback() {
 
     // Compute control command
     cmd_msg_.header.stamp = this->get_clock()->now();
-    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_);
+    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_speed_);
     cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
   // TODO compute cmd.tool_position once ToolController is available
 
@@ -139,6 +142,23 @@ void WorksystemControlNode::localRobotStateCallback(const nav_msgs::msg::Odometr
 void WorksystemControlNode::globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
   global_robot_state_ = *msg;
+}
+
+void WorksystemControlNode::encoderTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
+  // calculate time difference
+  delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)-tlast_;
+  // get current steer position
+  float steer_pos_rear = static_cast<float>(msg->steer_pos_rear);
+  float steer_pos_front = static_cast<float>(msg->steer_pos_front);
+  // calculate 1-step speed
+  float speed_front = std::fabs((last_steer_pos_front_ - steer_pos_front)/static_cast<float>(delta_t_));
+  float speed_rear = std::fabs((last_steer_pos_rear_ - steer_pos_rear)/static_cast<float>(delta_t_));
+  // average front and rear 
+  steer_speed_ = (speed_rear + speed_front) /2;
+  // update last steer position
+  last_steer_pos_front_ = steer_pos_front;
+  last_steer_pos_rear_ = steer_pos_rear;
+  tlast_ = msg->header.stamp.sec+msg->header.stamp.nanosec*1e-9;
 }
 
 void WorksystemControlNode::enableWorksystem(cg_msgs::srv::EnableWorksystem::Request::SharedPtr req, cg_msgs::srv::EnableWorksystem::Response::SharedPtr res)
