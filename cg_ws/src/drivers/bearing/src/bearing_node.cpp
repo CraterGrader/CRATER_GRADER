@@ -115,9 +115,10 @@ void BearingNode::timerCallback() {
 
     // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
     // Compensate base link to camera offset as z-direction always measured away from camera
-    double link_to_tag_x = link_to_tag.transform.translation.x;
-    double link_to_tag_y = link_to_tag.transform.translation.y * std::cos(robot_roll_rad) - 
-                            link_to_tag.transform.translation.z * std::sin(robot_roll_rad);
+    // double cam_to_tag_x = cam_to_tag.transform.translation.x;
+    double cam_to_tag_x = cam_to_tag.transform.translation.x * std::cos(robot_roll_rad) - 
+                            cam_to_tag.transform.translation.y * std::sin(robot_roll_rad);
+    double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam_x;
 
     double camera_tag_yaw_offset = std::atan(link_to_tag_y/link_to_tag_x);
     camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);
