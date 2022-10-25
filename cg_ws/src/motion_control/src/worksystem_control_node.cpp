@@ -105,8 +105,10 @@ void WorksystemControlNode::timerCallback() {
     cmd_msg_.header.stamp = this->get_clock()->now();
     cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_speed_);
     cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
-  // TODO compute cmd.tool_position once ToolController is available
 
+    // Compute tool command
+    // TODO eventually implement slip-based control
+    cmd_msg_.tool_position = current_trajectory_.tool_positions[traj_idx_];
   } else {
     // Publish zero state if the worksystem is not enabled
     cmd_msg_.header.stamp = this->get_clock()->now();
