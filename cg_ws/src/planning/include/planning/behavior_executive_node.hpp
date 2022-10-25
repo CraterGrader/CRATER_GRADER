@@ -60,7 +60,7 @@ private:
 
   rclcpp::CallbackGroup::SharedPtr viz_timer_cb_group_;
   rclcpp::TimerBase::SharedPtr viz_timer_; // For controlled looping viz updates
-  long int viz_timer_callback_ms_ = 500;
+  long int viz_timer_callback_ms_;
 
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
   rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
@@ -70,7 +70,7 @@ private:
   bool enableWorksystemService(const bool enable_worksystem, bool verbose);
 
   int fsm_timer_callback_ms_;
-  long int service_response_timeout_sec_ = 2;
+  long int service_response_timeout_ms_;
 
   /* Message data */
   nav_msgs::msg::Path viz_path_;
@@ -122,16 +122,16 @@ private:
   //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
   //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
   //                               0, 0, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  // std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
   cg::mapping::Map<float> design_height_map_;
   float threshold_z_ = 0.03; // TODO: make this a config parameter
