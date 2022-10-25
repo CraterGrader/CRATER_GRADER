@@ -60,7 +60,6 @@ private:
 
   rclcpp::CallbackGroup::SharedPtr viz_timer_cb_group_;
   rclcpp::TimerBase::SharedPtr viz_timer_; // For controlled looping viz updates
-  long int viz_timer_callback_ms_;
 
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
   rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
@@ -70,6 +69,7 @@ private:
   bool enableWorksystemService(const bool enable_worksystem, bool verbose);
 
   int fsm_timer_callback_ms_;
+  long int viz_timer_callback_ms_;
   long int service_response_timeout_ms_;
 
   /* Message data */
@@ -112,29 +112,9 @@ private:
   bool worksystem_enabled_ = false;
   size_t num_poses_before_; // DEBUG
 
-  // DEBUG: test maps
-  // std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0};
-  // std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
   cg::mapping::Map<float> design_height_map_;
-  float threshold_z_ = 0.03; // TODO: make this a config parameter
+  float transport_threshold_z_;
+  double viz_planning_height_;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
@@ -142,7 +122,6 @@ private:
   cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!
   bool enable_worksystem_ = false;
   cg_msgs::msg::Trajectory current_trajectory_; 
-  // std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;

@@ -3,163 +3,171 @@
 namespace cg {
 namespace planning {
 
-    void KinematicPlanner::generatePath(
-        std::vector<cg_msgs::msg::Pose2D> &path,
-        const cg_msgs::msg::Pose2D &agent_pose,
-        const cg_msgs::msg::Pose2D &goal_pose,
-        const cg::mapping::Map<float> &map) {
-            // Instantiate lattice
-            std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice();
+void KinematicPlanner::generatePath(
+    std::vector<cg_msgs::msg::Pose2D> &path,
+    const cg_msgs::msg::Pose2D &agent_pose,
+    const cg_msgs::msg::Pose2D &goal_pose,
+    const cg::mapping::Map<float> &map) {
+        // Instantiate lattice
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice();
 
-            // Run astar search
-            path = KinematicPlanner::latticeAStarSearch(agent_pose, goal_pose, map, base_lattice);
+        // Run astar search
+        path = KinematicPlanner::latticeAStarSearch(agent_pose, goal_pose, map, base_lattice);
 
-            // Note: Path validity is already checked at every step of A* Search, do we need to check again here?
-            return;
+        // Note: Path validity is already checked at every step of A* Search, do we need to check again here?
+        return;
+    }
+
+std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
+    const cg_msgs::msg::Pose2D &agent_pose,
+    const cg_msgs::msg::Pose2D &goal_pose,
+    const cg::mapping::Map<float> &map,
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const {
+    
+    // TODO: Maybe stopping the planner if exceeding # iterations of lattice planning?
+    
+    // Ensure start is on the map
+    // assert(map.pose_on_map(agent_pose)); TODO ADD
+
+    // List of final trajectories composed from lattice primitives
+    std::vector<cg_msgs::msg::Pose2D> final_path;
+    
+    std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
+    std::vector<AStarNode> visited_nodes;
+
+    // Lower cost has higher priority (i.e. earlier in queue) - Min Heap
+    // Will compare first value (cost) when calling pop()
+    std::priority_queue<
+        std::pair<float, AStarNode>, 
+        std::vector<std::pair<float, AStarNode>>, 
+        std::greater<std::pair<float, AStarNode>>> pq_nodes;
+    
+    // Initialize with first trajectory and node
+    std::vector<cg_msgs::msg::Pose2D> start_trajectory = {agent_pose};
+    AStarNode start_node = {0.0, 0, 0, agent_pose, start_trajectory};
+    pq_nodes.push(std::make_pair(0.0, start_node));
+
+    int num_iter = 0;
+    while (!pq_nodes.empty()) {
+        num_iter++;
+        if (num_iter % 100 == 0) {
+            std::cout << "# Lattice Planner Iterations: " << num_iter << std::endl;
         }
 
-    std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
-        const cg_msgs::msg::Pose2D &agent_pose,
-        const cg_msgs::msg::Pose2D &goal_pose,
-        const cg::mapping::Map<float> &map,
-        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const {
-        
-        // TODO: Maybe stopping the planner if exceeding # iterations of lattice planning?
-        
-        // Ensure start is on the map
-        // assert(map.pose_on_map(agent_pose)); TODO ADD
+        // Obtain node with the lowest f-cost and remove from queue
+        AStarNode curr_node = pq_nodes.top().second;
+        pq_nodes.pop();
 
-        // List of final trajectories composed from lattice primitives
-        std::vector<cg_msgs::msg::Pose2D> final_path;
-        
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
-        std::vector<AStarNode> visited_nodes;
+        // Check if current node can can complete trajectory
+        auto [closest_traj_pose, closest_traj_idx] = KinematicPlanner::getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
+        if (KinematicPlanner::samePoseWithinThresh(closest_traj_pose, goal_pose)) {
+            int curr_idx = curr_node.idx;
 
-        // Lower cost has higher priority (i.e. earlier in queue) - Min Heap
-        // Will compare first value (cost) when calling pop()
-        std::priority_queue<
-            std::pair<float, AStarNode>, 
-            std::vector<std::pair<float, AStarNode>>, 
-            std::greater<std::pair<float, AStarNode>>> pq_nodes;
-        
-        // Initialize with first trajectory and node
-        std::vector<cg_msgs::msg::Pose2D> start_trajectory = {agent_pose};
-        AStarNode start_node = {0.0, 0, 0, agent_pose, start_trajectory};
-        pq_nodes.push(std::make_pair(0.0, start_node));
-
-        int num_iter = 0;
-        while (!pq_nodes.empty()) {
-            num_iter++;
-            if (num_iter % 100 == 0) {
-                std::cout << "# Latter Planner Iterations: " << num_iter << std::endl;
+            // Add final trajectory to 
+            if (visited_trajectories.empty()) {
+                visited_trajectories.push_back(curr_node.trajectory);
+                visited_nodes.push_back(curr_node);
             }
 
-            // Obtain node with the lowest f-cost and remove from queue
-            AStarNode curr_node = pq_nodes.top().second;
-            pq_nodes.pop();
-
-            // Check if current node can can complete trajectory
-            auto [closest_traj_pose, closest_traj_idx] = KinematicPlanner::getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
-            if (KinematicPlanner::samePoseWithinThresh(closest_traj_pose, goal_pose)) {
-                int curr_idx = curr_node.idx;
-
-                // Add final trajectory to 
-                if (visited_trajectories.empty()) {
-                    visited_trajectories.push_back(curr_node.trajectory);
-                    visited_nodes.push_back(curr_node);
-                }
-
-                // Reverse last segment
+            // Reverse last segment
+            std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
+            std::reverse(traj_copy.begin(), traj_copy.end());
+            final_path.insert(final_path.end(), 
+                                traj_copy.begin() + (traj_copy.size() - 1 - closest_traj_idx), 
+                                traj_copy.end());
+            
+            // Add trajectory segment in reverse order
+            curr_idx = visited_nodes[curr_idx].parent_idx;
+            while (curr_idx != 0) {
+                
+                // Reverse current trajectory segment to push it on backwards
                 std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
                 std::reverse(traj_copy.begin(), traj_copy.end());
-                final_path.insert(final_path.end(), 
-                                  traj_copy.begin() + (traj_copy.size() - 1 - closest_traj_idx), 
-                                  traj_copy.end());
-                
-                // Add trajectory segment in reverse order
+                final_path.insert(final_path.end(), traj_copy.begin(), traj_copy.end());
+
                 curr_idx = visited_nodes[curr_idx].parent_idx;
-                while (curr_idx != 0) {
-                    
-                    // Reverse current trajectory segment to push it on backwards
-                    std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
-                    std::reverse(traj_copy.begin(), traj_copy.end());
-                    final_path.insert(final_path.end(), traj_copy.begin(), traj_copy.end());
-
-                    curr_idx = visited_nodes[curr_idx].parent_idx;
-                }
-
-                // Since we have been pushing onto final_path backwards, reverse it
-                std::reverse(final_path.begin(), final_path.end());
-                
-                // Break since found end point
-                break;
             }
 
-            // Obtain lattice from current pose
-            std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice_trajectories = 
-                transformLatticeToPose(base_lattice, curr_node.pose);
+            // Add first segment
+            traj_copy = visited_trajectories[curr_idx];
+            std::reverse(traj_copy.begin(), traj_copy.end());
+            final_path.insert(final_path.end(), traj_copy.begin(), traj_copy.end());
 
-            // Filter out nonvalid trajectories
-            std::vector<std::vector<cg_msgs::msg::Pose2D>> valid_trajectories;
-            for (auto trajectory : lattice_trajectories) {
-                if (KinematicPlanner::isValidTrajectory(trajectory, map)) {
-                    valid_trajectories.push_back(trajectory);
-                }
-            }
+            // Insert initial agent pose
+            final_path.insert(final_path.end(), start_trajectory.begin(), start_trajectory.end());
 
-            // Calculate trajectory heuristic h(s') for valid trajectories
-            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose);
-                
-            // Get trajectory costs c(s,s') for valid trajectories
-            std::vector<float> trajectories_costs;
-            for (auto trajectory: valid_trajectories){
-                trajectories_costs.push_back(KinematicPlanner::calculateTopographyCost(trajectory, map));
-            }
+            // Since we have been pushing onto final_path backwards, reverse it
+            std::reverse(final_path.begin(), final_path.end());
+            
+            // Break since found end point
+            break;
+        }
 
-            // Calculate next nodes on all valid trajectories
-            for (size_t traj_idx = 0; traj_idx < valid_trajectories.size(); ++traj_idx) {
-                
-                // Skip if trajectory includes points out of bounds
-                if (!KinematicPlanner::isValidTrajectory(valid_trajectories[traj_idx], map)) continue;
+        // Obtain lattice from current pose
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice_trajectories = 
+            transformLatticeToPose(base_lattice, curr_node.pose);
 
-                cg_msgs::msg::Pose2D end_of_cur_traj_pose = valid_trajectories[traj_idx].back();
-
-                // Skip if nose pose is close to another node that has been visited
-                bool skip_new_node = false;
-                for (auto visited_node : visited_nodes) {
-                    if (KinematicPlanner::samePoseWithinThresh(end_of_cur_traj_pose, visited_node.pose)) {
-                        skip_new_node = true;
-                        break;
-                    }
-                }
-                if (skip_new_node) continue;
-
-                // Update node costs g(s') = g(s) + c(s,s')
-                float succ_g_cost = max_trajectory_length_ + curr_node.g_cost + trajectories_costs[traj_idx];
-
-                // Create new child node
-                AStarNode succ_node = {succ_g_cost, 
-                                       static_cast<int>(visited_trajectories.size()), // Current pose idx
-                                       curr_node.idx, // Parent pose idx
-                                       end_of_cur_traj_pose, // Current Pose
-                                       valid_trajectories[traj_idx]}; //
-                visited_trajectories.push_back(valid_trajectories[traj_idx]);
-                visited_nodes.push_back(succ_node);
-
-                // Add new poses to pqueue using f(s') = g(s') + h(s')
-                float f_cost = succ_g_cost + trajectories_heuristic[traj_idx];
-                pq_nodes.push(std::make_pair(f_cost, succ_node));
+        // Filter out nonvalid trajectories
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> valid_trajectories;
+        for (auto trajectory : lattice_trajectories) {
+            if (KinematicPlanner::isValidTrajectory(trajectory, map)) {
+                valid_trajectories.push_back(trajectory);
             }
         }
 
-        if (final_path.empty()) {
-            std::cout << "[WARN] No Solution Found, returning empty path..." << std::endl;
+        // Calculate trajectory heuristic h(s') for valid trajectories
+        std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose);
+            
+        // Get trajectory costs c(s,s') for valid trajectories
+        std::vector<float> trajectories_costs;
+        for (auto trajectory: valid_trajectories){
+            trajectories_costs.push_back(KinematicPlanner::calculateTopographyCost(trajectory, map));
         }
 
-        std::cout << "Final planner lattice iterations" << num_iter << std::endl;
+        // Calculate next nodes on all valid trajectories
+        for (size_t traj_idx = 0; traj_idx < valid_trajectories.size(); ++traj_idx) {
+            
+            // Skip if trajectory includes points out of bounds
+            if (!KinematicPlanner::isValidTrajectory(valid_trajectories[traj_idx], map)) continue;
 
-        return final_path;
+            cg_msgs::msg::Pose2D end_of_cur_traj_pose = valid_trajectories[traj_idx].back();
+
+            // Skip if nose pose is close to another node that has been visited
+            bool skip_new_node = false;
+            for (auto visited_node : visited_nodes) {
+                if (KinematicPlanner::samePoseWithinThresh(end_of_cur_traj_pose, visited_node.pose)) {
+                    skip_new_node = true;
+                    break;
+                }
+            }
+            if (skip_new_node) continue;
+
+            // Update node costs g(s') = g(s) + c(s,s')
+            float succ_g_cost = max_trajectory_length_ + curr_node.g_cost + trajectories_costs[traj_idx];
+
+            // Create new child node
+            AStarNode succ_node = {succ_g_cost, 
+                                    static_cast<int>(visited_trajectories.size()), // Current pose idx
+                                    curr_node.idx, // Parent pose idx
+                                    end_of_cur_traj_pose, // Current Pose
+                                    valid_trajectories[traj_idx]}; //
+            visited_trajectories.push_back(valid_trajectories[traj_idx]);
+            visited_nodes.push_back(succ_node);
+
+            // Add new poses to pqueue using f(s') = g(s') + h(s')
+            float f_cost = succ_g_cost + trajectories_heuristic[traj_idx];
+            pq_nodes.push(std::make_pair(f_cost, succ_node));
+        }
     }
+
+    if (final_path.empty()) {
+        std::cout << "[WARN] No Solution Found, returning empty path..." << std::endl;
+    }
+
+    std::cout << "Final planner lattice iterations: " << num_iter << std::endl;
+
+    return final_path;
+}
     
 
     bool KinematicPlanner::samePoseWithinThresh(

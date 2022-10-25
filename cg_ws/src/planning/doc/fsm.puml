@@ -2,8 +2,8 @@
 colors
 @enduml
 
-@startuml PlanningFSM_20221023_REV03
-mainframe PlanningFSM_20221023_REV03
+@startuml PlanningFSM_20221024_REV04
+mainframe PlanningFSM_20221024_REV04
 ' Formatting
 ' ------------------------------------
 hide empty description
@@ -38,7 +38,7 @@ state MapExplored <<choice>>
     MapExplored?
   end note
 state SiteWorkDone <<choice>>
-  note right of SiteWorkDone
+  note left of SiteWorkDone
     SiteWorkDone?
   end note
 state ReplanTransport <<choice>>
@@ -60,12 +60,12 @@ state FallBack #Gainsboro {
     end note
 
   ' Fallback state interactions
-  CallForHelp --> OperatorAvailable : call_help
-  OperatorAvailable --> OperatorIntervention : yes
-    OperatorIntervention --> ContinueMission : check_mission
-      ContinueMission --> UpdateMap : yes
-      ContinueMission --> EndMission : no
-  OperatorAvailable --> EndMission : no
+  CallForHelp -d-> OperatorAvailable : call_help
+  OperatorAvailable -d-> OperatorIntervention : yes
+    OperatorIntervention -d-> ContinueMission : check_mission
+      ContinueMission -l-> UpdateMap : yes
+      ContinueMission -d-> EndMission : no
+  OperatorAvailable -d-> EndMission : no
 }
 
 ' Driving states
@@ -79,28 +79,28 @@ state GoalsRemaining <<choice>>
   end note
 
 ' Driving state interactions
-GoalsRemaining --> GetWorksystemTrajectory : yes
-  GetWorksystemTrajectory --> FollowingTrajectory : follow_trajectory
+GoalsRemaining -u-> GetWorksystemTrajectory : yes
+  GetWorksystemTrajectory -u-> FollowingTrajectory : follow_trajectory
     FollowingTrajectory --> GoalsRemaining : goal_reached
     FollowingTrajectory --> GetWorksystemTrajectory : replan
     FollowingTrajectory --> EscapeManeuver : stuck
-      EscapeManeuver --> FollowingTrajectory : not_stuck
-      EscapeManeuver -->  CallForHelp : abort
-GoalsRemaining --> UpdateMap : no
+      EscapeManeuver -d-> FollowingTrajectory : not_stuck
+      EscapeManeuver -r->  CallForHelp : abort
+GoalsRemaining -d-> UpdateMap : no
 
 ' Global state interactions
-[*] --> UpdateMap : start
-  UpdateMap --> SiteWorkDone : map_updated
-  SiteWorkDone --> EndMission : yes
-  SiteWorkDone --> MapExplored : no
-    MapExplored --> ReplanTransport : yes
-      ReplanTransport --> PlanTransport : yes
-        PlanTransport --> GetTransportGoals : transport_planned
-      ReplanTransport --> GetTransportGoals : no
-        GetTransportGoals --> GoalsRemaining : drive
-    MapExplored --> PlanExploration : no
-      PlanExploration --> GetExplorationGoals : exploration_planned
-      GetExplorationGoals --> GoalsRemaining : drive
+[*] -d-> UpdateMap : start
+  UpdateMap -d-> SiteWorkDone : map_updated
+  SiteWorkDone -r-> EndMission : yes
+  SiteWorkDone -l-> MapExplored : no
+    MapExplored -d-> ReplanTransport : yes
+      ReplanTransport -d-> PlanTransport : yes
+        PlanTransport -d-> GetTransportGoals : transport_planned
+      ReplanTransport -d-> GetTransportGoals : no
+        GetTransportGoals -d-> GoalsRemaining : drive
+    MapExplored -d-> PlanExploration : no
+      PlanExploration -d-> GetExplorationGoals : exploration_planned
+      GetExplorationGoals -d-> GoalsRemaining : drive
 EndMission --> [*] : stop
 
 @enduml

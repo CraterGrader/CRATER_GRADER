@@ -57,11 +57,9 @@ namespace planning {
     this->get_parameter("xTransform", xTransform);
     this->declare_parameter<float>("yTransform", 1.0);
     this->get_parameter("yTransform", yTransform);
-
     this->declare_parameter<std::string>("design_topo_filepath", "/root/CRATER_GRADER/cg_ws/src/planning/config/50x50_zeros_height_map.csv");
     this->get_parameter("design_topo_filepath", design_topo_filepath);
     
-
     // Thresholds for reaching following goal
     this->declare_parameter<double>("thresh_pos", 1.0);
     this->get_parameter("thresh_pos", thresh_pos_);
@@ -115,6 +113,14 @@ namespace planning {
         trajectory_heuristic_epsilon);
     kinematic_planner_ = param_kinematic_planner;
 
+    // Transport planner
+    this->declare_parameter<float>("transport_threshold_z", 0.03);
+    this->get_parameter("transport_threshold_z", transport_threshold_z_);
+
+    // Viz
+    this->declare_parameter<double>("viz_planning_height", 0.0);
+    this->get_parameter("viz_planning_height", viz_planning_height_);
+
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
     bool design_height_map_initialized = design_height_map_.load_map_from_file(design_topo_filepath);
@@ -134,6 +140,12 @@ namespace planning {
     // Create pose of local map, assumed with no rotation
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
     global_map_relative_to_local_frame_ = create_pose2d(-xTransform, -yTransform, 0.0);
+
+    // ---------------------
+    // DEBUG
+    // global_robot_pose_ = cg::planning::create_pose2d(1.0, 1.0, 0.0);
+    // current_agent_pose_ = cg::planning::transformPose(global_robot_pose_, global_map_relative_to_local_frame_); // Convert pose to local map frame
+    // ---------------------
   }
 
 void BehaviorExecutive::fsmTimerCallback()
@@ -166,7 +178,7 @@ void BehaviorExecutive::fsmTimerCallback()
     replan_transport_.runState();
     break;
   case cg::planning::FSM::State::PLAN_TRANSPORT:
-    plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, threshold_z_);
+    plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, transport_threshold_z_);
     break;
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
@@ -191,10 +203,10 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     // ---------------------------------------
     // DEBUG
-    cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(2.5, 1.5, 0.0);
+    // cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(2.5, 1.5, 0.0);
     // cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 4.0, 3.14159);
-    current_goal_poses_.clear();
-    current_goal_poses_.push_back(manual_goal1);
+    // current_goal_poses_.clear();
+    // current_goal_poses_.push_back(manual_goal1);
     // current_goal_poses_.push_back(manual_goal2);
     // ---------------------------------------
     break;}
@@ -362,7 +374,7 @@ void BehaviorExecutive::globalRobotStateCallback(const nav_msgs::msg::Odometry::
   double global_robot_roll, global_robot_pitch, global_robot_yaw;
   m.getRPY(global_robot_roll, global_robot_pitch, global_robot_yaw);
 
-  cg_msgs::msg::Pose2D global_robot_pose_ = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
+  global_robot_pose_ = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
                                                                        global_robot_state_.pose.pose.position.y,
                                                                        global_robot_yaw);
 
@@ -379,6 +391,7 @@ void BehaviorExecutive::vizTimerCallback() {
   cg_msgs::msg::Pose2D global_agent_pose = cg::planning::transformPose(current_agent_pose_, local_map_relative_to_global_frame_);
   viz_agent_.pose.position.x = global_agent_pose.pt.x;
   viz_agent_.pose.position.y = global_agent_pose.pt.y;
+  viz_agent_.pose.position.z = viz_planning_height_;
 
   tf2::Quaternion q_agent;
   q_agent.setRPY(0, 0, global_agent_pose.yaw);
@@ -396,6 +409,7 @@ void BehaviorExecutive::vizTimerCallback() {
   cg_msgs::msg::Pose2D global_curr_goal_pose = cg::planning::transformPose(current_goal_pose_, local_map_relative_to_global_frame_);
   viz_curr_goal_.pose.position.x = global_curr_goal_pose.pt.x;
   viz_curr_goal_.pose.position.y = global_curr_goal_pose.pt.y;
+  viz_curr_goal_.pose.position.z = viz_planning_height_;
 
   tf2::Quaternion q_curr_goal;
   q_curr_goal.setRPY(0, 0, global_curr_goal_pose.yaw);
@@ -417,6 +431,7 @@ void BehaviorExecutive::vizTimerCallback() {
     geometry_msgs::msg::Pose pose_single;
     pose_single.position.x = global_goal_pose.pt.x;
     pose_single.position.y = global_goal_pose.pt.y;
+    pose_single.position.z = viz_planning_height_;
 
     tf2::Quaternion q;
     q.setRPY(0, 0, global_goal_pose.yaw);
@@ -440,6 +455,7 @@ void BehaviorExecutive::vizTimerCallback() {
     geometry_msgs::msg::PoseStamped pose_stamped;
     pose_stamped.pose.position.x = global_traj_pose.pt.x;
     pose_stamped.pose.position.y = global_traj_pose.pt.y;
+    pose_stamped.pose.position.z = viz_planning_height_;
 
     tf2::Quaternion q;
     q.setRPY(0, 0, global_traj_pose.yaw);

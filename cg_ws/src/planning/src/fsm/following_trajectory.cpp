@@ -10,12 +10,13 @@ bool FollowingTrajectory::runState(const cg_msgs::msg::Pose2D &current_agent_pos
   // Check if re-plan is needed
   traj_idx_ = cg::planning::getClosestTrajIndex(current_trajectory, global_robot_state, traj_idx_);
 
-  // euclidean_distance_to_trajectory_point_ = cg::planning::euclidean_distance(global_robot_pose.pt, current_trajectory.path[traj_idx_].pt);
-  euclidean_distance_to_trajectory_point_ = 0.0;
-
-  // std::cout << "      *    "  << global_robot_pose.pt.x << "       " << traj_idx_ << std::endl;
-
-  // std::cout << "      *    "  << euclidean_distance_to_trajectory_point_ << "       " << traj_idx_ << std::endl;
+  euclidean_distance_to_trajectory_point_ = cg::planning::euclidean_distance(global_robot_pose.pt, current_trajectory.path[traj_idx_].pt);
+  // ------------------------------
+  // DEBUG
+  std::cout << "      *    global <x,y>: < " << global_robot_pose.pt.x << ", " << global_robot_pose.pt.y << " >, traj[" << traj_idx_ << "] <x,y> < " << current_trajectory.path[traj_idx_].pt.x << ", " << current_trajectory.path[traj_idx_].pt.y << " >" << std::endl;
+  std::cout << "      *    e_dist: "  << euclidean_distance_to_trajectory_point_ << std::endl;
+  // ------------------------------
+  
   if (euclidean_distance_to_trajectory_point_ > thresh_euclidean_replan) {
     // Change state to re-calculate trajectory
     pre_signal_ = Signal::REPLAN;
