@@ -14,6 +14,11 @@ def generate_launch_description():
     'config',
     'ekf_global_node_params.yaml'
   )
+  prism_transformer_params = os.path.join(
+    get_package_share_directory('localization'),
+    'config',
+    'prism_transform_params.yaml'
+  )
 
   return LaunchDescription([
     Node(
@@ -35,13 +40,9 @@ def generate_launch_description():
       ]
     ),
     Node(
-            package='localization',
-            executable='beacon_transformer',
-            name='beacon_transformer',
-            output='screen'),
-    Node(
-            package='localization',
-            executable='ts_prism_transformer',
-            name='ts_prism_transformer',
-            output='screen')
+      package='robot_localization',
+      executable='ts_prism_transformer',
+      name='ts_prism_transformer',
+      parameters=[prism_transformer_params],
+      output='screen')
   ])

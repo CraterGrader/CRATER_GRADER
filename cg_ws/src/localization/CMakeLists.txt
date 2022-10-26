@@ -43,22 +43,6 @@ geometry_msgs
 add_library(kalman_filter_linear src/kalman_filter_linear.cpp)
 target_link_libraries(slip_estimate_node kalman_filter_linear)
 
-# build nodes
-add_executable(beacon_transformer src/beacon_transformer_main.cpp
-  src/beacon_transformer.cpp
-)
-ament_target_dependencies(beacon_transformer
-  rclcpp
-  geometry_msgs
-  sensor_msgs
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
-  Eigen3
-)
-target_link_libraries(
-  beacon_transformer
-)
 
 # build nodes
 add_executable(ts_prism_transformer src/ts_prism_transformer_main.cpp
@@ -88,9 +72,6 @@ install(TARGETS slip_estimate_node
   DESTINATION lib/${PROJECT_NAME})
 
 # Install targets
-install(TARGETS beacon_transformer
-  DESTINATION lib/${PROJECT_NAME}
-)
 install(TARGETS ts_prism_transformer
   DESTINATION lib/${PROJECT_NAME}
 )

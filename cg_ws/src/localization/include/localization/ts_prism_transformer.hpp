@@ -55,6 +55,11 @@ private:
     bool got_imu{false};
     bool got_bearing_{false};
 
+    int pub_freq_;
+    float prism_offset_x_;
+    float prism_offset_y_;
+    float prism_offset_z_;
+
 };
 
 
