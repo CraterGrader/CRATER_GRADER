@@ -40,7 +40,7 @@ def generate_launch_description():
       ]
     ),
     Node(
-      package='robot_localization',
+      package='localization',
       executable='ts_prism_transformer',
       name='ts_prism_transformer',
       parameters=[prism_transformer_params],
