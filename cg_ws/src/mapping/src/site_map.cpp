@@ -114,6 +114,7 @@ void SiteMap::updateCellsBayes(){
 void SiteMap::normalizeHeightMap(){
   float sum = 0.0f;
   // for every cell, sum to get mean
+  // TODO convert this to 
   for (size_t i=0; i<getNcells(); i++){
     sum += heightMap_[i];
   }

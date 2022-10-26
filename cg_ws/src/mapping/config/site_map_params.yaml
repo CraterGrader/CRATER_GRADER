@@ -11,12 +11,12 @@ site_map:
     # SiteMap specific params
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
-    cellStartingVariance: 10.0 # meters^2
-    minCellVariance: 0.01 # meters^2
+    cellStartingVariance: 100.0 # meters^2
+    minCellVariance: 0.0000001 # meters^2
 
     # Loading from a map filepath
-    static_map: True
-    load_height_map_from_filepath: True
+    static_map: False
+    load_height_map_from_filepath: False
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_9x9.csv" # use absolute path
     load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_3x3.csv" # use absolute path
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001.csv" # use absolute path
