@@ -28,6 +28,5 @@ def generate_launch_description():
   return LaunchDescription([
     bearing_launch,
     imu_launch,
-    realsense_launch,
-    uwb_beacon_launch
+    realsense_launch
   ])
