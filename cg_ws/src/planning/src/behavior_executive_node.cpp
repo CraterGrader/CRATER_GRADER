@@ -6,10 +6,10 @@ namespace planning {
   BehaviorExecutive::BehaviorExecutive() : Node("behavior_executive_node")
   {
     /* Initialize publishers and subscribers */
-    viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/current_path", 1);
-    viz_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/current_goals", 1);
-    viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/current_agent", 1);
-    viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/current_goal", 1);
+    viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/planning/current_path", 1);
+    viz_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/planning/current_goals", 1);
+    viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_agent", 1);
+    viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_goal", 1);
 
     global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "/odometry/filtered/ekf_global_node", 1, std::bind(&BehaviorExecutive::globalRobotStateCallback, this, std::placeholders::_1));
@@ -116,6 +116,8 @@ namespace planning {
     // Transport planner
     this->declare_parameter<float>("transport_threshold_z", 0.03);
     this->get_parameter("transport_threshold_z", transport_threshold_z_);
+    this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
+    this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
 
     // Viz
     this->declare_parameter<double>("viz_planning_height", 0.0);
@@ -178,7 +180,7 @@ void BehaviorExecutive::fsmTimerCallback()
     replan_transport_.runState();
     break;
   case cg::planning::FSM::State::PLAN_TRANSPORT:
-    plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, transport_threshold_z_);
+    plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, transport_threshold_z_, thresh_max_assignment_distance_);
     break;
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG

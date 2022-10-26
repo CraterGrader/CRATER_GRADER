@@ -28,7 +28,7 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
   std::vector<cg_msgs::msg::Pose2D> goalPoses;
   
   // Return empty poses if there are no assigments
-  if (transport_assignments_.size() == 0) {
+  if ((transport_assignments_.size() == 0) || (std::count(unvisited_assignments_.begin(), unvisited_assignments_.end(), true) == 0)) {
     return goalPoses;
   }
 
@@ -156,7 +156,7 @@ void TransportPlanner::calculate_distances(std::vector<float> &distances_between
  * @return float Optimization objective value
  */
 using namespace operations_research;
-float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssignment> &new_transport_assignments, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes, const std::vector<float> &distances_between_nodes, const float vol_source, const float vol_sink, bool verbose = false)
+float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssignment> &new_transport_assignments, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes, const std::vector<float> &distances_between_nodes, const float vol_source, const float vol_sink, const float thresh_max_assignment_distance, bool verbose = false)
 {
   // Declare the solver.
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -272,8 +272,10 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
     {
       size_t index = ij_to_index(i, j, m_policy);
       float transport_volume = transport_plan.at(index)->solution_value();
-      // All non-zero transports should be added as assignments
-      if (transport_volume > 0)
+      // All non-zero transports that are close enough should be added as assignments
+      cg_msgs::msg::Point2D source_pt = create_point2d(source_nodes[i].x, source_nodes[i].y);
+      cg_msgs::msg::Point2D sink_pt = create_point2d(sink_nodes[j].x, sink_nodes[j].y);
+      if ((transport_volume > 0) && (cg::planning::euclidean_distance(source_pt, sink_pt) <= thresh_max_assignment_distance))
       {
         TransportAssignment new_assignment = {.source_node = source_nodes[i], .sink_node = sink_nodes[j], .transport_volume = transport_volume};
         new_transport_assignments.push_back(new_assignment);
@@ -315,7 +317,7 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
  * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  * @return float The optimization objective value
  */
-float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z)
+float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z, const float thresh_max_assignment_distance)
 {
   // ---------------------------------------------------
   // Initialize nodes and volume sums
@@ -333,7 +335,7 @@ float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_hei
   // ---------------------------------------------------
   // Solve the transport optimization problem
   std::vector<TransportAssignment> new_transport_assignments;
-  float objective_value = solveForTransportAssignments(new_transport_assignments, source_nodes, sink_nodes, distances_between_nodes, vol_source, vol_sink);
+  float objective_value = solveForTransportAssignments(new_transport_assignments, source_nodes, sink_nodes, distances_between_nodes, vol_source, vol_sink, thresh_max_assignment_distance);
 
   // Update current transport assignments
   transport_assignments_ = new_transport_assignments;

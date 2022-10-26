@@ -11,9 +11,6 @@ namespace planning {
     // DEBUG
     std::vector<cg_msgs::msg::Pose2D> goalPoses = transport_planner.getGoalPose(agent_pose, map);
     while (goalPoses.size() > 0) {
-      // for (cg_msgs::msg::Pose2D pose : goalPoses) {
-      //   current_goal_poses.push_back(pose);
-      // }
       current_goal_poses.insert(current_goal_poses.end(), goalPoses.begin(), goalPoses.end());
       goalPoses = transport_planner.getGoalPose(agent_pose, map);
     }

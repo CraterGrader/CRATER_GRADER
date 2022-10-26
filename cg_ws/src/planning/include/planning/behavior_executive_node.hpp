@@ -114,6 +114,7 @@ private:
 
   cg::mapping::Map<float> design_height_map_;
   float transport_threshold_z_;
+  float thresh_max_assignment_distance_;
   double viz_planning_height_;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;

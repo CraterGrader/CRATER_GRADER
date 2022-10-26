@@ -6,10 +6,10 @@ namespace mapping {
 SiteMapNode::SiteMapNode() : Node("site_map_node") {
   // Initialize publishers and subscribers
   new_points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain/filtered", 1, std::bind(&SiteMapNode::new_pts_callback, this, std::placeholders::_1));
-  visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_viz", 1);
-  visualization_seen_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_seen_viz", 1);
-  visualization_variance_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/site_map_variance_viz", 1);
-
+  visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_viz", 1);
+  visualization_seen_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_seen_viz", 1);
+  visualization_variance_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_variance", 1);
+  
   // Viz Timer callback
   viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&SiteMapNode::map_viz_callback, this));
 
@@ -50,7 +50,6 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   this->declare_parameter<bool>("static_map", false);
   this->get_parameter("static_map", static_map_);
 
-
   cg::mapping::SiteMap temp(height_, 
                               width_, 
                               resolution_, 
@@ -73,7 +72,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
     if ((fileMap_.getHeight() != siteMap_.getHeight()) \
           || (fileMap_.getWidth() != siteMap_.getWidth()) \
           || (fileMap_.getResolution() != siteMap_.getResolution())) {
-      RCLCPP_FATAL(this->get_logger(), "Map dimensions do not align!\n    Site map <height, width, resolution, data.size()> <%ld, %ld, %f, %ld>\n    Design map <height, width, resolution, data.size()>: <%ld, %ld, %f, %ld>", siteMap_.getHeight(), siteMap_.getWidth(), siteMap_.getResolution(), siteMap_.getHeightMap().size(), fileMap_.getHeight(), fileMap_.getWidth(), fileMap_.getResolution(), fileMap_.getCellData().size());
+      RCLCPP_FATAL(this->get_logger(), "Map dimensions do not align!\n    Site map <height, width, resolution, data.size()> <%ld, %ld, %f, %ld>\n    File map <height, width, resolution, data.size()>: <%ld, %ld, %f, %ld>", siteMap_.getHeight(), siteMap_.getWidth(), siteMap_.getResolution(), siteMap_.getHeightMap().size(), fileMap_.getHeight(), fileMap_.getWidth(), fileMap_.getResolution(), fileMap_.getCellData().size());
       rclcpp::shutdown();
     }
 
@@ -205,11 +204,11 @@ void SiteMapNode::new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPt
 void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res)
 {
   (void)req; // No request input for cg_msgs/srv/SiteMap.srv, but service needs both Request and Response args so just "touch" the request to hide unused parameter warning
+  // siteMap_.updateMapCoverage();
+  siteMap_.normalizeHeightMap();
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
   res->success = true;
-  // siteMap_.updateMapCoverage();
-  siteMap_.normalizeHeightMap();
   res->map_fully_explored = siteMap_.getSiteMapFullStatus();
 }
 
