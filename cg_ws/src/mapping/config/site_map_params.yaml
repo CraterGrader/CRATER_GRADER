@@ -11,8 +11,8 @@ site_map:
     # SiteMap specific params
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
-    cellStartingVariance: 100.0 # meters^2
-    minCellVariance: 0.0000001 # meters^2
+    cellStartingVariance: 1.0 # meters^2
+    minCellVariance: 0.1 # meters^2
 
     # Loading from a map filepath
     static_map: False
