@@ -20,6 +20,7 @@ behavior_executive_node:
     # Transport planner
     transport_threshold_z: 0.05 # meters off fit plane
     thresh_max_assignment_distance: 0.5 # max meters between transport assignments
+    last_pose_offset: 1.0 # meters to rearward offset last pose in transport assignment by
 
     # Timer callbacks
     fsm_timer_callback_ms: 500 # milliseconds

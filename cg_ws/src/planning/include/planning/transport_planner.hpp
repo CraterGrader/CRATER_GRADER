@@ -29,7 +29,7 @@ class TransportPlanner : public GoalPlanner {
 
 public:
   // Constructor()
-  TransportPlanner() {};
+  TransportPlanner(){};
 
   // Computations()
   float planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z, const float thresh_max_assignment_distance);
@@ -46,11 +46,14 @@ public:
   // Getters()
   std::vector<TransportAssignment> getTransportAssignments() const {return transport_assignments_;};
 
+  // Setters()
+  void setLastPoseOffset(double last_pose_offset){last_pose_offset_ = last_pose_offset;};
+
 private: 
   // Attributes
   std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (i.e. the non-zero transports)
   std::vector<bool> unvisited_assignments_; // each index corresponds to a TransportAssignment in transport_assignments. true = unvisited, false = visited
-
+  double last_pose_offset_ = 1.0; // Offset for how far back to make final pose rearward of the first source node as <source pose, sink pose, offset pose>
 };
 
 } // namespace planning
