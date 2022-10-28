@@ -11,7 +11,7 @@ CellBuffer::CellBuffer(float unseenGridHeight){
 
 void CellBuffer::bufferHasBeenUpdated(){
     doesBufferHaveNewData_ = false;
-    // height_ = unseen_grid_height_;
+    height_ = 0.0f;
 }
 
 void CellBuffer::addPoint(indexPoint pt){

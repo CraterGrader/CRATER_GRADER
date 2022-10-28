@@ -216,8 +216,13 @@ void BehaviorExecutive::fsmTimerCallback()
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     // ---------------------------------------
     // DEBUG
+    std::cout << "    Num Goals: " << current_goal_poses_.size() << std::endl;
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    std::cout << "    ------------ Remaining goals: " << std::endl;
+    for (size_t i = 0; i < current_goal_poses_.size(); ++i) {
+      std::cout << "    Goal pose " << i << " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    }
     // ---------------------------------------
     break;}
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
