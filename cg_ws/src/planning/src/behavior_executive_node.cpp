@@ -70,6 +70,7 @@ namespace planning {
 
     // Kinematic planner
     float goal_pose_distance_threshold;
+    float goal_pose_yaw_threshold;
     float turn_radii_min;
     float turn_radii_max;
     float turn_radii_resolution;
@@ -81,6 +82,8 @@ namespace planning {
     float trajectory_heuristic_epsilon;
     this->declare_parameter<float>("goal_pose_distance_threshold", 0.00001);
     this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
+    this->declare_parameter<float>("goal_pose_yaw_threshold", 0.00001);
+    this->get_parameter("goal_pose_yaw_threshold", goal_pose_yaw_threshold);
     this->declare_parameter<float>("turn_radii_min", 1.6);
     this->get_parameter("turn_radii_min", turn_radii_min);
     this->declare_parameter<float>("turn_radii_max", 2.8);
@@ -102,6 +105,7 @@ namespace planning {
 
     cg::planning::KinematicPlanner param_kinematic_planner = cg::planning::KinematicPlanner(
         goal_pose_distance_threshold,
+        goal_pose_yaw_threshold,
         turn_radii_min,
         turn_radii_max,
         turn_radii_resolution,

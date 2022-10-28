@@ -6,7 +6,8 @@ behavior_executive_node:
     thresh_euclidean_replan: 0.5 # meters
 
     # Kinematic planner (all params are floats)
-    goal_pose_distance_threshold: 0.00001 # 1e-5f
+    goal_pose_distance_threshold: 0.15 # 1e-5f
+    goal_pose_yaw_threshold: 0.0872665 # 1e-5f
     turn_radii_min: 2.0 # m
     turn_radii_max: 3.2 # m
     turn_radii_resolution: 0.4 # m

@@ -20,7 +20,8 @@ public:
   // Construct Kinematic Planner
   // TODO: make these params
   KinematicPlanner() : 
-      goal_pose_distance_threshold_(1e-5f), 
+      goal_pose_distance_threshold_(0.15f), 
+      goal_pose_yaw_threshold_(deg2rad(5)), 
       turn_radii_min_(1.6f), 
       turn_radii_max_(2.8f), 
       turn_radii_resolution_(0.4f),
@@ -34,6 +35,7 @@ public:
   // Construct Fully Parametric Planner
   KinematicPlanner(
     float goal_pose_distance_threshold,
+    float goal_pose_yaw_threshold,
     float turn_radii_min,
     float turn_radii_max,
     float turn_radii_resolution,
@@ -44,6 +46,7 @@ public:
     float topography_weight,
     float trajectory_heuristic_epsilon) : 
       goal_pose_distance_threshold_(goal_pose_distance_threshold), 
+      goal_pose_yaw_threshold_(goal_pose_yaw_threshold), 
       turn_radii_min_(turn_radii_min), 
       turn_radii_max_(turn_radii_max), 
       turn_radii_resolution_(turn_radii_resolution),
@@ -78,6 +81,12 @@ public:
     const cg_msgs::msg::Pose2D &trajectory_end_pose,
     const cg_msgs::msg::Pose2D &goal_pose) const;
 
+  bool samePoseWithinThresh(
+      const cg_msgs::msg::Pose2D &trajectory_end_pose,
+      const cg_msgs::msg::Pose2D &goal_pose,
+      const float pose_threshold,
+      const float yaw_threshold) const;
+
   // Creates a std::vector of lattice trajectories 
   // based on a base lattice type and current pose
   std::vector<std::vector<cg_msgs::msg::Pose2D>> transformLatticeToPose(
@@ -105,6 +114,7 @@ public:
 
   // Getters
   float getGoalPoseDistanceThreshold() {return goal_pose_distance_threshold_;}
+  float getGoalPoseYawThreshold() {return goal_pose_yaw_threshold_;}
   float getTurnRadiiMin() {return turn_radii_min_;}
   float getTurnRadiiMax() {return turn_radii_max_;}
   float getTurnRadiiResolutuion() {return turn_radii_resolution_;}
@@ -118,6 +128,10 @@ public:
   // Setters
   void setGoalPoseDistanceThreshold(float val) {
     goal_pose_distance_threshold_ = val;
+    return;
+    }
+  void setGoalPoseYawThreshold(float val) {
+    goal_pose_yaw_threshold_ = val;
     return;
     }
   void setTurnRadiiMin(float val) {
@@ -161,6 +175,7 @@ private:
 
   // Threshold to determine if trajectory end pose is a valid final pose
   float goal_pose_distance_threshold_;
+  float goal_pose_yaw_threshold_;
 
   // Lattice Parameters
   float turn_radii_min_;

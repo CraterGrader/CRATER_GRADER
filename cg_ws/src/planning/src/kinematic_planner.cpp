@@ -60,7 +60,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
 
         // Check if current node can can complete trajectory
         auto [closest_traj_pose, closest_traj_idx] = KinematicPlanner::getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
-        if (KinematicPlanner::samePoseWithinThresh(closest_traj_pose, goal_pose)) {
+        if (KinematicPlanner::samePoseWithinThresh(closest_traj_pose, goal_pose, goal_pose_distance_threshold_, goal_pose_yaw_threshold_)) {
             int curr_idx = curr_node.idx;
 
             // Add final trajectory to 
@@ -183,6 +183,25 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_position_equality_threshold_ &&
                 abs(end_pose_yaw - goal_pose_yaw) <= pose_yaw_equality_threshold_);
     }
+
+    bool KinematicPlanner::samePoseWithinThresh(
+        const cg_msgs::msg::Pose2D &trajectory_end_pose,
+        const cg_msgs::msg::Pose2D &goal_pose,
+        const float pose_threshold,
+        const float yaw_threshold) const {
+            
+            // Normalize yaw within +- M_PI for distance thresholding
+            float end_pose_yaw = std::fmod(trajectory_end_pose.yaw,2.0*M_PI);
+            if (end_pose_yaw < 0.0f) end_pose_yaw += 2.0*M_PI;
+
+            float goal_pose_yaw = std::fmod(goal_pose.yaw, 2.0*M_PI);
+            if (goal_pose_yaw < 0.0f) goal_pose_yaw += 2.0*M_PI;
+
+            return (
+                euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_threshold &&
+                abs(end_pose_yaw - goal_pose_yaw) <= yaw_threshold);
+    }
+
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() const {
 
