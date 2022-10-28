@@ -35,6 +35,7 @@ private:
   double k_;  // Stanley controller gain
   double stanley_softening_constant_;
   LateralControllerDebug debug_;
+  double heading_gain_ = 1.5;
 };
 
 } // namespace motion_control
