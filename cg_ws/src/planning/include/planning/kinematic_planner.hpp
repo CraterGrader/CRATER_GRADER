@@ -30,7 +30,9 @@ public:
       pose_position_equality_threshold_(0.05f),
       pose_yaw_equality_threshold_(deg2rad(5)),
       topography_weight_(1.0f),
-      trajectory_heuristic_epsilon_(1.0f) {};
+      trajectory_heuristic_epsilon_(1.0f),
+      max_pose_equality_scalar_(2.0),
+      pose_equality_scalar_iteration_(2000) {};
 
   // Construct Fully Parametric Planner
   KinematicPlanner(
@@ -44,7 +46,9 @@ public:
     float pose_position_equality_threshold,
     float pose_yaw_equality_threshold,
     float topography_weight,
-    float trajectory_heuristic_epsilon) : 
+    float trajectory_heuristic_epsilon,
+    float max_pose_equality_scalar,
+    int pose_equality_scalar_iteration) : 
       goal_pose_distance_threshold_(goal_pose_distance_threshold), 
       goal_pose_yaw_threshold_(goal_pose_yaw_threshold), 
       turn_radii_min_(turn_radii_min), 
@@ -55,7 +59,9 @@ public:
       pose_position_equality_threshold_(pose_position_equality_threshold),
       pose_yaw_equality_threshold_(pose_yaw_equality_threshold),
       topography_weight_(topography_weight),
-      trajectory_heuristic_epsilon_(trajectory_heuristic_epsilon) {}; 
+      trajectory_heuristic_epsilon_(trajectory_heuristic_epsilon),
+      max_pose_equality_scalar_(max_pose_equality_scalar),
+      pose_equality_scalar_iteration_(pose_equality_scalar_iteration) {}; 
 
   // Updates the path field in-place
   void generatePath(
@@ -191,6 +197,10 @@ private:
   // Cost Parameters
   float topography_weight_;
   float trajectory_heuristic_epsilon_;
+
+  // A* parameters
+  float max_pose_equality_scalar_;
+  int pose_equality_scalar_iteration_;
 
 };
 

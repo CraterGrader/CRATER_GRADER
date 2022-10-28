@@ -80,6 +80,8 @@ namespace planning {
     float pose_yaw_equality_threshold;
     float topography_weight;
     float trajectory_heuristic_epsilon;
+    float max_pose_equality_scalar;
+    int pose_equality_scalar_iteration;
     this->declare_parameter<float>("goal_pose_distance_threshold", 0.00001);
     this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
     this->declare_parameter<float>("goal_pose_yaw_threshold", 0.00001);
@@ -102,6 +104,10 @@ namespace planning {
     this->get_parameter("topography_weight", topography_weight);
     this->declare_parameter<float>("trajectory_heuristic_epsilon", 1.0);
     this->get_parameter("trajectory_heuristic_epsilon", trajectory_heuristic_epsilon);
+    this->declare_parameter<float>("max_pose_equality_scalar", 1.0);
+    this->get_parameter("max_pose_equality_scalar", max_pose_equality_scalar);
+    this->declare_parameter<float>("pose_equality_scalar_iteration", 1.0);
+    this->get_parameter("pose_equality_scalar_iteration", pose_equality_scalar_iteration);
 
     cg::planning::KinematicPlanner param_kinematic_planner = cg::planning::KinematicPlanner(
         goal_pose_distance_threshold,
@@ -114,7 +120,9 @@ namespace planning {
         pose_position_equality_threshold,
         pose_yaw_equality_threshold,
         topography_weight,
-        trajectory_heuristic_epsilon);
+        trajectory_heuristic_epsilon,
+        max_pose_equality_scalar,
+        pose_equality_scalar_iteration);
     kinematic_planner_ = param_kinematic_planner;
 
     // Transport planner
