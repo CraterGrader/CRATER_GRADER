@@ -11,8 +11,8 @@ import yaml
 cfg_Standard41h12 = {
     "image_transport": "raw",    # image format
     "family": "Standard41h12",   # tag family name
-    "size": 0.282,             # tag edge size in meter
-    "max_hamming": 0,          # maximum allowed hamming distance (corrected bits)
+    "size": 0.383,             # tag edge size in meter
+    "max_hamming": 10,          # maximum allowed hamming distance (corrected bits)
     "z_up": True,              # rotate about x-axis to have Z pointing upwards
 
     # see "apriltag.h" for more documentation on these optional parameters
@@ -56,7 +56,8 @@ def generate_launch_description():
             package='bearing',
             executable='bearing_node',
             name='bearing_node',
-            parameters=[bearing_params_path]
+            parameters=[bearing_params_path],
+            output='screen'
         ),
         # Base link to camera transform
         Node(

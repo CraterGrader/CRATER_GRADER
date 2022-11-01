@@ -16,6 +16,7 @@ find_package(image_transport REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -32,6 +33,7 @@ ament_target_dependencies(bearing_node
   rclcpp_components
   std_msgs
   geometry_msgs
+  nav_msgs
   tf2
   tf2_ros
 )

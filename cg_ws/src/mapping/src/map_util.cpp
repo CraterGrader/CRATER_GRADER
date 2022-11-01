@@ -88,5 +88,33 @@ cg_msgs::msg::Point2D transformPoint(const cg_msgs::msg::Point2D &source_pt, con
     return dest_pt;
 }
 
+/**
+ * @brief
+ *
+ * @param map1
+ * @param map2
+ * @param threshold
+ * @return true
+ * @return false
+ */
+bool mapSimilarityWithinThreshold(const std::vector<float> &map1, const std::vector<float> &map2, float threshold){
+    // compare each cell check within threshold
+    for (size_t i=0; i<(map1.size()); i++){
+        if (fabs(map1[i] - map2[i]) > threshold){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool file_exists(const std::string& filepath) {
+  if (FILE *file = fopen(filepath.c_str(), "r")) {
+    fclose(file);
+    return true;
+  } else {
+    return false;
+  }   
+}
+
 } // mapping namespace
 } // cg namespace

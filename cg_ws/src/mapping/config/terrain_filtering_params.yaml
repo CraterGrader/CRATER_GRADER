@@ -4,7 +4,3 @@ terrain_filtering:
     use_sor: true
     sor_mean_k: 120
     sor_stddev_mul_thresh: 1.5
-
-    ## Plane Segmentation Params ##
-    use_plane_seg: false
-    plane_seg_dist_thresh: 0.03

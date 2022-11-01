@@ -30,34 +30,6 @@ INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 include_directories(include)
 
-# build nodes
-# add_executable(point_cloud_registration src/point_cloud_registration_main.cpp
-#   src/point_cloud_registration_node.cpp
-# )
-# ament_target_dependencies(point_cloud_registration
-#   rclcpp
-#   rclcpp_components
-#   pcl_ros
-#   sensor_msgs
-#   tf2
-#   tf2_ros
-#   tf2_eigen
-# )
-
-# # build nodes
-# add_executable(point_cloud_registration_but_fancier src/point_cloud_registration_main_but_fancier.cpp
-#   src/point_cloud_registration_node_but_fancier.cpp
-# )
-# ament_target_dependencies(point_cloud_registration_but_fancier
-#   rclcpp
-#   rclcpp_components
-#   pcl_ros
-#   sensor_msgs
-#   tf2
-#   tf2_ros
-#   tf2_eigen
-# )
-
 add_executable(terrain_filtering src/terrain_filtering_main.cpp
   src/terrain_filtering_node.cpp
 )
@@ -80,6 +52,12 @@ add_executable(site_map src/site_map_main.cpp
   src/site_map.cpp
   include/mapping/map_util.hpp
   src/map_util.cpp
+  src/cell_bayes.cpp
+  include/mapping/cell_bayes.hpp
+  src/cell_buffer.cpp
+  include/mapping/cell_buffer.hpp
+  include/mapping/index_point.hpp
+  include/mapping/map_point.hpp
 )
 
 ament_target_dependencies(site_map
@@ -104,6 +82,12 @@ if(BUILD_TESTING)
         src/site_map.cpp
         include/mapping/map_util.hpp
         src/map_util.cpp
+        src/cell_bayes.cpp
+        include/mapping/cell_bayes.hpp
+        src/cell_buffer.cpp
+        include/mapping/cell_buffer.hpp
+        include/mapping/index_point.hpp
+        include/mapping/map_point.hpp
         )
   ament_target_dependencies(site_map_test
     cg_msgs
@@ -119,16 +103,6 @@ if(BUILD_TESTING)
     cg_msgs
   )
 endif()
-
-
-# Install targets
-# install(TARGETS point_cloud_registration
-#   DESTINATION lib/${PROJECT_NAME}
-# )
-
-# install(TARGETS point_cloud_registration_but_fancier
-#   DESTINATION lib/${PROJECT_NAME}
-# )
 
 install(TARGETS terrain_filtering
   DESTINATION lib/${PROJECT_NAME}
