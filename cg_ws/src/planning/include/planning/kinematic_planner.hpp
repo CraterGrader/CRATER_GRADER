@@ -207,6 +207,41 @@ struct AStarNode {
 
 };
 
+// Struct to hold parameters for kinematic planner configurations;
+struct KinematicPlannerParams {
+      float goal_pose_distance_threshold;
+      float turn_radii_min;
+      float turn_radii_max;
+      float turn_radii_resolution;
+      float max_trajectory_length;
+      float trajectory_resolution;
+      float pose_position_equality_threshold;
+      float pose_yaw_equality_threshold;
+      float topography_weight;
+      float trajectory_heuristic_epsilon;
+
+      KinematicPlanner(float goal_pose_distance_threshold,
+        float turn_radii_min,
+        float turn_radii_max,
+        float turn_radii_resolution,
+        float max_trajectory_length,
+        float trajectory_resolution,
+        float pose_position_equality_threshold,
+        float pose_yaw_equality_threshold,
+        float topography_weight,
+        float trajectory_heuristic_epsilon) :
+          goal_pose_distance_threshold(goal_pose_distance_threshold),
+          turn_radii_min(turn_radii_min),
+          turn_radii_max(turn_radii_max),
+          turn_radii_resolution(turn_radii_resolution),
+          max_trajectory_length(max_trajectory_length),
+          trajectory_resolution(trajectory_resolution),
+          pose_position_equality_threshold(pose_position_equality_threshold),
+          pose_yaw_equality_threshold(pose_yaw_equality_threshold),
+          topography_weight(topography_weight),
+          trajectory_heuristic_epsilon(trajectory_heuristic_epsilon) {};
+};
+
 } // namespace planning
 } // namespace cg
 
