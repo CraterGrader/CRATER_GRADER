@@ -22,7 +22,8 @@ public:
     GOALS_REMAINING,
     GET_WORKSYSTEM_TRAJECTORY,
     FOLLOWING_TRAJECTORY,
-    STOPPED
+    STOPPED,
+    END_MISSION
   };
 
   enum class Signal {

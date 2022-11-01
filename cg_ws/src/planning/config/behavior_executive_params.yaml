@@ -22,6 +22,9 @@ behavior_executive_node:
     thresh_max_assignment_distance: 0.5 # max meters between transport assignments
     last_pose_offset: 1.0 # meters to rearward offset last pose in transport assignment by
 
+    # Exploration planner
+    map_coverage_threshold: 0.01
+
     # Timer callbacks
     fsm_timer_callback_ms: 500 # milliseconds
     service_response_timeout_ms: 500 # milliseconds

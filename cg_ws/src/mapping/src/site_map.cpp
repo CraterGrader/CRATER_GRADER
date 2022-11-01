@@ -87,6 +87,10 @@ void SiteMap::updateMapCoverage(){
   if (getNcells() == sum_of_elems){
     siteMapFull_ = true;
   }
+  else {
+    siteMapFull_ = false;
+  }
+  siteMapCoverageRatio_ = static_cast<float>(sum_of_elems) / static_cast<float>(getNcells());
 }
 
 void SiteMap::updateCellsBayes(){

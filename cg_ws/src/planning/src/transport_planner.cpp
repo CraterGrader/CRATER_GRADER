@@ -84,7 +84,7 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
  * @param design_height_map The desired final height map
  * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  */
-void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z)
+void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map, const float threshold_z)
 {
 
   // Loop through height map and assign points to either source or sink
@@ -95,6 +95,9 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
     cg_msgs::msg::Point2D pt = current_height_map.indexToContinuousCoords(i);
     float cell_height = current_height_map.getDataAtIdx(i);
     TransportNode node;
+
+    // Skip cell if not seen
+    if (seen_map[i] == 0) continue;
 
     // Positive height becomes a source; positive volume in +z
     if (cell_height > (design_height_map.getDataAtIdx(i) + threshold_z))
@@ -320,7 +323,7 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
  * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  * @return float The optimization objective value
  */
-float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z, const float thresh_max_assignment_distance)
+float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map, const float threshold_z, const float thresh_max_assignment_distance)
 {
   // ---------------------------------------------------
   // Initialize nodes and volume sums
@@ -328,7 +331,7 @@ float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_hei
   std::vector<TransportNode> sink_nodes;
   float vol_source = 0.0f;
   float vol_sink = 0.0f;
-  init_nodes(source_nodes, sink_nodes, vol_source, vol_sink, current_height_map, design_height_map, threshold_z);
+  init_nodes(source_nodes, sink_nodes, vol_source, vol_sink, current_height_map, design_height_map, seen_map, threshold_z);
 
   // ---------------------------------------------------
   // Calculate distances between nodes

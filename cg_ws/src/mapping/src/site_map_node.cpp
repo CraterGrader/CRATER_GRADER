@@ -210,6 +210,10 @@ void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_
   res->site_map = map_msg;
   res->success = true;
   res->map_fully_explored = siteMap_.getSiteMapFullStatus();
+  res->map_coverage_ratio = siteMap_.getSiteMapCoverage();
+  for (int seen: siteMap_.getSeenMap()) {
+    res->seen_map.push_back(seen);
+  }
 }
 
 void SiteMapNode::saveMap(cg_msgs::srv::SaveMap::Request::SharedPtr req, cg_msgs::srv::SaveMap::Response::SharedPtr res) {

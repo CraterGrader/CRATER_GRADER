@@ -53,6 +53,7 @@ class SiteMap {
   float getXTransform() const {return xTransform_;}
   float getYTransform() const {return yTransform_;}
   bool getSiteMapFullStatus() const {return siteMapFull_;}
+  bool getSiteMapCoverage() const {return siteMapCoverageRatio_;}
   std::vector<CellBuffer> getBufferMap() const {return bufferMap_;}
   std::vector<float> getHeightMap() const {return heightMap_;}
   std::vector<int> getSeenMap() const {return seenPointsMap_;}
@@ -67,6 +68,7 @@ private:
 
   // variables
   bool siteMapFull_ = false;
+  float siteMapCoverageRatio_ = 0.0f;
   float plane_offset_ = 0.0f;
 
   // attributes

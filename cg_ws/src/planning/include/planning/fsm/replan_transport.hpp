@@ -2,6 +2,7 @@
 #define PLANNING__REPLAN_TRANSPORT_HPP
 
 #include <planning/fsm/fsm.hpp>
+#include <mapping/map_util.hpp>
 
 namespace cg {
 namespace planning {

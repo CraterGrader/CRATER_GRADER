@@ -97,6 +97,8 @@ private:
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
+  float current_map_coverage_ratio_;
+  std::vector<int> current_seen_map_;
   cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
   cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
@@ -104,6 +106,7 @@ private:
   double thresh_pos_;
   double thresh_head_;
   float thresh_euclidean_replan_;
+  float map_coverage_threshold_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
