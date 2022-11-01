@@ -11,10 +11,17 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/BeaconTag.idl"
   "msg/BeaconMultiTag.idl"
   "msg/EncoderTelemetry.idl"
+  "msg/Point2D.idl"
+  "msg/Pose2D.idl"
   "msg/Slip.idl"
   "msg/MuxMode.idl"
   "msg/ActuatorState.idl"
-
+  "msg/SiteMap.idl"
+  "msg/Trajectory.idl"
+  "srv/SiteMap.srv"
+  "srv/UpdateTrajectory.srv"
+  "srv/EnableWorksystem.srv"
+  "srv/SaveMap.srv"
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs
 )

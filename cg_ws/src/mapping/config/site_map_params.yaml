@@ -1,0 +1,37 @@
+site_map:
+  ros__parameters:
+    # Map dimensions; UPDATE FOR BEHAVIORE EXECUTIVE BELOW
+    # site assumed to be 5mx5m
+    height: 50 # number of cells in col
+    width: 50 # number cells in row
+    resolution: 0.1 # meters
+    xTransform: 1.0 # meters
+    yTransform: 1.0 # meters
+
+    # SiteMap specific params
+    unseenGridHeight: 0.0 # meters, Kalman Filter seed
+    incomingPointVariance: 0.05 # meters^2
+    cellStartingVariance: 1.0 # meters^2
+    minCellVariance: 0.1 # meters^2
+
+    # Loading from a map filepath
+    static_map: True
+    load_height_map_from_filepath: True
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/half_auton_half_manual_exploration.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/lunar_south_pole_50x50_map.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/cg_craters_50x50_map.csv" # use absolute path
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/max_map.csv" # use absolute path
+    
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_9x9.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_3x3.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001.csv" # use absolute path
+
+behavior_executive_node:
+  ros__parameters:
+    # site assumed to be 5mx5m
+    # Map dimensions; should match site_map dimensions!
+    height: 50 # number of cells in col
+    width: 50 # number cells in row
+    resolution: 0.1 # meters
+    xTransform: 1.0 # meters
+    yTransform: 1.0 # meters

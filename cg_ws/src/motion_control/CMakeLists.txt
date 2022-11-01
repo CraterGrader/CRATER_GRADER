@@ -17,6 +17,11 @@ find_package(nav_msgs REQUIRED)
 find_package(cg_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(diagnostic_updater REQUIRED)
+find_package(planning REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+# Add Eigen3 Library
+INCLUDE_DIRECTORIES(${EIGEN3_INCLUDE_DIRS})
 
 # Find package header files
 include_directories(include)
@@ -40,11 +45,34 @@ ament_target_dependencies(odom_node
   cg_msgs
   tf2_ros
 )
+add_executable(worksystem_control_node src/worksystem_control_main.cpp
+  src/worksystem_control_node.cpp
+  src/longitudinal_controller.cpp
+  src/lateral_controller.cpp
+  src/pid_controller.cpp
+  ../planning/src/common.cpp
+)
+ament_target_dependencies(worksystem_control_node
+  rclcpp
+  cg_msgs
+  nav_msgs
+  planning
+)
 
 # Code testing
 if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(lateral_controller_test
+        test/lateral_controller_test.cpp
+        ../planning/src/common.cpp
+        src/lateral_controller.cpp
+        )
+  ament_target_dependencies(lateral_controller_test
+    rclcpp
+    cg_msgs
+    nav_msgs
+    planning
+  )
 endif()
 
 # Install targets
@@ -52,6 +80,9 @@ install(TARGETS cmd_mux
   DESTINATION lib/${PROJECT_NAME}
 )
 install(TARGETS odom_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS worksystem_control_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -11,22 +11,21 @@ import yaml
 cfg_Standard41h12 = {
     "image_transport": "raw",    # image format
     "family": "Standard41h12",   # tag family name
-    "size": 0.282,             # tag edge size in meter
-    "max_hamming": 0,          # maximum allowed hamming distance (corrected bits)
+    "size": 0.383,             # tag edge size in meter
+    "max_hamming": 10,          # maximum allowed hamming distance (corrected bits)
     "z_up": True,              # rotate about x-axis to have Z pointing upwards
 
     # see "apriltag.h" for more documentation on these optional parameters
     "decimate": 1.0,           # decimate resolution for quad detection
     "blur": 0.0,               # sigma of Gaussian blur for quad detection
     "refine-edges": 1,         # snap to strong gradients
-    "threads": 1,              # number of threads
+    "threads": 4,              # number of threads
     "refine-decode": 0,        # increase the number of detected tags
     "refine-pose": 1,          # increase the accuracy of the extracted pose
     "debug": 0,                # write additional debugging images to current working directory
 
-    "tag_ids": [0,1,2,3],           # tag IDs for which to publish transform
+    "tag_ids": [0, 1, 2, 3],           # tag IDs for which to publish transform
     "tag_frames": ['april_tag0', 'april_tag1', 'april_tag2', 'april_tag3']   # optional frame names
-    #"tag_sizes": [0.1]      # optional tag-specific edge size
 }
 
 def generate_launch_description():
@@ -57,7 +56,8 @@ def generate_launch_description():
             package='bearing',
             executable='bearing_node',
             name='bearing_node',
-            parameters=[bearing_params_path]
+            parameters=[bearing_params_path],
+            output='screen'
         ),
         # Base link to camera transform
         Node(

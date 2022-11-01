@@ -1,0 +1,11 @@
+#include "cg_msgs/msg/Pose2D.idl"
+
+module cg_msgs {
+  module msg {
+    struct Trajectory {
+      sequence<cg_msgs::msg::Pose2D> path;
+      sequence<float> velocity_targets;  // [m/s], along longitduinal axis
+      sequence<float> tool_positions;    // [0-100], % full scale; 0:=closest to chassis
+    };
+  };
+};

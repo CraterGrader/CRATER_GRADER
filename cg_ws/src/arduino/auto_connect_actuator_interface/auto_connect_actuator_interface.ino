@@ -49,12 +49,14 @@ bool micro_ros_init_successful;
 #define BYTE_TO_QP_DELTA_POS_SCALE 10  // Drive Scale 
 #define BYTE_TO_QP_DELTA_POS_OFFSET 127 // 
 
-#define BYTE_TO_QP_TOOL_SCALE -588 // Tool Scale
+#define BYTE_TO_QP_TOOL_SCALE 129 // Tool Scale = floor( (Full Scale QP as flashed on Roboclaw) / 255 )
 #define BYTE_TO_QP_TOOL_OFFSET 0 // Tool offset 
 
-#define POSN_CTRL_ACCEL_QPPS 600
-#define POSN_CTRL_DECCEL_QPPS 600
+#define POSN_CTRL_ACCEL_QPPS 1000
+#define POSN_CTRL_DECCEL_QPPS 1000
 #define POSN_CTRL_SPD_QPPS 1300
+
+#define DRIVE_CTRL_ACCEL_QPPS 5000
 
 #define TOOL_CTRL_ACCEL_QPPS 7000
 #define TOOL_CTRL_DECCEL_QPPS 5000
@@ -128,7 +130,7 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
 
       // Send Mobility Commands
       for (int i = 0; i < NUM_ROBOCLAWS_MOBILITY; ++i) {
-        roboclaws_mobility[i].SpeedM1(ROBOCLAW_ADDRESS, roboclaw_signs[i]*drive_cmd);
+        roboclaws_mobility[i].SpeedAccelM1(ROBOCLAW_ADDRESS, DRIVE_CTRL_ACCEL_QPPS, roboclaw_signs[i]*drive_cmd); // speed command uses QPPS ramping
         roboclaws_mobility[i].SpeedAccelDeccelPositionM2(ROBOCLAW_ADDRESS, POSN_CTRL_ACCEL_QPPS, POSN_CTRL_SPD_QPPS, POSN_CTRL_DECCEL_QPPS, roboclaw_signs[i]*steer_cmd, 1);
       }
 

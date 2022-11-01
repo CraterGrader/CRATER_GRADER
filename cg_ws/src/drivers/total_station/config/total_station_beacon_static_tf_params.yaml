@@ -1,0 +1,11 @@
+total_station_beacon_static_transform_publisher:
+  ros__parameters:
+    total_station_prism:
+      x: '0.20033'  #'0.1904'
+      y: '0.020133'  #'0.03575'
+      z: '0.75628'  #'0.7326355'
+      roll: '0'
+      pitch: '0'
+      yaw: '0'
+      parent_frame_id: base_link
+      child_frame_id: total_station_prism

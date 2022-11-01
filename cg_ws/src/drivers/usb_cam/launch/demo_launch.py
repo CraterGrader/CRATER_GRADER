@@ -63,16 +63,14 @@ def generate_launch_description():
 
     print(params_path)
     ld.add_action(Node(
-        package='usb_cam', executable='usb_cam_node_exe', output='screen',
+        package='usb_cam', 
+        executable='usb_cam_node_exe', 
+        output='screen',
         name=node_name,
-        # namespace=ns,
         parameters=[params_path]
         ))
-    ld.add_action(Node(
-        package='usb_cam', executable='show_image.py', output='screen',
-        # namespace=ns,
-        # arguments=[image_manip_dir + "/data/mosaic.jpg"])
-        # remappings=[('image_in', 'image_raw')]
-        ))
+    # ld.add_action(Node(
+    #     package='usb_cam', executable='show_image.py', output='screen',
+    #     ))
 
     return ld
