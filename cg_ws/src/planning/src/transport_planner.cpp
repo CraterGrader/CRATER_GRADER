@@ -58,14 +58,17 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
   double yaw = static_cast<double>(atan2((transport_assignments_.at(arg_min).sink_node.y-transport_assignments_.at(arg_min).source_node.y),(transport_assignments_.at(arg_min).sink_node.x-transport_assignments_.at(arg_min).source_node.x)));
   
   // convert src, sink nodes to poses
-  cg_msgs::msg::Pose2D source_pose_1 = cg::planning::create_pose2d(transport_assignments_.at(arg_min).source_node.x, transport_assignments_.at(arg_min).source_node.y, yaw);
+  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).source_node.x, transport_assignments_.at(arg_min).source_node.y, yaw);
   cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).sink_node.x, transport_assignments_.at(arg_min).sink_node.y, yaw);
 
-  // TODO: experiment with changing this pose to visualize movement done during push
-  cg_msgs::msg::Pose2D source_pose_2 = source_pose_1;
-  goalPoses.push_back(source_pose_1);
+  // Set up last offset pose
+  double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
+  double offset_pose_y = source_pose.pt.y - last_pose_offset_ * std::sin(yaw);
+  cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
+  
+  goalPoses.push_back(source_pose);
   goalPoses.push_back(sink_pose);
-  goalPoses.push_back(source_pose_2);
+  goalPoses.push_back(offset_pose);
 
   return goalPoses;
 }

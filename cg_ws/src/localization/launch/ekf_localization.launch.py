@@ -14,6 +14,11 @@ def generate_launch_description():
     'config',
     'ekf_global_node_params.yaml'
   )
+  ekf_slip_params = os.path.join(
+    get_package_share_directory('localization'),
+    'config',
+    'ekf_slip_node_params.yaml'
+  )
 
   return LaunchDescription([
     Node(
@@ -32,6 +37,15 @@ def generate_launch_description():
       parameters=[ekf_global_params],
       remappings=[
         ('odometry/filtered', 'odometry/filtered/ekf_global_node')
+      ]
+    ),
+    Node(
+      package='robot_localization',
+      executable='ekf_node',
+      name='ekf_slip_node',
+      parameters=[ekf_slip_params],
+      remappings=[
+        ('odometry/filtered', 'odometry/filtered/ekf_slip_node')
       ]
     ),
     Node(

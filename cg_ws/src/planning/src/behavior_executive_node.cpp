@@ -131,6 +131,12 @@ namespace planning {
     this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
     this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
 
+    double last_pose_offset;
+    this->declare_parameter<double>("last_pose_offset", 1.0);
+    this->get_parameter("last_pose_offset", last_pose_offset);
+
+    transport_planner_.setLastPoseOffset(last_pose_offset);
+
     // Viz
     this->declare_parameter<double>("viz_planning_height", 0.0);
     this->get_parameter("viz_planning_height", viz_planning_height_);
@@ -228,8 +234,13 @@ void BehaviorExecutive::fsmTimerCallback()
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     // ---------------------------------------
     // DEBUG
+    std::cout << "    Num Goals: " << current_goal_poses_.size() << std::endl;
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    std::cout << "    ------------ Remaining goals: " << std::endl;
+    for (size_t i = 0; i < current_goal_poses_.size(); ++i) {
+      std::cout << "    Goal pose " << i << " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    }
     // ---------------------------------------
     break;}
   case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
