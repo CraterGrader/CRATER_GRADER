@@ -199,6 +199,7 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   case cg::planning::FSM::State::PLAN_TRANSPORT:
     plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, transport_threshold_z_, thresh_max_assignment_distance_);
+    phase_goal_poses_.clear();
     break;
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
@@ -215,6 +216,7 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   case cg::planning::FSM::State::PLAN_EXPLORATION:
     plan_exploration_.runState(exploration_planner_, current_height_map_);
+    phase_goal_poses_.clear();
     break;
   case cg::planning::FSM::State::GET_EXPLORATION_GOALS:{
     get_exploration_goals_.runState(current_goal_poses_, phase_goal_poses_, exploration_planner_, current_agent_pose_, current_height_map_);
