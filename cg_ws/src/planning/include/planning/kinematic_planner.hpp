@@ -20,7 +20,8 @@ public:
   // Construct Kinematic Planner
   // TODO: make these params
   KinematicPlanner() : 
-      goal_pose_distance_threshold_(1e-5f), 
+      goal_pose_distance_threshold_(0.15f), 
+      goal_pose_yaw_threshold_(deg2rad(5)), 
       turn_radii_min_(1.6f), 
       turn_radii_max_(2.8f), 
       turn_radii_resolution_(0.4f),
@@ -29,11 +30,14 @@ public:
       pose_position_equality_threshold_(0.05f),
       pose_yaw_equality_threshold_(deg2rad(5)),
       topography_weight_(1.0f),
-      trajectory_heuristic_epsilon_(1.0f) {};
+      trajectory_heuristic_epsilon_(1.0f),
+      max_pose_equality_scalar_(2.0),
+      pose_equality_scalar_iteration_(2000) {};
 
   // Construct Fully Parametric Planner
   KinematicPlanner(
     float goal_pose_distance_threshold,
+    float goal_pose_yaw_threshold,
     float turn_radii_min,
     float turn_radii_max,
     float turn_radii_resolution,
@@ -42,8 +46,11 @@ public:
     float pose_position_equality_threshold,
     float pose_yaw_equality_threshold,
     float topography_weight,
-    float trajectory_heuristic_epsilon) : 
+    float trajectory_heuristic_epsilon,
+    float max_pose_equality_scalar,
+    int pose_equality_scalar_iteration) : 
       goal_pose_distance_threshold_(goal_pose_distance_threshold), 
+      goal_pose_yaw_threshold_(goal_pose_yaw_threshold), 
       turn_radii_min_(turn_radii_min), 
       turn_radii_max_(turn_radii_max), 
       turn_radii_resolution_(turn_radii_resolution),
@@ -52,7 +59,9 @@ public:
       pose_position_equality_threshold_(pose_position_equality_threshold),
       pose_yaw_equality_threshold_(pose_yaw_equality_threshold),
       topography_weight_(topography_weight),
-      trajectory_heuristic_epsilon_(trajectory_heuristic_epsilon) {}; 
+      trajectory_heuristic_epsilon_(trajectory_heuristic_epsilon),
+      max_pose_equality_scalar_(max_pose_equality_scalar),
+      pose_equality_scalar_iteration_(pose_equality_scalar_iteration) {}; 
 
   // Updates the path field in-place
   void generatePath(
@@ -77,6 +86,12 @@ public:
   bool samePoseWithinThresh(
     const cg_msgs::msg::Pose2D &trajectory_end_pose,
     const cg_msgs::msg::Pose2D &goal_pose) const;
+
+  bool samePoseWithinThresh(
+      const cg_msgs::msg::Pose2D &trajectory_end_pose,
+      const cg_msgs::msg::Pose2D &goal_pose,
+      const float pose_threshold,
+      const float yaw_threshold) const;
 
   // Creates a std::vector of lattice trajectories 
   // based on a base lattice type and current pose
@@ -105,6 +120,7 @@ public:
 
   // Getters
   float getGoalPoseDistanceThreshold() {return goal_pose_distance_threshold_;}
+  float getGoalPoseYawThreshold() {return goal_pose_yaw_threshold_;}
   float getTurnRadiiMin() {return turn_radii_min_;}
   float getTurnRadiiMax() {return turn_radii_max_;}
   float getTurnRadiiResolutuion() {return turn_radii_resolution_;}
@@ -118,6 +134,10 @@ public:
   // Setters
   void setGoalPoseDistanceThreshold(float val) {
     goal_pose_distance_threshold_ = val;
+    return;
+    }
+  void setGoalPoseYawThreshold(float val) {
+    goal_pose_yaw_threshold_ = val;
     return;
     }
   void setTurnRadiiMin(float val) {
@@ -161,6 +181,7 @@ private:
 
   // Threshold to determine if trajectory end pose is a valid final pose
   float goal_pose_distance_threshold_;
+  float goal_pose_yaw_threshold_;
 
   // Lattice Parameters
   float turn_radii_min_;
@@ -176,6 +197,10 @@ private:
   // Cost Parameters
   float topography_weight_;
   float trajectory_heuristic_epsilon_;
+
+  // A* parameters
+  float max_pose_equality_scalar_;
+  int pose_equality_scalar_iteration_;
 
 };
 
