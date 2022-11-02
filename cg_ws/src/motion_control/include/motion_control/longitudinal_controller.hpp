@@ -26,7 +26,7 @@ private:
       const cg_msgs::msg::Trajectory &target_trajectory,
       const nav_msgs::msg::Odometry &current_state);
   float max_steer_speed_ = 1000; // TODO: pass into constructor
-  float min_drive_speed_scaler_ = 0.2; // TODO: pass into constructor
+  float min_drive_speed_scaler_ = 0.0; // TODO: pass into constructor
 };
 
 } // namespace motion_control
