@@ -118,6 +118,7 @@ private:
   double viz_planning_height_;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
+  std::vector<cg_msgs::msg::Pose2D> phase_goal_poses_;
   cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D current_agent_pose_; // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!

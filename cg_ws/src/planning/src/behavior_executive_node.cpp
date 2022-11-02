@@ -202,7 +202,7 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
-    get_transport_goals_.runState(current_goal_poses_, transport_planner_, current_agent_pose_, current_height_map_);
+    get_transport_goals_.runState(current_goal_poses_, phase_goal_poses_, transport_planner_, current_agent_pose_, current_height_map_);
     // ---------------------------------------
     // DEBUG
     std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
@@ -217,7 +217,7 @@ void BehaviorExecutive::fsmTimerCallback()
     plan_exploration_.runState(exploration_planner_, current_height_map_);
     break;
   case cg::planning::FSM::State::GET_EXPLORATION_GOALS:{
-    get_exploration_goals_.runState(current_goal_poses_, exploration_planner_, current_agent_pose_, current_height_map_);
+    get_exploration_goals_.runState(current_goal_poses_, phase_goal_poses_, exploration_planner_, current_agent_pose_, current_height_map_);
     for (size_t i =0; i < current_goal_poses_.size(); ++i){
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
     }
@@ -450,7 +450,7 @@ void BehaviorExecutive::vizTimerCallback() {
 
   // Goal poses
   viz_goals_.poses.clear();
-  for (cg_msgs::msg::Pose2D goal_pose : current_goal_poses_) {
+  for (cg_msgs::msg::Pose2D goal_pose : phase_goal_poses_) {
     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(goal_pose, local_map_relative_to_global_frame_);
 
     geometry_msgs::msg::Pose pose_single;

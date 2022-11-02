@@ -39,22 +39,32 @@ public:
     REPLAN
   };
 
+  enum class Phase {
+    BEGINNING,
+    EXPLORATION,
+    TRANSPORT,
+    END
+  };
+
   // Constructors()
   FSM(){};
-  FSM(State start_state, Signal start_signal);
+  FSM(Phase start_phase, State start_state, Signal start_signal);
   
   // Destructor(), for resetting static variables
   ~FSM();
 
   // Getters()
+  Phase getCurrPhase() const { return curr_phase_; }
   State getCurrState() const { return curr_state_; }
   Signal getPreSignal() const { return pre_signal_; }
 
   // Helpers
+  std::string currPhaseToString();
   std::string currStateToString();
   std::string preSignalToString();
 
 protected: // "Shared private" variables
+  static Phase curr_phase_; // Current phase that FSM is in
   static State curr_state_; // Current state that should run
   static Signal pre_signal_; // Precursing signal that led to the current state
 
@@ -65,6 +75,7 @@ private:
    * - Used to initialize the static state and signal
    * - May need to update the init_default_test if these defaults change
    */
+  static Phase defaultStartPhase() { return Phase::BEGINNING; }
   static State defaultStartState() { return State::READY; }
   static Signal defaultStartSignal() { return Signal::START; }
   /******************************/
