@@ -25,16 +25,16 @@ UsbCamNode::UsbCamNode(const rclcpp::NodeOptions & node_options)
         std::placeholders::_2,
         std::placeholders::_3)))
 {
-  // declare params
+  // declare params - these do not affect bearing launch, only here as defaults, will load from params.yaml
   this->declare_parameter("camera_name", "default_cam");
   this->declare_parameter("camera_info_url", "");
-  this->declare_parameter("framerate", 60.0);
+  this->declare_parameter("framerate", 30.0);
   this->declare_parameter("frame_id", "camera");
-  this->declare_parameter("image_height", 720);
-  this->declare_parameter("image_width", 1280);
+  this->declare_parameter("image_height", 1080);
+  this->declare_parameter("image_width", 1920);
   this->declare_parameter("io_method", "mmap");
   this->declare_parameter("pixel_format", "yuyv");
-  this->declare_parameter("video_device", "/dev/cg_dev/sun_cam");
+  this->declare_parameter("video_device", "/dev/cg_ws/sun_cam");
 
   get_params();
   init();
@@ -170,6 +170,7 @@ bool UsbCamNode::take_and_send_image()
 
   // Undistort the image using fisheye model
   cv::remap(cv_ptr->image, out_msg.image, map1, map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+  // out_msg.image = cv_ptr->image;
 
   // Create the output image
   out_msg.header = img_->header; // Same timestamp and tf frame as input image
@@ -186,14 +187,9 @@ bool UsbCamNode::take_and_send_image()
 void UsbCamNode::update()
 {
   if (cam_.is_capturing()) {
-    // If the camera exposure longer higher than the framerate period
-    // then that caps the framerate.
-    // auto t0 = now();
     if (!take_and_send_image()) {
       RCLCPP_WARN(this->get_logger(), "USB camera did not respond in time.");
     }
-    // auto diff = now() - t0;
-    // INFO(diff.nanoseconds() / 1e6 << " " << int(t0.nanoseconds() / 1e9));
   }
 }
 }  // namespace usb_cam

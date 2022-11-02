@@ -1,0 +1,107 @@
+@startuml
+colors
+@enduml
+
+@startuml PlanningFSM_20221024_REV04
+mainframe PlanningFSM_20221024_REV04
+' Formatting
+' ------------------------------------
+hide empty description
+
+' State blocks
+skinparam state {
+  BackgroundColor #DeepSkyBlue
+}
+
+' choice blocks
+<style>
+  diamond {
+    BackgroundColor #Tomato
+}
+</style>
+
+
+' States and Interactions
+' ------------------------------------
+' Global states
+state EndMission
+state PlanExploration #MediumSpringGreen
+state PlanTransport #MediumPurple
+state UpdateMap
+  UpdateMap : Request site_map_server
+state GetExplorationGoals #MediumSpringGreen
+  GetExplorationGoals : Select N goals
+state GetTransportGoals #MediumPurple
+  GetTransportGoals : Select 3 goals: src, sink, src
+state MapExplored <<choice>>
+  note right of MapExplored
+    MapExplored?
+  end note
+state SiteWorkDone <<choice>>
+  note left of SiteWorkDone
+    SiteWorkDone?
+  end note
+state ReplanTransport <<choice>>
+  note right of ReplanTransport
+    ReplanTransport?
+  end note
+
+' Fallback states
+state FallBack #Gainsboro {
+  state CallForHelp #Gainsboro 
+  state OperatorIntervention #Gainsboro 
+  state OperatorAvailable <<choice>>
+    note right of OperatorAvailable
+    OperatorAvailable?
+    end note
+  state ContinueMission <<choice>>
+    note right of ContinueMission
+      ContinueMission?
+    end note
+
+  ' Fallback state interactions
+  CallForHelp -d-> OperatorAvailable : call_help
+  OperatorAvailable -d-> OperatorIntervention : yes
+    OperatorIntervention -d-> ContinueMission : check_mission
+      ContinueMission -l-> UpdateMap : yes
+      ContinueMission -d-> EndMission : no
+  OperatorAvailable -d-> EndMission : no
+}
+
+' Driving states
+state FollowingTrajectory #Magenta
+state EscapeManeuver #Magenta
+state GetWorksystemTrajectory #Magenta
+  GetWorksystemTrajectory : Call Kinematic, Velocity, Tool planners
+state GoalsRemaining <<choice>>
+  note right of GoalsRemaining
+    GoalsRemaining?
+  end note
+
+' Driving state interactions
+GoalsRemaining -u-> GetWorksystemTrajectory : yes
+  GetWorksystemTrajectory -u-> FollowingTrajectory : follow_trajectory
+    FollowingTrajectory --> GoalsRemaining : goal_reached
+    FollowingTrajectory --> GetWorksystemTrajectory : replan
+    FollowingTrajectory --> EscapeManeuver : stuck
+      EscapeManeuver -d-> FollowingTrajectory : not_stuck
+      EscapeManeuver -r->  CallForHelp : abort
+GoalsRemaining -d-> UpdateMap : no
+
+' Global state interactions
+[*] -d-> UpdateMap : start
+  UpdateMap -d-> SiteWorkDone : map_updated
+  SiteWorkDone -r-> EndMission : yes
+  SiteWorkDone -l-> MapExplored : no
+    MapExplored -d-> ReplanTransport : yes
+      ReplanTransport -d-> PlanTransport : yes
+        PlanTransport -d-> GetTransportGoals : transport_planned
+      ReplanTransport -d-> GetTransportGoals : no
+        GetTransportGoals -d-> GoalsRemaining : drive
+    MapExplored -d-> PlanExploration : no
+      PlanExploration -d-> GetExplorationGoals : exploration_planned
+      GetExplorationGoals -d-> GoalsRemaining : drive
+EndMission --> [*] : stop
+
+@enduml
+

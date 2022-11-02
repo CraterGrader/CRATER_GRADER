@@ -11,16 +11,17 @@ def generate_launch_description():
         'config',
         'odom_node_params.yaml'
     )
-    cmdmux_params =  os.path.join(
-        get_package_share_directory('motion_control'),
-        'config',
-        'cmdmux_node_params.yaml'
-    )
 
     diagnostic_params = os.path.join(
         get_package_share_directory('motion_control'),
         'config',
         'diagnostic_params.yaml'
+    )
+
+    worksystem_params = os.path.join(
+        get_package_share_directory('motion_control'),
+        'config',
+        'worksystem_control_params.yaml'
     )
 
     # Also bring up the teleop launch file, expect that teleop launch file to handle parameters
@@ -38,11 +39,18 @@ def generate_launch_description():
             name='odom_node',
             parameters=[odom_params]
         ),
-         Node(
+        Node(
             package='motion_control',
             executable='cmd_mux',
             name='cmd_mux',
-            parameters=[cmdmux_params, diagnostic_params]
+            parameters=[diagnostic_params]
+        ),
+        Node(
+            package='motion_control',
+            executable='worksystem_control_node',
+            name='worksystem_control_node',
+            output='screen',
+            parameters=[worksystem_params]
         ),
         included_launch
     ])

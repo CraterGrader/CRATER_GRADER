@@ -16,7 +16,6 @@ struct PIDParams {
 
 class PIDController {
 public:
-  PIDController() {}
   PIDController(const PIDParams &params);
   // Computes control command given error
   double control(double error);
@@ -24,6 +23,11 @@ public:
   void reset();
   // Sets PID gains dynamically e.g. for gain scheduling
   void setGains(const double kp, const double ki, const double kd);
+
+  PIDParams params_;
+  double prev_error_;
+  double integral_error_;
+  bool first_timestep_;
 };
 
 }  // namespace motion_control

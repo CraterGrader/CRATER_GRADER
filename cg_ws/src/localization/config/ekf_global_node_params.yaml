@@ -138,21 +138,21 @@ ekf_global_node:
     #  vroll, vpitch, vyaw,
     #  ax, ay, az].
 
-    # # Drive Encoders
-    # odom0: encoder/odom
-    # # Only setting velocities (vx, vy, vyaw) to true, as per Configuring robot_localization -> Fusing Unmeasured Variables, available here: 
-    # # http://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
-    # odom0_config: [
-    #   true, true, false,  # TODO test if these should be set to false
-    #   false, false, false,
-    #   true, true, false,
-    #   false, false, true,
-    #   false, false, false
-    # ]
-    # odom0_queue_size: 2
-    # odom0_nodelay: true
-    # odom0_differential: true
-    # odom0_relative: true
+    # Drive Encoders
+    odom0: encoder/odom
+    # Only setting velocities (vx, vy, vyaw) to true, as per Configuring robot_localization -> Fusing Unmeasured Variables, available here: 
+    # http://docs.ros.org/en/melodic/api/robot_localization/html/configuring_robot_localization.html
+    odom0_config: [
+      false, false, false, 
+      false, false, false,
+      true, true, false,
+      false, false, true,
+      false, false, false
+    ]
+    odom0_queue_size: 2
+    odom0_nodelay: true
+    odom0_differential: true
+    odom0_relative: false
 
     # IMU
     imu0: imu/data/base_link
@@ -243,8 +243,8 @@ ekf_global_node:
                                 0.0,    0.0,    0.0,    0.03, 0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
                                 0.0,    0.0,    0.0,    0.0,    0.03, 0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
                                 0.0,    0.0,    0.0,    0.0,    0.0,    0.06, 0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    10.0, 0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     10.0, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.05, 0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.05, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
                                 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.04, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
                                 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.01, 0.0,    0.0,    0.0,    0.0,    0.0,
                                 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.01, 0.0,    0.0,    0.0,    0.0,

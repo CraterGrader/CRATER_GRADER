@@ -43,7 +43,6 @@ geometry_msgs
 add_library(kalman_filter_linear src/kalman_filter_linear.cpp)
 target_link_libraries(slip_estimate_node kalman_filter_linear)
 
-
 # build nodes
 add_executable(ts_prism_transformer src/ts_prism_transformer_main.cpp
   src/ts_prism_transformer.cpp

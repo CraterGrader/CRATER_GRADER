@@ -82,7 +82,7 @@ void CmdMuxNode::timerCallback()
   if (curr_mux_mode_ == cg_msgs::msg::MuxMode::IDLE)
   {
     // Publish last message, with wheel velocity set to zero
-    cmd_msg_.wheel_velocity = 0;
+    cmd_msg_.wheel_velocity = 0.0;
   }
 
   // Clamp commands
