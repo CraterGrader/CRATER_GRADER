@@ -15,6 +15,26 @@ size_t TransportPlanner::ij_to_index(size_t i, size_t j, size_t width) const {
     return (j + (i * width));
 }
 
+void TransportPlanner::makeGoalsFromAssignment(const size_t assignment_idx, std::vector<cg_msgs::msg::Pose2D> &goalPoses) {
+
+  // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
+  double yaw = static_cast<double>(atan2((transport_assignments_[assignment_idx].sink_node.y - transport_assignments_[assignment_idx].source_node.y), (transport_assignments_[assignment_idx].sink_node.x - transport_assignments_[assignment_idx].source_node.x)));
+
+  // convert src, sink nodes to poses
+  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments_[assignment_idx].source_node.x, transport_assignments_[assignment_idx].source_node.y, yaw);
+  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_[assignment_idx].sink_node.x, transport_assignments_[assignment_idx].sink_node.y, yaw);
+
+  // Set up last offset pose
+  double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
+  double offset_pose_y = source_pose.pt.y - last_pose_offset_ * std::sin(yaw);
+  cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
+
+  // Push back the goal poses
+  goalPoses.push_back(source_pose);
+  goalPoses.push_back(sink_pose);
+  goalPoses.push_back(offset_pose);
+}
+
 /**
  * @brief Select a target pose to navigate in order to accomplish transport plan
  * 
@@ -53,24 +73,23 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
   }
   // update unvisited_assignments with false for arg_min
   unvisited_assignments_.at(arg_min) = false;
-  
-  // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
-  double yaw = static_cast<double>(atan2((transport_assignments_.at(arg_min).sink_node.y-transport_assignments_.at(arg_min).source_node.y),(transport_assignments_.at(arg_min).sink_node.x-transport_assignments_.at(arg_min).source_node.x)));
-  
-  // convert src, sink nodes to poses
-  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).source_node.x, transport_assignments_.at(arg_min).source_node.y, yaw);
-  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).sink_node.x, transport_assignments_.at(arg_min).sink_node.y, yaw);
 
-  // Set up last offset pose
-  double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
-  double offset_pose_y = source_pose.pt.y - last_pose_offset_ * std::sin(yaw);
-  cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
-  
-  goalPoses.push_back(source_pose);
-  goalPoses.push_back(sink_pose);
-  goalPoses.push_back(offset_pose);
+  // Get goal poses
+  makeGoalsFromAssignment(arg_min, goalPoses);
 
   return goalPoses;
+}
+
+std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getUnvisitedGoalPoses() {
+  std::vector<cg_msgs::msg::Pose2D> unvisitedGoalPoses;
+  // Loop through all assignments
+  for (size_t i = 0; i < transport_assignments_.size(); ++i){
+    // If unvisited, push back the set of goal poses
+    if (unvisited_assignments_[i]) {
+      makeGoalsFromAssignment(i, unvisitedGoalPoses);
+    }
+  }
+  return unvisitedGoalPoses;
 }
 
 /**

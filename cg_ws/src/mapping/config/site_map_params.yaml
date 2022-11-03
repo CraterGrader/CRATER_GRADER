@@ -17,7 +17,7 @@ site_map:
     # Loading from a map filepath
     static_map: True
     load_height_map_from_filepath: True
-    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/half_auton_half_manual_exploration.csv" # use absolute path
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/max_map.csv" # use absolute path
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/lunar_south_pole_50x50_map.csv" # use absolute path
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/cg_craters_50x50_map.csv" # use absolute path
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/max_map.csv" # use absolute path

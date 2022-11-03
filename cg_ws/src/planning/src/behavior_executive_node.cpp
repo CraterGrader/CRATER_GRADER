@@ -8,6 +8,7 @@ namespace planning {
     /* Initialize publishers and subscribers */
     viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/planning/current_path", 1);
     viz_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/planning/current_goals", 1);
+    viz_state_l1_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/planning/all_state_l1_goals", 1);
     viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_agent", 1);
     viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_goal", 1);
 
@@ -228,11 +229,10 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
     plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
-    state_l1_goal_poses_.clear();
     break;
   case cg::planning::FSM::StateL0::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
-    get_transport_goals_.runState(current_goal_poses_, state_l1_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
+    get_transport_goals_.runState(current_goal_poses_, viz_state_l1_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
     // ---------------------------------------
     // DEBUG
     std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
@@ -245,10 +245,10 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   case cg::planning::FSM::StateL0::PLAN_EXPLORATION:
     plan_exploration_.runState(*exploration_planner_, current_height_map_);
-    state_l1_goal_poses_.clear();
+    viz_state_l1_goal_poses_.clear();
     break;
   case cg::planning::FSM::StateL0::GET_EXPLORATION_GOALS:{
-    get_exploration_goals_.runState(current_goal_poses_, state_l1_goal_poses_, *exploration_planner_, current_agent_pose_, current_height_map_);
+    get_exploration_goals_.runState(current_goal_poses_, viz_state_l1_goal_poses_, *exploration_planner_, current_agent_pose_, current_height_map_);
     for (size_t i =0; i < current_goal_poses_.size(); ++i){
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
     }
@@ -490,7 +490,7 @@ void BehaviorExecutive::vizTimerCallback() {
 
   // Goal poses
   viz_goals_.poses.clear();
-  for (cg_msgs::msg::Pose2D goal_pose : state_l1_goal_poses_) {
+  for (cg_msgs::msg::Pose2D goal_pose : current_goal_poses_) {
     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(goal_pose, local_map_relative_to_global_frame_);
 
     geometry_msgs::msg::Pose pose_single;
@@ -510,6 +510,29 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_goals_.header.stamp = this->get_clock()->now();
   viz_goals_.header.frame_id = "map";
   viz_goals_pub_->publish(viz_goals_);
+
+  // StateL1 goal poses
+  viz_state_l1_goals_.poses.clear();
+  for (cg_msgs::msg::Pose2D goal_pose : viz_state_l1_goal_poses_) {
+    cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(goal_pose, local_map_relative_to_global_frame_);
+
+    geometry_msgs::msg::Pose pose_single;
+    pose_single.position.x = global_goal_pose.pt.x;
+    pose_single.position.y = global_goal_pose.pt.y;
+    pose_single.position.z = viz_planning_height_ * 0.9; // Make L1 goals covered by current goals when overlapping
+
+    tf2::Quaternion q;
+    q.setRPY(0, 0, global_goal_pose.yaw);
+    pose_single.orientation.x = q.x();
+    pose_single.orientation.y = q.y();
+    pose_single.orientation.z = q.z();
+    pose_single.orientation.w = q.w();
+
+    viz_state_l1_goals_.poses.push_back(pose_single);
+  }
+  viz_state_l1_goals_.header.stamp = this->get_clock()->now();
+  viz_state_l1_goals_.header.frame_id = "map";
+  viz_state_l1_goals_pub_->publish(viz_state_l1_goals_);
 
   // Trajectory
   viz_path_.poses.clear();
