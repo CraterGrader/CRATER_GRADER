@@ -13,12 +13,12 @@ namespace cg
       // Load parameters
       this->declare_parameter<int>("pub_freq", 10);
       this->get_parameter("pub_freq", pub_freq_);
-      this->declare_parameter<float>("prism_offset_x", 0.0);
-      this->get_parameter("prism_offset_x", prism_offset_x_);
-      this->declare_parameter<float>("prism_offset_y", 0.0);
-      this->get_parameter("prism_offset_y", prism_offset_y_);
-      this->declare_parameter<float>("prism_offset_z", 0.0);
-      this->get_parameter("prism_offset_z", prism_offset_z_);
+      this->declare_parameter<float>("linear_translation.prism_offset_x", -0.20033);
+      this->get_parameter("linear_translation.prism_offset_x", prism_offset_x_);
+      this->declare_parameter<float>("linear_translation.prism_offset_y", -0.020133);
+      this->get_parameter("linear_translation.prism_offset_y", prism_offset_y_);
+      this->declare_parameter<float>("linear_translation.prism_offset_z", -0.75628);
+      this->get_parameter("linear_translation.prism_offset_z", prism_offset_z_);
 
       /* Publishers and Subscribers */
       ts_prism_subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
