@@ -23,7 +23,6 @@ public:
 private:
 
   double constant_velocity_;
-  // double constant_velocity_ = 15*0.003795275591; // m/s
 
 };
 
