@@ -157,6 +157,10 @@ namespace planning {
 
     transport_planner_->setLastPoseOffset(last_pose_offset);
 
+    // Exploration planner
+    this->declare_parameter<float>("map_coverage_threshold", 0.01);
+    this->get_parameter("map_coverage_threshold", map_coverage_threshold_);
+
     // Viz
     this->declare_parameter<double>("viz_planning_height", 0.0);
     this->get_parameter("viz_planning_height", viz_planning_height_);
@@ -164,6 +168,10 @@ namespace planning {
     // Update map parameters
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
     bool design_height_map_initialized = design_height_map_.load_map_from_file(design_topo_filepath);
+
+    // Validation parameters
+    this->declare_parameter<float>("topology_equality_threshold", 0.03);
+    this->get_parameter("topology_equality_threshold", topology_equality_threshold_);
 
     if (!design_height_map_initialized) {
       RCLCPP_FATAL(this->get_logger(), "Design map loading error");
@@ -210,16 +218,16 @@ void BehaviorExecutive::fsmTimerCallback()
     update_map_.runState(map_updated_);
     break;
   case cg::planning::FSM::StateL0::SITE_WORK_DONE:
-    site_work_done_.runState();
+    site_work_done_.runState(current_height_map_, design_height_map_, topology_equality_threshold_);
     break;
   case cg::planning::FSM::StateL0::MAP_EXPLORED:
-    map_explored_.runState();
+    map_explored_.runState(current_map_coverage_ratio_, map_coverage_threshold_);
     break;
   case cg::planning::FSM::StateL0::REPLAN_TRANSPORT:
     replan_transport_.runState();
     break;
   case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
-    plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, transport_threshold_z_, thresh_max_assignment_distance_);
+    plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
     state_l1_goal_poses_.clear();
     break;
   case cg::planning::FSM::StateL0::GET_TRANSPORT_GOALS:
@@ -316,6 +324,9 @@ void BehaviorExecutive::fsmTimerCallback()
     }
 
     break;}
+  case cg::planning::FSM::StateL0::END_MISSION:
+    end_mission_.runState();
+    break;
   case cg::planning::FSM::StateL0::STOPPED:
     // Stop the worksystem
     enable_worksystem_ = false;
@@ -349,6 +360,11 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
     // Only update height map if data is valid
     if (response->success) {
       bool set_data = current_height_map_.setCellData(response->site_map.height_map);
+      current_map_coverage_ratio_ = response->map_coverage_ratio;
+      current_seen_map_.clear();
+      for (auto seen: response->seen_map) {
+        current_seen_map_.push_back(seen);
+      }
       return set_data;
     } 
     return false;

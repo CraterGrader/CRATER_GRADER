@@ -1,14 +1,13 @@
-#ifndef PLANNING__REPLAN_TRANSPORT_HPP
-#define PLANNING__REPLAN_TRANSPORT_HPP
+#ifndef PLANNING__END_MISSION_HPP
+#define PLANNING__END_MISSION_HPP
 
 #include <planning/fsm/fsm.hpp>
-#include <mapping/map_util.hpp>
 
 namespace cg {
 namespace planning {
 
 // Inherit from FSM to have access to current state/signal
-class ReplanTransport : public FSM {
+class EndMission : public FSM {
 
 public:
   void runState(); // Main function to run current state; optionally modifies signal and state for transition
@@ -18,4 +17,4 @@ public:
 } // namespace planning
 } // namespace cg
 
-#endif // PLANNING__REPLAN_TRANSPORT_HPP
+#endif // PLANNING__END_MISSION_HPP

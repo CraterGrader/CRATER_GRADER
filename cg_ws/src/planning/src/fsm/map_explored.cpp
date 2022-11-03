@@ -4,14 +4,19 @@
 namespace cg {
 namespace planning {
 
-void MapExplored::runState() {
+void MapExplored::runState(float current_map_coverage_ratio_, float map_coverage_threshold) {
   std::cout << "MAP_EXPLORED" << std::endl;
 
   // Update shared current state and the precursing signal
-  // pre_signal_ = Signal::YES;
-  // curr_state_l0_ = StateL0::REPLAN_TRANSPORT;
-  pre_signal_ = Signal::NO;
-  curr_state_l0_ = StateL0::PLAN_EXPLORATION;
+  if (current_map_coverage_ratio_ >= map_coverage_threshold) {
+    pre_signal_ = Signal::YES;
+    curr_state_l0_ = StateL0::REPLAN_TRANSPORT;
+  }
+  else {
+    pre_signal_ = Signal::NO;
+    curr_state_l0_ = StateL0::PLAN_EXPLORATION;
+
+  }
 }
 
 } // planning namespace

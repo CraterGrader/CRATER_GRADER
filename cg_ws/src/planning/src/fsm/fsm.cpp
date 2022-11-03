@@ -47,6 +47,8 @@ std::string FSM::currStateL0ToString() {
       return "GET_WORKSYSTEM_TRAJECTORY";
     case StateL0::FOLLOWING_TRAJECTORY:
       return "FOLLOWING_TRAJECTORY";
+    case StateL0::END_MISSION:
+      return "END_MISSION";
     case StateL0::STOPPED:
       return "STOPPED";
     default:
