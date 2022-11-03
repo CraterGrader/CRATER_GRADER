@@ -6,19 +6,19 @@ behavior_executive_node:
     thresh_euclidean_replan: 0.5 # meters
 
     # Kinematic planner (all params are floats)
-    goal_pose_distance_threshold: 0.02 # 1e-5f
-    goal_pose_yaw_threshold: 0.0872665 # 1e-5f
+    goal_pose_distance_threshold: 0.15 # m
+    goal_pose_yaw_threshold: 0.15 # rad
     turn_radii_min: 1.8 # m
     turn_radii_max: 3.0 # m
     turn_radii_resolution: 0.1 # m
-    max_trajectory_length: 0.4 # m
+    max_trajectory_length: 0.1 # m
     trajectory_resolution: 0.05 # m
     pose_position_equality_threshold: 0.05 # m
-    pose_yaw_equality_threshold: 0.1 # rad
+    pose_yaw_equality_threshold: 0.05 # rad
     topography_weight: 0.0 # "unitless"
     trajectory_heuristic_epsilon: 1.0 # for weighted A* heuristic
     max_pose_equality_scalar: 2.0 # For scaling goal pose equality thresholds 
-    pose_equality_scalar_iteration: 2000 # For scaling goal pose equality thresholds 
+    pose_equality_scalar_iteration: 500 # For scaling goal pose equality thresholds 
 
     # Transport planner
     transport_threshold_z: 0.05 # meters off fit plane
@@ -34,7 +34,7 @@ behavior_executive_node:
     raised_blade_height: 0.0   # Height of blade when lifted
 
     # Velocity planner
-    constant_velocity: 100.0  # Constant velocity for velocity planner, %FS
+    constant_velocity: 30.0  # Constant velocity for velocity planner, %FS
 
     # Validation parameters
     topology_equality_threshold: 0.05 # Note: must be <= transport_threshold_z

@@ -51,9 +51,9 @@ void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2
         
       transformStamped = tfBuffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
 
-      std::cout << msg->width << std::endl;
+      // std::cout << msg->width << std::endl;
 
-      if ((msg->width) < 5000) return;
+      // if ((msg->width) < 5000) return;
 
       cloud_in_ = *msg;
       tf2::doTransform(cloud_in_, cloud_out_, transformStamped);

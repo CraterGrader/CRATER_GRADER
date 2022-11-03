@@ -235,6 +235,7 @@ void BehaviorExecutive::fsmTimerCallback()
     get_transport_goals_.runState(current_goal_poses_, viz_state_l1_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
     // ---------------------------------------
     // DEBUG
+    std::cout << "  **** num viz L1 goals: " << viz_state_l1_goal_poses_.size() << std::endl;
     std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
     std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
     
