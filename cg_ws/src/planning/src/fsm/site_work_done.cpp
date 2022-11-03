@@ -15,7 +15,7 @@ void SiteWorkDone::runState(const cg::mapping::Map<float> &current_height_map, c
   // Update shared current state and the precursing signal
   if (within_thresh) {
     pre_signal_ = Signal::YES;
-    curr_state_ = State::END_MISSION;
+    curr_state_l0_ = StateL0::END_MISSION;
   } else {
   pre_signal_ = Signal::NO;
   curr_state_l0_ = StateL0::MAP_EXPLORED;
