@@ -3,7 +3,8 @@
 namespace cg {
 namespace mapping {
 
-CellBayes::CellBayes(float cellStartingVariance, float minCellVariance){
+CellBayes::CellBayes(float cellElevation, float cellStartingVariance, float minCellVariance){
+  cellElevation_ = cellElevation;
   cellVariance_ = cellStartingVariance;
   minCellVariance_ = minCellVariance;
 }

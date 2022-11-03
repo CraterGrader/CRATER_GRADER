@@ -1,0 +1,7 @@
+ts_prism_transformer:
+  ros__parameters:
+    pub_freq: 20  # Publishing frequency in Hz
+    linear_translation: # m
+        x: -0.20033
+        y: -0.020133
+        z: -0.75628

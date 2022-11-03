@@ -30,20 +30,16 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr beacon_subscription_0_;
     rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr beacon_subscription_1_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subscription_;
-    rclcpp::TimerBase::SharedPtr tf_timer_{nullptr};
     rclcpp::TimerBase::SharedPtr average_tag_timer_{nullptr};
 
     /* Callbacks */
     void beacon_callback_0(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg);
     void beacon_callback_1(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr beacon_msg);
     void imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg);
-    bool tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform);
-    void tf_Callback();
     void average_Beacon_Callback();
 
     /* Transforms */
     std::shared_ptr<tf2_ros::TransformListener> transform_listener_{nullptr};
-    std::unique_ptr<tf2_ros::Buffer> tf_buffer_;
     bool got_tf{false};
 
     std::string tag_0_frame = "uwb_tag_0";
