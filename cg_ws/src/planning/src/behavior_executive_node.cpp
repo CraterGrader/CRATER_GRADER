@@ -106,7 +106,7 @@ namespace planning {
     this->get_parameter("trajectory_heuristic_epsilon", trajectory_heuristic_epsilon);
     this->declare_parameter<float>("max_pose_equality_scalar", 1.0);
     this->get_parameter("max_pose_equality_scalar", max_pose_equality_scalar);
-    this->declare_parameter<float>("pose_equality_scalar_iteration", 1.0);
+    this->declare_parameter<int>("pose_equality_scalar_iteration", 1000);
     this->get_parameter("pose_equality_scalar_iteration", pose_equality_scalar_iteration);
 
     cg::planning::KinematicPlanner param_kinematic_planner = cg::planning::KinematicPlanner(
