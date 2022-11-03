@@ -10,27 +10,29 @@ namespace cg
     TSPrismTransformer::TSPrismTransformer() : Node("ts_prism_transformer")
     {
 
+      // Load parameters
+      this->declare_parameter<int>("pub_freq", 10);
+      this->get_parameter("pub_freq", pub_freq_);
+      this->declare_parameter<float>("linear_translation.prism_offset_x", -0.20033);
+      this->get_parameter("linear_translation.prism_offset_x", prism_offset_x_);
+      this->declare_parameter<float>("linear_translation.prism_offset_y", -0.020133);
+      this->get_parameter("linear_translation.prism_offset_y", prism_offset_y_);
+      this->declare_parameter<float>("linear_translation.prism_offset_z", -0.75628);
+      this->get_parameter("linear_translation.prism_offset_z", prism_offset_z_);
+
       /* Publishers and Subscribers */
       ts_prism_subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
-          "/total_station_prism", 10, std::bind(&TSPrismTransformer::ts_prism_callback, this, _1));
+          "/total_station_prism", pub_freq_, std::bind(&TSPrismTransformer::ts_prism_callback, this, _1));
 
       imu_subscription_ = this->create_subscription<sensor_msgs::msg::Imu>(
-          "/imu/data/base_link", 10, std::bind(&TSPrismTransformer::imu_callback, this, _1));
+          "/imu/data/base_link", pub_freq_, std::bind(&TSPrismTransformer::imu_callback, this, _1));
 
       transformed_ts_prism_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(
           "/transformed_total_station_prism", 1);
       
       bearing_subscription_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
-          "/bearing", 10, std::bind(&TSPrismTransformer::bearing_callback, this, _1));
+          "/bearing", pub_freq_, std::bind(&TSPrismTransformer::bearing_callback, this, _1));
 
-      int pub_freq{10};
-      tf_timer_ = this->create_wall_timer(
-          std::chrono::milliseconds(1000 / pub_freq),
-          std::bind(&TSPrismTransformer::tf_Callback, this));
-
-      // Tf listeners
-      tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-      transform_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
     }
 
     void TSPrismTransformer::bearing_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr bearing_msg) {
@@ -73,13 +75,10 @@ namespace cg
           map_to_base_link_q.z()
         );
 
-        // TODO parametrize this hard-coded translation
         // Get static TS prism to base_link translation from transform/parameters
         Eigen::Vector3d ts_prism_to_base_link_translation(
-          // ts_prism_transformStamped.transform.translation.x,
-          // ts_prism_transformStamped.transform.translation.y,
-          // ts_prism_transformStamped.transform.translation.z
-          -0.20033, -0.020133, -0.75628
+          ///-0.20033, -0.020133, -0.75628
+          prism_offset_x_, prism_offset_y_, prism_offset_z_
         );
 
         // Rotate translation such that it is axis aligned with base_link
@@ -112,38 +111,6 @@ namespace cg
     {
       imu_last = *imu_msg;
       got_imu = true;
-    }
-
-    // Update tf transforms
-    // TODO investigate if tf_Callback and tf_Update are still needed
-    void TSPrismTransformer::tf_Callback()
-    {
-
-      // Get Translation between base_link and prism in base_link_frame
-      bool got_tf1 = tf_update(prism_frame, base_link_frame, ts_prism_transformStamped);
-
-      // Get Orientation between map and base_link in map_frame
-      bool got_tf2 = tf_update(map_frame, base_link_frame, base_link_transform);
-      got_tf = got_tf1 && got_tf2;
-    }
-
-    // Update given tf transform
-    bool TSPrismTransformer::tf_update(std::string toFrameRel, std::string fromFrameRel, geometry_msgs::msg::TransformStamped &transform)
-    {
-      try
-      {
-        transform = tf_buffer_->lookupTransform(
-            toFrameRel, fromFrameRel,
-            tf2::TimePointZero);
-        return true;
-      }
-      catch (tf2::TransformException &ex)
-      {
-        RCLCPP_INFO(
-            this->get_logger(), "Could not transform %s to %s: %s",
-            toFrameRel.c_str(), fromFrameRel.c_str(), ex.what());
-        return false;
-      }
     }
 
   } // namespace total_station_rtls

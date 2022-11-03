@@ -18,14 +18,12 @@ class CellBuffer {
   void bufferHasNewData(){doesBufferHaveNewData_ = true;}
   void bufferHasBeenUpdated();
   bool doesBufferHaveNewData(){return doesBufferHaveNewData_;}
-  void offset_height(float offset){height_ -= offset;}
+  void offset_height(float offset);
 
   private:
   // attributes
   bool doesBufferHaveNewData_;
   float height_; // the buffer which stores the height
-  float unseen_grid_height_;
-
 
 };
 

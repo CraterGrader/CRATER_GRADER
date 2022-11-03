@@ -16,6 +16,7 @@
 #include <pcl/filters/crop_box.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <iostream>
 
 // includes for the box filters
 #include <pcl_conversions/pcl_conversions.h>

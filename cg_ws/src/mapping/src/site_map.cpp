@@ -28,7 +28,7 @@ SiteMap::SiteMap(size_t cHeight,
   minCellVariance_ = minCellVariance;
   heightMap_.resize(height_*width_, unseenGridHeight_);
   bufferMap_.resize(height_*width_, CellBuffer(unseenGridHeight_));
-  varianceMap_.resize(height_*width_, CellBayes(cellStartingVariance_, minCellVariance_));
+  varianceMap_.resize(height_*width_, CellBayes(unseenGridHeight, cellStartingVariance, minCellVariance));
   seenPointsMap_.resize(height_*width_, 0);
   }
 
@@ -96,7 +96,7 @@ void SiteMap::updateMapCoverage(){
 void SiteMap::updateCellsBayes(){
   // for each cell in map
   for (size_t i=0; i<getNcells(); i++){
-
+    
     // if the filter has been updated since the last updateCellsBayes
     if (bufferMap_[i].doesBufferHaveNewData() == true){
       // get the new element in the filter map 
@@ -117,20 +117,22 @@ void SiteMap::updateCellsBayes(){
 
 void SiteMap::normalizeHeightMap(){
   float sum = 0.0f;
-  // for every cell, sum to get mean
-  // TODO convert this to 
+  float num_seen_cells = 1.0f; // set to one to prevent devide by zero
+  // for every seen cell, sum to get mean
   for (size_t i=0; i<getNcells(); i++){
-    sum += heightMap_[i];
+    if (seenPointsMap_[i] != 0){
+      sum += heightMap_[i];
+      num_seen_cells += 1; 
+    }
   }
-  plane_offset_ = sum / getNcells();
+  plane_offset_ = sum / num_seen_cells;
   std::cout << "  offset " << plane_offset_ << std::endl;
+  
   // for every cell, subtract mean
   for (size_t i=0; i<getNcells(); i++){
-    // std::cout << "    before" << heightMap_[i] << std::endl;
     heightMap_[i] -= plane_offset_;
     bufferMap_[i].offset_height(plane_offset_);
     varianceMap_[i].offset_height(plane_offset_);
-    // std::cout << "      after" << heightMap_[i] << std::endl;
   }
 }
 
