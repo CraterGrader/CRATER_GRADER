@@ -204,7 +204,6 @@ void SiteMapNode::new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPt
 void SiteMapNode::sendSiteMap(cg_msgs::srv::SiteMap::Request::SharedPtr req, cg_msgs::srv::SiteMap::Response::SharedPtr res)
 {
   (void)req; // No request input for cg_msgs/srv/SiteMap.srv, but service needs both Request and Response args so just "touch" the request to hide unused parameter warning
-  // siteMap_.updateMapCoverage();
   siteMap_.normalizeHeightMap();
   cg_msgs::msg::SiteMap map_msg = siteMap_.toMsg();
   res->site_map = map_msg;
