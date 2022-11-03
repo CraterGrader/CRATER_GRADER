@@ -56,8 +56,6 @@ void BearingNode::poseUpdateCallback(const nav_msgs::msg::Odometry::SharedPtr ms
   double roll, pitch, yaw;
   m.getRPY(roll, pitch, yaw);
   robot_roll_rad = roll;
-  RCLCPP_INFO(this->get_logger(), "Robot Roll");
-  RCLCPP_INFO(this->get_logger(), std::to_string(robot_roll_rad).c_str());
 }
 
 void BearingNode::timerCallback() {
