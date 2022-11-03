@@ -12,8 +12,6 @@ class ToolPlanner {
 
 public:
 
-  ToolPlanner() 
-   : design_blade_height_(80.0), raised_blade_height_(0.0) {} //TODO MAKE THIS PARAM & ADD CONSTRUCTOR TO BEHAVIOR
   ToolPlanner(double design_blade_height, double raised_blade_height)
    : design_blade_height_(design_blade_height), raised_blade_height_(raised_blade_height) {}
 

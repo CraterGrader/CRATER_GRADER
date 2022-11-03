@@ -11,13 +11,14 @@ namespace planning {
 class ExplorationPlanner : public GoalPlanner {
 
 public:
-  ExplorationPlanner() {};
+  ExplorationPlanner(double min_dist_from_map_boundary)
+      : min_dist_from_map_boundary_(min_dist_from_map_boundary) {};
   bool planExploration(const cg::mapping::Map<float> &map);
   std::vector<cg_msgs::msg::Pose2D> getGoalPose(
     const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map);
 
 private:
-  static constexpr double min_dist_from_map_boundary_ = 0.5;
+  double min_dist_from_map_boundary_;
   std::vector<cg_msgs::msg::Pose2D> exploration_waypoints_;
 };
 

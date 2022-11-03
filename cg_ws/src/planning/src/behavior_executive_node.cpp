@@ -70,6 +70,7 @@ namespace planning {
 
     // Kinematic planner
     float goal_pose_distance_threshold;
+    float goal_pose_yaw_threshold;
     float turn_radii_min;
     float turn_radii_max;
     float turn_radii_resolution;
@@ -79,8 +80,12 @@ namespace planning {
     float pose_yaw_equality_threshold;
     float topography_weight;
     float trajectory_heuristic_epsilon;
+    float max_pose_equality_scalar;
+    int pose_equality_scalar_iteration;
     this->declare_parameter<float>("goal_pose_distance_threshold", 0.00001);
     this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
+    this->declare_parameter<float>("goal_pose_yaw_threshold", 0.00001);
+    this->get_parameter("goal_pose_yaw_threshold", goal_pose_yaw_threshold);
     this->declare_parameter<float>("turn_radii_min", 1.6);
     this->get_parameter("turn_radii_min", turn_radii_min);
     this->declare_parameter<float>("turn_radii_max", 2.8);
@@ -99,9 +104,33 @@ namespace planning {
     this->get_parameter("topography_weight", topography_weight);
     this->declare_parameter<float>("trajectory_heuristic_epsilon", 1.0);
     this->get_parameter("trajectory_heuristic_epsilon", trajectory_heuristic_epsilon);
+    this->declare_parameter<float>("max_pose_equality_scalar", 1.0);
+    this->get_parameter("max_pose_equality_scalar", max_pose_equality_scalar);
+    this->declare_parameter<int>("pose_equality_scalar_iteration", 1000);
+    this->get_parameter("pose_equality_scalar_iteration", pose_equality_scalar_iteration);
 
-    cg::planning::KinematicPlanner param_kinematic_planner = cg::planning::KinematicPlanner(
+    // Exploration planner
+    double exploration_min_dist_from_map_boundary;
+    this->declare_parameter<double>("exploration_min_dist_from_map_boundary", 0.5);
+    this->get_parameter("exploration_min_dist_from_map_boundary", exploration_min_dist_from_map_boundary);
+
+    // Tool planner
+    double design_blade_height, raised_blade_height;
+    this->declare_parameter<double>("design_blade_height", 80.0);
+    this->get_parameter<double>("design_blade_height", design_blade_height);
+    this->declare_parameter<double>("raised_blade_height", 0.0);
+    this->get_parameter<double>("raised_blade_height", raised_blade_height);
+
+    // Velocity planner
+    double constant_velocity;
+    this->declare_parameter<double>("constant_velocity", 100.0);
+    this->get_parameter<double>("constant_velocity", constant_velocity);
+
+    transport_planner_ = std::make_unique<TransportPlanner>(TransportPlanner());
+    exploration_planner_ = std::make_unique<ExplorationPlanner>(ExplorationPlanner(exploration_min_dist_from_map_boundary));
+    kinematic_planner_ = std::make_unique<KinematicPlanner>(KinematicPlanner(
         goal_pose_distance_threshold,
+        goal_pose_yaw_threshold,
         turn_radii_min,
         turn_radii_max,
         turn_radii_resolution,
@@ -110,8 +139,11 @@ namespace planning {
         pose_position_equality_threshold,
         pose_yaw_equality_threshold,
         topography_weight,
-        trajectory_heuristic_epsilon);
-    kinematic_planner_ = param_kinematic_planner;
+        trajectory_heuristic_epsilon,
+        max_pose_equality_scalar,
+        pose_equality_scalar_iteration));
+    tool_planner_ = std::make_unique<ToolPlanner>(ToolPlanner(design_blade_height, raised_blade_height));
+    velocity_planner_ = std::make_unique<VelocityPlanner>(VelocityPlanner(constant_velocity));
 
     // Transport planner
     this->declare_parameter<float>("transport_threshold_z", 0.03);
@@ -123,7 +155,7 @@ namespace planning {
     this->declare_parameter<double>("last_pose_offset", 1.0);
     this->get_parameter("last_pose_offset", last_pose_offset);
 
-    transport_planner_.setLastPoseOffset(last_pose_offset);
+    transport_planner_->setLastPoseOffset(last_pose_offset);
 
     // Exploration planner
     this->declare_parameter<float>("map_coverage_threshold", 0.01);
@@ -190,11 +222,11 @@ void BehaviorExecutive::fsmTimerCallback()
     replan_transport_.runState();
     break;
   case cg::planning::FSM::State::PLAN_TRANSPORT:
-    plan_transport_.runState(transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
+    plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
     break;
   case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
-    get_transport_goals_.runState(current_goal_poses_, transport_planner_, current_agent_pose_, current_height_map_);
+    get_transport_goals_.runState(current_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
     // ---------------------------------------
     // DEBUG
     std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
@@ -206,10 +238,10 @@ void BehaviorExecutive::fsmTimerCallback()
     // ---------------------------------------
     break;
   case cg::planning::FSM::State::PLAN_EXPLORATION:
-    plan_exploration_.runState(exploration_planner_, current_height_map_);
+    plan_exploration_.runState(*exploration_planner_, current_height_map_);
     break;
   case cg::planning::FSM::State::GET_EXPLORATION_GOALS:{
-    get_exploration_goals_.runState(current_goal_poses_, exploration_planner_, current_agent_pose_, current_height_map_);
+    get_exploration_goals_.runState(current_goal_poses_, *exploration_planner_, current_agent_pose_, current_height_map_);
     for (size_t i =0; i < current_goal_poses_.size(); ++i){
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
     }
@@ -240,13 +272,13 @@ void BehaviorExecutive::fsmTimerCallback()
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
     if (!calculated_trajectory_) {
       // Calculate path trajectory
-      kinematic_planner_.generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
+      kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
 
       // Calculate velocity trajectory
-      velocity_planner_.generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+      velocity_planner_->generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);
 
       // Calculate tool trajectory
-      tool_planner_.generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+      tool_planner_->generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
       
       // Convert to global frame
       for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {

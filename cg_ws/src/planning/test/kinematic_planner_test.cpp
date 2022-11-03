@@ -21,10 +21,10 @@ TEST(KinematicPlannerTest, Test_generatePathForward) {
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
 
-  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.getTrajectoryResolution()));
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
+  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>((1.0f/kinematic_planner.getTrajectoryResolution()) + 1));
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getGoalPoseDistanceThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getGoalPoseDistanceThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getGoalPoseYawThreshold());
 
 }
 
@@ -48,10 +48,10 @@ TEST(KinematicPlannerTest, Test_generatePathForwardMultiple) {
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
 
-  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(2.0f/kinematic_planner.getTrajectoryResolution()));
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
+  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>((2.0f/kinematic_planner.getTrajectoryResolution()) + 1));
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getGoalPoseDistanceThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getGoalPoseDistanceThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getGoalPoseYawThreshold());
 
 }
 
@@ -74,10 +74,10 @@ TEST(KinematicPlannerTest, Test_generatePathBackwards) {
   
   kinematic_planner.generatePath(path, agent_pose, goal_pose, map);
 
-  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>(1.0f/kinematic_planner.getTrajectoryResolution()));
-  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getPosePositionEqualityThreshold());
-  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getPosePositionEqualityThreshold());
-  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getPoseYawEqualityThreshold());
+  EXPECT_EQ(static_cast<int>(path.size()), static_cast<int>((1.0f/kinematic_planner.getTrajectoryResolution()) + 1));
+  EXPECT_NEAR(path.back().pt.x, goal_pose.pt.x, kinematic_planner.getGoalPoseDistanceThreshold());
+  EXPECT_NEAR(path.back().pt.y, goal_pose.pt.y, kinematic_planner.getGoalPoseDistanceThreshold());
+  EXPECT_NEAR(path.back().yaw, goal_pose.yaw, kinematic_planner.getGoalPoseYawThreshold());
 
 }
 
