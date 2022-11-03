@@ -20,6 +20,7 @@ def generate_launch_description():
       os.path.join(get_package_share_directory('realsense'), 'launch/realsense_launch.py')
     )
   )
+
   return LaunchDescription([
     bearing_launch,
     imu_launch,

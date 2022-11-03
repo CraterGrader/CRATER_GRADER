@@ -23,6 +23,7 @@
 #include <planning/fsm/goals_remaining.hpp>
 #include <planning/fsm/get_worksystem_trajectory.hpp>
 #include <planning/fsm/following_trajectory.hpp>
+#include <planning/fsm/end_mission.hpp>
 #include <planning/fsm/stopped.hpp>
 
 // Viz
@@ -97,6 +98,8 @@ private:
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
+  float current_map_coverage_ratio_;
+  std::vector<int> current_seen_map_;
   cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
   cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
@@ -104,6 +107,7 @@ private:
   double thresh_pos_;
   double thresh_head_;
   float thresh_euclidean_replan_;
+  float map_coverage_threshold_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
@@ -114,6 +118,7 @@ private:
 
   cg::mapping::Map<float> design_height_map_;
   float transport_threshold_z_;
+  float topology_equality_threshold_;
   float thresh_max_assignment_distance_;
   double viz_planning_height_;
 
@@ -140,6 +145,7 @@ private:
   cg::planning::GoalsRemaining goals_remaining_;
   cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
   cg::planning::FollowingTrajectory following_trajectory_;
+  cg::planning::EndMission end_mission_;
   cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive

@@ -50,6 +50,7 @@ add_executable(behavior_executive_node src/behavior_executive_main.cpp
   src/fsm/goals_remaining.cpp
   src/fsm/get_worksystem_trajectory.cpp
   src/fsm/following_trajectory.cpp
+  src/fsm/end_mission.cpp
   src/fsm/stopped.cpp
   # Planner modules
   src/transport_planner.cpp
