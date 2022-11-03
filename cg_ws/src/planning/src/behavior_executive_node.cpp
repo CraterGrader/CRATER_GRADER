@@ -284,6 +284,9 @@ void BehaviorExecutive::fsmTimerCallback()
     }
 
     break;}
+  case cg::planning::FSM::State::END_MISSION:
+    end_mission_.runState();
+    break;
   case cg::planning::FSM::State::STOPPED:
     // Stop the worksystem
     enable_worksystem_ = false;

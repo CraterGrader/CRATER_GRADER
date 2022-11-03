@@ -23,6 +23,7 @@
 #include <planning/fsm/goals_remaining.hpp>
 #include <planning/fsm/get_worksystem_trajectory.hpp>
 #include <planning/fsm/following_trajectory.hpp>
+#include <planning/fsm/end_mission.hpp>
 #include <planning/fsm/stopped.hpp>
 
 // Viz
@@ -143,6 +144,7 @@ private:
   cg::planning::GoalsRemaining goals_remaining_;
   cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
   cg::planning::FollowingTrajectory following_trajectory_;
+  cg::planning::EndMission end_mission_;
   cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive
