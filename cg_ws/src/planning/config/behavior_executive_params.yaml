@@ -36,6 +36,9 @@ behavior_executive_node:
     # Velocity planner
     constant_velocity: 100.0  # Constant velocity for velocity planner, %FS
 
+    # Validation parameters
+    topology_equality_threshold: 0.05
+
     # Timer callbacks
     fsm_timer_callback_ms: 500 # milliseconds
     service_response_timeout_ms: 500 # milliseconds

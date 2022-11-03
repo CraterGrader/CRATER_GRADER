@@ -118,6 +118,7 @@ private:
 
   cg::mapping::Map<float> design_height_map_;
   float transport_threshold_z_;
+  float topology_equality_threshold_;
   float thresh_max_assignment_distance_;
   double viz_planning_height_;
 

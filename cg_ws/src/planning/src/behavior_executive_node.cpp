@@ -169,6 +169,10 @@ namespace planning {
     current_height_map_.updateDimensions(map_height, map_width, map_resolution);
     bool design_height_map_initialized = design_height_map_.load_map_from_file(design_topo_filepath);
 
+    // Validation parameters
+    this->declare_parameter<float>("topology_equality_threshold", 0.03);
+    this->get_parameter("topology_equality_threshold", topology_equality_threshold_);
+
     if (!design_height_map_initialized) {
       RCLCPP_FATAL(this->get_logger(), "Design map loading error");
       rclcpp::shutdown();
@@ -213,7 +217,7 @@ void BehaviorExecutive::fsmTimerCallback()
     update_map_.runState(map_updated_);
     break;
   case cg::planning::FSM::State::SITE_WORK_DONE:
-    site_work_done_.runState(current_height_map_, design_height_map_, transport_threshold_z_);
+    site_work_done_.runState(current_height_map_, design_height_map_, topology_equality_threshold_);
     break;
   case cg::planning::FSM::State::MAP_EXPLORED:
     map_explored_.runState(current_map_coverage_ratio_, map_coverage_threshold_);
