@@ -21,7 +21,7 @@ public:
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg::mapping::Map<float> &map);
 
-  void setEnable(bool enable) {autograder_enabled_ = enable;}
+  void enable(bool enable) {autograder_enabled_ = enable;}
 
 private:
   double design_blade_height_;

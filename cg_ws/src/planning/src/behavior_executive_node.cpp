@@ -285,7 +285,7 @@ void BehaviorExecutive::fsmTimerCallback()
       velocity_planner_->generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);
 
       // Calculate tool trajectory
-      tool_planner_->setEnable(fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT);
+      tool_planner_->enable(fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT);
       tool_planner_->generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
       
       // Convert to global frame
