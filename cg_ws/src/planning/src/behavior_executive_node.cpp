@@ -196,6 +196,7 @@ void BehaviorExecutive::fsmTimerCallback()
   std::cout << "~~~~~~~ Machine iteration" << std::endl;
   std::cout << "    Pre-Signal: " << fsm_.preSignalToString() << std::endl;
   std::cout << "      State L0: " << fsm_.currStateL0ToString() << std::endl;
+  std::cout << "      State L1: " << fsm_.currStateL1ToString() << std::endl;
   switch (fsm_.getCurrStateL0())
   {
   case cg::planning::FSM::StateL0::READY:

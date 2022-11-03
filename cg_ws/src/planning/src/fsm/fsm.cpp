@@ -50,7 +50,18 @@ std::string FSM::currStateL0ToString() {
     case StateL0::STOPPED:
       return "STOPPED";
     default:
-      return "State not recognized!";
+      return "State L0 not recognized!";
+  }
+}
+
+std::string FSM::currStateL1ToString() {
+  switch(curr_state_l1_) {
+    case StateL1::EXPLORATION:
+      return "EXPLORATION";
+    case StateL1::TRANSPORT:
+      return "TRANSPORT";
+    default:
+      return "State L1 not recognized";
   }
 }
 
