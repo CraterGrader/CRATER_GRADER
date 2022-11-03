@@ -14,7 +14,7 @@ void UpdateMap::runState(const bool map_updated) {
   
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::MAP_UPDATED;
-  curr_state_ = State::SITE_WORK_DONE;
+  curr_state_l0_ = StateL0::SITE_WORK_DONE;
 
 }
 

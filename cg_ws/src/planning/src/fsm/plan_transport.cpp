@@ -13,7 +13,7 @@ namespace planning {
 
     // Update shared current state and the precursing signal
     pre_signal_ = Signal::TRANSPORT_PLANNED;
-    curr_state_ = State::GET_TRANSPORT_GOALS;
+    curr_state_l0_ = StateL0::GET_TRANSPORT_GOALS;
   }
 
 } // planning namespace

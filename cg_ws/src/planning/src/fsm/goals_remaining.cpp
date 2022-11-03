@@ -16,13 +16,13 @@ void GoalsRemaining::runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_po
 
     // Change state to generate trajectory
     pre_signal_ = Signal::YES;
-    curr_state_ = State::GET_WORKSYSTEM_TRAJECTORY;
+    curr_state_l0_ = StateL0::GET_WORKSYSTEM_TRAJECTORY;
     return;
   }
 
   // Otherwise no more goals are left so go back to checking the map
   pre_signal_ = Signal::NO;
-  curr_state_ = State::UPDATE_MAP;
+  curr_state_l0_ = StateL0::UPDATE_MAP;
 }
 
 } // planning namespace

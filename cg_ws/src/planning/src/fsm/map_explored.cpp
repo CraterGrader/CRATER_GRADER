@@ -9,9 +9,9 @@ void MapExplored::runState() {
 
   // Update shared current state and the precursing signal
   // pre_signal_ = Signal::YES;
-  // curr_state_ = State::REPLAN_TRANSPORT;
+  // curr_state_l0_ = StateL0::REPLAN_TRANSPORT;
   pre_signal_ = Signal::NO;
-  curr_state_ = State::PLAN_EXPLORATION;
+  curr_state_l0_ = StateL0::PLAN_EXPLORATION;
 }
 
 } // planning namespace

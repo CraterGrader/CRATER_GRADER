@@ -5,49 +5,49 @@ namespace planning {
 
 // Initialize default static variables
 FSM::StateL1 FSM::curr_state_l1_ = FSM::defaultStartStateL1();
-FSM::State FSM::curr_state_ = FSM::defaultStartState();
+FSM::StateL0 FSM::curr_state_l0_ = FSM::defaultStartStateL0();
 FSM::Signal FSM::pre_signal_ = FSM::defaultStartSignal();
 
-FSM::FSM(StateL1 start_state_l1, State start_state, Signal start_signal) {
+FSM::FSM(StateL1 start_state_l1, StateL0 start_state, Signal start_signal) {
   curr_state_l1_ = start_state_l1;
-  curr_state_ = start_state;
+  curr_state_l0_ = start_state;
   pre_signal_ = start_signal;
 }
 
 FSM::~FSM(){
-  // Reset to default state when being destroyed so new FSM objects start with defaults (e.g. for tests)
+  // Reset to default states when being destroyed so new FSM objects start with defaults (e.g. for tests)
   curr_state_l1_ = FSM::defaultStartStateL1();
-  curr_state_ = FSM::defaultStartState();
+  curr_state_l0_ = FSM::defaultStartStateL0();
   pre_signal_ = FSM::defaultStartSignal();
 }
 
-std::string FSM::currStateToString() {
-  switch(curr_state_) {
-    case State::READY:
+std::string FSM::currStateL0ToString() {
+  switch(curr_state_l0_) {
+    case StateL0::READY:
       return "READY";
-    case State::UPDATE_MAP:
+    case StateL0::UPDATE_MAP:
       return "UPDATE_MAP";
-    case State::SITE_WORK_DONE:
+    case StateL0::SITE_WORK_DONE:
       return "SITE_WORK_DONE";
-    case State::MAP_EXPLORED:
+    case StateL0::MAP_EXPLORED:
       return "MAP_EXPLORED";
-    case State::REPLAN_TRANSPORT:
+    case StateL0::REPLAN_TRANSPORT:
       return "REPLAN_TRANSPORT";
-    case State::PLAN_TRANSPORT:
+    case StateL0::PLAN_TRANSPORT:
       return "PLAN_TRANSPORT";
-    case State::GET_TRANSPORT_GOALS:
+    case StateL0::GET_TRANSPORT_GOALS:
       return "GET_TRANSPORT_GOALS";
-    case State::PLAN_EXPLORATION:
+    case StateL0::PLAN_EXPLORATION:
       return "PLAN_EXPLORATION";
-    case State::GET_EXPLORATION_GOALS:
+    case StateL0::GET_EXPLORATION_GOALS:
       return "GET_EXPLORATION_GOALS";
-    case State::GOALS_REMAINING:
+    case StateL0::GOALS_REMAINING:
       return "GOALS_REMAINING";
-    case State::GET_WORKSYSTEM_TRAJECTORY:
+    case StateL0::GET_WORKSYSTEM_TRAJECTORY:
       return "GET_WORKSYSTEM_TRAJECTORY";
-    case State::FOLLOWING_TRAJECTORY:
+    case StateL0::FOLLOWING_TRAJECTORY:
       return "FOLLOWING_TRAJECTORY";
-    case State::STOPPED:
+    case StateL0::STOPPED:
       return "STOPPED";
     default:
       return "State not recognized!";

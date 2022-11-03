@@ -18,7 +18,7 @@ namespace planning {
 
     // Update shared current state and the precursing signal
     pre_signal_ = Signal::DRIVE;
-    curr_state_ = State::GOALS_REMAINING;
+    curr_state_l0_ = StateL0::GOALS_REMAINING;
   }
 
 } // planning namespace

@@ -195,33 +195,33 @@ void BehaviorExecutive::fsmTimerCallback()
   // std::cout << "~~~~~~~ Running machine..." << std::endl;
   std::cout << "~~~~~~~ Machine iteration" << std::endl;
   std::cout << "    Pre-Signal: " << fsm_.preSignalToString() << std::endl;
-  std::cout << "         State: " << fsm_.currStateToString() << std::endl;
-  switch (fsm_.getCurrState())
+  std::cout << "      State L0: " << fsm_.currStateL0ToString() << std::endl;
+  switch (fsm_.getCurrStateL0())
   {
-  case cg::planning::FSM::State::READY:
+  case cg::planning::FSM::StateL0::READY:
     ready_.runState();
     break;
-  case cg::planning::FSM::State::UPDATE_MAP:
+  case cg::planning::FSM::StateL0::UPDATE_MAP:
     map_updated_ = updateMapFromService(false);
     // Check that map was updated correctly
     RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated_ ? "true" : "false");
     // map_updated_ = true; // DEBUG: use to skip actual state checking
     update_map_.runState(map_updated_);
     break;
-  case cg::planning::FSM::State::SITE_WORK_DONE:
+  case cg::planning::FSM::StateL0::SITE_WORK_DONE:
     site_work_done_.runState();
     break;
-  case cg::planning::FSM::State::MAP_EXPLORED:
+  case cg::planning::FSM::StateL0::MAP_EXPLORED:
     map_explored_.runState();
     break;
-  case cg::planning::FSM::State::REPLAN_TRANSPORT:
+  case cg::planning::FSM::StateL0::REPLAN_TRANSPORT:
     replan_transport_.runState();
     break;
-  case cg::planning::FSM::State::PLAN_TRANSPORT:
+  case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
     plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, transport_threshold_z_, thresh_max_assignment_distance_);
     state_l1_goal_poses_.clear();
     break;
-  case cg::planning::FSM::State::GET_TRANSPORT_GOALS:
+  case cg::planning::FSM::StateL0::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
     get_transport_goals_.runState(current_goal_poses_, state_l1_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
     // ---------------------------------------
@@ -234,11 +234,11 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     // ---------------------------------------
     break;
-  case cg::planning::FSM::State::PLAN_EXPLORATION:
+  case cg::planning::FSM::StateL0::PLAN_EXPLORATION:
     plan_exploration_.runState(*exploration_planner_, current_height_map_);
     state_l1_goal_poses_.clear();
     break;
-  case cg::planning::FSM::State::GET_EXPLORATION_GOALS:{
+  case cg::planning::FSM::StateL0::GET_EXPLORATION_GOALS:{
     get_exploration_goals_.runState(current_goal_poses_, state_l1_goal_poses_, *exploration_planner_, current_agent_pose_, current_height_map_);
     for (size_t i =0; i < current_goal_poses_.size(); ++i){
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
@@ -252,7 +252,7 @@ void BehaviorExecutive::fsmTimerCallback()
     // current_goal_poses_.push_back(manual_goal2);
     // ---------------------------------------
     break;}
-  case cg::planning::FSM::State::GOALS_REMAINING:{
+  case cg::planning::FSM::StateL0::GOALS_REMAINING:{
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     // ---------------------------------------
     // DEBUG
@@ -265,7 +265,7 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     // ---------------------------------------
     break;}
-  case cg::planning::FSM::State::GET_WORKSYSTEM_TRAJECTORY:
+  case cg::planning::FSM::StateL0::GET_WORKSYSTEM_TRAJECTORY:
     // Get the trajectory
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
     if (!calculated_trajectory_) {
@@ -304,7 +304,7 @@ void BehaviorExecutive::fsmTimerCallback()
     // Update shared current state and the precursing signal if worksystem is now enabled
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
     break;
-  case cg::planning::FSM::State::FOLLOWING_TRAJECTORY:{
+  case cg::planning::FSM::StateL0::FOLLOWING_TRAJECTORY:{
     bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_, global_robot_pose_);
 
     // Disable worksystem if goal is reached
@@ -314,7 +314,7 @@ void BehaviorExecutive::fsmTimerCallback()
     }
 
     break;}
-  case cg::planning::FSM::State::STOPPED:
+  case cg::planning::FSM::StateL0::STOPPED:
     // Stop the worksystem
     enable_worksystem_ = false;
     enableWorksystemService(enable_worksystem_, true);

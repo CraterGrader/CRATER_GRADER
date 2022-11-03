@@ -9,7 +9,7 @@ void SiteWorkDone::runState() {
 
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::NO;
-  curr_state_ = State::MAP_EXPLORED;
+  curr_state_l0_ = StateL0::MAP_EXPLORED;
 }
 
 } // planning namespace
