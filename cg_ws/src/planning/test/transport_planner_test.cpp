@@ -36,7 +36,8 @@ TEST(TransportPlannerTest, vector_map)
 
   // Solve transport problem
   cg::planning::TransportPlanner transport_planner;
-  float objective_value = transport_planner.planTransport(current_height_map, design_height_map, threshold_z, thresh_max_assignment_distance);
+  std::vector<int> seen_map(map_height_cells * map_width_cells, 1);
+  float objective_value = transport_planner.planTransport(current_height_map, design_height_map, seen_map, threshold_z, thresh_max_assignment_distance);
   std::vector<cg::planning::TransportAssignment> transport_assignments = transport_planner.getTransportAssignments();
   
   // Check number of transport assignments

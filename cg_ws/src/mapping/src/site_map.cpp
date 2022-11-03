@@ -87,6 +87,10 @@ void SiteMap::updateMapCoverage(){
   if (getNcells() == sum_of_elems){
     siteMapFull_ = true;
   }
+  else {
+    siteMapFull_ = false;
+  }
+  siteMapCoverageRatio_ = static_cast<float>(sum_of_elems) / static_cast<float>(getNcells());
 }
 
 void SiteMap::updateCellsBayes(){
@@ -157,6 +161,16 @@ bool SiteMap::setHeightMap(std::vector<float> input_data) {
   }
   // Otherwise, ok to update
   heightMap_ = input_data;
+  return true;
+}
+
+bool SiteMap::setSeenMap(std::vector<int> input_data) {
+  // Don't update data if the dimensions are wrong
+  if (input_data.size() != (height_ * width_)) {
+    return false;
+  }
+  // Otherwise, ok to update
+  seenPointsMap_ = input_data;
   return true;
 }
 

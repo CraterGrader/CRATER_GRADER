@@ -9,7 +9,8 @@ namespace planning {
 class FSM {
 
 public:
-  enum class State {
+  enum class State
+  {
     READY,
     UPDATE_MAP,
     SITE_WORK_DONE,
@@ -22,6 +23,7 @@ public:
     GOALS_REMAINING,
     GET_WORKSYSTEM_TRAJECTORY,
     FOLLOWING_TRAJECTORY,
+    END_MISSION,
     STOPPED
   };
 
