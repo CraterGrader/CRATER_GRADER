@@ -26,10 +26,8 @@ public:
   };
 
   enum class StateL1 {
-    BEGINNING,
     EXPLORATION,
-    TRANSPORT,
-    END
+    TRANSPORT
   };
 
   enum class Signal {
@@ -75,7 +73,7 @@ private:
    * - Used to initialize the static state and signal
    * - May need to update the init_default_test if these defaults change
    */
-  static StateL1 defaultStartStateL1() { return StateL1::BEGINNING; }
+  static StateL1 defaultStartStateL1() { return StateL1::EXPLORATION; }
   static StateL0 defaultStartStateL0() { return StateL0::READY; }
   static Signal defaultStartSignal() { return Signal::START; }
   /******************************/

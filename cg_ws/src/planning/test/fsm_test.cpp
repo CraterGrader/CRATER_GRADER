@@ -22,7 +22,7 @@ TEST(FSMTest, init_default_test)
   cg::planning::FSM fsm;
 
   // Check for default start state and signal
-  EXPECT_EQ(fsm.getCurrStateL1(), cg::planning::FSM::StateL1::BEGINNING);
+  EXPECT_EQ(fsm.getCurrStateL1(), cg::planning::FSM::StateL1::EXPLORATION);
   EXPECT_EQ(fsm.getCurrStateL0(), cg::planning::FSM::StateL0::READY);
   EXPECT_EQ(fsm.getPreSignal(), cg::planning::FSM::Signal::START);
 }
