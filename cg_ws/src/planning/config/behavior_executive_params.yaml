@@ -37,7 +37,7 @@ behavior_executive_node:
     constant_velocity: 100.0  # Constant velocity for velocity planner, %FS
 
     # Validation parameters
-    topology_equality_threshold: 0.05
+    topology_equality_threshold: 0.05 # Note: must be <= transport_threshold_z
 
     # Timer callbacks
     fsm_timer_callback_ms: 500 # milliseconds
