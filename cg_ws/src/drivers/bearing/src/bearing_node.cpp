@@ -65,9 +65,9 @@ void BearingNode::timerCallback() {
   geometry_msgs::msg::PoseWithCovarianceStamped bearing;
 
   // Frame names
-  std::string fromTag_base = "april_tag";
-  std::string toCamera = "camera";
-  std::string toLink = "rob_base_link";
+  std::string tag_frame_base = "april_tag";
+  std::string cam_frame = "camera";
+  std::string link_frame = "rob_base_link";
   std::string tf_map_frame = "map";
   
   // Store bearing estimates and distances
@@ -80,13 +80,13 @@ void BearingNode::timerCallback() {
   // Look up for the transformation from tag to base_link
   for (int i = 0; i < 4; i++) {
     geometry_msgs::msg::TransformStamped cam_to_tag;
-    geometry_msgs::msg::TransformStamped link_to_tag;
-    std::string fromTag = fromTag_base + std::to_string(i);
+    geometry_msgs::msg::TransformStamped link_to_cam;
+    std::string tag_frame = tag_frame_base + std::to_string(i);
 
     // Get camera to tag transform - matters the most, needs to not only include most recent transform
     try {
       cam_to_tag = tf_buffer_->lookupTransform(
-        toCamera, fromTag,
+        cam_frame, tag_frame,
         tf2::TimePointZero);
       rclcpp::Time tf_time = cam_to_tag.header.stamp;
       // If the camera to tag transform is more than 0.8 seconds old, discard
@@ -101,8 +101,8 @@ void BearingNode::timerCallback() {
 
     // Get tag to base link transform
     try {
-      link_to_tag = tf_buffer_->lookupTransform(
-        toLink, fromTag,
+      link_to_cam = tf_buffer_->lookupTransform(
+        link_frame, cam_frame,
         tf2::TimePointZero);
     } catch (tf2::TransformException & ex) {
       continue;
@@ -115,11 +115,10 @@ void BearingNode::timerCallback() {
 
     // Get x and z location of the tag relative to the base link (z out from camera axis, x to the right)
     // Compensate base link to camera offset as z-direction always measured away from camera
-    double link_to_tag_x = link_to_tag.transform.translation.x;
-    double link_to_tag_y = link_to_tag.transform.translation.y * std::cos(robot_roll_rad) - 
-                            link_to_tag.transform.translation.z * std::sin(robot_roll_rad);
+    double cam_to_tag_x = cam_to_tag.transform.translation.x;
+    double cam_to_tag_z = cam_to_tag.transform.translation.z + link_to_cam.transform.translation.x;
 
-    double camera_tag_yaw_offset = std::atan(link_to_tag_y/link_to_tag_x);
+    double camera_tag_yaw_offset = std::atan(cam_to_tag_x/cam_to_tag_z);
     camera_tag_yaw_offsets.push_back(camera_tag_yaw_offset);
     double yaw = camera_tag_yaw_offset;
     double yaw_pose_offset;

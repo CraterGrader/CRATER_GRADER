@@ -41,7 +41,7 @@ def generate_launch_description():
         bearing_params = yaml.load(
         stream,
         Loader = yaml.SafeLoader
-    )  
+    )
 
     # Camera input parameters
     usb_cam_path = os.path.join(
