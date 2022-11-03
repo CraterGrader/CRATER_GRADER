@@ -28,7 +28,7 @@ SiteMap::SiteMap(size_t cHeight,
   minCellVariance_ = minCellVariance;
   heightMap_.resize(height_*width_, unseenGridHeight_);
   bufferMap_.resize(height_*width_, CellBuffer(unseenGridHeight_));
-  varianceMap_.resize(height_*width_, CellBayes(cellStartingVariance_, minCellVariance_));
+  varianceMap_.resize(height_*width_, CellBayes(unseenGridHeight, cellStartingVariance, minCellVariance));
   seenPointsMap_.resize(height_*width_, 0);
   }
 
@@ -96,7 +96,7 @@ void SiteMap::updateMapCoverage(){
 void SiteMap::updateCellsBayes(){
   // for each cell in map
   for (size_t i=0; i<getNcells(); i++){
-
+    
     // if the filter has been updated since the last updateCellsBayes
     if (bufferMap_[i].doesBufferHaveNewData() == true){
       // get the new element in the filter map 
