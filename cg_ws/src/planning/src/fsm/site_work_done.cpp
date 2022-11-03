@@ -19,6 +19,7 @@ void SiteWorkDone::runState(const cg::mapping::Map<float> &current_height_map, c
   } else {
   pre_signal_ = Signal::NO;
   curr_state_l0_ = StateL0::MAP_EXPLORED;
+  }
 }
 
 } // planning namespace
