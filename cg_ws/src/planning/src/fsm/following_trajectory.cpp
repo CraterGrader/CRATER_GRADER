@@ -20,7 +20,7 @@ bool FollowingTrajectory::runState(const cg_msgs::msg::Pose2D &current_agent_pos
   if (euclidean_distance_to_trajectory_point_ > thresh_euclidean_replan) {
     // Change state to re-calculate trajectory
     pre_signal_ = Signal::REPLAN;
-    curr_state_ = State::GET_WORKSYSTEM_TRAJECTORY;
+    curr_state_l0_ = StateL0::GET_WORKSYSTEM_TRAJECTORY;
     traj_idx_ = 0; // Reset state trajectory index so next following state begins with zero
     return false;
   }
@@ -28,7 +28,7 @@ bool FollowingTrajectory::runState(const cg_msgs::msg::Pose2D &current_agent_pos
   if (cg::planning::samePoseWithinThresh(current_agent_pose, current_goal_pose, thresh_pos, thresh_head)) {
     // Update shared current state and the precursing signal
     pre_signal_ = Signal::GOAL_REACHED;
-    curr_state_ = State::GOALS_REMAINING;
+    curr_state_l0_ = StateL0::GOALS_REMAINING;
     traj_idx_ = 0; // Reset state trajectory index so next following state begins with zero
     return false;
   }

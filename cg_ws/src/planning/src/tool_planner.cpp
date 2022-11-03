@@ -21,12 +21,15 @@ void ToolPlanner::generateToolTargets(
         for (float velocity_target: trajectory.velocity_targets) {
             // std::cout << "Current velocity: " << velocity_target << std::endl; // DEBUG
 
-            // If pose as positive x component, it's going forward
-            if (velocity_target >= 0) {
-                // std::cout << "Going forward, design height: " << design_blade_height_ << std::endl; // DEBUG
-                tool_positions.push_back(design_blade_height_);
+            if (autograder_enabled_) {
+                // If pose has positive x component, it's going forward
+                if (velocity_target >= 0) {
+                    tool_positions.push_back(design_blade_height_);
+                } else {
+                    tool_positions.push_back(raised_blade_height_);
+                }
             } else {
-                // std::cout << "Going backward, raised height: " << raised_blade_height_ << std::endl; // DEBUG
+                // Don't lower blade if autograder is disabled
                 tool_positions.push_back(raised_blade_height_);
             }
         }

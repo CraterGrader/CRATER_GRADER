@@ -16,7 +16,7 @@ void PlanExploration::runState(cg::planning::ExplorationPlanner &exploration_pla
 
   // Update for shared current state and the precursing signal
   pre_signal_ = Signal::EXPLORATION_PLANNED;
-  curr_state_ = State::GET_EXPLORATION_GOALS;
+  curr_state_l0_ = StateL0::GET_EXPLORATION_GOALS;
   exploration_planned_ = false; // Reset for next cycle
 }
 

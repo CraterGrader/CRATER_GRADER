@@ -28,7 +28,7 @@ namespace planning {
 
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::FOLLOW_TRAJECTORY;
-  curr_state_ = State::FOLLOWING_TRAJECTORY;
+  curr_state_l0_ = StateL0::FOLLOWING_TRAJECTORY;
 }
 
 void GetWorksystemTrajectory::runState(const bool worksystem_enabled, bool &updated_trajectory, bool &calculated_trajectory)
@@ -42,7 +42,7 @@ void GetWorksystemTrajectory::runState(const bool worksystem_enabled, bool &upda
 
     // Update shared current state and the precursing signal if trajectory was sent and worksystem is now enabled
     pre_signal_ = Signal::FOLLOW_TRAJECTORY;
-    curr_state_ = State::FOLLOWING_TRAJECTORY;
+    curr_state_l0_ = StateL0::FOLLOWING_TRAJECTORY;
   }
 }
 

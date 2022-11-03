@@ -13,9 +13,9 @@ void ReplanTransport::runState() {
 
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::YES;
-  curr_state_ = State::PLAN_TRANSPORT;
+  curr_state_l0_ = StateL0::PLAN_TRANSPORT;
   // pre_signal_ = Signal::NO;
-  // curr_state_ = State::GET_TRANSPORT_GOALS;
+  // curr_state_l0_ = StateL0::GET_TRANSPORT_GOALS;
 }
 
 } // planning namespace

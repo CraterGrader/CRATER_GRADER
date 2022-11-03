@@ -44,6 +44,7 @@ private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_goals_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_state_l1_goals_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_agent_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_curr_goal_pub_;
 
@@ -76,6 +77,7 @@ private:
   /* Message data */
   nav_msgs::msg::Path viz_path_;
   geometry_msgs::msg::PoseArray viz_goals_;
+  geometry_msgs::msg::PoseArray viz_state_l1_goals_;
   geometry_msgs::msg::PoseStamped viz_agent_;
   geometry_msgs::msg::PoseStamped viz_curr_goal_;
 
@@ -123,6 +125,7 @@ private:
   double viz_planning_height_;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
+  std::vector<cg_msgs::msg::Pose2D> viz_state_l1_goal_poses_;
   cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D current_agent_pose_; // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!

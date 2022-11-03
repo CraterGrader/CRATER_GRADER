@@ -9,7 +9,7 @@ void Ready::runState() {
 
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::START;
-  curr_state_ = State::UPDATE_MAP;
+  curr_state_l0_ = StateL0::UPDATE_MAP;
 }
 
 } // planning namespace
