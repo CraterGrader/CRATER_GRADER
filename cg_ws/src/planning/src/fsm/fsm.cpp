@@ -4,19 +4,19 @@ namespace cg {
 namespace planning {
 
 // Initialize default static variables
-FSM::Phase FSM::curr_phase_ = FSM::defaultStartPhase();
+FSM::StateL1 FSM::curr_state_l1_ = FSM::defaultStartStateL1();
 FSM::State FSM::curr_state_ = FSM::defaultStartState();
 FSM::Signal FSM::pre_signal_ = FSM::defaultStartSignal();
 
-FSM::FSM(Phase start_phase, State start_state, Signal start_signal) {
-  curr_phase_ = start_phase;
+FSM::FSM(StateL1 start_state_l1, State start_state, Signal start_signal) {
+  curr_state_l1_ = start_state_l1;
   curr_state_ = start_state;
   pre_signal_ = start_signal;
 }
 
 FSM::~FSM(){
   // Reset to default state when being destroyed so new FSM objects start with defaults (e.g. for tests)
-  curr_phase_ = FSM::defaultStartPhase();
+  curr_state_l1_ = FSM::defaultStartStateL1();
   curr_state_ = FSM::defaultStartState();
   pre_signal_ = FSM::defaultStartSignal();
 }

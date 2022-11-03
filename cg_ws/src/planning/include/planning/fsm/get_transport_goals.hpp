@@ -11,7 +11,7 @@ namespace planning {
 class GetTransportGoals : public FSM {
 
 public:
-  void runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_poses, std::vector<cg_msgs::msg::Pose2D> &phase_goal_poses, cg::planning::TransportPlanner &transport_planner, const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_poses, std::vector<cg_msgs::msg::Pose2D> &state_l1_goal_poses, cg::planning::TransportPlanner &transport_planner, const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map); // Main function to run current state; optionally modifies signal and state for transition
 }; // class State
 
 } // namespace planning

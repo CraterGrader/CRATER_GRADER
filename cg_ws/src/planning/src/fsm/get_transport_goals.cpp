@@ -4,13 +4,13 @@
 namespace cg {
 namespace planning {
 
-  void GetTransportGoals::runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_poses, std::vector<cg_msgs::msg::Pose2D> &phase_goal_poses, cg::planning::TransportPlanner &transport_planner, const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map)
+  void GetTransportGoals::runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_poses, std::vector<cg_msgs::msg::Pose2D> &state_l1_goal_poses, cg::planning::TransportPlanner &transport_planner, const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map)
   {
     std::cout << "GET_TRANSPORT_GOALS" << std::endl;
 
     std::vector<cg_msgs::msg::Pose2D> goalPoses = transport_planner.getGoalPose(agent_pose, map);
     while (goalPoses.size() > 0) {
-      phase_goal_poses.insert(phase_goal_poses.end(), goalPoses.begin(), goalPoses.end());
+      state_l1_goal_poses.insert(state_l1_goal_poses.end(), goalPoses.begin(), goalPoses.end());
       goalPoses = transport_planner.getGoalPose(agent_pose, map);
     }
 
