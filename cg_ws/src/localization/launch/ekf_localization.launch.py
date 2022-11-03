@@ -14,6 +14,11 @@ def generate_launch_description():
     'config',
     'ekf_global_node_params.yaml'
   )
+  prism_transformer_params = os.path.join(
+    get_package_share_directory('localization'),
+    'config',
+    'prism_transform_params.yaml'
+  )
   ekf_slip_params = os.path.join(
     get_package_share_directory('localization'),
     'config',
@@ -40,6 +45,12 @@ def generate_launch_description():
       ]
     ),
     Node(
+      package='localization',
+      executable='ts_prism_transformer',
+      name='ts_prism_transformer',
+      parameters=[prism_transformer_params],
+      output='screen'),
+    Node(
       package='robot_localization',
       executable='ekf_node',
       name='ekf_slip_node',
@@ -47,10 +58,5 @@ def generate_launch_description():
       remappings=[
         ('odometry/filtered', 'odometry/filtered/ekf_slip_node')
       ]
-    ),
-    Node(
-            package='localization',
-            executable='ts_prism_transformer',
-            name='ts_prism_transformer',
-            output='screen')
+    )
   ])
