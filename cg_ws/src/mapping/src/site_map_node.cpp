@@ -78,6 +78,11 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
 
     // Set the cell data
     siteMap_.setHeightMap(fileMap_.getCellData());
+    
+    // Assume loaded map has full coverage
+    std::vector<int> full_coverage(siteMap_.getHeight() * siteMap_.getHeight(), 1);
+    siteMap_.setSeenMap(full_coverage);
+    siteMap_.updateMapCoverage();
   }
 
 }

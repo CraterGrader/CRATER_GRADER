@@ -44,6 +44,7 @@ class SiteMap {
 
   // setters
   bool setHeightMap(std::vector<float> input_data);
+  bool setSeenMap(std::vector<int> input_data);
 
   // getter funcitons 
   size_t getNcells() const {return height_*width_;}
@@ -53,7 +54,7 @@ class SiteMap {
   float getXTransform() const {return xTransform_;}
   float getYTransform() const {return yTransform_;}
   bool getSiteMapFullStatus() const {return siteMapFull_;}
-  bool getSiteMapCoverage() const {return siteMapCoverageRatio_;}
+  float getSiteMapCoverage() const {return siteMapCoverageRatio_;}
   std::vector<CellBuffer> getBufferMap() const {return bufferMap_;}
   std::vector<float> getHeightMap() const {return heightMap_;}
   std::vector<int> getSeenMap() const {return seenPointsMap_;}

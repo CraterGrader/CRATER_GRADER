@@ -164,5 +164,15 @@ bool SiteMap::setHeightMap(std::vector<float> input_data) {
   return true;
 }
 
+bool SiteMap::setSeenMap(std::vector<int> input_data) {
+  // Don't update data if the dimensions are wrong
+  if (input_data.size() != (height_ * width_)) {
+    return false;
+  }
+  // Otherwise, ok to update
+  seenPointsMap_ = input_data;
+  return true;
+}
+
 } // mapping namespace
 } // cg namespace
