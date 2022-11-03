@@ -137,7 +137,7 @@ void BearingNode::timerCallback() {
         RCLCPP_INFO(this->get_logger(), "Unknown tag");
         break;
     }
-    yaw -= yaw_pose_offset;
+    yaw += yaw_pose_offset;
     bearings.push_back(yaw);
 
     RCLCPP_INFO(this->get_logger(), "Current Yaw");
