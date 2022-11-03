@@ -3,13 +3,15 @@
 #include <planning/exploration_planner.hpp>
 
 TEST(ExplorationPlannerTest, getGoalPoseTest) {
-  cg::planning::ExplorationPlanner ep;
+  std::unique_ptr<cg::planning::ExplorationPlanner> ep = std::make_unique<cg::planning::ExplorationPlanner>(
+    cg::planning::ExplorationPlanner(0.5)
+  );
   auto agent_pose = cg::planning::create_pose2d(0, 0, 0);
   size_t map_height = 10, map_width = 10;
   float map_res = 1.0;
   cg::mapping::Map<float> map(map_height, map_width, map_res);
-  ep.planExploration(map);
-  auto exploration_waypoints = ep.getGoalPose(agent_pose, map);
+  ep->planExploration(map);
+  auto exploration_waypoints = ep->getGoalPose(agent_pose, map);
   EXPECT_GT(exploration_waypoints.size(), 0ul);
   double center_x = map_width * map_res / 2.0;
   double center_y = map_height * map_res / 2.0;

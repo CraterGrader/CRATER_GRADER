@@ -25,6 +25,16 @@ behavior_executive_node:
     thresh_max_assignment_distance: 0.5 # max meters between transport assignments
     last_pose_offset: 1.0 # meters to rearward offset last pose in transport assignment by
 
+    # Exploration planner
+    exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
+
+    # Tool planner
+    design_blade_height: 80.0  # Height of blade when grading
+    raised_blade_height: 0.0   # Height of blade when lifted
+
+    # Velocity planner
+    constant_velocity: 100.0  # Constant velocity for velocity planner, %FS
+
     # Timer callbacks
     fsm_timer_callback_ms: 500 # milliseconds
     service_response_timeout_ms: 500 # milliseconds
