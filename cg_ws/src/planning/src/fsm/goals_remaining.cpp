@@ -1,10 +1,12 @@
-#include <planning/fsm/goals_remaining.hpp>
 #include <iostream> // DEBUG
+#include <planning/fsm/goals_remaining.hpp>
 
 namespace cg {
 namespace planning {
 
-void GoalsRemaining::runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_poses, cg_msgs::msg::Pose2D &current_goal_pose) {
+void GoalsRemaining::runState(
+    std::vector<cg_msgs::msg::Pose2D> &current_goal_poses,
+    cg_msgs::msg::Pose2D &current_goal_pose) {
   std::cout << "GOALS_REMAINING" << std::endl;
 
   // Update shared current state and the precursing signal
@@ -25,5 +27,5 @@ void GoalsRemaining::runState(std::vector<cg_msgs::msg::Pose2D> &current_goal_po
   curr_state_l0_ = StateL0::UPDATE_MAP;
 }
 
-} // planning namespace
-} // cg namespace
+} // namespace planning
+} // namespace cg

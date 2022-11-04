@@ -26,10 +26,7 @@ public:
     STOPPED
   };
 
-  enum class StateL1 {
-    EXPLORATION,
-    TRANSPORT
-  };
+  enum class StateL1 { EXPLORATION, TRANSPORT };
 
   enum class Signal {
     START,
@@ -48,7 +45,7 @@ public:
   // Constructors()
   FSM(){};
   FSM(StateL1 start_state_l1, StateL0 start_state_l0, Signal start_signal);
-  
+
   // Destructor(), for resetting static variables
   ~FSM();
 
@@ -62,7 +59,7 @@ public:
   std::string currStateL0ToString();
   std::string preSignalToString();
 
-protected: // "Shared private" variables
+protected:                       // "Shared private" variables
   static StateL1 curr_state_l1_; // Current StateL1 that FSM is in
   static StateL0 curr_state_l0_; // Current state that should run
   static Signal pre_signal_; // Precursing signal that led to the current state

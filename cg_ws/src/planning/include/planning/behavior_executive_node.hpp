@@ -1,35 +1,35 @@
 #ifndef PLANNING__BEHAVIOR_EXECUTIVE_HPP
 #define PLANNING__BEHAVIOR_EXECUTIVE_HPP
 
-#include <rclcpp/rclcpp.hpp>
-#include <mapping/map.hpp>
-#include <cg_msgs/srv/site_map.hpp> // Service for receiving SiteMap height data
-#include <cg_msgs/srv/update_trajectory.hpp>   // Service for updating current trajectory
 #include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
+#include <cg_msgs/srv/site_map.hpp> // Service for receiving SiteMap height data
+#include <cg_msgs/srv/update_trajectory.hpp> // Service for updating current trajectory
+#include <mapping/map.hpp>
 #include <nav_msgs/msg/odometry.hpp> // Callback for pose
+#include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Matrix3x3.h> // For converting from nav_msgs quaternions to rpy
 
 // Finite state machine and states
-#include <planning/fsm/fsm.hpp>
-#include <planning/fsm/ready.hpp>
-#include <planning/fsm/update_map.hpp>
-#include <planning/fsm/site_work_done.hpp>
-#include <planning/fsm/map_explored.hpp>
-#include <planning/fsm/replan_transport.hpp>
-#include <planning/fsm/plan_transport.hpp>
-#include <planning/fsm/get_transport_goals.hpp>
-#include <planning/fsm/plan_exploration.hpp>
-#include <planning/fsm/get_exploration_goals.hpp>
-#include <planning/fsm/goals_remaining.hpp>
-#include <planning/fsm/get_worksystem_trajectory.hpp>
-#include <planning/fsm/following_trajectory.hpp>
 #include <planning/fsm/end_mission.hpp>
+#include <planning/fsm/following_trajectory.hpp>
+#include <planning/fsm/fsm.hpp>
+#include <planning/fsm/get_exploration_goals.hpp>
+#include <planning/fsm/get_transport_goals.hpp>
+#include <planning/fsm/get_worksystem_trajectory.hpp>
+#include <planning/fsm/goals_remaining.hpp>
+#include <planning/fsm/map_explored.hpp>
+#include <planning/fsm/plan_exploration.hpp>
+#include <planning/fsm/plan_transport.hpp>
+#include <planning/fsm/ready.hpp>
+#include <planning/fsm/replan_transport.hpp>
+#include <planning/fsm/site_work_done.hpp>
 #include <planning/fsm/stopped.hpp>
+#include <planning/fsm/update_map.hpp>
 
 // Viz
-#include <nav_msgs/msg/path.hpp> // For visualizing the current trajectory
-#include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory and agent pose
 #include <geometry_msgs/msg/pose_array.hpp> // For visualizing the current goal poses
+#include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory and agent pose
+#include <nav_msgs/msg/path.hpp>       // For visualizing the current trajectory
 #include <tf2/LinearMath/Quaternion.h> // For visualizing the current goal poses
 
 namespace cg {
@@ -40,19 +40,24 @@ class BehaviorExecutive : public rclcpp::Node {
 public:
   BehaviorExecutive();
 
-private: 
+private:
   /* Publishers and Subscribers */
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_goals_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_state_l1_goals_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr
+      viz_state_l1_goals_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_agent_pub_;
-  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_curr_goal_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr
+      viz_curr_goal_pub_;
 
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_robot_state_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr
+      global_robot_state_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr
+      odom_robot_state_sub_;
 
   /* Services */
-  // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
+  // Create callback groups for service call in timer:
+  // https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
   rclcpp::CallbackGroup::SharedPtr site_map_client_group_;
   rclcpp::CallbackGroup::SharedPtr update_trajectory_client_group_;
   rclcpp::CallbackGroup::SharedPtr enable_worksystem_client_group_;
@@ -64,10 +69,14 @@ private:
   rclcpp::TimerBase::SharedPtr viz_timer_; // For controlled looping viz updates
 
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
-  rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
-  rclcpp::Client<cg_msgs::srv::EnableWorksystem>::SharedPtr enable_worksystem_client_;
+  rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr
+      update_trajectory_client_;
+  rclcpp::Client<cg_msgs::srv::EnableWorksystem>::SharedPtr
+      enable_worksystem_client_;
   bool updateMapFromService(bool verbose);
-  bool updateTrajectoryService(const cg_msgs::msg::Trajectory &current_trajectory, bool verbose);
+  bool
+  updateTrajectoryService(const cg_msgs::msg::Trajectory &current_trajectory,
+                          bool verbose);
   bool enableWorksystemService(const bool enable_worksystem, bool verbose);
 
   int fsm_timer_callback_ms_;
@@ -111,7 +120,8 @@ private:
   float thresh_euclidean_replan_;
   float map_coverage_threshold_;
 
-  // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
+  // TODO: encapsulate these variables into their respective states, e.g. with
+  // friend classes/functions (for service calls)
   bool map_updated_ = false;
   bool updated_trajectory_ = false;
   bool calculated_trajectory_ = false;
@@ -126,11 +136,11 @@ private:
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   std::vector<cg_msgs::msg::Pose2D> viz_state_l1_goal_poses_;
-  cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
+  cg_msgs::msg::Pose2D current_goal_pose_;  // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D current_agent_pose_; // Assumed to be in local map frame!
   cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!
   bool enable_worksystem_ = false;
-  cg_msgs::msg::Trajectory current_trajectory_; 
+  cg_msgs::msg::Trajectory current_trajectory_;
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;
@@ -144,7 +154,7 @@ private:
   cg::planning::PlanTransport plan_transport_; // Transport Planner
   cg::planning::GetTransportGoals get_transport_goals_;
   cg::planning::PlanExploration plan_exploration_; // Exploration Planner
-  cg::planning::GetExplorationGoals get_exploration_goals_; 
+  cg::planning::GetExplorationGoals get_exploration_goals_;
   cg::planning::GoalsRemaining goals_remaining_;
   cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
   cg::planning::FollowingTrajectory following_trajectory_;

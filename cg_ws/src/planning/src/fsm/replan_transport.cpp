@@ -1,5 +1,5 @@
-#include <planning/fsm/replan_transport.hpp>
 #include <iostream> // DEBUG
+#include <planning/fsm/replan_transport.hpp>
 
 namespace cg {
 namespace planning {
@@ -9,7 +9,7 @@ void ReplanTransport::runState() {
 
   // For now, always replan
   // If causing computational bottleneck later on
-  // compare to map used during last transport planning 
+  // compare to map used during last transport planning
 
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::YES;
@@ -18,5 +18,5 @@ void ReplanTransport::runState() {
   // curr_state_l0_ = StateL0::GET_TRANSPORT_GOALS;
 }
 
-} // planning namespace
-} // cg namespace
+} // namespace planning
+} // namespace cg

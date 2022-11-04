@@ -1,14 +1,16 @@
-#include <planning/fsm/plan_exploration.hpp>
 #include <iostream> // DEBUG
+#include <planning/fsm/plan_exploration.hpp>
 
 namespace cg {
 namespace planning {
 
-void PlanExploration::runState(cg::planning::ExplorationPlanner &exploration_planner, const cg::mapping::Map<float> &map) {
+void PlanExploration::runState(
+    cg::planning::ExplorationPlanner &exploration_planner,
+    const cg::mapping::Map<float> &map) {
   std::cout << "PLAN_EXPLORATION" << std::endl;
 
   exploration_planned_ = exploration_planner.planExploration(map);
-  
+
   // Don't move to next state if planning was unsuccessful
   if (!exploration_planned_) {
     return;
@@ -20,5 +22,5 @@ void PlanExploration::runState(cg::planning::ExplorationPlanner &exploration_pla
   exploration_planned_ = false; // Reset for next cycle
 }
 
-} // planning namespace
-} // cg namespace
+} // namespace planning
+} // namespace cg

@@ -1,5 +1,5 @@
-#include <planning/fsm/ready.hpp>
 #include <iostream> // DEBUG
+#include <planning/fsm/ready.hpp>
 
 namespace cg {
 namespace planning {
@@ -12,5 +12,5 @@ void Ready::runState() {
   curr_state_l0_ = StateL0::UPDATE_MAP;
 }
 
-} // planning namespace
-} // cg namespace
+} // namespace planning
+} // namespace cg

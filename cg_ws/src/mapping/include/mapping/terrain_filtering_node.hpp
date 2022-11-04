@@ -2,26 +2,26 @@
 #define MAPPING__TERRAIN_FILTER_NODE_HPP
 
 // TODO: FIND WHICH PACKAGES ARE ACTUALLY NEEDED
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <pcl_ros/transforms.hpp>
-#include <tf2/convert.h>
-#include <tf2/transform_datatypes.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/buffer.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
+#include <iostream>
 #include <pcl/filters/crop_box.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <iostream>
+#include <pcl_ros/transforms.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <tf2/convert.h>
+#include <tf2/transform_datatypes.h>
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
 // includes for the box filters
-#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 namespace cg {
 namespace mapping {
@@ -45,8 +45,10 @@ public:
 
 private:
   /* Publishers and Subscribers */
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_points_pub_;
-  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr raw_points_sub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr
+      filtered_points_pub_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr
+      raw_points_sub_;
 
   /* Callbacks */
   void rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
@@ -57,8 +59,7 @@ private:
   double sor_stddev_mul_thresh_;
 };
 
+} // namespace mapping
+} // namespace cg
 
-}  // namespace mapping
-}  // namespace cg
-
-#endif  // MAPPING__TERRAIN_FILTER_NODE_HPP
+#endif // MAPPING__TERRAIN_FILTER_NODE_HPP

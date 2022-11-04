@@ -17,8 +17,8 @@ behavior_executive_node:
     pose_yaw_equality_threshold: 0.1 # rad
     topography_weight: 0.0 # "unitless"
     trajectory_heuristic_epsilon: 1.0 # for weighted A* heuristic
-    max_pose_equality_scalar: 2.0 # For scaling goal pose equality thresholds 
-    pose_equality_scalar_iteration: 2000 # For scaling goal pose equality thresholds 
+    max_pose_equality_scalar: 2.0 # For scaling goal pose equality thresholds
+    pose_equality_scalar_iteration: 2000 # For scaling goal pose equality thresholds
 
     # Transport planner
     transport_threshold_z: 0.05 # meters off fit plane
@@ -30,11 +30,11 @@ behavior_executive_node:
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
 
     # Tool planner
-    design_blade_height: 80.0  # Height of blade when grading
-    raised_blade_height: 0.0   # Height of blade when lifted
+    design_blade_height: 80.0 # Height of blade when grading
+    raised_blade_height: 0.0 # Height of blade when lifted
 
     # Velocity planner
-    constant_velocity: 100.0  # Constant velocity for velocity planner, %FS
+    constant_velocity: 100.0 # Constant velocity for velocity planner, %FS
 
     # Validation parameters
     topology_equality_threshold: 0.05 # Note: must be <= transport_threshold_z

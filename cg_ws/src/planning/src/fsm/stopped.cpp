@@ -1,5 +1,5 @@
-#include <planning/fsm/stopped.hpp>
 #include <iostream> // DEBUG
+#include <planning/fsm/stopped.hpp>
 
 namespace cg {
 namespace planning {
@@ -12,5 +12,5 @@ void Stopped::runState() {
   curr_state_l0_ = StateL0::STOPPED;
 }
 
-} // planning namespace
-} // cg namespace
+} // namespace planning
+} // namespace cg

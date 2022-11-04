@@ -1,5 +1,5 @@
-#include <planning/fsm/update_map.hpp>
 #include <iostream> // DEBUG
+#include <planning/fsm/update_map.hpp>
 
 namespace cg {
 namespace planning {
@@ -11,12 +11,11 @@ void UpdateMap::runState(const bool map_updated) {
   if (!map_updated) {
     return;
   }
-  
+
   // Update shared current state and the precursing signal
   pre_signal_ = Signal::MAP_UPDATED;
   curr_state_l0_ = StateL0::SITE_WORK_DONE;
-
 }
 
-} // planning namespace
-} // cg namespace
+} // namespace planning
+} // namespace cg

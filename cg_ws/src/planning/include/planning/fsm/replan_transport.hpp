@@ -1,8 +1,8 @@
 #ifndef PLANNING__REPLAN_TRANSPORT_HPP
 #define PLANNING__REPLAN_TRANSPORT_HPP
 
-#include <planning/fsm/fsm.hpp>
 #include <mapping/map_util.hpp>
+#include <planning/fsm/fsm.hpp>
 
 namespace cg {
 namespace planning {
@@ -11,7 +11,8 @@ namespace planning {
 class ReplanTransport : public FSM {
 
 public:
-  void runState(); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(); // Main function to run current state; optionally modifies
+                   // signal and state for transition
 
 }; // class State
 

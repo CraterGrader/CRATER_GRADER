@@ -10,7 +10,8 @@ namespace planning {
 class EndMission : public FSM {
 
 public:
-  void runState(); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(); // Main function to run current state; optionally modifies
+                   // signal and state for transition
 
 }; // class State
 
