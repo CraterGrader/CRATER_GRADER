@@ -32,6 +32,9 @@
 #include <geometry_msgs/msg/pose_array.hpp> // For visualizing the current goal poses
 #include <tf2/LinearMath/Quaternion.h> // For visualizing the current goal poses
 
+// Debug
+#include <std_msgs/msg/bool.hpp> // Stepping through planning debug
+
 namespace cg {
 namespace planning {
 
@@ -51,6 +54,8 @@ private:
 
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_robot_state_sub_;
+
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr debug_trigger_sub_;
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
@@ -93,12 +98,16 @@ private:
   void globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void odomRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
+  void debugTriggerCallback(const std_msgs::msg::Bool::SharedPtr msg);
+
   /* Important Objects */
   std::unique_ptr<cg::planning::TransportPlanner> transport_planner_;
   std::unique_ptr<cg::planning::ExplorationPlanner> exploration_planner_;
   std::unique_ptr<cg::planning::KinematicPlanner> kinematic_planner_;
   std::unique_ptr<cg::planning::ToolPlanner> tool_planner_;
   std::unique_ptr<cg::planning::VelocityPlanner> velocity_planner_;
+  bool debug_trigger_{false};
+  cg_msgs::msg::Pose2D last_debug_pose_;
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
