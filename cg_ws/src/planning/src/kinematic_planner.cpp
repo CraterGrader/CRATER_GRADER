@@ -22,7 +22,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::Map<float> &map,
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const {
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) {
 
     // List of final trajectories composed from lattice primitives
     std::vector<cg_msgs::msg::Pose2D> final_path;
@@ -346,6 +346,7 @@ std::vector<float> KinematicPlanner::trajectoriesHeuristic(
         for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
             trajectories_heuristic.push_back(
                 trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.back().pt, goal_pose.pt));
+                // std::fabs(smallest_angle_difference_signed(trajectory.back().yaw, goal_pose.yaw)) * turn_radii_min_ * 0.4);
         }
         // Distance between goal pose and final point of trajectory
         return trajectories_heuristic;

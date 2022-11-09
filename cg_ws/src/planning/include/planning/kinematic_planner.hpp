@@ -74,7 +74,7 @@ public:
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::Map<float> &map,
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const;
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice);
 
   // Truncates trajectory to closest pose to goal_pose, returns pose and index
   std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
