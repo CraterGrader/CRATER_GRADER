@@ -18,7 +18,6 @@ class KinematicPlanner {
 public:
 
   // Construct Kinematic Planner
-  // TODO: make these params
   KinematicPlanner() : 
       goal_pose_distance_threshold_(0.15f), 
       goal_pose_yaw_threshold_(deg2rad(5)), 
@@ -75,7 +74,7 @@ public:
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::Map<float> &map,
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const;
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice);
 
   // Truncates trajectory to closest pose to goal_pose, returns pose and index
   std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
@@ -130,6 +129,7 @@ public:
   float getPoseYawEqualityThreshold() {return pose_yaw_equality_threshold_;}
   float getTopographyWeight() {return topography_weight_;}
   float getTrajectoryHeuristicEpsilon() {return trajectory_heuristic_epsilon_;}
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> getVizVisitedTrajectories() {return visited_trajectories;}
 
   // Setters
   void setGoalPoseDistanceThreshold(float val) {
@@ -202,6 +202,8 @@ private:
   float max_pose_equality_scalar_;
   int pose_equality_scalar_iteration_;
 
+  // Visualization parameters
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
 };
 
 struct AStarNode {

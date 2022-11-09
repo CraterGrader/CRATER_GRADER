@@ -7,6 +7,7 @@ namespace planning {
   {
     /* Initialize publishers and subscribers */
     viz_path_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/planning/current_path", 1);
+    viz_visited_trajectories_pub_ = this->create_publisher<nav_msgs::msg::Path>("/viz/planning/visited_trajectories", 1);
     viz_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/planning/current_goals", 1);
     viz_state_l1_goals_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/viz/planning/all_state_l1_goals", 1);
     viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_agent", 1);
@@ -580,6 +581,37 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_path_.header.frame_id = "map";
 
   viz_path_pub_->publish(viz_path_);
+
+  // Visited Paths in A*
+  viz_visited_trajs.poses.clear();
+  viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
+  for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
+    for (cg_msgs::msg::Pose2D traj_pose : traj) {
+      // Convert to global frame
+      auto global_path_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+
+      geometry_msgs::msg::PoseStamped pose_stamped;
+      pose_stamped.pose.position.x = global_path_pose.pt.x;
+      pose_stamped.pose.position.y = global_path_pose.pt.y;
+      pose_stamped.pose.position.z = viz_planning_height_;
+
+      tf2::Quaternion q;
+      q.setRPY(0, 0, global_path_pose.yaw);
+      pose_stamped.pose.orientation.x = q.x();
+      pose_stamped.pose.orientation.y = q.y();
+      pose_stamped.pose.orientation.z = q.z();
+      pose_stamped.pose.orientation.w = q.w();
+
+      pose_stamped.header.stamp = this->get_clock()->now();
+      pose_stamped.header.frame_id = "map";
+
+      viz_visited_trajs.poses.push_back(pose_stamped);
+    }
+  }
+  viz_visited_trajs.header.stamp = this->get_clock()->now();
+  viz_visited_trajs.header.frame_id = "map";
+
+  viz_visited_trajectories_pub_->publish(viz_visited_trajs);
 }
 
 } // namespace planning
