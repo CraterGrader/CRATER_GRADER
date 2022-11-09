@@ -57,6 +57,11 @@ public:
   StateL0 getCurrStateL0() const { return curr_state_l0_; }
   Signal getPreSignal() const { return pre_signal_; }
 
+  // Setters()
+  void setCurrStateL1(StateL1 curr_state_l1) { curr_state_l1_ = curr_state_l1; }
+  void setCurrStateL0(StateL0 curr_state_l0) { curr_state_l0_ = curr_state_l0; }
+  void setPreSignal(Signal pre_signal) { pre_signal_ = pre_signal; }
+
   // Helpers
   std::string currStateL1ToString();
   std::string currStateL0ToString();

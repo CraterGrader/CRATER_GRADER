@@ -190,11 +190,32 @@ namespace planning {
     local_map_relative_to_global_frame_ = create_pose2d(xTransform, yTransform, 0.0);
     global_map_relative_to_local_frame_ = create_pose2d(-xTransform, -yTransform, 0.0);
 
-    // ---------------------
     // DEBUG
-    // global_robot_pose_ = cg::planning::create_pose2d(1.0, 1.0, 0.0);
-    // current_agent_pose_ = cg::planning::transformPose(global_robot_pose_, global_map_relative_to_local_frame_); // Convert pose to local map frame
-    // ---------------------
+    this->declare_parameter<bool>("traj_debug", false);
+    this->get_parameter("traj_debug", traj_debug_);
+
+    double agent_x = 0.0;
+    double agent_y = 0.0;
+    double agent_yaw = 0.0;
+    double goal_x = 0.0;
+    double goal_y = 0.0;
+    double goal_yaw = 0.0;
+    this->declare_parameter<double>("agent_x", 0.0);
+    this->get_parameter("agent_x", agent_x);
+    this->declare_parameter<double>("agent_y", 0.0);
+    this->get_parameter("agent_y", agent_y);
+    this->declare_parameter<double>("agent_yaw", 0.0);
+    this->get_parameter("agent_yaw", agent_yaw);
+    this->declare_parameter<double>("goal_x", 0.0);
+    this->get_parameter("goal_x", goal_x);
+    this->declare_parameter<double>("goal_y", 0.0);
+    this->get_parameter("goal_y", goal_y);
+    this->declare_parameter<double>("goal_yaw", 0.0);
+    this->get_parameter("goal_yaw", goal_yaw);
+
+    cg_msgs::msg::Pose2D traj_debug_goal = create_pose2d(goal_x, goal_y, goal_yaw);
+    traj_debug_goal_poses_.push_back(traj_debug_goal);
+    traj_debug_agent_ = create_pose2d(agent_x, agent_y, agent_yaw);
   }
 
 void BehaviorExecutive::fsmTimerCallback()
@@ -206,6 +227,7 @@ void BehaviorExecutive::fsmTimerCallback()
   std::cout << "    Pre-Signal: " << fsm_.preSignalToString() << std::endl;
   std::cout << "      State L0: " << fsm_.currStateL0ToString() << std::endl;
   std::cout << "      State L1: " << fsm_.currStateL1ToString() << std::endl;
+
   switch (fsm_.getCurrStateL0())
   {
   case cg::planning::FSM::StateL0::READY:
@@ -217,6 +239,16 @@ void BehaviorExecutive::fsmTimerCallback()
     RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated_ ? "true" : "false");
     // map_updated_ = true; // DEBUG: use to skip actual state checking
     update_map_.runState(map_updated_);
+
+    // -------------------------------
+    // DEBUG
+    // Skip to trajectory debugging state
+    if (traj_debug_){
+      fsm_.setCurrStateL1(FSM::StateL1::TRANSPORT);
+      fsm_.setCurrStateL0(FSM::StateL0::GOALS_REMAINING);
+      fsm_.setPreSignal(FSM::Signal::DRIVE);
+    }
+    // -------------------------------
     break;
   case cg::planning::FSM::StateL0::SITE_WORK_DONE:
     site_work_done_.runState(current_height_map_, design_height_map_, topology_equality_threshold_);
@@ -253,20 +285,17 @@ void BehaviorExecutive::fsmTimerCallback()
     for (size_t i =0; i < current_goal_poses_.size(); ++i){
       std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
     }
-    // ---------------------------------------
-    // DEBUG
-    // cg_msgs::msg::Pose2D manual_goal1 = create_pose2d(2.5, 1.5, 0.0);
-    // cg_msgs::msg::Pose2D manual_goal2 = create_pose2d(1.0, 4.0, 3.14159);
-    // current_goal_poses_.clear();
-    // current_goal_poses_.push_back(manual_goal1);
-    // current_goal_poses_.push_back(manual_goal2);
-    // ---------------------------------------
     break;}
   case cg::planning::FSM::StateL0::GOALS_REMAINING:{
+    if (traj_debug_){
+      current_goal_poses_ = traj_debug_goal_poses_;
+      current_agent_pose_ = traj_debug_agent_;
+    }
+
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     // ---------------------------------------
     // DEBUG
-    std::cout << "    Num Goals: " << current_goal_poses_.size() << std::endl;
+    std::cout << "    Num Goals: " << current_goal_poses_.size() + 1 << std::endl;
     std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
     std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
     std::cout << "    ------------ Remaining goals: " << std::endl;

@@ -50,3 +50,13 @@ behavior_executive_node:
     # Viz
     viz_planning_height: 1.0 # meters, in global frame
 
+    # TRAJECTORY DEBUG
+    # Overwrites agent and goal poses with given values
+    traj_debug: false
+    agent_x: 2.5
+    agent_y: 1.0
+    agent_yaw: 0.0
+    goal_x: 0.5
+    goal_y: 1.0
+    goal_yaw: 6.28
+

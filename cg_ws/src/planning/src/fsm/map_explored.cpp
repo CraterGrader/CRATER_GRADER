@@ -8,19 +8,19 @@ void MapExplored::runState(float current_map_coverage_ratio_, float map_coverage
   std::cout << "MAP_EXPLORED" << std::endl;
 
   // Update shared current state and the precursing signal
-  // if (current_map_coverage_ratio_ >= map_coverage_threshold) {
-  //   pre_signal_ = Signal::YES;
-  //   curr_state_l0_ = StateL0::REPLAN_TRANSPORT;
-  //   curr_state_l1_ = StateL1::TRANSPORT;
-  // }
-  // else {
-  //   pre_signal_ = Signal::NO;
-  //   curr_state_l0_ = StateL0::PLAN_EXPLORATION;
-  //   curr_state_l1_ = StateL1::EXPLORATION;
-  // }
-  pre_signal_ = Signal::YES; // DEBUG
-  curr_state_l0_ = StateL0::REPLAN_TRANSPORT; // DEBUG
-  curr_state_l1_ = StateL1::TRANSPORT; // DEBUG
+  if (current_map_coverage_ratio_ >= map_coverage_threshold) {
+    pre_signal_ = Signal::YES;
+    curr_state_l0_ = StateL0::REPLAN_TRANSPORT;
+    curr_state_l1_ = StateL1::TRANSPORT;
+  }
+  else {
+    pre_signal_ = Signal::NO;
+    curr_state_l0_ = StateL0::PLAN_EXPLORATION;
+    curr_state_l1_ = StateL1::EXPLORATION;
+  }
+  // pre_signal_ = Signal::NO; // DEBUG
+  // curr_state_l0_ = StateL0::PLAN_EXPLORATION; // DEBUG
+  // curr_state_l1_ = StateL1::EXPLORATION; // DEBUG
 }
 
 } // planning namespace
