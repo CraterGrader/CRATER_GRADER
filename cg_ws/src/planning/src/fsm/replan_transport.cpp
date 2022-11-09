@@ -7,15 +7,20 @@ namespace planning {
 void ReplanTransport::runState() {
   std::cout << "REPLAN_TRANSPORT" << std::endl;
 
-  // For now, always replan
+  // For now, only replan the first time through
   // If causing computational bottleneck later on
   // compare to map used during last transport planning 
 
   // Update shared current state and the precursing signal
-  pre_signal_ = Signal::YES;
-  curr_state_l0_ = StateL0::PLAN_TRANSPORT;
-  // pre_signal_ = Signal::NO;
-  // curr_state_l0_ = StateL0::GET_TRANSPORT_GOALS;
+  if (!transport_planned) {
+    pre_signal_ = Signal::YES;
+    curr_state_l0_ = StateL0::PLAN_TRANSPORT;
+    transport_planned = true; // DEBUG
+    return;
+  }
+
+  pre_signal_ = Signal::NO;
+  curr_state_l0_ = StateL0::GET_TRANSPORT_GOALS;
 }
 
 } // planning namespace

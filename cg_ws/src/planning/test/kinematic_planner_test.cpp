@@ -193,25 +193,25 @@ TEST(KinematicPlannerTest, Test_getClosestTrajectoryPoseToGoal)
 
 
 // Test samePoseWithinThresh
-TEST(KinematicPlannerTest, Test_samePoseWithinThresh)
-{
+// TEST(KinematicPlannerTest, Test_samePoseWithinThresh)
+// {
 
-  cg::planning::KinematicPlanner kinematic_planner;
-  kinematic_planner.setPosePositionEqualityThreshold(0.01f);
-  kinematic_planner.setPoseYawEqualityThreshold(0.05f);
+//   cg::planning::KinematicPlanner kinematic_planner;
+//   kinematic_planner.setPosePositionEqualityThreshold(0.01f);
+//   kinematic_planner.setPoseYawEqualityThreshold(0.05f);
 
-  cg_msgs::msg::Pose2D pose1{cg::planning::create_pose2d(0, 1, 0)};
-  cg_msgs::msg::Pose2D pose2{cg::planning::create_pose2d(0, 1.02, 0)};
-  cg_msgs::msg::Pose2D pose3{cg::planning::create_pose2d(0, 1.005, 0)};
-  cg_msgs::msg::Pose2D pose4{cg::planning::create_pose2d(0, 1, 0.02)};
-  cg_msgs::msg::Pose2D pose5{cg::planning::create_pose2d(0, 1, 0.06)};
+//   cg_msgs::msg::Pose2D pose1{cg::planning::create_pose2d(0, 1, 0)};
+//   cg_msgs::msg::Pose2D pose2{cg::planning::create_pose2d(0, 1.02, 0)};
+//   cg_msgs::msg::Pose2D pose3{cg::planning::create_pose2d(0, 1.005, 0)};
+//   cg_msgs::msg::Pose2D pose4{cg::planning::create_pose2d(0, 1, 0.02)};
+//   cg_msgs::msg::Pose2D pose5{cg::planning::create_pose2d(0, 1, 0.06)};
 
-  EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose2), false);
-  EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose3), true);
-  EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose4), true);
-  EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose2), false);
+//   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose2), false);
+//   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose3), true);
+//   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose4), true);
+//   EXPECT_EQ(kinematic_planner.samePoseWithinThresh(pose1, pose2), false);
 
-}
+// }
 
 
 // Test generateLatticeArm

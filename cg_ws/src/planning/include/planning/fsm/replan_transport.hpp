@@ -13,6 +13,9 @@ class ReplanTransport : public FSM {
 public:
   void runState(); // Main function to run current state; optionally modifies signal and state for transition
 
+private:
+  bool transport_planned = false;
+
 }; // class State
 
 } // namespace planning

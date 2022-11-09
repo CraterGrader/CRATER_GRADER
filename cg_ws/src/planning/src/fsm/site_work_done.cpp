@@ -13,6 +13,7 @@ void SiteWorkDone::runState(const cg::mapping::Map<float> &current_height_map, c
     topology_equality_threshold);
 
   // Update shared current state and the precursing signal
+  // TODO: also check amount of the map that has been explored?
   if (within_thresh) {
     pre_signal_ = Signal::YES;
     curr_state_l0_ = StateL0::END_MISSION;
@@ -20,6 +21,8 @@ void SiteWorkDone::runState(const cg::mapping::Map<float> &current_height_map, c
   pre_signal_ = Signal::NO;
   curr_state_l0_ = StateL0::MAP_EXPLORED;
   }
+  // pre_signal_ = Signal::NO; // DEBUG
+  // curr_state_l0_ = StateL0::MAP_EXPLORED; // DEBUG
 }
 
 } // planning namespace

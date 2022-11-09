@@ -2,8 +2,8 @@
 colors
 @enduml
 
-@startuml PlanningFSM_20221103_REV05
-mainframe PlanningFSM_20221103_REV05
+@startuml PlanningFSM_20221108_REV06
+mainframe PlanningFSM_20221108_REV06
 ' Formatting
 ' ------------------------------------
 hide empty description
@@ -91,6 +91,7 @@ GoalsRemaining_L0 -d-> UpdateMap_L0 : no
 ' Global state interactions
 [*] -d-> UpdateMap_L0 : start
   UpdateMap_L0 -d-> SiteWorkDone_L0 : map_updated
+  UpdateMap_L0 -[dashed]-> GoalsRemaining_L0 : drive (for trajectory debug ONLY)
   SiteWorkDone_L0 -r-> EndMission_L0 : yes
   SiteWorkDone_L0 -l-> MapExplored_L0 : no
     MapExplored_L0 -d-> RePlanTransport_L0 : yes

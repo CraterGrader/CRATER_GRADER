@@ -56,7 +56,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
                               cellStartingVariance_, 
                               minCellVariance_);
   siteMap_ = temp;
-  std::cout << "Constructed SiteMap Objects" << std::endl;
+  // std::cout << "Constructed SiteMap Objects" << std::endl;
 
   // Load map from file
   if (load_height_map_from_filepath) {
@@ -87,7 +87,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_viz", 1);
   visualization_seen_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_seen_viz", 1);
   visualization_variance_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_variance", 1);
-  std::cout << "Started sub" << std::endl;
+  // std::cout << "Started sub" << std::endl;
 
 }
 
@@ -98,7 +98,7 @@ void SiteMapNode::map_viz_callback(){
   std::vector<float> tempMap = siteMap_.getHeightMap();
   size_t iterator0 = 0;
 
-  std::cout << "Started viz callback" << std::endl;
+  // std::cout << "Started viz callback" << std::endl;
 
 
   // Pack data
@@ -192,7 +192,7 @@ void SiteMapNode::map_viz_callback(){
 
 void SiteMapNode::new_pts_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg){
 
-  std::cout << "Started new pts callback" << std::endl;
+  // std::cout << "Started new pts callback" << std::endl;
 
 
   pcl::PCLPointCloud2 pcl_pc2;

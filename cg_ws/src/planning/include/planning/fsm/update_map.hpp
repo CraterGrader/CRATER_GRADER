@@ -10,7 +10,7 @@ namespace planning {
 class UpdateMap : public FSM {
 
 public:
-  void runState(const bool map_updated); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(const bool map_updated, const bool traj_debug); // Main function to run current state; optionally modifies signal and state for transition
 
 }; // class State
 

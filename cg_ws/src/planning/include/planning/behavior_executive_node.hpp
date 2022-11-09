@@ -108,23 +108,28 @@ private:
   cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
   // Params
-  double thresh_pos_;
-  double thresh_head_;
-  float thresh_euclidean_replan_;
-  float map_coverage_threshold_;
+  double thresh_pos_ = 0.0;
+  double thresh_head_ = 0.0;
+  float thresh_euclidean_replan_ = 0.0;
+  float map_coverage_threshold_ = 0.0;
+
+  // DEBUG
+  bool traj_debug_ = false;
+  std::vector<cg_msgs::msg::Pose2D> traj_debug_goal_poses_;
+  cg_msgs::msg::Pose2D traj_debug_agent_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
   bool updated_trajectory_ = false;
   bool calculated_trajectory_ = false;
   bool worksystem_enabled_ = false;
-  size_t num_poses_before_; // DEBUG
+  size_t num_poses_before_ = 0; // DEBUG
 
   cg::mapping::Map<float> design_height_map_;
-  float transport_threshold_z_;
-  float topology_equality_threshold_;
-  float thresh_max_assignment_distance_;
-  double viz_planning_height_;
+  float transport_threshold_z_ = 0.0;
+  float topology_equality_threshold_ = 0.0;
+  float thresh_max_assignment_distance_ = 0.0;
+  double viz_planning_height_ = 0.0;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   std::vector<cg_msgs::msg::Pose2D> viz_state_l1_goal_poses_;
