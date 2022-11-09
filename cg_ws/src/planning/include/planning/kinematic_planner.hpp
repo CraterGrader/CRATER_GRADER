@@ -18,7 +18,6 @@ class KinematicPlanner {
 public:
 
   // Construct Kinematic Planner
-  // TODO: make these params
   KinematicPlanner() : 
       goal_pose_distance_threshold_(0.15f), 
       goal_pose_yaw_threshold_(deg2rad(5)), 
@@ -130,6 +129,7 @@ public:
   float getPoseYawEqualityThreshold() {return pose_yaw_equality_threshold_;}
   float getTopographyWeight() {return topography_weight_;}
   float getTrajectoryHeuristicEpsilon() {return trajectory_heuristic_epsilon_;}
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> getVizVisitedTrajectories() {return visited_trajectories;}
 
   // Setters
   void setGoalPoseDistanceThreshold(float val) {
@@ -202,6 +202,8 @@ private:
   float max_pose_equality_scalar_;
   int pose_equality_scalar_iteration_;
 
+  // Visualization parameters
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
 };
 
 struct AStarNode {
