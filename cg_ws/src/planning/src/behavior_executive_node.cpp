@@ -237,18 +237,7 @@ void BehaviorExecutive::fsmTimerCallback()
     map_updated_ = updateMapFromService(false);
     // Check that map was updated correctly
     RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated_ ? "true" : "false");
-    // map_updated_ = true; // DEBUG: use to skip actual state checking
-    update_map_.runState(map_updated_);
-
-    // -------------------------------
-    // DEBUG
-    // Skip to trajectory debugging state
-    if (traj_debug_){
-      fsm_.setCurrStateL1(FSM::StateL1::TRANSPORT);
-      fsm_.setCurrStateL0(FSM::StateL0::GOALS_REMAINING);
-      fsm_.setPreSignal(FSM::Signal::DRIVE);
-    }
-    // -------------------------------
+    update_map_.runState(map_updated_, traj_debug_);
     break;
   case cg::planning::FSM::StateL0::SITE_WORK_DONE:
     site_work_done_.runState(current_height_map_, design_height_map_, topology_equality_threshold_);
