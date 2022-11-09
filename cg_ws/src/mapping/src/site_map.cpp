@@ -125,14 +125,15 @@ void SiteMap::normalizeHeightMap(){
       num_seen_cells += 1; 
     }
   }
-  plane_offset_ = sum / num_seen_cells;
-  std::cout << "  offset " << plane_offset_ << std::endl;
+
+  plane_delta_ = sum / num_seen_cells;
+  plane_offset_ += plane_delta_;
   
   // for every cell, subtract mean
   for (size_t i=0; i<getNcells(); i++){
-    heightMap_[i] -= plane_offset_;
-    bufferMap_[i].offset_height(plane_offset_);
-    varianceMap_[i].offset_height(plane_offset_);
+    bufferMap_[i].bufferHasBeenUpdated();
+    heightMap_[i] -= plane_delta_;
+    varianceMap_[i].offset_height(plane_delta_);
   }
 }
 

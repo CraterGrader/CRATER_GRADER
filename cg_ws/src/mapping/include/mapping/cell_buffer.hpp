@@ -18,7 +18,6 @@ class CellBuffer {
   void bufferHasNewData(){doesBufferHaveNewData_ = true;}
   void bufferHasBeenUpdated();
   bool doesBufferHaveNewData(){return doesBufferHaveNewData_;}
-  void offset_height(float offset);
 
   private:
   // attributes

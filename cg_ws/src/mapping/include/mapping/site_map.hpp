@@ -71,6 +71,7 @@ private:
   bool siteMapFull_ = false;
   float siteMapCoverageRatio_ = 0.0f;
   float plane_offset_ = 0.0f;
+  float plane_delta_ = 0.0f;
 
   // attributes
   size_t height_ = 1; // the vertical number of cells in the map 
