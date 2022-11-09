@@ -8,11 +8,8 @@ void KinematicPlanner::generatePath(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
     const cg::mapping::Map<float> &map) {
-        // Instantiate lattice
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice();
-
         // Run A* search
-        path = KinematicPlanner::latticeAStarSearch(agent_pose, goal_pose, map, base_lattice);
+        path = KinematicPlanner::latticeAStarSearch(agent_pose, goal_pose, map);
 
         // Note: Path validity is already checked at every step of A* Search, do we need to check again here?
         return;
@@ -21,8 +18,7 @@ void KinematicPlanner::generatePath(
 std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
-    const cg::mapping::Map<float> &map,
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) {
+    const cg::mapping::Map<float> &map) {
 
     // List of final trajectories composed from lattice primitives
     std::vector<cg_msgs::msg::Pose2D> final_path;
@@ -46,6 +42,8 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     bool found_plan = false;
     int num_iter;
     while (cur_equality_scalar < max_pose_equality_scalar_ && !found_plan) {
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(turn_radii_resolution_ / cur_equality_scalar,
+            max_trajectory_length_ * cur_equality_scalar);
 
         final_path.clear();
         visited_trajectories.clear();
@@ -110,10 +108,13 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
 
                 // Since we have been pushing onto final_path backwards, reverse it
                 std::reverse(final_path.begin(), final_path.end());
-                for (cg_msgs::msg::Pose2D pose : final_path) {
-                    std::cout << "final path pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
-                }
-                
+                // -----------------------------------
+                // DEBUG
+                // for (cg_msgs::msg::Pose2D pose : final_path) {
+                //     std::cout << "final path pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
+                // }
+                // -----------------------------------
+
                 // Break since found end point
                 found_plan = true;
                 break;
@@ -188,7 +189,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     return final_path;
 }
 
-std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() const {
+std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice(float turn_radii_resolution, float max_trajectory_length) const {
 
     assert(turn_radii_min_ > 0 && turn_radii_max_ > 0);
 
@@ -197,38 +198,38 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
     float cur_radii = turn_radii_min_;
     while (cur_radii <= turn_radii_max_) {
         turn_radii.push_back(cur_radii);
-        cur_radii += turn_radii_resolution_;
+        cur_radii += turn_radii_resolution;
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
     for (float turn_radius: turn_radii) {
         // Forwards right
-        lattice.push_back(generateLatticeArm(turn_radius, true, true));
+        lattice.push_back(generateLatticeArm(turn_radius, true, true, max_trajectory_length));
         // Forwards left
-        lattice.push_back(generateLatticeArm(turn_radius, true, false));
+        lattice.push_back(generateLatticeArm(turn_radius, true, false, max_trajectory_length));
         // Backwards right
-        lattice.push_back(generateLatticeArm(turn_radius, false, true));
+        lattice.push_back(generateLatticeArm(turn_radius, false, true, max_trajectory_length));
         // Backwards left
-        lattice.push_back(generateLatticeArm(turn_radius, false, false));
+        lattice.push_back(generateLatticeArm(turn_radius, false, false, max_trajectory_length));
     }
     // Going straight, forwards/backwards
-    lattice.push_back(generateLatticeArm(0, true, false));
-    lattice.push_back(generateLatticeArm(0, false, false));
+    lattice.push_back(generateLatticeArm(0, true, false, max_trajectory_length));
+    lattice.push_back(generateLatticeArm(0, false, false, max_trajectory_length));
     return lattice;
     }
 
 std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
-    float turn_radius, bool forwards, bool right) const {
+    float turn_radius, bool forwards, bool right, float max_trajectory_length) const {
 
     // Since left/right is handled with flags, turn radius should always be positive
     assert(turn_radius >= 0);
 
     std::vector<cg_msgs::msg::Pose2D> lattice_arm;
-    int num_segments = ceil(max_trajectory_length_ / trajectory_resolution_);
+    int num_segments = ceil(max_trajectory_length / trajectory_resolution_);
     float x, y, yaw;
     x = y = yaw = 0.0;
 
-    float max_arm_traj_length = max_trajectory_length_;
+    float max_arm_traj_length = max_trajectory_length;
     if (!forwards) max_arm_traj_length *= -1;
 
     // Straight (forwards and backwards)

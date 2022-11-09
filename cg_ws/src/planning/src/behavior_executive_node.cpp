@@ -18,6 +18,9 @@ namespace planning {
     odom_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "/odometry/filtered/ekf_odom_node", 1, std::bind(&BehaviorExecutive::odomRobotStateCallback, this, std::placeholders::_1));
 
+    debug_trigger_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+        "/behavior_exec_debug_trigger", 1, std::bind(&BehaviorExecutive::debugTriggerCallback, this, std::placeholders::_1));
+
     /* Initialize services */
     // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
     site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -294,9 +297,12 @@ void BehaviorExecutive::fsmTimerCallback()
     }
     // ---------------------------------------
     break;}
-  case cg::planning::FSM::StateL0::GET_WORKSYSTEM_TRAJECTORY:
+  case cg::planning::FSM::StateL0::GET_WORKSYSTEM_TRAJECTORY: {
     // Get the trajectory
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
+    
+    //Debug
+
     if (!calculated_trajectory_) {
       // Calculate path trajectory
       kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
@@ -307,6 +313,8 @@ void BehaviorExecutive::fsmTimerCallback()
       // Calculate tool trajectory
       tool_planner_->enable(fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT);
       tool_planner_->generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+
+      last_debug_pose_ = current_trajectory_.path.back();
       
       // Convert to global frame
       for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {
@@ -314,10 +322,12 @@ void BehaviorExecutive::fsmTimerCallback()
         current_trajectory_.path[i] = global_path_pose;
       }
 
+      // -------------------------------
       // DEBUG
-      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
-        std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
-      }
+      // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+      //   std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+      // }
+      // -------------------------------
       calculated_trajectory_ = true;
     }
 
@@ -329,10 +339,17 @@ void BehaviorExecutive::fsmTimerCallback()
         enable_worksystem_ = true;
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
+      else if (debug_trigger_) {
+        debug_trigger_ = false;
+        current_agent_pose_ = last_debug_pose_;
+        goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
+        calculated_trajectory_ = false;
+      }
     }
 
     // Update shared current state and the precursing signal if worksystem is now enabled
     get_worksystem_trajectory_.runState(worksystem_enabled_, updated_trajectory_, calculated_trajectory_);
+  }
     break;
   case cg::planning::FSM::StateL0::FOLLOWING_TRAJECTORY:{
     bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_, global_robot_pose_);
@@ -360,6 +377,10 @@ void BehaviorExecutive::fsmTimerCallback()
     break;
   }
   // std::cout << "~~~~~~~ Machine done!" << std::endl;
+}
+
+void BehaviorExecutive::debugTriggerCallback(const std_msgs::msg::Bool::SharedPtr msg) {
+  debug_trigger_ = true;
 }
 
 bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
@@ -593,7 +614,7 @@ void BehaviorExecutive::vizTimerCallback() {
       geometry_msgs::msg::PoseStamped pose_stamped;
       pose_stamped.pose.position.x = global_path_pose.pt.x;
       pose_stamped.pose.position.y = global_path_pose.pt.y;
-      pose_stamped.pose.position.z = viz_planning_height_;
+      pose_stamped.pose.position.z = viz_planning_height_ * 0.9;
 
       tf2::Quaternion q;
       q.setRPY(0, 0, global_path_pose.yaw);
@@ -612,6 +633,35 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_visited_trajs.header.frame_id = "map";
 
   viz_visited_trajectories_pub_->publish(viz_visited_trajs);
+
+  // --------------------------------------
+  // DEBUG: may crash rviz
+  // viz_state_l1_goals_.poses.clear();
+  // viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
+  // for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
+  //   for (cg_msgs::msg::Pose2D traj_pose : traj) {
+  //     // Convert to global frame
+  //     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+
+  //     geometry_msgs::msg::Pose pose_single;
+  //     pose_single.position.x = global_goal_pose.pt.x;
+  //     pose_single.position.y = global_goal_pose.pt.y;
+  //     pose_single.position.z = viz_planning_height_ * 0.9;
+
+  //     tf2::Quaternion q;
+  //     q.setRPY(0, 0, global_goal_pose.yaw);
+  //     pose_single.orientation.x = q.x();
+  //     pose_single.orientation.y = q.y();
+  //     pose_single.orientation.z = q.z();
+  //     pose_single.orientation.w = q.w();
+
+  //     viz_state_l1_goals_.poses.push_back(pose_single);
+  //   }
+  // }
+  // viz_state_l1_goals_.header.stamp = this->get_clock()->now();
+  // viz_state_l1_goals_.header.frame_id = "map";
+  // viz_state_l1_goals_pub_->publish(viz_state_l1_goals_);
+  // --------------------------------------
 }
 
 } // namespace planning

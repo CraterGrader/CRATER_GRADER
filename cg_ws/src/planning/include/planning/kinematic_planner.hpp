@@ -73,8 +73,7 @@ public:
   std::vector<cg_msgs::msg::Pose2D> latticeAStarSearch(
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg_msgs::msg::Pose2D &goal_pose,
-    const cg::mapping::Map<float> &map,
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice);
+    const cg::mapping::Map<float> &map);
 
   // Truncates trajectory to closest pose to goal_pose, returns pose and index
   std::pair<cg_msgs::msg::Pose2D, int> getClosestTrajectoryPoseToGoal(
@@ -114,8 +113,8 @@ public:
     const cg_msgs::msg::Pose2D &goal_pose) const;
 
   // Generate base lattice based on class parameters
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice() const;
-  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right) const;
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice(float turn_radii_resolution, float max_trajectory_length) const;
+  std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right, float max_trajectory_length) const;
 
   // Getters
   float getGoalPoseDistanceThreshold() {return goal_pose_distance_threshold_;}
