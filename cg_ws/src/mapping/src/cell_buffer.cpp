@@ -15,7 +15,8 @@ void CellBuffer::bufferHasBeenUpdated(){
 }
 
 void CellBuffer::offset_height(float offset){
-    height_ -= offset;
+    doesBufferHaveNewData_ = false;
+    height_ = 0.0f;
 }
 
 void CellBuffer::addPoint(indexPoint pt){
