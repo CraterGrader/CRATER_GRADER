@@ -314,10 +314,12 @@ void BehaviorExecutive::fsmTimerCallback()
         current_trajectory_.path[i] = global_path_pose;
       }
 
+      // -------------------------------
       // DEBUG
-      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
-        std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
-      }
+      // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+      //   std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+      // }
+      // -------------------------------
       calculated_trajectory_ = true;
     }
 
@@ -593,7 +595,7 @@ void BehaviorExecutive::vizTimerCallback() {
       geometry_msgs::msg::PoseStamped pose_stamped;
       pose_stamped.pose.position.x = global_path_pose.pt.x;
       pose_stamped.pose.position.y = global_path_pose.pt.y;
-      pose_stamped.pose.position.z = viz_planning_height_;
+      pose_stamped.pose.position.z = viz_planning_height_ * 0.9;
 
       tf2::Quaternion q;
       q.setRPY(0, 0, global_path_pose.yaw);
@@ -612,6 +614,35 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_visited_trajs.header.frame_id = "map";
 
   viz_visited_trajectories_pub_->publish(viz_visited_trajs);
+
+  // --------------------------------------
+  // DEBUG: may crash rviz
+  // viz_state_l1_goals_.poses.clear();
+  // viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
+  // for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
+  //   for (cg_msgs::msg::Pose2D traj_pose : traj) {
+  //     // Convert to global frame
+  //     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+
+  //     geometry_msgs::msg::Pose pose_single;
+  //     pose_single.position.x = global_goal_pose.pt.x;
+  //     pose_single.position.y = global_goal_pose.pt.y;
+  //     pose_single.position.z = viz_planning_height_ * 0.9;
+
+  //     tf2::Quaternion q;
+  //     q.setRPY(0, 0, global_goal_pose.yaw);
+  //     pose_single.orientation.x = q.x();
+  //     pose_single.orientation.y = q.y();
+  //     pose_single.orientation.z = q.z();
+  //     pose_single.orientation.w = q.w();
+
+  //     viz_state_l1_goals_.poses.push_back(pose_single);
+  //   }
+  // }
+  // viz_state_l1_goals_.header.stamp = this->get_clock()->now();
+  // viz_state_l1_goals_.header.frame_id = "map";
+  // viz_state_l1_goals_pub_->publish(viz_state_l1_goals_);
+  // --------------------------------------
 }
 
 } // namespace planning

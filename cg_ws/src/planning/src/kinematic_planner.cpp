@@ -108,10 +108,13 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
 
                 // Since we have been pushing onto final_path backwards, reverse it
                 std::reverse(final_path.begin(), final_path.end());
-                for (cg_msgs::msg::Pose2D pose : final_path) {
-                    std::cout << "final path pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
-                }
-                
+                // -----------------------------------
+                // DEBUG
+                // for (cg_msgs::msg::Pose2D pose : final_path) {
+                //     std::cout << "final path pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
+                // }
+                // -----------------------------------
+
                 // Break since found end point
                 found_plan = true;
                 break;
