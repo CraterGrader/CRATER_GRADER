@@ -81,6 +81,8 @@ namespace planning {
     float turn_radii_resolution;
     float max_trajectory_length;
     float trajectory_resolution;
+    size_t n_arms;
+    float lattice_radii_scale_factor;
     float pose_position_equality_threshold;
     float pose_yaw_equality_threshold;
     float topography_weight;
@@ -101,6 +103,10 @@ namespace planning {
     this->get_parameter("max_trajectory_length", max_trajectory_length);
     this->declare_parameter<float>("trajectory_resolution", 0.05);
     this->get_parameter("trajectory_resolution", trajectory_resolution);
+    this->declare_parameter<int>("n_arms", 1);
+    this->get_parameter("n_arms", n_arms);
+    this->declare_parameter<float>("lattice_radii_scale_factor", 2);
+    this->get_parameter("lattice_radii_scale_factor", lattice_radii_scale_factor);
     this->declare_parameter<float>("pose_position_equality_threshold", 0.05);
     this->get_parameter("pose_position_equality_threshold", pose_position_equality_threshold);
     this->declare_parameter<float>("pose_yaw_equality_threshold", 0.0872665);
@@ -141,6 +147,8 @@ namespace planning {
         turn_radii_resolution,
         max_trajectory_length,
         trajectory_resolution,
+        n_arms,
+        lattice_radii_scale_factor,
         pose_position_equality_threshold,
         pose_yaw_equality_threshold,
         topography_weight,

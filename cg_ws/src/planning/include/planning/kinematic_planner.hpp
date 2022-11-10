@@ -26,6 +26,8 @@ public:
       turn_radii_resolution_(0.4f),
       max_trajectory_length_(0.4f),
       trajectory_resolution_(0.05f),
+      n_arms_(1),
+      lattice_radii_scale_factor_(2.0),
       pose_position_equality_threshold_(0.05f),
       pose_yaw_equality_threshold_(deg2rad(5)),
       topography_weight_(1.0f),
@@ -42,6 +44,8 @@ public:
     float turn_radii_resolution,
     float max_trajectory_length,
     float trajectory_resolution,
+    size_t n_arms,
+    float lattice_radii_scale_factor,
     float pose_position_equality_threshold,
     float pose_yaw_equality_threshold,
     float topography_weight,
@@ -55,6 +59,8 @@ public:
       turn_radii_resolution_(turn_radii_resolution),
       max_trajectory_length_(max_trajectory_length),
       trajectory_resolution_(trajectory_resolution),
+      n_arms_(n_arms),
+      lattice_radii_scale_factor_(lattice_radii_scale_factor),
       pose_position_equality_threshold_(pose_position_equality_threshold),
       pose_yaw_equality_threshold_(pose_yaw_equality_threshold),
       topography_weight_(topography_weight),
@@ -184,10 +190,12 @@ private:
 
   // Lattice Parameters
   float turn_radii_min_;
-  float turn_radii_max_;
-  float turn_radii_resolution_;
+  float turn_radii_max_; // UNUSED
+  float turn_radii_resolution_; // UNUSED
   float max_trajectory_length_;
   float trajectory_resolution_;
+  size_t n_arms_;
+  float lattice_radii_scale_factor_;
 
   // Pose equality thresholds
   float pose_position_equality_threshold_;

@@ -196,9 +196,13 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
     // Generate turn_radii vector
     std::vector<float> turn_radii;
     float cur_radii = turn_radii_min_;
-    while (cur_radii <= turn_radii_max_) {
+    // while (cur_radii <= turn_radii_max_) {
+    //     turn_radii.push_back(cur_radii);
+    //     cur_radii += turn_radii_resolution;
+    // }
+    for (size_t i = 0; i < n_arms_; ++i) {
+        cur_radii *= lattice_radii_scale_factor_;
         turn_radii.push_back(cur_radii);
-        cur_radii += turn_radii_resolution;
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
