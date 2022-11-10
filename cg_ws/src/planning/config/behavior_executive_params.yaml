@@ -6,13 +6,13 @@ behavior_executive_node:
     thresh_euclidean_replan: 0.5 # meters
 
     # Kinematic planner (all params are floats)
-    goal_pose_distance_threshold: 0.15 # m
-    goal_pose_yaw_threshold: 0.15 # rad
-    turn_radii_min: 0.5 # m
+    goal_pose_distance_threshold: 0.1 # m
+    goal_pose_yaw_threshold: 0.09 # rad
+    turn_radii_min: 1.5 # m
     max_trajectory_length: 0.6 # m
     trajectory_resolution: 0.05 # m
-    n_arms : 5 # number of lattice arms in each quadrant
-    lattice_radii_scale_factor : 1.5 # multiplicative factor for lattice arms, closer to 1 makes arms approach min turn radius, larger makes arms approach straight line: radius[n] = turn_radii_min * lattice_radii_scale_factor^(n)
+    n_arms : 3 # max number of lattice arms in each quadrant
+    lattice_radii_scale_factor : 1.7 # multiplicative factor for lattice arms, closer to 1 makes arms approach min turn radius, larger makes arms approach straight line: radius[n] = turn_radii_min * lattice_radii_scale_factor^(n)
     pose_position_equality_threshold: 0.0 # m: note that this can potentially prune lattice arms depending on arm geometry - resulting turn radii, max trajectory length)
     pose_yaw_equality_threshold: 0.0 # rad: note that this can potentially prune lattice arms depending on arm geometry - resulting turn radii, max trajectory length)
     topography_weight: 0.0 # "unitless"
@@ -56,6 +56,6 @@ behavior_executive_node:
     agent_x: 2.5
     agent_y: 0.5
     agent_yaw: 0.0
-    goal_x: 3.5
+    goal_x: 4.5
     goal_y: 1.5
     goal_yaw: 0.0

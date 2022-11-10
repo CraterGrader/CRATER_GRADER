@@ -77,6 +77,8 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 cur_equality_scalar * goal_pose_yaw_threshold_)) {
                 int curr_idx = curr_node.idx;
 
+                std::cout << " ---------- final kinematic traj cost: " << curr_node.g_cost << std::endl;
+
                 // Add final trajectory to 
                 if (visited_trajectories.empty()) {
                     visited_trajectories.push_back(curr_node.trajectory);
@@ -353,7 +355,7 @@ std::vector<float> KinematicPlanner::trajectoriesHeuristic(
         std::vector<float> trajectories_heuristic;
         for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
             trajectories_heuristic.push_back(
-                trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.back().pt, goal_pose.pt));
+                trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.front().pt, goal_pose.pt));
                 // std::fabs(smallest_angle_difference_signed(trajectory.back().yaw, goal_pose.yaw)) * turn_radii_min_ * 0.4);
         }
         // Distance between goal pose and final point of trajectory
