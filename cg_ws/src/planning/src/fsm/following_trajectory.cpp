@@ -10,6 +10,13 @@ bool FollowingTrajectory::runState(const cg_msgs::msg::Pose2D &current_agent_pos
   // Check if re-plan is needed
   traj_idx_ = cg::planning::getClosestTrajIndex(current_trajectory, global_robot_state, traj_idx_);
 
+  // std::cout << "Index 0 path location: " << current_trajectory.path[0].pt.x << ", " << current_trajectory.path[0].pt.y << " >" << std::endl;
+  // std::cout << "Index 1 path location: " << current_trajectory.path[1].pt.x << ", " << current_trajectory.path[1].pt.y << " >" << std::endl;
+
+  for (int i = 0; i < current_trajectory.path.size(); ++i) {
+    std::cout << "Index " << i << " path location: " << current_trajectory.path[i].pt.x << ", " << current_trajectory.path[i].pt.y << " >" << std::endl;
+  }
+
   euclidean_distance_to_trajectory_point_ = cg::planning::euclidean_distance(global_robot_pose.pt, current_trajectory.path[traj_idx_].pt);
   // ------------------------------
   // DEBUG
