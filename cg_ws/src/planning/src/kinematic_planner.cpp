@@ -200,7 +200,8 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
     //     turn_radii.push_back(cur_radii);
     //     cur_radii += turn_radii_resolution;
     // }
-    for (size_t i = 0; i < n_arms_; ++i) {
+    turn_radii.push_back(cur_radii);
+    for (size_t i = 1; i < n_arms_; ++i) {
         cur_radii *= lattice_radii_scale_factor_;
         turn_radii.push_back(cur_radii);
     }
@@ -220,16 +221,22 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
         lattice.push_back(generateLatticeArm(turn_radius, false, false, max_trajectory_length));
     }
     // Going straight, forwards/backwards
-    lattice.push_back(generateLatticeArm(0, true, false, max_trajectory_length));
-    lattice.push_back(generateLatticeArm(0, false, false, max_trajectory_length));
+    lattice.push_back(generateLatticeArm(-1.0, true, false, max_trajectory_length));
+    lattice.push_back(generateLatticeArm(-1.0, false, false, max_trajectory_length));
     return lattice;
     }
 
+/**
+ * @brief Creates a lattice arm trajectory for given turn radius and direction (forwards vs. backwards, right vs. left)
+ * 
+ * @param turn_radius Always positive; treat negative turn radii as a straight section as special case
+ * @param forwards 
+ * @param right 
+ * @param max_trajectory_length 
+ * @return std::vector<cg_msgs::msg::Pose2D> 
+ */
 std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
     float turn_radius, bool forwards, bool right, float max_trajectory_length) const {
-
-    // Since left/right is handled with flags, turn radius should always be positive
-    assert(turn_radius >= 0);
 
     std::vector<cg_msgs::msg::Pose2D> lattice_arm;
     int num_segments = ceil(max_trajectory_length / trajectory_resolution_);
@@ -240,7 +247,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
     if (!forwards) max_arm_traj_length *= -1;
 
     // Straight (forwards and backwards)
-    if (turn_radius < 1e-2) {
+    if (turn_radius < 0.0) {
         float incremental_movement = max_arm_traj_length / num_segments;
         for (int n = 0; n < num_segments; ++n) {
             x += incremental_movement;
