@@ -164,12 +164,12 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 float succ_g_cost = max_trajectory_length_ + curr_node.g_cost + trajectories_costs[traj_idx];
 
                 // Create new child node
+                visited_trajectories.push_back(valid_trajectories[traj_idx]);
                 AStarNode succ_node = {succ_g_cost, 
                                         static_cast<int>(visited_trajectories.size()), // Current pose idx
                                         curr_node.idx, // Parent pose idx
                                         end_of_cur_traj_pose, // Current Pose
                                         valid_trajectories[traj_idx]}; //
-                visited_trajectories.push_back(valid_trajectories[traj_idx]);
                 visited_nodes.push_back(succ_node);
 
                 // Add new poses to pqueue using f(s') = g(s') + h(s')
