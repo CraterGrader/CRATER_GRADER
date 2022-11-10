@@ -204,6 +204,9 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
         cur_radii *= lattice_radii_scale_factor_;
         turn_radii.push_back(cur_radii);
     }
+    for (float r : turn_radii) {
+        std::cout << " ========== lattice turn radius: " << r << std::endl;
+    }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
     for (float turn_radius: turn_radii) {
