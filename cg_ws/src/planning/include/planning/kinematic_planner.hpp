@@ -22,8 +22,6 @@ public:
       goal_pose_distance_threshold_(0.15f), 
       goal_pose_yaw_threshold_(deg2rad(5)), 
       turn_radii_min_(1.6f), 
-      turn_radii_max_(2.8f), 
-      turn_radii_resolution_(0.4f),
       max_trajectory_length_(0.4f),
       trajectory_resolution_(0.05f),
       n_arms_(1),
@@ -40,8 +38,6 @@ public:
     float goal_pose_distance_threshold,
     float goal_pose_yaw_threshold,
     float turn_radii_min,
-    float turn_radii_max,
-    float turn_radii_resolution,
     float max_trajectory_length,
     float trajectory_resolution,
     size_t n_arms,
@@ -55,8 +51,6 @@ public:
       goal_pose_distance_threshold_(goal_pose_distance_threshold), 
       goal_pose_yaw_threshold_(goal_pose_yaw_threshold), 
       turn_radii_min_(turn_radii_min), 
-      turn_radii_max_(turn_radii_max), 
-      turn_radii_resolution_(turn_radii_resolution),
       max_trajectory_length_(max_trajectory_length),
       trajectory_resolution_(trajectory_resolution),
       n_arms_(n_arms),
@@ -119,15 +113,13 @@ public:
     const cg_msgs::msg::Pose2D &goal_pose) const;
 
   // Generate base lattice based on class parameters
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice(float turn_radii_resolution, float max_trajectory_length) const;
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> generateBaseLattice(float max_trajectory_length) const;
   std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right, float max_trajectory_length) const;
 
   // Getters
   float getGoalPoseDistanceThreshold() {return goal_pose_distance_threshold_;}
   float getGoalPoseYawThreshold() {return goal_pose_yaw_threshold_;}
   float getTurnRadiiMin() {return turn_radii_min_;}
-  float getTurnRadiiMax() {return turn_radii_max_;}
-  float getTurnRadiiResolutuion() {return turn_radii_resolution_;}
   float getMaxTrajectoryLength() {return max_trajectory_length_;}
   float getTrajectoryResolution() {return trajectory_resolution_;}
   float getPosePositionEqualityThreshold() {return pose_position_equality_threshold_;}
@@ -147,14 +139,6 @@ public:
     }
   void setTurnRadiiMin(float val) {
     turn_radii_min_ = val;
-    return;
-    }
-  void setTurnRadiiMax(float val) {
-    turn_radii_max_ = val;
-    return;
-    }
-  void setTurnRadiiResolutuion(float val) {
-    turn_radii_resolution_ = val;
     return;
     }
   void setMaxTrajectoryLength(float val) {
@@ -190,8 +174,6 @@ private:
 
   // Lattice Parameters
   float turn_radii_min_;
-  float turn_radii_max_; // UNUSED
-  float turn_radii_resolution_; // UNUSED
   float max_trajectory_length_;
   float trajectory_resolution_;
   size_t n_arms_;

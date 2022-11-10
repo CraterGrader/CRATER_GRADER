@@ -9,12 +9,10 @@ behavior_executive_node:
     goal_pose_distance_threshold: 0.15 # m
     goal_pose_yaw_threshold: 0.15 # rad
     turn_radii_min: 0.5 # m
-    turn_radii_max: 3.0 # m UNUSED
-    turn_radii_resolution: 0.1 # m UNUSED
     max_trajectory_length: 0.6 # m
     trajectory_resolution: 0.05 # m
-    n_arms : 4
-    lattice_radii_scale_factor : 4.0
+    n_arms : 5 # number of lattice arms in each quadrant
+    lattice_radii_scale_factor : 1.5 # multiplicative factor for lattice arms, closer to 1 makes arms approach min turn radius, larger makes arms approach straight line: radius[n] = turn_radii_min * lattice_radii_scale_factor^(n)
     pose_position_equality_threshold: 0.0 # m: note that this can potentially prune lattice arms depending on arm geometry - resulting turn radii, max trajectory length)
     pose_yaw_equality_threshold: 0.0 # rad: note that this can potentially prune lattice arms depending on arm geometry - resulting turn radii, max trajectory length)
     topography_weight: 0.0 # "unitless"

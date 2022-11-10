@@ -42,8 +42,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     bool found_plan = false;
     int num_iter;
     while (cur_equality_scalar < max_pose_equality_scalar_ && !found_plan) {
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(turn_radii_resolution_ / cur_equality_scalar,
-            max_trajectory_length_ * cur_equality_scalar);
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_ * cur_equality_scalar);
 
         final_path.clear();
         visited_trajectories.clear();
@@ -189,17 +188,11 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     return final_path;
 }
 
-std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice(float turn_radii_resolution, float max_trajectory_length) const {
-
-    assert(turn_radii_min_ > 0 && turn_radii_max_ > 0);
+std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice(float max_trajectory_length) const {
 
     // Generate turn_radii vector
     std::vector<float> turn_radii;
     float cur_radii = turn_radii_min_;
-    // while (cur_radii <= turn_radii_max_) {
-    //     turn_radii.push_back(cur_radii);
-    //     cur_radii += turn_radii_resolution;
-    // }
     turn_radii.push_back(cur_radii);
     for (size_t i = 1; i < n_arms_; ++i) {
         cur_radii *= lattice_radii_scale_factor_;
