@@ -615,9 +615,30 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_visited_trajs.poses.clear();
   viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
   for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
-    for (cg_msgs::msg::Pose2D traj_pose : traj) {
+    for (int i = 0; i < traj.size(); ++i) {
       // Convert to global frame
-      auto global_path_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
+      auto global_path_pose = cg::planning::transformPose(traj[i], local_map_relative_to_global_frame_);
+
+      geometry_msgs::msg::PoseStamped pose_stamped;
+      pose_stamped.pose.position.x = global_path_pose.pt.x;
+      pose_stamped.pose.position.y = global_path_pose.pt.y;
+      pose_stamped.pose.position.z = viz_planning_height_ * 0.9;
+
+      tf2::Quaternion q;
+      q.setRPY(0, 0, global_path_pose.yaw);
+      pose_stamped.pose.orientation.x = q.x();
+      pose_stamped.pose.orientation.y = q.y();
+      pose_stamped.pose.orientation.z = q.z();
+      pose_stamped.pose.orientation.w = q.w();
+
+      pose_stamped.header.stamp = this->get_clock()->now();
+      pose_stamped.header.frame_id = "map";
+
+      viz_visited_trajs.poses.push_back(pose_stamped);
+    }
+    for (int i = traj.size() - 2; i >= 0; --i) {
+      // Convert to global frame
+      auto global_path_pose = cg::planning::transformPose(traj[i], local_map_relative_to_global_frame_);
 
       geometry_msgs::msg::PoseStamped pose_stamped;
       pose_stamped.pose.position.x = global_path_pose.pt.x;
