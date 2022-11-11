@@ -74,12 +74,7 @@ namespace planning {
     this->get_parameter("thresh_euclidean_replan", thresh_euclidean_replan_);
 
     // Kinematic planner
-
-    std::vector<double> heuristic_epsilon_scalars;
-    this->declare_parameter<std::vector<double>>("heuristic_epsilon_scalars", std::vector<double>({1.0, 2.0, 5.0, 10.0}));
-    this->get_parameter("heuristic_epsilon_scalars", heuristic_epsilon_scalars);
-
-    float goal_pose_distance_threshold;
+    std::vector<double> goal_pose_distance_threshold;
     float goal_pose_yaw_threshold;
     float turn_radii_min;
     float max_trajectory_length;
@@ -89,10 +84,10 @@ namespace planning {
     float pose_position_equality_threshold;
     float pose_yaw_equality_threshold;
     float topography_weight;
-    float trajectory_heuristic_epsilon;
+    std::vector<double> trajectory_heuristic_epsilon;
     float max_pose_equality_scalar;
     int pose_equality_scalar_iteration;
-    this->declare_parameter<float>("goal_pose_distance_threshold", 0.00001);
+    this->declare_parameter<std::vector<double>>("goal_pose_distance_threshold", std::vector<double>({0.1, 0.2, 0.3, 0.4}));
     this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
     this->declare_parameter<float>("goal_pose_yaw_threshold", 0.00001);
     this->get_parameter("goal_pose_yaw_threshold", goal_pose_yaw_threshold);
@@ -112,7 +107,7 @@ namespace planning {
     this->get_parameter("pose_yaw_equality_threshold", pose_yaw_equality_threshold);
     this->declare_parameter<float>("topography_weight", 1.0);
     this->get_parameter("topography_weight", topography_weight);
-    this->declare_parameter<float>("trajectory_heuristic_epsilon", 1.0);
+    this->declare_parameter<std::vector<double>>("trajectory_heuristic_epsilon", std::vector<double>({1.0, 2.0, 5.0, 10.0}));
     this->get_parameter("trajectory_heuristic_epsilon", trajectory_heuristic_epsilon);
     this->declare_parameter<float>("max_pose_equality_scalar", 1.0);
     this->get_parameter("max_pose_equality_scalar", max_pose_equality_scalar);
