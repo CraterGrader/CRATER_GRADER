@@ -15,7 +15,7 @@ void ReplanTransport::runState() {
   if (!transport_planned) {
     pre_signal_ = Signal::YES;
     curr_state_l0_ = StateL0::PLAN_TRANSPORT;
-    transport_planned = true; // DEBUG
+    transport_planned = true;
     return;
   }
 

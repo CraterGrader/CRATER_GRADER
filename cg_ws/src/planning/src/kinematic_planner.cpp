@@ -43,6 +43,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     int num_iter;
     while (cur_equality_scalar < max_pose_equality_scalar_ && !found_plan) {
         std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_ * cur_equality_scalar);
+        std::cout << " ========== LATTICE GENERATED: " << std::endl;
 
         final_path.clear();
         visited_trajectories.clear();
