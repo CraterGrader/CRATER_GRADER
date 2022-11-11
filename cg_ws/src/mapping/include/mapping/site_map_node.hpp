@@ -24,6 +24,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_seen_map_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr visualization_variance_map_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr OOS_map_pub_;
 
   // timer
   rclcpp::TimerBase::SharedPtr viz_timer_;
@@ -55,6 +56,7 @@ private:
   float cellStartingVariance_;
   float minCellVariance_;
   bool static_map_;
+  float oos_thresh_;
 
 }; // class SiteMapNode
 
