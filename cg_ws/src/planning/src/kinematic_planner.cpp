@@ -43,8 +43,13 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     bool found_plan = false;
     int num_iter;
     for (int run_iter = 0; run_iter < goal_pose_distance_threshold_.size(); ++run_iter) {
+
+        if (found_plan) break;
+        
         std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_);
         std::cout << " ========== LATTICE GENERATED: " << std::endl;
+        std::cout << " Goal threshold: " << goal_pose_distance_threshold_[run_iter] << std::endl;
+        std::cout << " Heuristic Epsilon: " << trajectory_heuristic_epsilon_[run_iter] << std::endl;
 
         final_path.clear();
         visited_trajectories.clear();
@@ -60,6 +65,10 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
             num_iter++;
             if (num_iter % 100 == 0) {
                 std::cout << "# Lattice Planner Iterations: " << num_iter << std::endl;
+            }
+
+            if (num_iter % pose_equality_scalar_iteration_ == 0) {
+                break;
             }
 
             // Obtain node with the lowest f-cost and remove from queue
@@ -190,9 +199,6 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
     for (size_t i = 1; i < n_arms_; ++i) {
         cur_radii *= lattice_radii_scale_factor_;
         turn_radii.push_back(cur_radii);
-    }
-    for (float r : turn_radii) {
-        std::cout << " ========== lattice turn radius: " << r << std::endl;
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
