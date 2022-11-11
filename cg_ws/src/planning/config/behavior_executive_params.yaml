@@ -52,7 +52,7 @@ behavior_executive_node:
 
     # TRAJECTORY DEBUG
     # Overwrites agent and goal poses with given values
-    traj_debug: true
+    traj_debug: false
     agent_x: 4.8
     agent_y: 0.25
     agent_yaw: 1.9
