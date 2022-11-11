@@ -315,6 +315,10 @@ void BehaviorExecutive::fsmTimerCallback()
       tool_planner_->generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
 
       last_debug_pose_ = current_trajectory_.path.back();
+
+      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+        std::cout << "    Local Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+      }
       
       // Convert to global frame
       for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {
@@ -324,9 +328,9 @@ void BehaviorExecutive::fsmTimerCallback()
 
       // -------------------------------
       // DEBUG
-      // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
-      //   std::cout << "    Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
-      // }
+      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+        std::cout << "    Global Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+      }
       // -------------------------------
       calculated_trajectory_ = true;
     }

@@ -27,7 +27,7 @@ behavior_executive_node:
     last_pose_offset: 1.0 # meters to rearward offset last pose in transport assignment by
 
     # Exploration planner
-    map_coverage_threshold: 0.0
+    map_coverage_threshold: 0.01
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
 
     # Tool planner

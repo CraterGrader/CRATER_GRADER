@@ -35,9 +35,9 @@ bool ExplorationPlanner::planExploration(const cg::mapping::Map<float> &map) {
     exploration_waypoints_.push_back(cg::planning::create_pose2d(x, y, yaw));
   }
   // Final waypoints for backing into the corner and driving forward
-  exploration_waypoints_.push_back(cg::planning::create_pose2d(
-    w-min_dist_from_map_boundary_, min_dist_from_map_boundary_, 135*M_PI/180
-  ));
+  // exploration_waypoints_.push_back(cg::planning::create_pose2d(
+  //   w-min_dist_from_map_boundary_, min_dist_from_map_boundary_, 135*M_PI/180
+  // ));
   exploration_waypoints_.push_back(cg::planning::create_pose2d(
     2.0/3.0*w, 1.0/3.0*h, 135*M_PI/180
   ));

@@ -35,7 +35,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     
     // Initialize with first trajectory and node
     std::vector<cg_msgs::msg::Pose2D> start_trajectory = {agent_pose};
-    AStarNode start_node = {0.0, 0, 0, agent_pose, start_trajectory};
+    AStarNode start_node = {0.0, -1, -1, agent_pose, start_trajectory};
 
     // Initialze equality scalar for kinematic planner backup
     float cur_equality_scalar = 1.0;
@@ -78,26 +78,20 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 int curr_idx = curr_node.idx;
 
                 std::cout << " ---------- final kinematic traj cost: " << curr_node.g_cost << std::endl;
-
-                // Add final trajectory to 
-                if (visited_trajectories.empty()) {
-                    visited_trajectories.push_back(curr_node.trajectory);
-                    visited_nodes.push_back(curr_node);
-                }
-
+                
                 // Reverse last segment
-                std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
+                std::vector<cg_msgs::msg::Pose2D> traj_copy = curr_node.trajectory;
                 std::reverse(traj_copy.begin(), traj_copy.end());
                 final_path.insert(final_path.end(), 
                                     traj_copy.begin() + (traj_copy.size() - 1 - closest_traj_idx), 
                                     traj_copy.end());
                 
                 // Add trajectory segment in reverse order
-                curr_idx = visited_nodes[curr_idx].parent_idx;
-                while (curr_idx != 0) {
+                curr_idx = curr_node.parent_idx;
+                while (curr_idx != -1) {
                     
                     // Reverse current trajectory segment to push it on backwards
-                    std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
+                    std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_nodes[curr_idx].trajectory;
                     std::reverse(traj_copy.begin(), traj_copy.end());
                     final_path.insert(final_path.end(), traj_copy.begin(), traj_copy.end());
 
@@ -166,16 +160,16 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
 
                 // Create new child node
                 AStarNode succ_node = {succ_g_cost, 
-                                        static_cast<int>(visited_trajectories.size()), // Current pose idx
+                                        static_cast<int>(visited_nodes.size()), // Current pose idx
                                         curr_node.idx, // Parent pose idx
                                         end_of_cur_traj_pose, // Current Pose
                                         valid_trajectories[traj_idx]}; //
-                visited_trajectories.push_back(valid_trajectories[traj_idx]);
                 visited_nodes.push_back(succ_node);
 
                 // Add new poses to pqueue using f(s') = g(s') + h(s')
                 float f_cost = succ_g_cost + trajectories_heuristic[traj_idx];
                 pq_nodes.push(std::make_pair(f_cost, succ_node));
+                visited_trajectories.push_back(valid_trajectories[traj_idx]);
             }
         }
     }
