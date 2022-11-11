@@ -42,8 +42,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     bool found_plan = false;
     int num_iter;
     while (cur_equality_scalar < max_pose_equality_scalar_ && !found_plan) {
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(turn_radii_resolution_ / cur_equality_scalar,
-            max_trajectory_length_ * cur_equality_scalar);
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_ * cur_equality_scalar);
 
         final_path.clear();
         visited_trajectories.clear();
@@ -62,7 +61,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
             }
 
             if (num_iter >= pose_equality_scalar_iteration_) {
-                cur_equality_scalar += 0.1;
+                cur_equality_scalar *= 2;
                 break;
             }
 
@@ -78,6 +77,8 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 cur_equality_scalar * goal_pose_yaw_threshold_)) {
                 int curr_idx = curr_node.idx;
 
+                std::cout << " ---------- final kinematic traj cost: " << curr_node.g_cost << std::endl;
+                
                 // Reverse last segment
                 std::vector<cg_msgs::msg::Pose2D> traj_copy = curr_node.trajectory;
                 std::reverse(traj_copy.begin(), traj_copy.end());
@@ -183,16 +184,18 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     return final_path;
 }
 
-std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice(float turn_radii_resolution, float max_trajectory_length) const {
-
-    assert(turn_radii_min_ > 0 && turn_radii_max_ > 0);
+std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice(float max_trajectory_length) const {
 
     // Generate turn_radii vector
     std::vector<float> turn_radii;
     float cur_radii = turn_radii_min_;
-    while (cur_radii <= turn_radii_max_) {
+    turn_radii.push_back(cur_radii);
+    for (size_t i = 1; i < n_arms_; ++i) {
+        cur_radii *= lattice_radii_scale_factor_;
         turn_radii.push_back(cur_radii);
-        cur_radii += turn_radii_resolution;
+    }
+    for (float r : turn_radii) {
+        std::cout << " ========== lattice turn radius: " << r << std::endl;
     }
 
     std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
@@ -207,16 +210,22 @@ std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLat
         lattice.push_back(generateLatticeArm(turn_radius, false, false, max_trajectory_length));
     }
     // Going straight, forwards/backwards
-    lattice.push_back(generateLatticeArm(0, true, false, max_trajectory_length));
-    lattice.push_back(generateLatticeArm(0, false, false, max_trajectory_length));
+    lattice.push_back(generateLatticeArm(-1.0, true, false, max_trajectory_length));
+    lattice.push_back(generateLatticeArm(-1.0, false, false, max_trajectory_length));
     return lattice;
     }
 
+/**
+ * @brief Creates a lattice arm trajectory for given turn radius and direction (forwards vs. backwards, right vs. left)
+ * 
+ * @param turn_radius Always positive; treat negative turn radii as a straight section as special case
+ * @param forwards 
+ * @param right 
+ * @param max_trajectory_length 
+ * @return std::vector<cg_msgs::msg::Pose2D> 
+ */
 std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
     float turn_radius, bool forwards, bool right, float max_trajectory_length) const {
-
-    // Since left/right is handled with flags, turn radius should always be positive
-    assert(turn_radius >= 0);
 
     std::vector<cg_msgs::msg::Pose2D> lattice_arm;
     int num_segments = ceil(max_trajectory_length / trajectory_resolution_);
@@ -227,7 +236,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
     if (!forwards) max_arm_traj_length *= -1;
 
     // Straight (forwards and backwards)
-    if (turn_radius < 1e-2) {
+    if (turn_radius < 0.0) {
         float incremental_movement = max_arm_traj_length / num_segments;
         for (int n = 0; n < num_segments; ++n) {
             x += incremental_movement;
@@ -340,7 +349,7 @@ std::vector<float> KinematicPlanner::trajectoriesHeuristic(
         std::vector<float> trajectories_heuristic;
         for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
             trajectories_heuristic.push_back(
-                trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.back().pt, goal_pose.pt));
+                trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.front().pt, goal_pose.pt));
                 // std::fabs(smallest_angle_difference_signed(trajectory.back().yaw, goal_pose.yaw)) * turn_radii_min_ * 0.4);
         }
         // Distance between goal pose and final point of trajectory

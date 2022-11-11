@@ -77,10 +77,10 @@ namespace planning {
     float goal_pose_distance_threshold;
     float goal_pose_yaw_threshold;
     float turn_radii_min;
-    float turn_radii_max;
-    float turn_radii_resolution;
     float max_trajectory_length;
     float trajectory_resolution;
+    size_t n_arms;
+    float lattice_radii_scale_factor;
     float pose_position_equality_threshold;
     float pose_yaw_equality_threshold;
     float topography_weight;
@@ -93,14 +93,14 @@ namespace planning {
     this->get_parameter("goal_pose_yaw_threshold", goal_pose_yaw_threshold);
     this->declare_parameter<float>("turn_radii_min", 1.6);
     this->get_parameter("turn_radii_min", turn_radii_min);
-    this->declare_parameter<float>("turn_radii_max", 2.8);
-    this->get_parameter("turn_radii_max", turn_radii_max);
-    this->declare_parameter<float>("turn_radii_resolution", 0.4);
-    this->get_parameter("turn_radii_resolution", turn_radii_resolution);
     this->declare_parameter<float>("max_trajectory_length", 0.4);
     this->get_parameter("max_trajectory_length", max_trajectory_length);
     this->declare_parameter<float>("trajectory_resolution", 0.05);
     this->get_parameter("trajectory_resolution", trajectory_resolution);
+    this->declare_parameter<int>("n_arms", 1);
+    this->get_parameter("n_arms", n_arms);
+    this->declare_parameter<float>("lattice_radii_scale_factor", 2);
+    this->get_parameter("lattice_radii_scale_factor", lattice_radii_scale_factor);
     this->declare_parameter<float>("pose_position_equality_threshold", 0.05);
     this->get_parameter("pose_position_equality_threshold", pose_position_equality_threshold);
     this->declare_parameter<float>("pose_yaw_equality_threshold", 0.0872665);
@@ -137,10 +137,10 @@ namespace planning {
         goal_pose_distance_threshold,
         goal_pose_yaw_threshold,
         turn_radii_min,
-        turn_radii_max,
-        turn_radii_resolution,
         max_trajectory_length,
         trajectory_resolution,
+        n_arms,
+        lattice_radii_scale_factor,
         pose_position_equality_threshold,
         pose_yaw_equality_threshold,
         topography_weight,
@@ -380,7 +380,7 @@ void BehaviorExecutive::fsmTimerCallback()
     std::cout << "~ ~ ~ ~ ! Invalid State !" << std::endl;
     break;
   }
-  // std::cout << "~~~~~~~ Machine done!" << std::endl;
+  // std::cout << "~~~~~~~ Machine done!" << std::endl; // DEBUG
 }
 
 void BehaviorExecutive::debugTriggerCallback(const std_msgs::msg::Bool::SharedPtr msg) {
@@ -611,7 +611,7 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_visited_trajs.poses.clear();
   viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
   for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
-    for (int i = 0; i < traj.size(); ++i) {
+    for (unsigned int i = 0; i < traj.size(); ++i) {
       // Convert to global frame
       auto global_path_pose = cg::planning::transformPose(traj[i], local_map_relative_to_global_frame_);
 
