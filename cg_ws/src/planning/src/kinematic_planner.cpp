@@ -23,6 +23,8 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     // List of final trajectories composed from lattice primitives
     std::vector<cg_msgs::msg::Pose2D> final_path;
 
+    assert (goal_pose_distance_threshold_.size() == trajectory_heuristic_epsilon_.size());
+
     visited_trajectories.clear();
     std::vector<AStarNode> visited_nodes;
 
@@ -38,11 +40,10 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     AStarNode start_node = {0.0, -1, -1, agent_pose, start_trajectory};
 
     // Initialze equality scalar for kinematic planner backup
-    float cur_equality_scalar = 1.0;
     bool found_plan = false;
     int num_iter;
-    while (cur_equality_scalar < max_pose_equality_scalar_ && !found_plan) {
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_ * cur_equality_scalar);
+    for (int run_iter = 0; run_iter < goal_pose_distance_threshold_.size(); ++run_iter) {
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_);
         std::cout << " ========== LATTICE GENERATED: " << std::endl;
 
         final_path.clear();
@@ -61,11 +62,6 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 std::cout << "# Lattice Planner Iterations: " << num_iter << std::endl;
             }
 
-            if (num_iter >= pose_equality_scalar_iteration_) {
-                cur_equality_scalar *= 2;
-                break;
-            }
-
             // Obtain node with the lowest f-cost and remove from queue
             AStarNode curr_node = pq_nodes.top().second;
             pq_nodes.pop();
@@ -74,8 +70,8 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
             auto [closest_traj_pose, closest_traj_idx] = KinematicPlanner::getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
             if (cg::planning::samePoseWithinThresh(
                 closest_traj_pose, goal_pose,
-                cur_equality_scalar * goal_pose_distance_threshold_, 
-                cur_equality_scalar * goal_pose_yaw_threshold_)) {
+                goal_pose_distance_threshold_[run_iter], 
+                goal_pose_yaw_threshold_)) {
                 int curr_idx = curr_node.idx;
 
                 std::cout << " ---------- final kinematic traj cost: " << curr_node.g_cost << std::endl;
@@ -129,7 +125,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
             }
 
             // Calculate trajectory heuristic h(s') for valid trajectories
-            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose);
+            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose, trajectory_heuristic_epsilon_[run_iter]);
                 
             // Get trajectory costs c(s,s') for valid trajectories
             std::vector<float> trajectories_costs;
@@ -346,11 +342,11 @@ float KinematicPlanner::calculateTopographyCost(
 
 std::vector<float> KinematicPlanner::trajectoriesHeuristic(
     const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories,
-    const cg_msgs::msg::Pose2D &goal_pose) const {
+    const cg_msgs::msg::Pose2D &goal_pose, double heuristic_epsilon) const {
         std::vector<float> trajectories_heuristic;
         for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
             trajectories_heuristic.push_back(
-                trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.front().pt, goal_pose.pt));
+                static_cast<float>(heuristic_epsilon) * euclidean_distance(trajectory.front().pt, goal_pose.pt));
                 // std::fabs(smallest_angle_difference_signed(trajectory.back().yaw, goal_pose.yaw)) * turn_radii_min_ * 0.4);
         }
         // Distance between goal pose and final point of trajectory
