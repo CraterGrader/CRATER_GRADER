@@ -56,13 +56,59 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        april_tag0:
+          Value: true
+        april_tag2:
+          Value: true
+        april_tag3:
+          Value: true
+        base_link:
+          Value: true
+        camera:
+          Value: true
+        camera_depth_frame:
+          Value: true
+        camera_depth_optical_frame:
+          Value: true
+        camera_link:
+          Value: true
+        imu_link:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
+        realsense_frame:
+          Value: true
+        rob_base_link:
+          Value: true
+        tag0:
+          Value: true
+        tag1:
+          Value: true
+        tag2:
+          Value: true
+        tag3:
+          Value: true
+        tag_map:
+          Value: true
+        total_station_prism:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        {}
+        map:
+          odom:
+            base_link:
+              imu_link:
+                {}
+              realsense_frame:
+                {}
+              total_station_prism:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -121,10 +167,10 @@ Visualization Manager:
       Class: rviz_default_plugins/PoseArray
       Color: 0; 0; 0
       Enabled: true
-      Head Length: 0
-      Head Radius: 0
+      Head Length: 0.05000000074505806
+      Head Radius: 0.029999999329447746
       Name: All L1 Goals
-      Shaft Length: 0.03999999910593033
+      Shaft Length: 0.07999999821186066
       Shaft Radius: 0.009999999776482582
       Shape: Arrow (3D)
       Topic:
@@ -234,8 +280,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0
-        Min Value: 0
+        Max Value: 0.056561242789030075
+        Min Value: -0.11187673360109329
         Value: true
       Axis: Z
       Channel Name: z
@@ -302,7 +348,7 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0
+        Max Value: 1
         Min Value: 0
         Value: true
       Axis: Z
@@ -422,11 +468,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 211.93186950683594
+      Scale: 135.5234832763672
       Target Frame: map
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 4.4979023933410645
-      Y: 1.938808560371399
+      X: 3.3963623046875
+      Y: 3.5268197059631348
     Saved: ~
 Window Geometry:
   Displays:
