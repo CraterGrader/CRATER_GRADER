@@ -74,6 +74,11 @@ namespace planning {
     this->get_parameter("thresh_euclidean_replan", thresh_euclidean_replan_);
 
     // Kinematic planner
+
+    std::vector<double> heuristic_epsilon_scalars;
+    this->declare_parameter<std::vector<double>>("heuristic_epsilon_scalars", std::vector<double>({1.0, 2.0, 5.0, 10.0}));
+    this->get_parameter("heuristic_epsilon_scalars", heuristic_epsilon_scalars);
+
     float goal_pose_distance_threshold;
     float goal_pose_yaw_threshold;
     float turn_radii_min;
