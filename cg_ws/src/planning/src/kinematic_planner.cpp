@@ -61,7 +61,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
             }
 
             if (num_iter >= pose_equality_scalar_iteration_) {
-                cur_equality_scalar += 0.1;
+                cur_equality_scalar *= 2;
                 break;
             }
 
