@@ -17,7 +17,7 @@ class KinematicPlanner {
 
 public:
 
-  // Construct Kinematic Plannercur_equality_scalar
+  // Construct Kinematic Planner
   KinematicPlanner() : 
       goal_pose_distance_threshold_(std::vector<double>({0.1, 0.2, 0.5, 1.0})), 
       goal_pose_yaw_threshold_(deg2rad(5)), 
