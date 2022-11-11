@@ -314,7 +314,7 @@ void BehaviorExecutive::fsmTimerCallback()
       tool_planner_->enable(fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT);
       tool_planner_->generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
 
-      // last_debug_pose_ = current_trajectory_.path.back();
+      last_debug_pose_ = current_trajectory_.path.back();
 
       for (size_t i =0; i < current_trajectory_.path.size(); ++i){
         std::cout << "    Local Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
@@ -343,12 +343,12 @@ void BehaviorExecutive::fsmTimerCallback()
         enable_worksystem_ = true;
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
-      // else if (debug_trigger_) {
-      //   debug_trigger_ = false;
-      //   current_agent_pose_ = last_debug_pose_;
-      //   goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
-      //   calculated_trajectory_ = false;
-      // }
+      else if (debug_trigger_) {
+        debug_trigger_ = false;
+        current_agent_pose_ = last_debug_pose_;
+        goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
+        calculated_trajectory_ = false;
+      }
     }
 
     // Update shared current state and the precursing signal if worksystem is now enabled
