@@ -36,6 +36,8 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   this->get_parameter("cellStartingVariance", cellStartingVariance_);
   this->declare_parameter<float>("minCellVariance", 0.0001);
   this->get_parameter("minCellVariance", minCellVariance_);
+  this->declare_parameter<float>("oosThreshold", 0.03);
+  this->get_parameter("oosThreshold", oos_thresh_);
 
   std::string load_height_map_filepath;
   bool load_height_map_from_filepath;
@@ -87,7 +89,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
   visualization_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_viz", 1);
   visualization_seen_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_seen_viz", 1);
   visualization_variance_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/site_map_variance", 1);
-  // std::cout << "Started sub" << std::endl;
+  OOS_map_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/viz/mapping/oss_map", 1);
 
 }
 
@@ -104,6 +106,7 @@ void SiteMapNode::map_viz_callback(){
   // Pack data
   // TODO turn this into util
   pcl::PointCloud<pcl::PointXYZ> myCloud;
+  pcl::PointCloud<pcl::PointXYZ> myCloudOOS;
 
   for (int col=0; col<static_cast<int>(siteMap_.getWidth()); col++) {
     for (int row=0; row < static_cast<int>(siteMap_.getHeight()); row++) {
@@ -112,6 +115,9 @@ void SiteMapNode::map_viz_callback(){
       newPoint.y = col * siteMap_.getResolution() + siteMap_.getYTransform() + (siteMap_.getResolution()/2); // cell y-coordinate in map frame
       newPoint.z =  tempMap[iterator0]; // cell height in map frame
       myCloud.points.push_back(newPoint);
+      if (std::fabs(newPoint.z) > oos_thresh_){
+        myCloudOOS.points.push_back(newPoint);
+      }
       iterator0++;
     }
   }
@@ -125,6 +131,14 @@ void SiteMapNode::map_viz_callback(){
   site_map_viz_msg.header.stamp = this->get_clock()->now();
   visualization_pub_->publish(site_map_viz_msg);
 
+  // Convert to ROS data type
+  sensor_msgs::msg::PointCloud2 site_map_viz_oos_msg;
+  pcl::toROSMsg(myCloudOOS, site_map_viz_oos_msg);
+
+  // Publish the message
+  site_map_viz_oos_msg.header.frame_id = "map";
+  site_map_viz_oos_msg.header.stamp = this->get_clock()->now();
+  OOS_map_pub_->publish(site_map_viz_oos_msg);
 
   // Seen MAP
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
