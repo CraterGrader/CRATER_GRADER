@@ -428,7 +428,6 @@ void BehaviorExecutive::fsmTimerCallback()
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
       else if (debug_trigger_) {
-        RCLCPP_INFO(this->get_logger(), "debug_trigger_ read (if statement end) (fsm GET_WORKSYSTEM_TRAJECTORY)");
         RCLCPP_INFO(this->get_logger(), "debug_trigger_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         debug_trigger_ = false;
         RCLCPP_INFO(this->get_logger(), "debug_trigger_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
@@ -443,6 +442,7 @@ void BehaviorExecutive::fsmTimerCallback()
         RCLCPP_INFO(this->get_logger(), "current_goal_pose_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
         calculated_trajectory_ = false;
       }
+      RCLCPP_INFO(this->get_logger(), "debug_trigger_ read (if statement end) (fsm GET_WORKSYSTEM_TRAJECTORY)");
     }
 
     // Update shared current state and the precursing signal if worksystem is now enabled
