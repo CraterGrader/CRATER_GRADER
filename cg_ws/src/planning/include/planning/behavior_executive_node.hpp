@@ -139,6 +139,7 @@ private:
   float transport_threshold_z_ = 0.0;
   float topology_equality_threshold_ = 0.0;
   float thresh_max_assignment_distance_ = 0.0;
+  int transport_plan_max_calls_ = INT_MAX;
   double viz_planning_height_ = 0.0;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;

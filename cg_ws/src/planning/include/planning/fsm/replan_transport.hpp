@@ -11,10 +11,10 @@ namespace planning {
 class ReplanTransport : public FSM {
 
 public:
-  void runState(); // Main function to run current state; optionally modifies signal and state for transition
+  void runState(int max_calls_before_replan); // Main function to run current state; optionally modifies signal and state for transition
 
 private:
-  bool transport_planned = false;
+  int transport_counter_ = 0;
 
 }; // class State
 

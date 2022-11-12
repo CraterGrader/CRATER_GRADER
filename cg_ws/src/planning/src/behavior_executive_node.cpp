@@ -155,6 +155,8 @@ namespace planning {
     this->get_parameter("transport_threshold_z", transport_threshold_z_);
     this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
     this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
+    this->declare_parameter<int>("transport_plan_max_calls", INT_MAX);
+    this->get_parameter("transport_plan_max_calls", transport_plan_max_calls_);
 
     double last_pose_offset;
     this->declare_parameter<double>("last_pose_offset", 1.0);
@@ -255,7 +257,7 @@ void BehaviorExecutive::fsmTimerCallback()
     map_explored_.runState(current_map_coverage_ratio_, map_coverage_threshold_);
     break;
   case cg::planning::FSM::StateL0::REPLAN_TRANSPORT:
-    replan_transport_.runState();
+    replan_transport_.runState(transport_plan_max_calls_);
     break;
   case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
     plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
