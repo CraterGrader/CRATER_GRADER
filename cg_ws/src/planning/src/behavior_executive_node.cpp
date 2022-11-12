@@ -350,13 +350,17 @@ void BehaviorExecutive::fsmTimerCallback()
     if (calculated_trajectory_) {
       // Send the trajectory to the controller
       updated_trajectory_ = updateTrajectoryService(current_trajectory_, true);
+      RCLCPP_INFO(this->get_logger(), "debug_trigger_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
       if (updated_trajectory_) {
         // The controller trajectory was updated, so enable worksystem
         enable_worksystem_ = true;
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
       else if (debug_trigger_) {
+        RCLCPP_INFO(this->get_logger(), "debug_trigger_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+        RCLCPP_INFO(this->get_logger(), "debug_trigger_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         debug_trigger_ = false;
+        RCLCPP_INFO(this->get_logger(), "debug_trigger_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
         current_agent_pose_ = last_debug_pose_;
         goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
         calculated_trajectory_ = false;
@@ -397,7 +401,9 @@ void BehaviorExecutive::fsmTimerCallback()
 
 void BehaviorExecutive::debugTriggerCallback(const std_msgs::msg::Bool::SharedPtr msg) {
   (void)msg; // Message not used, just "touch" to hide unused parameter warning
+  RCLCPP_INFO(this->get_logger(), "debug_trigger_ write start (debugTriggerCallback)");
   debug_trigger_ = true;
+  RCLCPP_INFO(this->get_logger(), "debug_trigger_ write end (debugTriggerCallback)");
 }
 
 bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
