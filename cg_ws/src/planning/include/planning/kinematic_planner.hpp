@@ -118,16 +118,16 @@ public:
   std::vector<cg_msgs::msg::Pose2D> generateLatticeArm(float turn_radius, bool forwards, bool right, float max_trajectory_length) const;
 
   // Getters
-  std::vector<double> getGoalPoseDistanceThreshold() {return goal_pose_distance_threshold_;}
-  float getGoalPoseYawThreshold() {return goal_pose_yaw_threshold_;}
-  float getTurnRadiiMin() {return turn_radii_min_;}
-  float getMaxTrajectoryLength() {return max_trajectory_length_;}
-  float getTrajectoryResolution() {return trajectory_resolution_;}
-  float getPosePositionEqualityThreshold() {return pose_position_equality_threshold_;}
-  float getPoseYawEqualityThreshold() {return pose_yaw_equality_threshold_;}
-  float getTopographyWeight() {return topography_weight_;}
-  std::vector<double> getTrajectoryHeuristicEpsilon() {return trajectory_heuristic_epsilon_;}
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> getVizVisitedTrajectories() {return visited_trajectories;}
+  std::vector<double> getGoalPoseDistanceThreshold() const {return goal_pose_distance_threshold_;}
+  float getGoalPoseYawThreshold() const {return goal_pose_yaw_threshold_;}
+  float getTurnRadiiMin() const {return turn_radii_min_;}
+  float getMaxTrajectoryLength() const {return max_trajectory_length_;}
+  float getTrajectoryResolution() const {return trajectory_resolution_;}
+  float getPosePositionEqualityThreshold() const {return pose_position_equality_threshold_;}
+  float getPoseYawEqualityThreshold() const {return pose_yaw_equality_threshold_;}
+  float getTopographyWeight() const {return topography_weight_;}
+  std::vector<double> getTrajectoryHeuristicEpsilon() const {return trajectory_heuristic_epsilon_;}
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> getVizVisitedTrajectories() const {return visited_trajectories_;}
 
   // Setters
   void setGoalPoseDistanceThreshold(std::vector<double> val) {
@@ -193,7 +193,7 @@ private:
   int pose_equality_scalar_iteration_;
 
   // Visualization parameters
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories_;
 };
 
 struct AStarNode {

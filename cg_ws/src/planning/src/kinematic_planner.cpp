@@ -25,7 +25,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
 
     assert (goal_pose_distance_threshold_.size() == trajectory_heuristic_epsilon_.size());
 
-    visited_trajectories.clear();
+    visited_trajectories_.clear();
     std::vector<AStarNode> visited_nodes;
 
     // Lower cost has higher priority (i.e. earlier in queue) - Min Heap
@@ -52,7 +52,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
         std::cout << " Heuristic Epsilon: " << trajectory_heuristic_epsilon_[run_iter] << std::endl;
 
         final_path.clear();
-        visited_trajectories.clear();
+        visited_trajectories_.clear();
         visited_nodes.clear();
         pq_nodes = std::priority_queue<
             std::pair<float, AStarNode>, 
@@ -175,7 +175,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
                 // Add new poses to pqueue using f(s') = g(s') + h(s')
                 float f_cost = succ_g_cost + trajectories_heuristic[traj_idx];
                 pq_nodes.push(std::make_pair(f_cost, succ_node));
-                visited_trajectories.push_back(valid_trajectories[traj_idx]);
+                visited_trajectories_.push_back(valid_trajectories[traj_idx]);
             }
         }
     }
