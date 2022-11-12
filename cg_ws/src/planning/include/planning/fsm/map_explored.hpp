@@ -14,7 +14,7 @@ public:
 
 private:
 
-bool explored_once_{false};
+bool explored_once_{true};
 
 }; // class State
 

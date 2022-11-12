@@ -74,7 +74,7 @@ namespace planning {
     this->get_parameter("thresh_euclidean_replan", thresh_euclidean_replan_);
 
     // Kinematic planner
-    float goal_pose_distance_threshold;
+    std::vector<double> goal_pose_distance_threshold;
     float goal_pose_yaw_threshold;
     float turn_radii_min;
     float max_trajectory_length;
@@ -84,10 +84,10 @@ namespace planning {
     float pose_position_equality_threshold;
     float pose_yaw_equality_threshold;
     float topography_weight;
-    float trajectory_heuristic_epsilon;
+    std::vector<double> trajectory_heuristic_epsilon;
     float max_pose_equality_scalar;
     int pose_equality_scalar_iteration;
-    this->declare_parameter<float>("goal_pose_distance_threshold", 0.00001);
+    this->declare_parameter<std::vector<double>>("goal_pose_distance_threshold", std::vector<double>({0.1, 0.2, 0.3, 0.4}));
     this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
     this->declare_parameter<float>("goal_pose_yaw_threshold", 0.00001);
     this->get_parameter("goal_pose_yaw_threshold", goal_pose_yaw_threshold);
@@ -107,7 +107,7 @@ namespace planning {
     this->get_parameter("pose_yaw_equality_threshold", pose_yaw_equality_threshold);
     this->declare_parameter<float>("topography_weight", 1.0);
     this->get_parameter("topography_weight", topography_weight);
-    this->declare_parameter<float>("trajectory_heuristic_epsilon", 1.0);
+    this->declare_parameter<std::vector<double>>("trajectory_heuristic_epsilon", std::vector<double>({1.0, 2.0, 5.0, 10.0}));
     this->get_parameter("trajectory_heuristic_epsilon", trajectory_heuristic_epsilon);
     this->declare_parameter<float>("max_pose_equality_scalar", 1.0);
     this->get_parameter("max_pose_equality_scalar", max_pose_equality_scalar);
@@ -155,6 +155,8 @@ namespace planning {
     this->get_parameter("transport_threshold_z", transport_threshold_z_);
     this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
     this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
+    this->declare_parameter<int>("transport_plan_max_calls", INT_MAX);
+    this->get_parameter("transport_plan_max_calls", transport_plan_max_calls_);
 
     double last_pose_offset;
     this->declare_parameter<double>("last_pose_offset", 1.0);
@@ -250,7 +252,7 @@ void BehaviorExecutive::fsmTimerCallback()
     map_explored_.runState(current_map_coverage_ratio_, map_coverage_threshold_);
     break;
   case cg::planning::FSM::StateL0::REPLAN_TRANSPORT:
-    replan_transport_.runState();
+    replan_transport_.runState(transport_plan_max_calls_);
     break;
   case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
     plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
@@ -316,9 +318,9 @@ void BehaviorExecutive::fsmTimerCallback()
 
       last_debug_pose_ = current_trajectory_.path.back();
 
-      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
-        std::cout << "    Local Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
-      }
+      // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+      //   std::cout << "    Local Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+      // }
       
       // Convert to global frame
       for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {
@@ -328,9 +330,9 @@ void BehaviorExecutive::fsmTimerCallback()
 
       // -------------------------------
       // DEBUG
-      for (size_t i =0; i < current_trajectory_.path.size(); ++i){
-        std::cout << "    Global Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
-      }
+      // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
+      //   std::cout << "    Global Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
+      // }
       // -------------------------------
       calculated_trajectory_ = true;
     }
