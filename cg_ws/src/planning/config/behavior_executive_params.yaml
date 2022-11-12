@@ -24,7 +24,7 @@ behavior_executive_node:
     transport_threshold_z: 0.05 # meters off fit plane
     thresh_max_assignment_distance: 0.5 # max meters between transport assignments
     last_pose_offset: 1.0 # meters to rearward offset last pose in transport assignment by
-    max_assignments: 5 # maximum number of transport assignments to generate
+    max_assignments: 20 # maximum number of transport assignments to generate
 
     # Exploration planner
     map_coverage_threshold: 0.01
