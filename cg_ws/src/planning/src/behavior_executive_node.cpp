@@ -256,57 +256,95 @@ void BehaviorExecutive::fsmTimerCallback()
     update_map_.runState(map_updated_, traj_debug_);
     break;
   case cg::planning::FSM::StateL0::SITE_WORK_DONE:
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm SITE_WORK_DONE)");
     site_work_done_.runState(current_height_map_, design_height_map_, topology_equality_threshold_);
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm SITE_WORK_DONE)");
     break;
   case cg::planning::FSM::StateL0::MAP_EXPLORED:
+    RCLCPP_INFO(this->get_logger(), "current_map_coverage_ratio_ read start (fsm MAP_EXPLORED)");
     map_explored_.runState(current_map_coverage_ratio_, map_coverage_threshold_);
+    RCLCPP_INFO(this->get_logger(), "current_map_coverage_ratio_ read end (fsm MAP_EXPLORED)");
     break;
   case cg::planning::FSM::StateL0::REPLAN_TRANSPORT:
     replan_transport_.runState(transport_plan_max_calls_);
     break;
   case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm PLAN_TRANSPORT)");
+    RCLCPP_INFO(this->get_logger(), "current_seen_map_ read start (fsm PLAN_TRANSPORT)");
     plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
+    RCLCPP_INFO(this->get_logger(), "current_seen_map_ read end (fsm PLAN_TRANSPORT)");
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm PLAN_TRANSPORT)");
     break;
   case cg::planning::FSM::StateL0::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG
+    RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (fsm GET_TRANSPORT_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm GET_TRANSPORT_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write start (fsm GET_TRANSPORT_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ write start (fsm GET_TRANSPORT_GOALS)");
     get_transport_goals_.runState(current_goal_poses_, viz_state_l1_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
+    RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ write end (fsm GET_TRANSPORT_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write end (fsm GET_TRANSPORT_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm GET_TRANSPORT_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (fsm GET_TRANSPORT_GOALS)");
     // ---------------------------------------
     // DEBUG
-    std::cout << "  **** num viz L1 goals: " << viz_state_l1_goal_poses_.size() << std::endl;
-    std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
-    std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    // std::cout << "  **** num viz L1 goals: " << viz_state_l1_goal_poses_.size() << std::endl;
+    // std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
+    // std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
     
-    for (size_t i =0; i < current_goal_poses_.size(); ++i){
-      std::cout << "    Pose " << i<< " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
-    }
+    // for (size_t i =0; i < current_goal_poses_.size(); ++i){
+    //   std::cout << "    Pose " << i<< " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    // }
     // ---------------------------------------
     break;
   case cg::planning::FSM::StateL0::PLAN_EXPLORATION:
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm PLAN_EXPLORATION)");
     plan_exploration_.runState(*exploration_planner_, current_height_map_);
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm PLAN_EXPLORATION)");
+    
+    RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ write start (fsm PLAN_EXPLORATION)");
     viz_state_l1_goal_poses_.clear();
+    RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ write end (fsm PLAN_EXPLORATION)");
     break;
   case cg::planning::FSM::StateL0::GET_EXPLORATION_GOALS:{
+    RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (fsm GET_EXPLORATION_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm GET_EXPLORATION_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write start (fsm GET_EXPLORATION_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ write start (fsm GET_EXPLORATION_GOALS)");
     get_exploration_goals_.runState(current_goal_poses_, viz_state_l1_goal_poses_, *exploration_planner_, current_agent_pose_, current_height_map_);
-    for (size_t i =0; i < current_goal_poses_.size(); ++i){
-      std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
-    }
+    RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ write end (fsm GET_EXPLORATION_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write end (fsm GET_EXPLORATION_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm GET_EXPLORATION_GOALS)");
+    RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (fsm GET_EXPLORATION_GOALS)");
+    // for (size_t i =0; i < current_goal_poses_.size(); ++i){
+    //   std::cout << "    Exploration Pose <x,y,yaw>: "<< std::to_string(i) << " < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    // }
     break;}
   case cg::planning::FSM::StateL0::GOALS_REMAINING:{
     if (traj_debug_){
+      RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write start (fsm GOALS_REMAINING)");
       current_goal_poses_ = traj_debug_goal_poses_;
-      current_agent_pose_ = traj_debug_agent_;
-    }
+      RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write end (fsm GOALS_REMAINING)");
 
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ write start (fsm GOALS_REMAINING)");
+      current_agent_pose_ = traj_debug_agent_;
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ write end (fsm GOALS_REMAINING)");
+  }
+
+    RCLCPP_INFO(this->get_logger(), "current_goal_pose_ write start (fsm GOALS_REMAINING)");
+    RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write start (fsm GOALS_REMAINING)");
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
+    RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write end (fsm GOALS_REMAINING)");
+    RCLCPP_INFO(this->get_logger(), "current_goal_pose_ write end (fsm GOALS_REMAINING)");
     // ---------------------------------------
     // DEBUG
-    std::cout << "    Num Goals: " << current_goal_poses_.size() + 1 << std::endl;
-    std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
-    std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
-    std::cout << "    ------------ Remaining goals: " << std::endl;
-    for (size_t i = 0; i < current_goal_poses_.size(); ++i) {
-      std::cout << "    Goal pose " << i << " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
-    }
+    // std::cout << "    Num Goals: " << current_goal_poses_.size() + 1 << std::endl;
+    // std::cout << "    Current Goal Pose  <x,y,yaw>: < " << current_goal_pose_.pt.x << ", " << current_goal_pose_.pt.y << ", " << current_goal_pose_.yaw << " >" << std::endl;
+    // std::cout << "    Current Agent Pose <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    // std::cout << "    ------------ Remaining goals: " << std::endl;
+    // for (size_t i = 0; i < current_goal_poses_.size(); ++i) {
+    //   std::cout << "    Goal pose " << i << " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    // }
     // ---------------------------------------
     break;}
   case cg::planning::FSM::StateL0::GET_WORKSYSTEM_TRAJECTORY: {
@@ -317,26 +355,56 @@ void BehaviorExecutive::fsmTimerCallback()
 
     if (!calculated_trajectory_) {
       // Calculate path trajectory
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");      
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_goal_pose_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "kinematic_planner_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
       kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
+      RCLCPP_INFO(this->get_logger(), "kinematic_planner_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_goal_pose_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");      
 
       // Calculate velocity trajectory
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");      
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
       velocity_planner_->generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");      
 
       // Calculate tool trajectory
       tool_planner_->enable(fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT);
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");      
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
       tool_planner_->generateToolTargets(current_trajectory_, current_agent_pose_, current_height_map_);
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");      
 
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
       last_debug_pose_ = current_trajectory_.path.back();
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
 
       // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
       //   std::cout << "    Local Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
       // }
       
       // Convert to global frame
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ read (for loop start) (fsm GET_WORKSYSTEM_TRAJECTORY)");
       for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {
+        RCLCPP_INFO(this->get_logger(), "current_trajectory_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         cg_msgs::msg::Pose2D global_path_pose = cg::planning::transformPose(current_trajectory_.path[i], local_map_relative_to_global_frame_);
+        RCLCPP_INFO(this->get_logger(), "current_trajectory_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+        RCLCPP_INFO(this->get_logger(), "current_trajectory_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         current_trajectory_.path[i] = global_path_pose;
+        RCLCPP_INFO(this->get_logger(), "current_trajectory_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
       }
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ read (for loop end) (fsm GET_WORKSYSTEM_TRAJECTORY)");
 
       // -------------------------------
       // DEBUG
@@ -349,20 +417,30 @@ void BehaviorExecutive::fsmTimerCallback()
 
     if (calculated_trajectory_) {
       // Send the trajectory to the controller
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
       updated_trajectory_ = updateTrajectoryService(current_trajectory_, true);
-      RCLCPP_INFO(this->get_logger(), "debug_trigger_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      RCLCPP_INFO(this->get_logger(), "current_trajectory_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      
+      RCLCPP_INFO(this->get_logger(), "debug_trigger_ read (if statement start) (fsm GET_WORKSYSTEM_TRAJECTORY)");
       if (updated_trajectory_) {
         // The controller trajectory was updated, so enable worksystem
         enable_worksystem_ = true;
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
       else if (debug_trigger_) {
-        RCLCPP_INFO(this->get_logger(), "debug_trigger_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+        RCLCPP_INFO(this->get_logger(), "debug_trigger_ read (if statement end) (fsm GET_WORKSYSTEM_TRAJECTORY)");
         RCLCPP_INFO(this->get_logger(), "debug_trigger_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         debug_trigger_ = false;
         RCLCPP_INFO(this->get_logger(), "debug_trigger_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+        RCLCPP_INFO(this->get_logger(), "current_agent_pose_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");      
         current_agent_pose_ = last_debug_pose_;
+        RCLCPP_INFO(this->get_logger(), "current_agent_pose_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");   
+
+        RCLCPP_INFO(this->get_logger(), "current_goal_pose_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+        RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
+        RCLCPP_INFO(this->get_logger(), "current_goal_poses_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
+        RCLCPP_INFO(this->get_logger(), "current_goal_pose_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
         calculated_trajectory_ = false;
       }
     }
@@ -372,7 +450,17 @@ void BehaviorExecutive::fsmTimerCallback()
   }
     break;
   case cg::planning::FSM::StateL0::FOLLOWING_TRAJECTORY:{
+    RCLCPP_INFO(this->get_logger(), "global_robot_state_ read start (fsm FOLLOWING_TRAJECTORY)");
+    RCLCPP_INFO(this->get_logger(), "global_robot_pose_ read start (fsm FOLLOWING_TRAJECTORY)");
+    RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (fsm FOLLOWING_TRAJECTORY)");      
+    RCLCPP_INFO(this->get_logger(), "current_trajectory_ read start (fsm FOLLOWING_TRAJECTORY)");      
+    RCLCPP_INFO(this->get_logger(), "current_goal_pose_ read start (fsm FOLLOWING_TRAJECTORY)");      
     bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_, global_robot_pose_);
+    RCLCPP_INFO(this->get_logger(), "current_goal_pose_ read end (fsm FOLLOWING_TRAJECTORY)");      
+    RCLCPP_INFO(this->get_logger(), "current_trajectory_ read end (fsm FOLLOWING_TRAJECTORY)");      
+    RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (fsm FOLLOWING_TRAJECTORY)");      
+    RCLCPP_INFO(this->get_logger(), "global_robot_pose_ read end (fsm FOLLOWING_TRAJECTORY)");
+    RCLCPP_INFO(this->get_logger(), "global_robot_state_ read end (fsm FOLLOWING_TRAJECTORY)");
 
     // Disable worksystem if goal is reached
     if (!keep_following) {
@@ -423,11 +511,21 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
     auto response = result_future.get();
     // Only update height map if data is valid
     if (response->success) {
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ write start (updateMapFromService)");
       bool set_data = current_height_map_.setCellData(response->site_map.height_map);
+      RCLCPP_INFO(this->get_logger(), "current_height_map_ write end (updateMapFromService)");
+      
+      RCLCPP_INFO(this->get_logger(), "current_map_coverage_ratio_ write start (updateMapFromService)");
       current_map_coverage_ratio_ = response->map_coverage_ratio;
+      RCLCPP_INFO(this->get_logger(), "current_map_coverage_ratio_ write end (updateMapFromService)");
+      
+      RCLCPP_INFO(this->get_logger(), "current_seen_map_ write start (updateMapFromService)");
       current_seen_map_.clear();
+      RCLCPP_INFO(this->get_logger(), "current_seen_map_ write end (updateMapFromService)");
       for (auto seen: response->seen_map) {
+        RCLCPP_INFO(this->get_logger(), "current_seen_map_ write start (updateMapFromService)");
         current_seen_map_.push_back(seen);
+        RCLCPP_INFO(this->get_logger(), "current_seen_map_ write end (updateMapFromService)");
       }
       return set_data;
     } 
@@ -492,23 +590,33 @@ bool BehaviorExecutive::enableWorksystemService(const bool enable_worksystem, bo
 
 void BehaviorExecutive::globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
   // Read in the message
+  RCLCPP_INFO(this->get_logger(), "global_robot_state_ write start (globalRobotStateCallback)");
   global_robot_state_ = *msg;
+  RCLCPP_INFO(this->get_logger(), "global_robot_state_ write end (globalRobotStateCallback)");
 
   // Convert to pose
+  RCLCPP_INFO(this->get_logger(), "global_robot_state_ read start (globalRobotStateCallback)");
   tf2::Quaternion q(global_robot_state_.pose.pose.orientation.x,
                     global_robot_state_.pose.pose.orientation.y,
                     global_robot_state_.pose.pose.orientation.z,
                     global_robot_state_.pose.pose.orientation.w);
+  RCLCPP_INFO(this->get_logger(), "global_robot_state_ read end (globalRobotStateCallback)");
   tf2::Matrix3x3 m(q);
   double global_robot_roll, global_robot_pitch, global_robot_yaw;
   m.getRPY(global_robot_roll, global_robot_pitch, global_robot_yaw);
 
+  RCLCPP_INFO(this->get_logger(), "global_robot_state_ read start (globalRobotStateCallback)");
+  RCLCPP_INFO(this->get_logger(), "global_robot_pose_ write start (globalRobotStateCallback)");
   global_robot_pose_ = cg::planning::create_pose2d(global_robot_state_.pose.pose.position.x,
                                                                        global_robot_state_.pose.pose.position.y,
                                                                        global_robot_yaw);
+  RCLCPP_INFO(this->get_logger(), "global_robot_pose_ write end (globalRobotStateCallback)");
+  RCLCPP_INFO(this->get_logger(), "global_robot_state_ read end (globalRobotStateCallback)");
 
   // Convert pose to local map frame
+  RCLCPP_INFO(this->get_logger(), "current_agent_pose_ write start (globalRobotStateCallback)");      
   current_agent_pose_ = cg::planning::transformPose(global_robot_pose_, global_map_relative_to_local_frame_);
+  RCLCPP_INFO(this->get_logger(), "current_agent_pose_ write end (globalRobotStateCallback)");      
 }
 
 void BehaviorExecutive::odomRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
@@ -517,7 +625,9 @@ void BehaviorExecutive::odomRobotStateCallback(const nav_msgs::msg::Odometry::Sh
 
 void BehaviorExecutive::vizTimerCallback() {
   // Agent
+  RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read start (vizTimerCallback)");      
   cg_msgs::msg::Pose2D global_agent_pose = cg::planning::transformPose(current_agent_pose_, local_map_relative_to_global_frame_);
+  RCLCPP_INFO(this->get_logger(), "current_agent_pose_ read end (vizTimerCallback)");      
   viz_agent_.pose.position.x = global_agent_pose.pt.x;
   viz_agent_.pose.position.y = global_agent_pose.pt.y;
   viz_agent_.pose.position.z = viz_planning_height_;
@@ -535,7 +645,9 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_agent_pub_->publish(viz_agent_);
 
   // Current goal
+  RCLCPP_INFO(this->get_logger(), "current_goal_pose_ read start (vizTimerCallback)");      
   cg_msgs::msg::Pose2D global_curr_goal_pose = cg::planning::transformPose(current_goal_pose_, local_map_relative_to_global_frame_);
+  RCLCPP_INFO(this->get_logger(), "current_goal_pose_ read end (vizTimerCallback)");      
   viz_curr_goal_.pose.position.x = global_curr_goal_pose.pt.x;
   viz_curr_goal_.pose.position.y = global_curr_goal_pose.pt.y;
   viz_curr_goal_.pose.position.z = viz_planning_height_;
@@ -554,6 +666,7 @@ void BehaviorExecutive::vizTimerCallback() {
 
   // Goal poses
   viz_goals_.poses.clear();
+  RCLCPP_INFO(this->get_logger(), "current_goal_poses_ read (for loop start) (vizTimerCallback)");        
   for (cg_msgs::msg::Pose2D goal_pose : current_goal_poses_) {
     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(goal_pose, local_map_relative_to_global_frame_);
 
@@ -571,12 +684,14 @@ void BehaviorExecutive::vizTimerCallback() {
 
     viz_goals_.poses.push_back(pose_single);
   }
+  RCLCPP_INFO(this->get_logger(), "current_goal_poses_ read (for loop end) (vizTimerCallback)");        
   viz_goals_.header.stamp = this->get_clock()->now();
   viz_goals_.header.frame_id = "map";
   viz_goals_pub_->publish(viz_goals_);
 
   // StateL1 goal poses
   viz_state_l1_goals_.poses.clear();
+  RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ read (for loop start) (vizTimerCallback)");        
   for (cg_msgs::msg::Pose2D goal_pose : viz_state_l1_goal_poses_) {
     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(goal_pose, local_map_relative_to_global_frame_);
 
@@ -594,12 +709,14 @@ void BehaviorExecutive::vizTimerCallback() {
 
     viz_state_l1_goals_.poses.push_back(pose_single);
   }
+  RCLCPP_INFO(this->get_logger(), "viz_state_l1_goal_poses_ read (for loop end) (vizTimerCallback)");        
   viz_state_l1_goals_.header.stamp = this->get_clock()->now();
   viz_state_l1_goals_.header.frame_id = "map";
   viz_state_l1_goals_pub_->publish(viz_state_l1_goals_);
 
   // Trajectory
   viz_path_.poses.clear();
+  RCLCPP_INFO(this->get_logger(), "current_trajectory_ read (start for loop) (vizTimerCallback)");      
   for (cg_msgs::msg::Pose2D traj_pose : current_trajectory_.path) {
     // cg_msgs::msg::Pose2D global_traj_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);
     cg_msgs::msg::Pose2D global_traj_pose = traj_pose; // DEBUG
@@ -621,6 +738,7 @@ void BehaviorExecutive::vizTimerCallback() {
 
     viz_path_.poses.push_back(pose_stamped);
   }
+  RCLCPP_INFO(this->get_logger(), "current_trajectory_ read (end for loop) (vizTimerCallback)");      
   viz_path_.header.stamp = this->get_clock()->now();
   viz_path_.header.frame_id = "map";
 
@@ -628,7 +746,9 @@ void BehaviorExecutive::vizTimerCallback() {
 
   // Visited Paths in A*
   viz_visited_trajs_.poses.clear();
+  RCLCPP_INFO(this->get_logger(), "kinematic_planner_ read start (vizTimerCallback)");      
   viz_visited_trajectories_ = kinematic_planner_->getVizVisitedTrajectories();
+  RCLCPP_INFO(this->get_logger(), "kinematic_planner_ read end (vizTimerCallback)");      
   for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories_) {
     for (unsigned int i = 0; i < traj.size(); ++i) {
       // Convert to global frame
