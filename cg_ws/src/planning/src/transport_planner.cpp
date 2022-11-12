@@ -307,6 +307,9 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
       }
     }
   }
+  
+  // Filter assignments to final set for planner to use
+  filterAssignments(new_transport_assignments);
 
   // update unvisited assignments, set all to true
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,6 +332,42 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
   return objective->Value();
 }
 
+void TransportPlanner::filterAssignments(std::vector<TransportAssignment> &new_transport_assignments) {
+
+  std::vector<TransportAssignment> filtered_transport_assignments;
+
+  for (size_t i=0; i < new_transport_assignments.size(); ++i) {
+    TransportAssignment assignment = new_transport_assignments[i];
+    // -------------------------
+    // DEBUG
+    // std::cout << " --------- Assigment source <x,y,height,transport volume> : < " << assignment.source_node.x << ", " << assignment.source_node.y << ", " << assignment.source_node.height << ", " << assignment.transport_volume << " >" << std::endl;
+    // -------------------------
+
+    // Skip transport from same source
+    bool keep_assignment = true;
+    for (size_t j=i+1; j < new_transport_assignments.size(); ++j) {
+      TransportAssignment check_assignment = new_transport_assignments[j];
+
+      double same_distance_thresh = 1e-5;
+      if (std::fabs(assignment.source_node.x - check_assignment.source_node.x) < same_distance_thresh && std::fabs(assignment.source_node.y - check_assignment.source_node.y) < same_distance_thresh) {
+        keep_assignment = false;
+        break;
+      }
+    }
+
+    // Keep assignments
+    if (keep_assignment) {
+      filtered_transport_assignments.push_back(assignment);
+    }
+
+  }
+
+  // Keep random subset
+  std::shuffle(std::begin(filtered_transport_assignments), std::end(filtered_transport_assignments), random_number_generator_);
+  size_t start_slice = std::max(static_cast<int>(filtered_transport_assignments.size() - max_assignments_), 0);
+
+  new_transport_assignments = std::vector<TransportAssignment>(filtered_transport_assignments.begin() + start_slice, filtered_transport_assignments.end());
+}
 
 /**
  * @brief Primary method to plan optimal transport of volume from source nodes to sink nodes

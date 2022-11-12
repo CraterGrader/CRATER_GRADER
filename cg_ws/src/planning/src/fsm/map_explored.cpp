@@ -19,9 +19,13 @@ void MapExplored::runState(float current_map_coverage_ratio_, float map_coverage
     curr_state_l0_ = StateL0::PLAN_EXPLORATION;
     curr_state_l1_ = StateL1::EXPLORATION;
   }
-  // pre_signal_ = Signal::NO; // DEBUG
-  // curr_state_l0_ = StateL0::PLAN_EXPLORATION; // DEBUG
-  // curr_state_l1_ = StateL1::EXPLORATION; // DEBUG
+  
+  // ------------------------------
+  // DEBUG
+  // pre_signal_ = Signal::YES;
+  // curr_state_l0_ = StateL0::REPLAN_TRANSPORT;
+  // curr_state_l1_ = StateL1::TRANSPORT;
+  // ------------------------------
 }
 
 } // planning namespace

@@ -8,6 +8,7 @@
 #include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
 #include <nav_msgs/msg/odometry.hpp> // Callback for pose
 #include <tf2/LinearMath/Matrix3x3.h> // For converting from nav_msgs quaternions to rpy
+#include <limits> // used for infinity values
 
 // Finite state machine and states
 #include <planning/fsm/fsm.hpp>
