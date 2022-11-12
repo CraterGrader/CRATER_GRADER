@@ -22,6 +22,11 @@ void CellBuffer::addPoint(indexPoint pt){
         bufferHasNewData();
     }
 
+
+    // height_ = pt.z;
+    // bufferHasNewData();
+
+
     // let other maps know the buffer has new data here
 }
 
