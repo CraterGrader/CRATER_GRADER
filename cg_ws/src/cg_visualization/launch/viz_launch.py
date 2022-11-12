@@ -9,12 +9,7 @@ def generate_launch_description():
     get_package_share_directory('cg_visualization'),
     'urdf', '600220.urdf'
   )
-
-  # marker_viz_params =  os.path.join(
-  #       get_package_share_directory('cg_visualization'),
-  #       'config',
-  #       'marker_viz_params.yaml'
-  # )
+  
   with open(urdf, 'r') as f:
     robot_desc = f.read()
     
@@ -32,22 +27,14 @@ def generate_launch_description():
       namespace='',
       executable='rviz2',
       name='rviz2',
-      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'planning_debug.rviz')]]
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'planning_debug_with_tool.rviz')]]
+    ),
+     Node(
+      package='cg_visualization',
+      executable='marker_viz_node',
+      name='marker_viz_node',
+      output='screen',
     )
-    # Node(
-    #   package='rviz2',
-    #   namespace='',
-    #   executable='rviz2',
-    #   name='rviz2',
-    #   arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'svd_depthcam.rviz')]]
-    # ),
-    #  Node(
-    #   package='cg_visualization',
-    #   executable='marker_viz_node',
-    #   name='marker_viz_node',
-    #   output='screen',
-    #   parameters=[marker_viz_params]
-    # )
     # Plotjuggler cannot be placed in a launch file
     # https://githubhot.com/repo/facontidavide/PlotJuggler/issues/561
     # Node(
