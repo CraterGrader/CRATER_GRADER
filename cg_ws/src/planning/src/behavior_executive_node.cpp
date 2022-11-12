@@ -621,9 +621,9 @@ void BehaviorExecutive::vizTimerCallback() {
   viz_path_pub_->publish(viz_path_);
 
   // Visited Paths in A*
-  viz_visited_trajs.poses.clear();
-  viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
-  for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
+  viz_visited_trajs_.poses.clear();
+  viz_visited_trajectories_ = kinematic_planner_->getVizVisitedTrajectories();
+  for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories_) {
     for (unsigned int i = 0; i < traj.size(); ++i) {
       // Convert to global frame
       auto global_path_pose = cg::planning::transformPose(traj[i], local_map_relative_to_global_frame_);
@@ -643,7 +643,7 @@ void BehaviorExecutive::vizTimerCallback() {
       pose_stamped.header.stamp = this->get_clock()->now();
       pose_stamped.header.frame_id = "map";
 
-      viz_visited_trajs.poses.push_back(pose_stamped);
+      viz_visited_trajs_.poses.push_back(pose_stamped);
     }
     for (int i = traj.size() - 2; i >= 0; --i) {
       // Convert to global frame
@@ -664,19 +664,19 @@ void BehaviorExecutive::vizTimerCallback() {
       pose_stamped.header.stamp = this->get_clock()->now();
       pose_stamped.header.frame_id = "map";
 
-      viz_visited_trajs.poses.push_back(pose_stamped);
+      viz_visited_trajs_.poses.push_back(pose_stamped);
     }
   }
-  viz_visited_trajs.header.stamp = this->get_clock()->now();
-  viz_visited_trajs.header.frame_id = "map";
+  viz_visited_trajs_.header.stamp = this->get_clock()->now();
+  viz_visited_trajs_.header.frame_id = "map";
 
-  viz_visited_trajectories_pub_->publish(viz_visited_trajs);
+  viz_visited_trajectories_pub_->publish(viz_visited_trajs_);
 
   // --------------------------------------
   // DEBUG: may crash rviz
   // viz_state_l1_goals_.poses.clear();
-  // viz_visited_trajectories = kinematic_planner_->getVizVisitedTrajectories();
-  // for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories) {
+  // viz_visited_trajectories_ = kinematic_planner_->getVizVisitedTrajectories();
+  // for (std::vector<cg_msgs::msg::Pose2D> traj : viz_visited_trajectories_) {
   //   for (cg_msgs::msg::Pose2D traj_pose : traj) {
   //     // Convert to global frame
   //     cg_msgs::msg::Pose2D global_goal_pose = cg::planning::transformPose(traj_pose, local_map_relative_to_global_frame_);

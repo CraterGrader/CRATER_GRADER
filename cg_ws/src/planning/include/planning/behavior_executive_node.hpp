@@ -83,7 +83,7 @@ private:
 
   /* Message data */
   nav_msgs::msg::Path viz_path_;
-  nav_msgs::msg::Path viz_visited_trajs;
+  nav_msgs::msg::Path viz_visited_trajs_;
   geometry_msgs::msg::PoseArray viz_goals_;
   geometry_msgs::msg::PoseArray viz_state_l1_goals_;
   geometry_msgs::msg::PoseStamped viz_agent_;
@@ -149,7 +149,7 @@ private:
   cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!
   bool enable_worksystem_ = false;
   cg_msgs::msg::Trajectory current_trajectory_;
-  std::vector<std::vector<cg_msgs::msg::Pose2D>> viz_visited_trajectories;
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> viz_visited_trajectories_;
 
 
   // Create Finite State Machine
