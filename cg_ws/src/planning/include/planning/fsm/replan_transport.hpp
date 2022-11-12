@@ -15,6 +15,7 @@ public:
 
 private:
   int transport_counter_ = 0;
+  bool first_replan_ = true;
 
 }; // class State
 

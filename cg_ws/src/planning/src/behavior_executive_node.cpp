@@ -173,6 +173,11 @@ namespace planning {
     this->declare_parameter<float>("map_coverage_threshold", 0.01);
     this->get_parameter("map_coverage_threshold", map_coverage_threshold_);
 
+    bool explored_once;
+    this->declare_parameter<bool>("explored_once", false);
+    this->get_parameter("explored_once", explored_once);
+    map_explored_.setExploredState(explored_once);
+
     // Viz
     this->declare_parameter<double>("viz_planning_height", 0.0);
     this->get_parameter("viz_planning_height", viz_planning_height_);

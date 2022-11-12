@@ -13,8 +13,9 @@ void ReplanTransport::runState(int max_calls_before_replan) {
 
   // Update shared current state and the precursing signal
   transport_counter_ = (transport_counter_+1) % max_calls_before_replan;
-  if (transport_counter_ == 0) {
+  if (transport_counter_ == 0 || first_replan_) {
     std::cout << "Replanning transport goals" << std::endl;
+    first_replan_ = false;
     pre_signal_ = Signal::YES;
     curr_state_l0_ = StateL0::PLAN_TRANSPORT;
     return;

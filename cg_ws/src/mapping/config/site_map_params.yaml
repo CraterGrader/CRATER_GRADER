@@ -16,17 +16,9 @@ site_map:
     oosThreshold: 0.04 # meters 
 
     # Loading from a map filepath
-    static_map: False
-    load_height_map_from_filepath: False
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/max_map.csv" # use absolute path
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/lunar_south_pole_50x50_map.csv" # use absolute path
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/cg_craters_50x50_map.csv" # use absolute path
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
-    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/nov_11_crater.csv" # use absolute path
-    
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_9x9.csv" # use absolute path
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001_3x3.csv" # use absolute path
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001.csv" # use absolute path
+    static_map: false
+    load_height_map_from_filepath: false
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
 
 behavior_executive_node:
   ros__parameters:

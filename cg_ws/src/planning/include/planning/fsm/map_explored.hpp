@@ -12,9 +12,11 @@ class MapExplored : public FSM {
 public:
   void runState(float current_map_coverage_ratio_, float map_coverage_threshold); // Main function to run current state; optionally modifies signal and state for transition
 
+  void setExploredState(bool explored_once) { explored_once_ = explored_once; };
+
 private:
 
-bool explored_once_{true};
+bool explored_once_{false};
 
 }; // class State
 
