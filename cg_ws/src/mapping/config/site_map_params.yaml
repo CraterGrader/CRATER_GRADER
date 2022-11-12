@@ -12,7 +12,7 @@ site_map:
     unseenGridHeight: 0.0 # meters, Kalman Filter seed
     incomingPointVariance: 0.05 # meters^2
     cellStartingVariance: 1.0 # meters^2
-    minCellVariance: 0.00001 # meters^2
+    minCellVariance: 0.001 # meters^2
     oosThreshold: 0.04 # meters 
 
     # Loading from a map filepath
