@@ -18,11 +18,11 @@ namespace cg_visualization
 
   void MarkerVizNode::updateToolViz(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   {
-    float tool_pose = static_cast<float>(msg->tool_pos);
+    float tool_pose = static_cast<float>(msg->tool_pos)/129;
 
     // Update length and position of tool
-    tool1.pose.position.y = 2.5 - 0.5 * tool_pose/70.0;
-    tool1.scale.y = tool_pose/70.0;
+    tool1.pose.position.y = 2.5 - 0.5 * tool_pose/80.0;
+    tool1.scale.y = tool_pose/80.0;
     tool2.pose.position.y = tool1.pose.position.y - tool1.scale.y/2;
     tool_pose_pub_->publish(tool1);
     tool_pose_pub_->publish(tool2);
