@@ -13,6 +13,24 @@ namespace planning {
     viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_agent", 1);
     viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_goal", 1);
 
+    /* Initialize services */
+    // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
+    this->declare_parameter<bool>("sync_callback_groups", true);
+    this->get_parameter("sync_callback_groups", sync_callback_groups_);
+
+    fsm_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    if (!sync_callback_groups_) {
+      viz_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+      viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
+    }
+
+    site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    update_trajectory_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    enable_worksystem_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+    // Commented out for now - may be used to avoid memory collisions by putting subs into same callback group as FSM
+    // rclcpp::SubscriptionOptions subcriber_options;
+    // subcriber_options.callback_group = fsm_timer_cb_group_;
     global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "/odometry/filtered/ekf_global_node", 1, std::bind(&BehaviorExecutive::globalRobotStateCallback, this, std::placeholders::_1));
     odom_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
@@ -21,13 +39,6 @@ namespace planning {
     debug_trigger_sub_ = this->create_subscription<std_msgs::msg::Bool>(
         "/behavior_exec_debug_trigger", 1, std::bind(&BehaviorExecutive::debugTriggerCallback, this, std::placeholders::_1));
 
-    /* Initialize services */
-    // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
-    site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    update_trajectory_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    enable_worksystem_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    fsm_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    viz_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
     // Create the service client, joined to the callback group
     site_map_client_ = this->create_client<cg_msgs::srv::SiteMap>("site_map_server", rmw_qos_profile_services_default, site_map_client_group_);
@@ -42,7 +53,6 @@ namespace planning {
     this->declare_parameter<int>("viz_timer_callback_ms", 500);
     this->get_parameter("viz_timer_callback_ms", viz_timer_callback_ms_);
     fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
-    viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 
     /* Load parameters */
     // Map parameters
@@ -252,7 +262,6 @@ void BehaviorExecutive::fsmTimerCallback()
   case cg::planning::FSM::StateL0::UPDATE_MAP:
     map_updated_ = updateMapFromService(false);
     // Check that map was updated correctly
-    RCLCPP_INFO(this->get_logger(), "Valid map update: %s", map_updated_ ? "true" : "false");
     update_map_.runState(map_updated_, traj_debug_);
     break;
   case cg::planning::FSM::StateL0::SITE_WORK_DONE:
@@ -272,13 +281,13 @@ void BehaviorExecutive::fsmTimerCallback()
     get_transport_goals_.runState(current_goal_poses_, viz_state_l1_goal_poses_, *transport_planner_, current_agent_pose_, current_height_map_);
     // ---------------------------------------
     // DEBUG
-    std::cout << "  **** num viz L1 goals: " << viz_state_l1_goal_poses_.size() << std::endl;
-    std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
-    std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
+    // std::cout << "  **** num viz L1 goals: " << viz_state_l1_goal_poses_.size() << std::endl;
+    // std::cout << "  Init / updated goal poses: " << num_poses_before_ << " / " << current_goal_poses_.size() << std::endl;
+    // std::cout << "    Agent <x,y,yaw>: < " << current_agent_pose_.pt.x << ", " << current_agent_pose_.pt.y << ", " << current_agent_pose_.yaw << " >" << std::endl;
     
-    for (size_t i =0; i < current_goal_poses_.size(); ++i){
-      std::cout << "    Pose " << i<< " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
-    }
+    // for (size_t i =0; i < current_goal_poses_.size(); ++i){
+    //   std::cout << "    Pose " << i<< " <x,y,yaw>: < " << current_goal_poses_[i].pt.x << ", " << current_goal_poses_[i].pt.y << ", " << current_goal_poses_[i].yaw << " >" << std::endl;
+    // }
     // ---------------------------------------
     break;
   case cg::planning::FSM::StateL0::PLAN_EXPLORATION:
@@ -295,8 +304,7 @@ void BehaviorExecutive::fsmTimerCallback()
     if (traj_debug_){
       current_goal_poses_ = traj_debug_goal_poses_;
       current_agent_pose_ = traj_debug_agent_;
-    }
-
+  }
     goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
     // ---------------------------------------
     // DEBUG
@@ -313,8 +321,6 @@ void BehaviorExecutive::fsmTimerCallback()
     // Get the trajectory
     // TODO: encapsulate these functions in to the state; e.g. make GetWorksystemTrajectory a friend class of BehaviorExecutive so GetWorksystemTrajectory can access service calls
     
-    //Debug
-
     if (!calculated_trajectory_) {
       // Calculate path trajectory
       kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
@@ -328,9 +334,12 @@ void BehaviorExecutive::fsmTimerCallback()
 
       last_debug_pose_ = current_trajectory_.path.back();
 
+      // -------------------------------
+      // DEBUG
       // for (size_t i =0; i < current_trajectory_.path.size(); ++i){
       //   std::cout << "    Local Trajectory <x,y,yaw,v,tool>: " << std::to_string(i) << " < " << current_trajectory_.path[i].pt.x << ", " << current_trajectory_.path[i].pt.y << ", " << current_trajectory_.path[i].yaw << ", " << current_trajectory_.velocity_targets[i] << ", " << current_trajectory_.tool_positions[i] << " >" << std::endl;
       // }
+      // -------------------------------
       
       // Convert to global frame
       for (unsigned int i = 0; i < current_trajectory_.path.size(); ++i) {
@@ -350,17 +359,14 @@ void BehaviorExecutive::fsmTimerCallback()
     if (calculated_trajectory_) {
       // Send the trajectory to the controller
       updated_trajectory_ = updateTrajectoryService(current_trajectory_, true);
-      RCLCPP_INFO(this->get_logger(), "debug_trigger_ read start (fsm GET_WORKSYSTEM_TRAJECTORY)");
+      
       if (updated_trajectory_) {
         // The controller trajectory was updated, so enable worksystem
         enable_worksystem_ = true;
         worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
       }
       else if (debug_trigger_) {
-        RCLCPP_INFO(this->get_logger(), "debug_trigger_ read end (fsm GET_WORKSYSTEM_TRAJECTORY)");
-        RCLCPP_INFO(this->get_logger(), "debug_trigger_ write start (fsm GET_WORKSYSTEM_TRAJECTORY)");
         debug_trigger_ = false;
-        RCLCPP_INFO(this->get_logger(), "debug_trigger_ write end (fsm GET_WORKSYSTEM_TRAJECTORY)");
         current_agent_pose_ = last_debug_pose_;
         goals_remaining_.runState(current_goal_poses_, current_goal_pose_);
         calculated_trajectory_ = false;
@@ -396,14 +402,15 @@ void BehaviorExecutive::fsmTimerCallback()
     std::cout << "~ ~ ~ ~ ! Invalid State !" << std::endl;
     break;
   }
+
+  if (sync_callback_groups_) vizTimerCallback();
+
   // std::cout << "~~~~~~~ Machine done!" << std::endl; // DEBUG
 }
 
 void BehaviorExecutive::debugTriggerCallback(const std_msgs::msg::Bool::SharedPtr msg) {
   (void)msg; // Message not used, just "touch" to hide unused parameter warning
-  RCLCPP_INFO(this->get_logger(), "debug_trigger_ write start (debugTriggerCallback)");
   debug_trigger_ = true;
-  RCLCPP_INFO(this->get_logger(), "debug_trigger_ write end (debugTriggerCallback)");
 }
 
 bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
@@ -424,7 +431,9 @@ bool BehaviorExecutive::updateMapFromService(bool verbose = false) {
     // Only update height map if data is valid
     if (response->success) {
       bool set_data = current_height_map_.setCellData(response->site_map.height_map);
+      
       current_map_coverage_ratio_ = response->map_coverage_ratio;
+      
       current_seen_map_.clear();
       for (auto seen: response->seen_map) {
         current_seen_map_.push_back(seen);

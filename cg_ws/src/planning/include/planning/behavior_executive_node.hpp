@@ -80,6 +80,7 @@ private:
   int fsm_timer_callback_ms_;
   long int viz_timer_callback_ms_;
   long int service_response_timeout_ms_;
+  bool sync_callback_groups_{true};
 
   /* Message data */
   nav_msgs::msg::Path viz_path_;

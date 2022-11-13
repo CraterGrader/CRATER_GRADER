@@ -6,7 +6,7 @@ behavior_executive_node:
     thresh_euclidean_replan: 0.5 # meters
 
     # Kinematic planner (all params are floats)
-    goal_pose_distance_threshold: [0.1, 0.1, 0.2, 0.2, 0.4] # m -> 0.1, 0.2, 0.3, 0.4
+    goal_pose_distance_threshold: [0.1, 0.1, 0.2, 0.2, 0.4, 1.0] # m -> 0.1, 0.2, 0.3, 0.4
     goal_pose_yaw_threshold: 0.1 # rad
     turn_radii_min: 1.5 # m
     max_trajectory_length: 0.4 # m
@@ -16,7 +16,7 @@ behavior_executive_node:
     pose_position_equality_threshold: 0.1 # m: note that this can potentially prune lattice arms depending on arm geometry - resulting turn radii, max trajectory length)
     pose_yaw_equality_threshold: 0.1 # rad: note that this can potentially prune lattice arms depending on arm geometry - resulting turn radii, max trajectory length)
     topography_weight: 100.0 # "unitless"
-    trajectory_heuristic_epsilon: [2.0, 5.0, 5.0, 10.0, 10.0] # for weighted A* heuristic --> 1.0, 2.0, 5.0, 10.0
+    trajectory_heuristic_epsilon: [2.0, 5.0, 5.0, 10.0, 10.0, 50.0] # for weighted A* heuristic --> 1.0, 2.0, 5.0, 10.0
     max_pose_equality_scalar: 2.0 # For scaling goal pose equality thresholds 
     pose_equality_scalar_iteration: 1500 # For scaling goal pose equality thresholds --> 1500
 
@@ -52,6 +52,9 @@ behavior_executive_node:
 
     # Viz
     viz_planning_height: 1.0 # meters, in global frame
+
+    # Callback-group syncronous
+    sync_callback_groups: true
 
     # TRAJECTORY DEBUG
     # Overwrites agent and goal poses with given values
