@@ -161,8 +161,16 @@ namespace planning {
     velocity_planner_ = std::make_unique<VelocityPlanner>(VelocityPlanner(constant_velocity));
 
     // Transport planner
-    this->declare_parameter<float>("transport_threshold_z", 0.03);
-    this->get_parameter("transport_threshold_z", transport_threshold_z_);
+    float source_threshold_z;
+    float sink_threshold_z;
+    this->declare_parameter<float>("source_threshold_z", 0.03);
+    this->get_parameter("source_threshold_z", source_threshold_z);
+    this->declare_parameter<float>("sink_threshold_z", 0.03);
+    this->get_parameter("sink_threshold_z", sink_threshold_z);
+
+    transport_planner_->setSourceThresholdZ(source_threshold_z);
+    transport_planner_->setSinkThresholdZ(sink_threshold_z);
+
     this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
     this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
     this->declare_parameter<int>("transport_plan_max_calls", INT_MAX);
@@ -274,7 +282,7 @@ void BehaviorExecutive::fsmTimerCallback()
     replan_transport_.runState(transport_plan_max_calls_);
     break;
   case cg::planning::FSM::StateL0::PLAN_TRANSPORT:
-    plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, transport_threshold_z_, thresh_max_assignment_distance_);
+    plan_transport_.runState(*transport_planner_, current_height_map_, design_height_map_, current_seen_map_, thresh_max_assignment_distance_);
     break;
   case cg::planning::FSM::StateL0::GET_TRANSPORT_GOALS:
     num_poses_before_ = current_goal_poses_.size(); // DEBUG

@@ -137,7 +137,6 @@ private:
   size_t num_poses_before_ = 0; // DEBUG
 
   cg::mapping::Map<float> design_height_map_;
-  float transport_threshold_z_ = 0.0;
   float topology_equality_threshold_ = 0.0;
   float thresh_max_assignment_distance_ = 0.0;
   int transport_plan_max_calls_ = INT_MAX;

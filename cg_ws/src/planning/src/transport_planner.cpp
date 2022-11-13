@@ -101,9 +101,8 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getUnvisitedGoalPoses() {
  * @param vol_sink Zero float value to be updated with sink volume
  * @param current_height_map The current height map that should be modified by the robot
  * @param design_height_map The desired final height map
- * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  */
-void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map, const float threshold_z)
+void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map)
 {
 
   // Loop through height map and assign points to either source or sink
@@ -119,7 +118,7 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
     if (seen_map[i] == 0) continue;
 
     // Positive height becomes a source; positive volume in +z
-    if (cell_height > (design_height_map.getDataAtIdx(i) + threshold_z))
+    if (cell_height > (design_height_map.getDataAtIdx(i) + source_threshold_z_))
     {
       node.x = pt.x;
       node.y = pt.y;
@@ -129,7 +128,7 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
       source_nodes.push_back(node);
     }
     // Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
-    else if (cell_height < (design_height_map.getDataAtIdx(i) - threshold_z))
+    else if (cell_height < (design_height_map.getDataAtIdx(i) - sink_threshold_z_))
     {
       node.x = pt.x;
       node.y = pt.y;
@@ -378,10 +377,9 @@ void TransportPlanner::filterAssignments(std::vector<TransportAssignment> &new_t
  * 
  * @param current_height_map The current height map that should be modified by the robot
  * @param design_height_map The desired final height map
- * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  * @return float The optimization objective value
  */
-float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map, const float threshold_z, const float thresh_max_assignment_distance)
+float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map, const float thresh_max_assignment_distance)
 {
   // ---------------------------------------------------
   // Initialize nodes and volume sums
@@ -389,7 +387,7 @@ float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_hei
   std::vector<TransportNode> sink_nodes;
   float vol_source = 0.0f;
   float vol_sink = 0.0f;
-  init_nodes(source_nodes, sink_nodes, vol_source, vol_sink, current_height_map, design_height_map, seen_map, threshold_z);
+  init_nodes(source_nodes, sink_nodes, vol_source, vol_sink, current_height_map, design_height_map, seen_map);
 
   // ---------------------------------------------------
   // Calculate distances between nodes
