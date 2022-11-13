@@ -53,6 +53,9 @@ behavior_executive_node:
     # Viz
     viz_planning_height: 1.0 # meters, in global frame
 
+    # Callback-group syncronous
+    sync_callback_groups: true
+
     # TRAJECTORY DEBUG
     # Overwrites agent and goal poses with given values
     traj_debug: false

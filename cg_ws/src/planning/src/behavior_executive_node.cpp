@@ -13,6 +13,24 @@ namespace planning {
     viz_agent_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_agent", 1);
     viz_curr_goal_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/viz/planning/current_goal", 1);
 
+    /* Initialize services */
+    // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
+    this->declare_parameter<bool>("sync_callback_groups", true);
+    this->get_parameter("sync_callback_groups", sync_callback_groups_);
+
+    fsm_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    if (!sync_callback_groups_) {
+      viz_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+      viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
+    }
+
+    site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    update_trajectory_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+    enable_worksystem_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
+
+    // Commented out for now - may be used to avoid memory collisions by putting subs into same callback group as FSM
+    // rclcpp::SubscriptionOptions subcriber_options;
+    // subcriber_options.callback_group = fsm_timer_cb_group_;
     global_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
         "/odometry/filtered/ekf_global_node", 1, std::bind(&BehaviorExecutive::globalRobotStateCallback, this, std::placeholders::_1));
     odom_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
@@ -21,13 +39,6 @@ namespace planning {
     debug_trigger_sub_ = this->create_subscription<std_msgs::msg::Bool>(
         "/behavior_exec_debug_trigger", 1, std::bind(&BehaviorExecutive::debugTriggerCallback, this, std::placeholders::_1));
 
-    /* Initialize services */
-    // Create reentrant callback group for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
-    site_map_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    update_trajectory_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    enable_worksystem_client_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    fsm_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
-    viz_timer_cb_group_ = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
 
     // Create the service client, joined to the callback group
     site_map_client_ = this->create_client<cg_msgs::srv::SiteMap>("site_map_server", rmw_qos_profile_services_default, site_map_client_group_);
@@ -42,7 +53,6 @@ namespace planning {
     this->declare_parameter<int>("viz_timer_callback_ms", 500);
     this->get_parameter("viz_timer_callback_ms", viz_timer_callback_ms_);
     fsm_timer_ = this->create_wall_timer(std::chrono::milliseconds(fsm_timer_callback_ms_), std::bind(&BehaviorExecutive::fsmTimerCallback, this), fsm_timer_cb_group_);
-    viz_timer_ = this->create_wall_timer(std::chrono::milliseconds(viz_timer_callback_ms_), std::bind(&BehaviorExecutive::vizTimerCallback, this), viz_timer_cb_group_);
 
     /* Load parameters */
     // Map parameters
@@ -484,6 +494,9 @@ void BehaviorExecutive::fsmTimerCallback()
     std::cout << "~ ~ ~ ~ ! Invalid State !" << std::endl;
     break;
   }
+
+  if (sync_callback_groups_) vizTimerCallback();
+
   // std::cout << "~~~~~~~ Machine done!" << std::endl; // DEBUG
 }
 
