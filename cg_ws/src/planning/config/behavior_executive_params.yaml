@@ -31,7 +31,7 @@ behavior_executive_node:
     # Exploration planner
     map_coverage_threshold: 0.01
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
-    explored_once: true # set false to do exploration, true means system will skip exploration 
+    explored_once: false # set false to do exploration, true means system will skip exploration 
 
     # Tool planner
     design_blade_height: 80.0  # Height of blade when grading

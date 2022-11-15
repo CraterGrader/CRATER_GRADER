@@ -7,3 +7,4 @@ worksystem_control_node:
 
     lateral_stanley_gain: 1.3
     lateral_stanley_softening_constant: 0.0 # unused
+    min_drive_speed_scalar: 0.0
