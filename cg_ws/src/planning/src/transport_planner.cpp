@@ -27,6 +27,30 @@ void TransportPlanner::makeGoalsFromAssignment(const size_t assignment_idx, std:
   // Set up last offset pose
   double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
   double offset_pose_y = source_pose.pt.y - last_pose_offset_ * std::sin(yaw);
+
+  double last_pose_offset_constrained = last_pose_offset_;
+
+  if (offset_pose_x > boundary_max_ ||
+      offset_pose_x < boundary_min_ || 
+      offset_pose_y > boundary_max_ || 
+      offset_pose_y < boundary_min_) {
+
+    while (offset_pose_x > boundary_max_ ||
+           offset_pose_x < boundary_min_ || 
+           offset_pose_y > boundary_max_ || 
+           offset_pose_y < boundary_min_){
+
+      last_pose_offset_constrained -= boundary_increment_;
+      if (last_pose_offset_constrained <= 0.0f){
+        offset_pose_x = source_pose.pt.x;
+        offset_pose_y = source_pose.pt.y;
+      	break;
+      }
+      offset_pose_x = source_pose.pt.x - last_pose_offset_constrained * std::cos(yaw);
+      offset_pose_y = source_pose.pt.y - last_pose_offset_constrained * std::sin(yaw);
+    }
+  }
+
   cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
 
   // Push back the goal poses

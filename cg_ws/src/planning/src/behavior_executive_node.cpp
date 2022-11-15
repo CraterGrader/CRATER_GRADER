@@ -171,6 +171,16 @@ namespace planning {
     transport_planner_->setSourceThresholdZ(source_threshold_z);
     transport_planner_->setSinkThresholdZ(sink_threshold_z);
 
+    float boundary_min; 
+    float boundary_max;
+    this->declare_parameter<float>("boundary_min", 0.4);
+    this->get_parameter("boundary_min", boundary_min);
+    this->declare_parameter<float>("boundary_max", 4.6);
+    this->get_parameter("boundary_max", boundary_max);
+
+    transport_planner_->setBoundaryMin(boundary_min);
+    transport_planner_->setBoundaryMax(boundary_max);
+
     this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
     this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
     this->declare_parameter<int>("transport_plan_max_calls", INT_MAX);

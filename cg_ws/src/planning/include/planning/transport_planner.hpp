@@ -55,6 +55,8 @@ public:
   void setNumFilteredAssignments(size_t max_assignments){max_assignments_ = max_assignments;};
   void setSourceThresholdZ(float source_threshold_z) { source_threshold_z_ = source_threshold_z; };
   void setSinkThresholdZ(float sink_threshold_z) { sink_threshold_z_ = sink_threshold_z; };
+  void setBoundaryMin(float boundary_min) { boundary_min_ = boundary_min; };
+  void setBoundaryMax(float boundary_max) { boundary_max_ = boundary_max; };
 
 private: 
   // Attributes
@@ -68,6 +70,10 @@ private:
 
   float sink_threshold_z_ = 0.03;
   float source_threshold_z_ = 0.03;
+  float boundary_min_ = 0.4;
+  float boundary_max_ = 4.6;
+  float boundary_increment_ = 0.01;
+
 };
 
 } // namespace planning
