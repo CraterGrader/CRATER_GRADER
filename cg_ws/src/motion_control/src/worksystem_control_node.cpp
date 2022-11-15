@@ -80,6 +80,8 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   
   this->declare_parameter<int>("steer_speed_filter_window_size", 10);
   this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
+  this->declare_parameter<int>("steer_error_filter_window_size", 10);
+  this->get_parameter("steer_error_filter_window_size", steer_error_filter_window_size_);
 
   // Lateral controller
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
@@ -170,7 +172,9 @@ void WorksystemControlNode::encoderTelemetryCallback(const cg_msgs::msg::Encoder
   float speed_rear = std::fabs((last_steer_pos_rear_ - steer_pos_rear)/static_cast<float>(delta_t_));
   // average front and rear 
   float curr_steer_speed_ = (speed_rear + speed_front) /2;
-  float curr_steer_error_ = 100 * (steer_pos_front/steer_full_scale_) - cmd_msg_.steer_position;
+  float curr_steer_error_ = std::fabs((100*steer_pos_front/(steer_full_scale_ + 1e-6f)) - cmd_msg_.steer_position);
+  std::cout << "Encoder increments: " << steer_pos_front << " " << steer_full_scale_  << " " << cmd_msg_.steer_position << std::endl;
+  std::cout << "Current steer error: " << curr_steer_error_ << std::endl;
   // Use moving average to smooth slip estimate
   steer_speed_ = updateMovingAverage(steer_velocity_window_, curr_steer_speed_, steer_speed_filter_window_size_);
   steer_error_ = updateMovingAverage(steer_error_window_, curr_steer_error_, steer_error_filter_window_size_);
