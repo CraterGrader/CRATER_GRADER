@@ -3,12 +3,12 @@ behavior_executive_node:
     # Absolute +/- thresholds for tracking agent state
     thresh_pos: 0.2 # meters
     thresh_head: 0.523599 # radians
-    thresh_euclidean_replan: 0.5 # meters
+    thresh_euclidean_replan: 0.25 # meters
 
     # Kinematic planner (all params are floats)
     goal_pose_distance_threshold: [0.1, 0.1, 0.2, 0.2, 0.4, 1.0] # m -> 0.1, 0.2, 0.3, 0.4
     goal_pose_yaw_threshold: 0.1 # rad
-    turn_radii_min: 1.8 # m
+    turn_radii_min: 2.0 # m
     max_trajectory_length: 0.4 # m
     trajectory_resolution: 0.05 # m
     n_arms : 1 # max number of lattice arms in each quadrant
@@ -31,7 +31,7 @@ behavior_executive_node:
     # Exploration planner
     map_coverage_threshold: 0.01
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
-    explored_once: true # set false to do exploration, true means system will skip exploration 
+    explored_once: false # set false to do exploration, true means system will skip exploration 
 
     # Tool planner
     design_blade_height: 80.0  # Height of blade when grading
