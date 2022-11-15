@@ -21,12 +21,12 @@ behavior_executive_node:
     pose_equality_scalar_iteration: 1500 # For scaling goal pose equality thresholds --> 1500
 
     # Transport planner
-    source_threshold_z: 0.05 # meters off fit plane
-    sink_threshold_z: 0.08 # meters below fit plane
-    thresh_max_assignment_distance: 0.4 # max meters between transport assignments
+    source_threshold_z: 0.02 # meters above fit plane
+    sink_threshold_z: 0.07 # meters below fit plane
+    thresh_max_assignment_distance: 0.6 # max meters between transport assignments
     last_pose_offset: 1.5 # meters to rearward offset last pose in transport assignment by
-    max_assignments: 25 # maximum number of transport assignments to generate
-    transport_plan_max_calls: 100 # Number of calls to REPLAN_TRANSPORT before a replan is triggered
+    max_assignments: 200 # maximum number of transport assignments to generate
+    transport_plan_max_calls: 3 # Number of calls to REPLAN_TRANSPORT before a replan is triggered
 
     # Exploration planner
     map_coverage_threshold: 0.01
