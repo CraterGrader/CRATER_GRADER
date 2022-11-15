@@ -5,10 +5,10 @@
 namespace cg {
 namespace motion_control {
 
-LongitudinalController::LongitudinalController(const PIDParams &params, float min_drive_speed_scalar, float max_steer_speed) {
+LongitudinalController::LongitudinalController(const PIDParams &params, float min_drive_speed_scalar, float max_steer_error) {
   velocity_controller_ = std::make_unique<PIDController>(PIDController(params));
   min_drive_speed_scalar_ = min_drive_speed_scalar;
-  max_steer_speed_ = max_steer_speed;
+  max_steer_error_ = max_steer_error;
 }
 
 void LongitudinalController::setGains(const double kp, const double ki, const double kd) {
@@ -18,7 +18,7 @@ void LongitudinalController::setGains(const double kp, const double ki, const do
 double LongitudinalController::computeDrive(
     const cg_msgs::msg::Trajectory &target_trajectory,
     const nav_msgs::msg::Odometry &current_state,
-    const size_t traj_idx, const float steer_velocity){
+    const size_t traj_idx, const float steer_error){
   // double target_velocity, curr_velocity;
   double curr_velocity = current_state.twist.twist.linear.x;
 
@@ -38,11 +38,11 @@ double LongitudinalController::computeDrive(
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-  float steer_scale_factor = std::max((max_steer_speed_ - steer_velocity)/(max_steer_speed_),min_drive_speed_scalar_);
+  float steer_scale_factor = std::max((max_steer_error_ - steer_error)/(max_steer_error_),min_drive_speed_scalar_);
 
   double desired_drive = steer_scale_factor * target_velocity; 
 
-  std::cout << " *************** Target Velocity : " << target_velocity << "Steer Velocity :" << steer_velocity << " Steer-Speed Scale Factor :" << steer_scale_factor << std::endl;
+  std::cout << " *************** Target Velocity : " << target_velocity << "Steer Error :" << steer_error << " Steer-Speed Scale Factor :" << steer_scale_factor << std::endl;
   std::cout << "Desired Drive Speed : " << desired_drive << std::endl; 
 
   return desired_drive; // DEBUG
