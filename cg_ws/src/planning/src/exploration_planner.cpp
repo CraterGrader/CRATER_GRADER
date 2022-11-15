@@ -26,8 +26,8 @@ bool ExplorationPlanner::planExploration(const cg::mapping::Map<float> &map) {
   std::vector<int> thetas_deg = {
     270, 225, 180, 135, 90, 45, 0, 315
   };
-  // Make sure that we close the circle
-  thetas_deg.push_back(thetas_deg[0]);
+  // // Make sure that we close the circle
+  // thetas_deg.push_back(thetas_deg[0]);
   for (const auto &theta_deg : thetas_deg) {
     double x = r*std::cos(theta_deg*M_PI/180) + xc;
     double y = r*std::sin(theta_deg*M_PI/180) + yc;
@@ -39,7 +39,7 @@ bool ExplorationPlanner::planExploration(const cg::mapping::Map<float> &map) {
   //   w-min_dist_from_map_boundary_, min_dist_from_map_boundary_, 135*M_PI/180
   // ));
   exploration_waypoints_.push_back(cg::planning::create_pose2d(
-    2.0/3.0*w, 1.0/3.0*h, 135*M_PI/180
+    0.5*w, 1.0/3.0*h, M_PI/2.0
   ));
 
   return true;

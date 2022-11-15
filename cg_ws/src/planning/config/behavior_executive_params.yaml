@@ -3,7 +3,7 @@ behavior_executive_node:
     # Absolute +/- thresholds for tracking agent state
     thresh_pos: 0.2 # meters
     thresh_head: 0.523599 # radians
-    thresh_euclidean_replan: 0.5 # meters
+    thresh_euclidean_replan: 0.25 # meters
 
     # Kinematic planner (all params are floats)
     goal_pose_distance_threshold: [0.1, 0.1, 0.2, 0.2, 0.4, 1.0] # m -> 0.1, 0.2, 0.3, 0.4

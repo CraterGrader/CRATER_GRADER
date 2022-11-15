@@ -70,9 +70,11 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_output_sat_min", pid_params_.output_sat_min);
   this->declare_parameter<double>("longitudinal_velocity_output_sat_max", std::numeric_limits<double>::infinity());
   this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
-  float min_drive_speed_scalar;
+  float min_drive_speed_scalar, max_steer_speed;
   this->declare_parameter<float>("min_drive_speed_scalar", 0.2);
   this->get_parameter("min_drive_speed_scalar", min_drive_speed_scalar);
+  this->declare_parameter<float>("max_steer_speed", 1000);
+  this->get_parameter("max_steer_speed", max_steer_speed);
   
   this->declare_parameter<int>("steer_speed_filter_window_size", 10);
   this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
@@ -84,7 +86,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("lateral_stanley_softening_constant", lateral_stanley_softening_constant_);
 
   // Initialize controllers
-  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_, min_drive_speed_scalar));
+  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_, min_drive_speed_scalar, max_steer_speed));
   lat_controller_ = std::make_unique<LateralController>(LateralController(lateral_stanley_gain_, lateral_stanley_softening_constant_));
 }
 

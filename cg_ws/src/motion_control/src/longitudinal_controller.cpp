@@ -5,9 +5,10 @@
 namespace cg {
 namespace motion_control {
 
-LongitudinalController::LongitudinalController(const PIDParams &params, float min_drive_speed_scalar) {
+LongitudinalController::LongitudinalController(const PIDParams &params, float min_drive_speed_scalar, float max_steer_speed) {
   velocity_controller_ = std::make_unique<PIDController>(PIDController(params));
   min_drive_speed_scalar_ = min_drive_speed_scalar;
+  max_steer_speed_ = max_steer_speed;
 }
 
 void LongitudinalController::setGains(const double kp, const double ki, const double kd) {
