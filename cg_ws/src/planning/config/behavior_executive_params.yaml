@@ -8,7 +8,7 @@ behavior_executive_node:
     # Kinematic planner (all params are floats)
     goal_pose_distance_threshold: [0.1, 0.1, 0.2, 0.2, 0.4, 1.0] # m -> 0.1, 0.2, 0.3, 0.4
     goal_pose_yaw_threshold: 0.1 # rad
-    turn_radii_min: 1.8 # m
+    turn_radii_min: 2.0 # m
     max_trajectory_length: 0.4 # m
     trajectory_resolution: 0.05 # m
     n_arms : 1 # max number of lattice arms in each quadrant
