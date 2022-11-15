@@ -123,6 +123,8 @@ private:
   double thresh_head_ = 0.0;
   float thresh_euclidean_replan_ = 0.0;
   float map_coverage_threshold_ = 0.0;
+  bool exploration_enable_topography_weight_ = false;
+  float topography_weight_ = 1.0;
 
   // DEBUG
   bool traj_debug_ = false;

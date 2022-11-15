@@ -34,6 +34,7 @@ behavior_executive_node:
     map_coverage_threshold: 0.01
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
     explored_once: false # set false to do exploration, true means system will skip exploration
+    exploration_enable_topography_weight: false # Use to enable/disable topography weight in exploration plan
 
     # Tool planner
     design_blade_height: 80.0  # Height of blade when grading
