@@ -6,9 +6,9 @@ namespace cg_visualization
   MarkerVizNode::MarkerVizNode() : Node("marker_viz_node") {
 
     tool_pose_pub_ = this->create_publisher<visualization_msgs::msg::Marker>(
-      "/viz/planning/tool_pose", 1);
+      "/viz/planning/tool_pose_viz", 1);
     steer_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
-      "/viz/planning/steer_pose", 1);
+      "/viz/planning/steer_pose_viz", 1);
     enc_tele_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
         "/encoder_telemetry", 1, std::bind(&MarkerVizNode::updateToolViz, this, std::placeholders::_1));
     act_cmd_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
