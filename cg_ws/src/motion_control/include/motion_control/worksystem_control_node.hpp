@@ -60,17 +60,13 @@ private:
   int traj_idx_ = 0; // used for tracking what index on trajectory is closest to current pose, monotonically increasing, reset when new traj given
 
   float steer_speed_ = 0.0f;
-  float steer_error_ = 0.0f;
   float last_steer_pos_front_ = 0.0f;
   float last_steer_pos_rear_ = 0.0f;
   double tlast_;
   double delta_t_; 
 
   std::list<float> steer_velocity_window_;
-  std::list<float> steer_error_window_;
   size_t steer_speed_filter_window_size_;
-  size_t steer_error_filter_window_size_;
-  float steer_full_scale_;
 
   /* Helpers */
   // Update list of values for moving average, modify the list being passed as an argument

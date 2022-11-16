@@ -70,18 +70,14 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_output_sat_min", pid_params_.output_sat_min);
   this->declare_parameter<double>("longitudinal_velocity_output_sat_max", std::numeric_limits<double>::infinity());
   this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
-  float min_drive_speed_scalar, max_steer_error;
+  float min_drive_speed_scalar, max_steer_speed;
   this->declare_parameter<float>("min_drive_speed_scalar", 0.2);
   this->get_parameter("min_drive_speed_scalar", min_drive_speed_scalar);
-  this->declare_parameter<float>("max_steer_error", 50.0);
-  this->get_parameter("max_steer_error", max_steer_error);
-  this->declare_parameter<float>("steer_full_scale", 2800.0);
-  this->get_parameter("steer_full_scale", steer_full_scale_);
+  this->declare_parameter<float>("max_steer_speed", 1000);
+  this->get_parameter("max_steer_speed", max_steer_speed);
   
   this->declare_parameter<int>("steer_speed_filter_window_size", 10);
   this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
-  this->declare_parameter<int>("steer_error_filter_window_size", 10);
-  this->get_parameter("steer_error_filter_window_size", steer_error_filter_window_size_);
 
   // Lateral controller
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
@@ -90,7 +86,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("lateral_stanley_softening_constant", lateral_stanley_softening_constant_);
 
   // Initialize controllers
-  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_, min_drive_speed_scalar, max_steer_error));
+  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_, min_drive_speed_scalar, max_steer_speed));
   lat_controller_ = std::make_unique<LateralController>(LateralController(lateral_stanley_gain_, lateral_stanley_softening_constant_));
 }
 
@@ -112,7 +108,7 @@ void WorksystemControlNode::timerCallback() {
 
     // Compute control command
     cmd_msg_.header.stamp = this->get_clock()->now();
-    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_error_);
+    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_speed_);
     cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
 
     // Compute tool command
@@ -172,12 +168,8 @@ void WorksystemControlNode::encoderTelemetryCallback(const cg_msgs::msg::Encoder
   float speed_rear = std::fabs((last_steer_pos_rear_ - steer_pos_rear)/static_cast<float>(delta_t_));
   // average front and rear 
   float curr_steer_speed_ = (speed_rear + speed_front) /2;
-  float curr_steer_error_ = std::fabs((100*steer_pos_front/(steer_full_scale_ + 1e-6f)) - cmd_msg_.steer_position);
-  std::cout << "Encoder increments: " << steer_pos_front << " " << steer_full_scale_  << " " << cmd_msg_.steer_position << std::endl;
-  std::cout << "Current steer error: " << curr_steer_error_ << std::endl;
   // Use moving average to smooth slip estimate
   steer_speed_ = updateMovingAverage(steer_velocity_window_, curr_steer_speed_, steer_speed_filter_window_size_);
-  steer_error_ = updateMovingAverage(steer_error_window_, curr_steer_error_, steer_error_filter_window_size_);
 
   // update last steer position
   last_steer_pos_front_ = steer_pos_front;
