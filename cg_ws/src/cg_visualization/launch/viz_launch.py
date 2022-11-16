@@ -27,7 +27,7 @@ def generate_launch_description():
       namespace='',
       executable='rviz2',
       name='rviz2',
-      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'planning_debug.rviz')]]
+      arguments=['-d', [os.path.join(get_package_share_directory('cg_visualization'), 'config', 'planning_debug_with_tool.rviz')]]
     ),
      Node(
       package='cg_visualization',
