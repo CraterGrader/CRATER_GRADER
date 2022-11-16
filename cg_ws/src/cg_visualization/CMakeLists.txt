@@ -15,6 +15,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(cg_msgs)
 find_package(visualization_msgs)
+find_package(nav_msgs)
+find_package(geometry_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -32,6 +34,8 @@ ament_target_dependencies(marker_viz_node
 rclcpp
 cg_msgs
 visualization_msgs
+nav_msgs
+geometry_msgs
 )
 
 # Install targets

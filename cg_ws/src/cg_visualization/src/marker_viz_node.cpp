@@ -1,5 +1,4 @@
 #include "cg_visualization/marker_viz_node.hpp"
-#include <tf2/LinearMath/Quaternion.h>
 
 namespace cg {
 namespace cg_visualization
@@ -7,52 +6,96 @@ namespace cg_visualization
   MarkerVizNode::MarkerVizNode() : Node("marker_viz_node") {
 
     tool_pose_pub_ = this->create_publisher<visualization_msgs::msg::Marker>(
-        "/viz/planning/tool_pose", 1);
+      "/viz/planning/tool_pose", 1);
+    steer_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseStamped>(
+      "/viz/planning/steer_pose", 1);
     enc_tele_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
         "/encoder_telemetry", 1, std::bind(&MarkerVizNode::updateToolViz, this, std::placeholders::_1));
+    act_cmd_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
+        "/actuator_cmd", 1, std::bind(&MarkerVizNode::updateSteerViz, this, std::placeholders::_1));
+    pose_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+        "/odometry/filtered/ekf_global_node", 1, std::bind(&MarkerVizNode::poseUpdateViz,
+        this, std::placeholders::_1));
 
-    RCLCPP_INFO(this->get_logger(), "In constructor");
+    RCLCPP_INFO(this->get_logger(), "In Tool / Steer Viz Constructor");
 
     toolPoseVizInit();
   }
 
   void MarkerVizNode::updateToolViz(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   {
-    float tool_pose = static_cast<float>(msg->tool_pos)/129;
+    float msg_tool_pose = static_cast<float>(msg->tool_pos)/129.0;
+    float diff = std::fabs(tool_pose_ - msg_tool_pose);
+    float scaling = std::fabs(tool_pose_ + msg_tool_pose);
+    if (diff < std::numeric_limits<float>::epsilon() * scaling) {
+      tool_pose_ = msg_tool_pose;
 
-    // Update length and position of tool
-    tool1.pose.position.y = 2.5 - 0.5 * tool_pose/80.0;
-    tool1.scale.y = tool_pose/80.0;
-    tool2.pose.position.y = tool1.pose.position.y - tool1.scale.y/2;
-    tool_pose_pub_->publish(tool1);
-    tool_pose_pub_->publish(tool2);
+      // Update length and position of tool
+      tool1.pose.position.y = 2.5 - 0.5 * tool_pose_/80.0;
+      tool1.scale.y = tool_pose_/80.0;
+      tool2.pose.position.y = tool1.pose.position.y - tool1.scale.y/2;
+      tool_pose_pub_->publish(tool1);
+      tool_pose_pub_->publish(tool2);
+    }
+  }
+
+  void MarkerVizNode::updateSteerViz(const cg_msgs::msg::ActuatorCommand::SharedPtr msg)
+  {
+    steer_pose_ = msg->steer_position / 100.0 * 16.0 / 180.0 * M_PI;
+  }
+
+  void MarkerVizNode::poseUpdateViz(const nav_msgs::msg::Odometry::SharedPtr msg) {
+    // Set header and frame name
+    steer.header.stamp = this->get_clock()->now();
+    steer.header.frame_id = "base_link";
+
+    // Set the Pose relative to the robot frame to zeros
+    steer.pose.position.x = 0.0;
+    steer.pose.position.y = 0.0;
+    steer.pose.position.z = 0.0;
+
+    // Combine the current yaw and steer pose
+    tf2::Quaternion q_yaw, q_steer, q_new;
+    q_steer.setRPY(0.0, 0.0, steer_pose_);
+    tf2::convert(msg->pose.pose.orientation, q_yaw);
+    q_new = q_steer * q_yaw;
+    q_new.normalize();
+
+    // Set the quarternion in the message
+    steer.pose.orientation.x = q_new.x();
+    steer.pose.orientation.y = q_new.y();
+    steer.pose.orientation.z = q_new.z();
+    steer.pose.orientation.w = q_new.w();
+
+    // Publish the steering position
+    steer_pose_pub_->publish(steer);
   }
 
   void MarkerVizNode::toolPoseVizInit()
   {
     // RCLCPP_INFO(this->get_logger(), "Starting Tool Pose Viz");
-    // Text Description
-    viz_text.header.frame_id = "map";
-    viz_text.header.stamp = this->get_clock()->now();
-    viz_text.ns = "viz_text";
-    viz_text.id = 0;
-    viz_text.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
-    viz_text.action = visualization_msgs::msg::Marker::ADD;
-    viz_text.pose.position.x = -2;
-    viz_text.pose.position.y = 3.5;
-    viz_text.pose.position.z = 0;
-    viz_text.pose.orientation.x = 0.0;
-    viz_text.pose.orientation.y = 0.0;
-    viz_text.pose.orientation.z = 0.0;
-    viz_text.pose.orientation.w = 1.0;
-    viz_text.scale.x = 0.1;
-    viz_text.scale.y = 0.1;
-    viz_text.scale.z = 0.4;
-    viz_text.color.a = 1.0;
-    viz_text.color.r = 0.0;
-    viz_text.color.g = 0.0;
-    viz_text.color.b = 0.0;
-    viz_text.text = "Tool Position";
+    // Tool Text Description
+    tool_text.header.frame_id = "map";
+    tool_text.header.stamp = this->get_clock()->now();
+    tool_text.ns = "tool_text";
+    tool_text.id = 0;
+    tool_text.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+    tool_text.action = visualization_msgs::msg::Marker::ADD;
+    tool_text.pose.position.x = -2.0;
+    tool_text.pose.position.y = 3.5;
+    tool_text.pose.position.z = 0;
+    tool_text.pose.orientation.x = 0.0;
+    tool_text.pose.orientation.y = 0.0;
+    tool_text.pose.orientation.z = 0.0;
+    tool_text.pose.orientation.w = 1.0;
+    tool_text.scale.x = 0.1;
+    tool_text.scale.y = 0.1;
+    tool_text.scale.z = 0.4;
+    tool_text.color.a = 1.0;
+    tool_text.color.r = 0.0;
+    tool_text.color.g = 0.0;
+    tool_text.color.b = 0.0;
+    tool_text.text = "Tool Position";
     // Vehicle Body
     body.header.frame_id = "map";
     body.header.stamp = this->get_clock()->now();
@@ -63,7 +106,7 @@ namespace cg_visualization
     body.pose.position.x = -2.0;
     body.pose.position.y = 3.0;
     body.pose.position.z = 0.0;
-    body.pose.orientation = viz_text.pose.orientation;
+    body.pose.orientation = tool_text.pose.orientation;
     body.scale.x = 3;
     body.scale.y = 1;
     body.scale.z = 0.1;
@@ -81,7 +124,7 @@ namespace cg_visualization
     ground.pose.position.x = -2.0;
     ground.pose.position.y = 0.75;
     ground.pose.position.z = 0;
-    ground.pose.orientation = viz_text.pose.orientation;
+    ground.pose.orientation = tool_text.pose.orientation;
     ground.scale.x = 3.0;
     ground.scale.y = 1.5;
     ground.scale.z = 0.1;
@@ -96,10 +139,10 @@ namespace cg_visualization
     tool1.id = 3;
     tool1.type = visualization_msgs::msg::Marker::CUBE;
     tool1.action = visualization_msgs::msg::Marker::ADD;
-    tool1.pose.position.x = -2;
+    tool1.pose.position.x = -2.0;
     tool1.pose.position.y = 2.0;
     tool1.pose.position.z = 0.1;
-    tool1.pose.orientation = viz_text.pose.orientation;
+    tool1.pose.orientation = tool_text.pose.orientation;
     tool1.scale.x = 0.2;
     tool1.scale.y = 1.0;
     tool1.scale.z = 0.1;
@@ -116,13 +159,13 @@ namespace cg_visualization
     tool2.pose.position.x = -2.2;
     tool2.pose.position.y = 1.5;
     tool2.pose.position.z = 0.1;
-    tool2.pose.orientation = viz_text.pose.orientation;
+    tool2.pose.orientation = tool_text.pose.orientation;
     tool2.scale.x = 0.2;
     tool2.scale.y = 0.5;
     tool2.scale.z = 0.1;
     tool2.color = tool1.color;
 
-    tool_pose_pub_->publish(viz_text);
+    tool_pose_pub_->publish(tool_text);
     tool_pose_pub_->publish(body);
     tool_pose_pub_->publish(ground);
     tool_pose_pub_->publish(tool1);
