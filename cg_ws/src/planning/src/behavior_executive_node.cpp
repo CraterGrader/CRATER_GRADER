@@ -182,6 +182,16 @@ namespace planning {
     transport_planner_->setBoundaryMin(boundary_min);
     transport_planner_->setBoundaryMax(boundary_max);
 
+    float thresh_filter_assignment_pos;
+    double thresh_filter_assignment_head;
+    this->declare_parameter<float>("thresh_filter_assignment_pos", 0.0);
+    this->get_parameter("thresh_filter_assignment_pos", thresh_filter_assignment_pos);
+    this->declare_parameter<double>("thresh_filter_assignment_head", 6.28);
+    this->get_parameter("thresh_filter_assignment_head", thresh_filter_assignment_head);
+
+    transport_planner_->setThreshFilterAssignmentPos(thresh_filter_assignment_pos);
+    transport_planner_->setThreshFilterAssignmentHead(thresh_filter_assignment_head);
+
     this->declare_parameter<float>("thresh_max_assignment_distance", 0.7);
     this->get_parameter("thresh_max_assignment_distance", thresh_max_assignment_distance_);
     this->declare_parameter<int>("transport_plan_max_calls", INT_MAX);
@@ -191,12 +201,7 @@ namespace planning {
     this->declare_parameter<double>("last_pose_offset", 1.0);
     this->get_parameter("last_pose_offset", last_pose_offset);
 
-    size_t max_assignments;
-    this->declare_parameter<int>("max_assignments", std::numeric_limits<int>::max());
-    this->get_parameter("max_assignments", max_assignments);
-
     transport_planner_->setLastPoseOffset(last_pose_offset);
-    transport_planner_->setNumFilteredAssignments(max_assignments);
 
     // Exploration planner
     this->declare_parameter<float>("map_coverage_threshold", 0.01);

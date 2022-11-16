@@ -15,14 +15,15 @@ size_t TransportPlanner::ij_to_index(size_t i, size_t j, size_t width) const {
     return (j + (i * width));
 }
 
-void TransportPlanner::makeGoalsFromAssignment(const size_t assignment_idx, std::vector<cg_msgs::msg::Pose2D> &goalPoses) {
+void TransportPlanner::makeGoalsFromAssignment(const std::vector<TransportAssignment> &transport_assignments, const size_t assignment_idx, std::vector<cg_msgs::msg::Pose2D> &goalPoses)
+{
 
   // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
-  double yaw = static_cast<double>(atan2((transport_assignments_[assignment_idx].sink_node.y - transport_assignments_[assignment_idx].source_node.y), (transport_assignments_[assignment_idx].sink_node.x - transport_assignments_[assignment_idx].source_node.x)));
+  double yaw = static_cast<double>(atan2((transport_assignments[assignment_idx].sink_node.y - transport_assignments[assignment_idx].source_node.y), (transport_assignments[assignment_idx].sink_node.x - transport_assignments[assignment_idx].source_node.x)));
 
   // convert src, sink nodes to poses
-  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments_[assignment_idx].source_node.x, transport_assignments_[assignment_idx].source_node.y, yaw);
-  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_[assignment_idx].sink_node.x, transport_assignments_[assignment_idx].sink_node.y, yaw);
+  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].source_node.x, transport_assignments[assignment_idx].source_node.y, yaw);
+  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].sink_node.x, transport_assignments[assignment_idx].sink_node.y, yaw);
 
   // Set up last offset pose
   double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
@@ -99,7 +100,7 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
   unvisited_assignments_.at(arg_min) = false;
 
   // Get goal poses
-  makeGoalsFromAssignment(arg_min, goalPoses);
+  makeGoalsFromAssignment(transport_assignments_, arg_min, goalPoses);
 
   return goalPoses;
 }
@@ -110,7 +111,7 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getUnvisitedGoalPoses() {
   for (size_t i = 0; i < transport_assignments_.size(); ++i){
     // If unvisited, push back the set of goal poses
     if (unvisited_assignments_[i]) {
-      makeGoalsFromAssignment(i, unvisitedGoalPoses);
+      makeGoalsFromAssignment(transport_assignments_, i, unvisitedGoalPoses);
     }
   }
   return unvisitedGoalPoses;
@@ -359,37 +360,42 @@ void TransportPlanner::filterAssignments(std::vector<TransportAssignment> &new_t
 
   std::vector<TransportAssignment> filtered_transport_assignments;
 
+  // Initialize boolean mask to false
+  std::vector<bool> keep_assignment(new_transport_assignments.size(), false);
+
   for (size_t i=0; i < new_transport_assignments.size(); ++i) {
-    TransportAssignment assignment = new_transport_assignments[i];
-    // -------------------------
-    // DEBUG
-    // std::cout << " --------- Assigment source <x,y,height,transport volume> : < " << assignment.source_node.x << ", " << assignment.source_node.y << ", " << assignment.source_node.height << ", " << assignment.transport_volume << " >" << std::endl;
-    // -------------------------
 
-    // Skip transport from same source
-    bool keep_assignment = true;
-    for (size_t j=i+1; j < new_transport_assignments.size(); ++j) {
-      TransportAssignment check_assignment = new_transport_assignments[j];
+    // bool keep_assignment = true;
+    std::vector<cg_msgs::msg::Pose2D> assignment_goal_poses;
+    makeGoalsFromAssignment(new_transport_assignments, i, assignment_goal_poses);
+    cg_msgs::msg::Pose2D assignment_source_pose = assignment_goal_poses[0];
+    bool no_similar_poses = true;
+    for (size_t j=0; j < i; ++j) {
+      
+      std::vector<cg_msgs::msg::Pose2D> check_assignment_goal_poses;
+      makeGoalsFromAssignment(new_transport_assignments, j, check_assignment_goal_poses);
+      cg_msgs::msg::Pose2D check_assignment_source_pose = check_assignment_goal_poses[0];
 
-      double same_distance_thresh = 1e-5;
-      if (std::fabs(assignment.source_node.x - check_assignment.source_node.x) < same_distance_thresh && std::fabs(assignment.source_node.y - check_assignment.source_node.y) < same_distance_thresh) {
-        keep_assignment = false;
+      // Skip transport that is too close
+      if (cg::planning::samePoseWithinThresh(assignment_source_pose, check_assignment_source_pose, thresh_filter_assignment_pos_, thresh_filter_assignment_head_) && keep_assignment[j]) {
+        no_similar_poses = false;
         break;
       }
     }
 
-    // Keep assignments
-    if (keep_assignment) {
-      filtered_transport_assignments.push_back(assignment);
+    if (no_similar_poses) {
+      keep_assignment[i] = true;
     }
 
   }
 
-  // Keep random subset
-  std::shuffle(std::begin(filtered_transport_assignments), std::end(filtered_transport_assignments), random_number_generator_);
-  size_t start_slice = std::max(static_cast<int>(filtered_transport_assignments.size() - max_assignments_), 0);
-
-  new_transport_assignments = std::vector<TransportAssignment>(filtered_transport_assignments.begin() + start_slice, filtered_transport_assignments.end());
+  // Keep assignments
+  for (size_t i = 0; i < new_transport_assignments.size(); ++i) {
+    if (keep_assignment[i]) {
+      filtered_transport_assignments.push_back(new_transport_assignments[i]);
+    }
+  }
+  new_transport_assignments = filtered_transport_assignments;
 }
 
 /**

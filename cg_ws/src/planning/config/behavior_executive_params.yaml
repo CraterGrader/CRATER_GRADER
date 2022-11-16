@@ -25,10 +25,11 @@ behavior_executive_node:
     sink_threshold_z: 0.07 # meters below fit plane
     thresh_max_assignment_distance: 0.6 # max meters between transport assignments
     last_pose_offset: 5.0 # meters to rearward offset last pose in transport assignment by
-    max_assignments: 200 # maximum number of transport assignments to generate
     transport_plan_max_calls: 100 # Number of calls to REPLAN_TRANSPORT before a replan is triggered
     boundary_min: 0.4 # max pose for x-y in sitemap frame
     boundary_max: 4.6 # min pose for x-y in sitemap frame
+    thresh_filter_assignment_pos: 0.2 # minimum meters between final transport assignments
+    thresh_filter_assignment_head: 6.28 # minimum heading [rad] between final transport assignments
 
     # Exploration planner
     map_coverage_threshold: 0.01
