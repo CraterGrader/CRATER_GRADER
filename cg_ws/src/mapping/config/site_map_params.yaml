@@ -18,7 +18,28 @@ site_map:
     # Loading from a map filepath
     static_map: false
     load_height_map_from_filepath: false
+    #### "Obvious crater" maps
     load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
+
+    #### "Malformed crater" maps
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/russells_fun_map.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/half_auton_half_manual_exploration.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/map001.csv" # use absolute path --> same as half_auton_half_manual_exploration
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/full_exploration.csv" # use absolute path
+
+    #### "Noisy" maps
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/max_map.csv" # use absolute path MORPHIN PRESENT
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/auton_transition.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/exploration_map_check_test.csv" # use absolute path
+    
+    #### "Extreme gouging" maps
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/normal_map.csv" # use absolute path
+
+    #### "Partially unseen" maps
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/red_demo.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/nov_11_crater.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/donut_exploration.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/autonomous_mapping.csv" # use absolute path
 
 behavior_executive_node:
   ros__parameters:

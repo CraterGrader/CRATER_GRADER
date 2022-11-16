@@ -41,7 +41,7 @@ SiteMapNode::SiteMapNode() : Node("site_map_node") {
 
   std::string load_height_map_filepath;
   bool load_height_map_from_filepath;
-  this->declare_parameter<std::string>("load_height_map_filepath", "/root/CRATER_GRADER/cg_ws/src/mapping/config/half_auton_half_manual_exploration.csv");
+  this->declare_parameter<std::string>("load_height_map_filepath", "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv");
   this->get_parameter("load_height_map_filepath", load_height_map_filepath);
   this->declare_parameter<bool>("load_height_map_from_filepath", false);
   this->get_parameter("load_height_map_from_filepath", load_height_map_from_filepath);

@@ -78,7 +78,8 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   
   this->declare_parameter<int>("steer_speed_filter_window_size", 10);
   this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
-
+  this->declare_parameter<int>("cmd_msg_filter_window_size", 10);
+  this->get_parameter("cmd_msg_filter_window_size", cmd_msg_filter_window_size_);
   // Lateral controller
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
@@ -108,8 +109,10 @@ void WorksystemControlNode::timerCallback() {
 
     // Compute control command
     cmd_msg_.header.stamp = this->get_clock()->now();
-    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_speed_);
-    cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
+    float wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_speed_);
+    float steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
+    cmd_msg_.wheel_velocity = updateMovingAverage(cmg_msg_steer_window_, wheel_velocity, cmd_msg_filter_window_size_);
+    cmd_msg_.steer_position = updateMovingAverage(cmg_msg_drive_window_, steer_position, cmd_msg_filter_window_size_);
 
     // Compute tool command
     // TODO eventually implement slip-based control

@@ -24,7 +24,7 @@ bool ExplorationPlanner::planExploration(const cg::mapping::Map<float> &map) {
   double r = std::min(h,w)/2.0 - min_dist_from_map_boundary_;
   // Generate waypoints going clockwise around a circle
   std::vector<int> thetas_deg = {
-    270, 225, 180, 135, 90, 45, 0, 315
+    270, 225, 180, 135, 90, 45, 0//, 315
   };
   // // Make sure that we close the circle
   // thetas_deg.push_back(thetas_deg[0]);
@@ -35,12 +35,24 @@ bool ExplorationPlanner::planExploration(const cg::mapping::Map<float> &map) {
     exploration_waypoints_.push_back(cg::planning::create_pose2d(x, y, yaw));
   }
   // Final waypoints for backing into the corner and driving forward
+  exploration_waypoints_.push_back(cg::planning::create_pose2d(
+    w/2.0, h/3.0, M_PI
+  ));
+  exploration_waypoints_.push_back(cg::planning::create_pose2d(
+    0.8*w, h/5.0, 135*M_PI/180
+  ));
+  exploration_waypoints_.push_back(cg::planning::create_pose2d(
+    2.0*w/3.0, h/3.0, 135*M_PI/180
+  ));
   // exploration_waypoints_.push_back(cg::planning::create_pose2d(
   //   w-min_dist_from_map_boundary_, min_dist_from_map_boundary_, 135*M_PI/180
   // ));
-  exploration_waypoints_.push_back(cg::planning::create_pose2d(
-    0.5*w, 1.0/3.0*h, M_PI/2.0
-  ));
+  // exploration_waypoints_.push_back(cg::planning::create_pose2d(
+  //   0.5*w, 1.0/3.0*h, M_PI/2.0
+  // ));
+  // exploration_waypoints_.push_back(cg::planning::create_pose2d(
+  //   1.0/2.0*w - h/(2.0*std::sqrt(3)) + h/(3.0*std::sqrt(3)), 1.0/3.0*h, M_PI/3.0
+  // ));
 
   return true;
 }
