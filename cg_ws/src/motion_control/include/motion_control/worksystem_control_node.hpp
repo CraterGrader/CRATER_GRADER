@@ -57,6 +57,9 @@ private:
   nav_msgs::msg::Odometry global_robot_state_;
   nav_msgs::msg::Odometry local_robot_state_;
   cg_msgs::msg::ActuatorCommand cmd_msg_;
+  std::list<float> cmg_msg_steer_window_;
+  std::list<float> cmg_msg_drive_window_;
+  size_t cmd_msg_filter_window_size_;
   int traj_idx_ = 0; // used for tracking what index on trajectory is closest to current pose, monotonically increasing, reset when new traj given
 
   float steer_speed_ = 0.0f;
