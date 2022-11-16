@@ -5,8 +5,11 @@ worksystem_control_node:
     longitudinal_velocity_kd: 0.5
     steer_speed_filter_window_size: 10
     cmd_msg_filter_window_size: 10
+    steer_error_filter_window_size: 10
 
     lateral_stanley_gain: 2.0
     lateral_stanley_softening_constant: 0.0 # unused
     min_drive_speed_scalar: 0.0
-    max_steer_speed: 500.0
+
+    max_steer_error: 50.0
+    steer_full_scale: 2800.0
