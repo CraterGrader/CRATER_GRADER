@@ -36,8 +36,6 @@ namespace cg_visualization
     this->declare_parameter<float>("arrow_b", 1.0);
     this->get_parameter("arrow_b", arrow_b_);
 
-    RCLCPP_INFO(this->get_logger(), "In Tool / Steer Viz Constructor");
-
     toolPoseVizInit();
   }
 
@@ -56,9 +54,7 @@ namespace cg_visualization
 
   void MarkerVizNode::updateToolViz(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   {
-    RCLCPP_INFO(this->get_logger(), "In update tool viz");
     float msg_tool_pose = static_cast<float>(msg->tool_pos)/328.0;
-    RCLCPP_INFO(this->get_logger(), std::to_string(msg_tool_pose).c_str());
     tool_pose_ = msg_tool_pose;
 
     // Update length and position of tool
@@ -69,7 +65,6 @@ namespace cg_visualization
 
   void MarkerVizNode::toolPoseVizInit()
   {
-    RCLCPP_INFO(this->get_logger(), "Tool pose viz initialization");
     // Tool Text Description
     tool_text.header.frame_id = "map";
     tool_text.header.stamp = this->get_clock()->now();
