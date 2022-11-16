@@ -1,10 +1,11 @@
 #ifndef MAPPING__MAP_UTIL_HPP
 #define MAPPING__MAP_UTIL_HPP
 
-#include <cmath> // floor
+#include <cmath> // floor, fabs
 #include <Eigen/Dense> // matrix multiplication
 #include <cg_msgs/msg/point2_d.hpp> // use of cg:msgs::Point2D
 #include <cg_msgs/msg/pose2_d.hpp> // use of cg:msgs::Pose2D
+#include <iostream> // map i/o
 
 namespace cg {
 namespace mapping {
@@ -21,6 +22,15 @@ bool mapSimilarityWithinThreshold(const std::vector<float> &map1, const std::vec
 
 float rad2deg(float rad);
 float deg2rad(float deg);
+
+/**
+ * @brief Checks if a filepath exists or not
+ *
+ * @param filepath The filepath to check
+ * @return true
+ * @return false
+ */
+bool file_exists(const std::string& filepath);
 
 } // mapping namespace
 } // cg namespace

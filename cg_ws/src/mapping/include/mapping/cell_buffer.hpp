@@ -2,6 +2,7 @@
 #define MAPPING__CELL_BUFFER_HPP
 
 #include <mapping/index_point.hpp>
+#include <cmath> // fabs
 
 namespace cg {
 namespace mapping {
@@ -15,13 +16,13 @@ class CellBuffer {
   void addPoint(cg::mapping::indexPoint pt);
   float getHeight(){return height_;}
   void bufferHasNewData(){doesBufferHaveNewData_ = true;}
-  void bufferHasBeenUpdated(){doesBufferHaveNewData_ = false;}
+  void bufferHasBeenUpdated();
   bool doesBufferHaveNewData(){return doesBufferHaveNewData_;}
 
   private:
   // attributes
   bool doesBufferHaveNewData_;
-  float height_; // the buffer which stores the height 
+  float height_; // the buffer which stores the height
 
 };
 

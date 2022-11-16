@@ -3,4 +3,6 @@
 #response
 cg_msgs/SiteMap site_map
 bool map_fully_explored
+float64 map_coverage_ratio
 bool success
+int8[] seen_map

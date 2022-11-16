@@ -18,10 +18,13 @@ void VelocityPlanner::generateVelocityTargets(
 
             // Transform both traj_pose and reference pose by the opposite of reference pose
             cg_msgs::msg::Point2D curr_vec_transformed = cg::planning::transformPointGlobalToLocal(trajectory.path[i].pt, reference_pose);
-            std::cout << " ++++++++++ traj pose <x,y,yaw>: < " << trajectory.path[i].pt.x << ", " << trajectory.path[i].pt.y << ", " << trajectory.path[i].yaw << std::endl;
-            std::cout << " ++++++++++ ref pose <x,y,yaw>: < " << reference_pose.pt.x << ", " << reference_pose.pt.y << ", " << reference_pose.yaw << std::endl;
-            std::cout << " ++++++++++ curr_vec_transformed <x,y>: < " << curr_vec_transformed.x << ", " << curr_vec_transformed.y << std::endl;
-            std::cout << " ++++++++++" << std::endl;
+            // ----------------------------------
+            // DEBUG
+            // std::cout << " ++++++++++ traj pose <x,y,yaw>: < " << trajectory.path[i].pt.x << ", " << trajectory.path[i].pt.y << ", " << trajectory.path[i].yaw << std::endl;
+            // std::cout << " ++++++++++ ref pose <x,y,yaw>: < " << reference_pose.pt.x << ", " << reference_pose.pt.y << ", " << reference_pose.yaw << std::endl;
+            // std::cout << " ++++++++++ curr_vec_transformed <x,y>: < " << curr_vec_transformed.x << ", " << curr_vec_transformed.y << std::endl;
+            // std::cout << " ++++++++++" << std::endl;
+            // ----------------------------------
             reference_pose = trajectory.path[i];
             // If pose as positive x component, it's going forward
             // Currently using constant velocity

@@ -4,15 +4,30 @@ namespace cg {
 namespace mapping {
 
 CellBuffer::CellBuffer(float unseenGridHeight){
-      height_ = unseenGridHeight;
-      doesBufferHaveNewData_ = false;
+    (void) unseenGridHeight;
+    height_ = 0.0f;
+    doesBufferHaveNewData_ = false;
+}
+
+void CellBuffer::bufferHasBeenUpdated(){
+    doesBufferHaveNewData_ = false;
+    height_ = 0.0f;
 }
 
 void CellBuffer::addPoint(indexPoint pt){
     // update the height based on incoming point
-    height_ = pt.z;
+    // do a check to see if the incoming point is an extreema
+    if (std::fabs(pt.z) > std::fabs(height_)){
+        height_ = pt.z;
+        bufferHasNewData();
+    }
+
+
+    // height_ = pt.z;
+    // bufferHasNewData();
+
+
     // let other maps know the buffer has new data here
-    bufferHasNewData();
 }
 
 } // mapping namespace

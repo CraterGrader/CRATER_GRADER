@@ -4,14 +4,25 @@
 namespace cg {
 namespace planning {
 
-void ReplanTransport::runState() {
+void ReplanTransport::runState(int max_calls_before_replan) {
   std::cout << "REPLAN_TRANSPORT" << std::endl;
 
+  // For now, only replan the first time through
+  // If causing computational bottleneck later on
+  // compare to map used during last transport planning 
+
   // Update shared current state and the precursing signal
-  pre_signal_ = Signal::YES;
-  curr_state_ = State::PLAN_TRANSPORT;
-  // pre_signal_ = Signal::NO;
-  // curr_state_ = State::GET_TRANSPORT_GOALS;
+  transport_counter_ = (transport_counter_+1) % max_calls_before_replan;
+  if (transport_counter_ == 0 || first_replan_) {
+    std::cout << "Replanning transport goals" << std::endl;
+    first_replan_ = false;
+    pre_signal_ = Signal::YES;
+    curr_state_l0_ = StateL0::PLAN_TRANSPORT;
+    return;
+  }
+
+  pre_signal_ = Signal::NO;
+  curr_state_l0_ = StateL0::GET_TRANSPORT_GOALS;
 }
 
 } // planning namespace

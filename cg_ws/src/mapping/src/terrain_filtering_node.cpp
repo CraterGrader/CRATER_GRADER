@@ -20,7 +20,7 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
   // create ptr to listener 
   tfBuffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   tfListener_ = std::make_shared<tf2_ros::TransformListener>(*tfBuffer_);
-
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   // Parameters 
   source_frame_ = "realsense_frame";
   target_frame_ = "map";
@@ -46,53 +46,61 @@ TerrainFilteringNode::TerrainFilteringNode() : Node("terrain_filtering_node"){
 void TerrainFilteringNode::rawPointsCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
   try {
     geometry_msgs::msg::TransformStamped transformStamped;
-    transformStamped = tfBuffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
 
-    cloud_in_ = *msg;
-    tf2::doTransform(cloud_in_, cloud_out_, transformStamped);
-    cloud_out_.header.frame_id = target_frame_;
+    if (tfBuffer_->canTransform(target_frame_, source_frame_, tf2::TimePointZero)){
+        
+      transformStamped = tfBuffer_->lookupTransform(target_frame_, source_frame_, tf2::TimePointZero);
 
-    // convert sensor_msgs::msg::PointCloud2::SharedPtr to pcl::PointCloud<pcl::PointXYZ>
-    pcl::PCLPointCloud2 pcl_pc2;
-    pcl_conversions::toPCL(cloud_out_,pcl_pc2);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
+      // std::cout << msg->width << std::endl;
 
-    // setup output cloud 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      // if ((msg->width) < 5000) return;
 
-    // Declare instance of filter:
-    pcl::CropBox<pcl::PointXYZ> crop;
+      cloud_in_ = *msg;
+      tf2::doTransform(cloud_in_, cloud_out_, transformStamped);
+      cloud_out_.header.frame_id = target_frame_;
 
-    // Set input:
-    crop.setInputCloud(temp_cloud);
+      // convert sensor_msgs::msg::PointCloud2::SharedPtr to pcl::PointCloud<pcl::PointXYZ>
+      pcl::PCLPointCloud2 pcl_pc2;
+      pcl_conversions::toPCL(cloud_out_,pcl_pc2);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      pcl::fromPCLPointCloud2(pcl_pc2,*temp_cloud);
 
-    // Set parameters
-    Eigen::Vector4f min_point = Eigen::Vector4f(1.0, 1.0, -10.0, 0);
-    Eigen::Vector4f max_point = Eigen::Vector4f(6.0, 6.0, 10.0, 0);
-    crop.setMin(min_point);
-    crop.setMax(max_point);
+      // setup output cloud 
+      pcl::PointCloud<pcl::PointXYZ>::Ptr xyz_filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-    // Filter
-    crop.filter(*xyz_filtered_cloud);
+      // Declare instance of filter:
+      pcl::CropBox<pcl::PointXYZ> crop;
 
-    // Statistical outlier removal for salt-and-pepper noise
-    // https://pcl.readthedocs.io/en/latest/statistical_outlier.html
-    if (use_sor_) {
-      pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-      sor.setInputCloud(xyz_filtered_cloud);
-      sor.setMeanK(sor_mean_k_);
-      sor.setStddevMulThresh(sor_stddev_mul_thresh_);
-      sor.filter(*xyz_filtered_cloud);
+      // Set input:
+      crop.setInputCloud(temp_cloud);
+
+      // Set parameters
+      Eigen::Vector4f min_point = Eigen::Vector4f(1.0, 1.0, -10.0, 0);
+      Eigen::Vector4f max_point = Eigen::Vector4f(6.0, 6.0, 10.0, 0);
+      crop.setMin(min_point);
+      crop.setMax(max_point);
+
+      // Filter
+      crop.filter(*xyz_filtered_cloud);
+
+      // Statistical outlier removal for salt-and-pepper noise
+      // https://pcl.readthedocs.io/en/latest/statistical_outlier.html
+      if (use_sor_) {
+        pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+        sor.setInputCloud(xyz_filtered_cloud);
+        sor.setMeanK(sor_mean_k_);
+        sor.setStddevMulThresh(sor_stddev_mul_thresh_);
+        sor.filter(*xyz_filtered_cloud);
+      }
+
+      // Convert from pcl::PointCloud<T> back to sensor_msgs::PointCloud2
+      pcl::toROSMsg(*xyz_filtered_cloud, box_cloud_out_);
+
+      // Publish
+      filtered_points_pub_->publish(box_cloud_out_);
+
+      } 
     }
-
-    // Convert from pcl::PointCloud<T> back to sensor_msgs::PointCloud2
-    pcl::toROSMsg(*xyz_filtered_cloud, box_cloud_out_);
-
-    // Publish
-    filtered_points_pub_->publish(box_cloud_out_);
-
-    } 
   catch (tf2::TransformException &ex) {
     RCLCPP_WARN(this->get_logger(),"%s", ex.what());
     }

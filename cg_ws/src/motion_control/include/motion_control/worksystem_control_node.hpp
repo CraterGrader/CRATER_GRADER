@@ -4,6 +4,7 @@
 #include <cg_msgs/msg/actuator_command.hpp>
 #include <cg_msgs/msg/trajectory.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <cg_msgs/msg/encoder_telemetry.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include "motion_control/lateral_controller.hpp"
 #include "motion_control/longitudinal_controller.hpp"
@@ -22,6 +23,7 @@ private:
   rclcpp::Publisher<cg_msgs::msg::ActuatorCommand>::SharedPtr cmd_pub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr local_robot_state_sub_;
+  rclcpp::Subscription<cg_msgs::msg::EncoderTelemetry>::SharedPtr encoder_telemetry_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   /* Debugging publishers */
@@ -31,6 +33,7 @@ private:
   /* Callbacks */
   void globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void localRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+  void encoderTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg);
   void timerCallback();
 
   /* Services */
@@ -53,9 +56,29 @@ private:
   bool worksystem_enabled_ = false;
   nav_msgs::msg::Odometry global_robot_state_;
   nav_msgs::msg::Odometry local_robot_state_;
+  cg_msgs::msg::ActuatorCommand cmd_msg_;
+  std::list<float> cmg_msg_steer_window_;
+  std::list<float> cmg_msg_drive_window_;
+  size_t cmd_msg_filter_window_size_;
   int traj_idx_ = 0; // used for tracking what index on trajectory is closest to current pose, monotonically increasing, reset when new traj given
 
-  cg_msgs::msg::ActuatorCommand cmd_msg_;
+  float steer_speed_ = 0.0f;
+  float steer_error_ = 0.0f;
+  float last_steer_pos_front_ = 0.0f;
+  float last_steer_pos_rear_ = 0.0f;
+  double tlast_;
+  double delta_t_; 
+
+  std::list<float> steer_velocity_window_;
+  size_t steer_speed_filter_window_size_;
+  std::list<float> steer_error_window_;
+  size_t steer_error_filter_window_size_;
+  float steer_full_scale_;
+
+  /* Helpers */
+  // Update list of values for moving average, modify the list being passed as an argument
+  float updateMovingAverage(std::list<float> &list, const float &new_val, const size_t &window_size);
+
 }; // class WorksystemControlNode
 
 } // namespace motion_control

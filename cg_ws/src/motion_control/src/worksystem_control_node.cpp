@@ -34,6 +34,9 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   local_robot_state_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/odometry/filtered/ekf_odom_node", 1, std::bind(&WorksystemControlNode::localRobotStateCallback, this, std::placeholders::_1));
 
+  encoder_telemetry_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
+      "/encoder_telemetry", 1, std::bind(&WorksystemControlNode::encoderTelemetryCallback, this, std::placeholders::_1));
+
   // Initialize publishers
   cmd_pub_ = this->create_publisher<cg_msgs::msg::ActuatorCommand>(
       "/autonomy_cmd", 1);
@@ -49,7 +52,8 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   lat_debug_heading_err_pub_ = this->create_publisher<std_msgs::msg::Float64>(
       "/lat_control_debug/heading_error", 1);
 
-  // Load parameters
+  /* Parameters */
+  // Longitudinal controller
   this->declare_parameter<double>("longitudinal_velocity_kp", 1.0);
   this->get_parameter("longitudinal_velocity_kp", pid_params_.kp);
   this->declare_parameter<double>("longitudinal_velocity_ki", 0.0);
@@ -66,13 +70,28 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("longitudinal_velocity_output_sat_min", pid_params_.output_sat_min);
   this->declare_parameter<double>("longitudinal_velocity_output_sat_max", std::numeric_limits<double>::infinity());
   this->get_parameter("longitudinal_velocity_output_sat_max", pid_params_.output_sat_max);
+  float min_drive_speed_scalar, max_steer_error;
+  this->declare_parameter<float>("min_drive_speed_scalar", 0.2);
+  this->get_parameter("min_drive_speed_scalar", min_drive_speed_scalar);
+  this->declare_parameter<float>("max_steer_error", 30.0);
+  this->get_parameter("max_steer_error", max_steer_error);
+  
+  this->declare_parameter<int>("steer_error_filter_window_size", 10);
+  this->get_parameter("steer_error_filter_window_size", steer_error_filter_window_size_);
+  this->declare_parameter<int>("steer_full_scale", 2800.0);
+  this->get_parameter("steer_full_scale", steer_full_scale_);
+  this->declare_parameter<int>("steer_speed_filter_window_size", 10);
+  this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
+  this->declare_parameter<int>("cmd_msg_filter_window_size", 10);
+  this->get_parameter("cmd_msg_filter_window_size", cmd_msg_filter_window_size_);
+  // Lateral controller
   this->declare_parameter<double>("lateral_stanley_gain", 1.0);
   this->get_parameter("lateral_stanley_gain", lateral_stanley_gain_);
   this->declare_parameter<double>("lateral_stanley_softening_constant", 1.0);
   this->get_parameter("lateral_stanley_softening_constant", lateral_stanley_softening_constant_);
 
   // Initialize controllers
-  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_));
+  lon_controller_ = std::make_unique<LongitudinalController>(LongitudinalController(pid_params_, min_drive_speed_scalar, max_steer_error));
   lat_controller_ = std::make_unique<LateralController>(LateralController(lateral_stanley_gain_, lateral_stanley_softening_constant_));
 }
 
@@ -94,10 +113,14 @@ void WorksystemControlNode::timerCallback() {
 
     // Compute control command
     cmd_msg_.header.stamp = this->get_clock()->now();
-    cmd_msg_.wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_);
-    cmd_msg_.steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
-  // TODO compute cmd.tool_position once ToolController is available
+    float wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_error_);
+    float steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
+    cmd_msg_.wheel_velocity = updateMovingAverage(cmg_msg_steer_window_, wheel_velocity, cmd_msg_filter_window_size_);
+    cmd_msg_.steer_position = updateMovingAverage(cmg_msg_drive_window_, steer_position, cmd_msg_filter_window_size_);
 
+    // Compute tool command
+    // TODO eventually implement slip-based control
+    cmd_msg_.tool_position = current_trajectory_.tool_positions[traj_idx_];
   } else {
     // Publish zero state if the worksystem is not enabled
     cmd_msg_.header.stamp = this->get_clock()->now();
@@ -141,10 +164,47 @@ void WorksystemControlNode::globalRobotStateCallback(const nav_msgs::msg::Odomet
   global_robot_state_ = *msg;
 }
 
+void WorksystemControlNode::encoderTelemetryCallback(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg) {
+  // calculate time difference
+  delta_t_ = (msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9)-tlast_;
+  // get current steer position
+  float steer_pos_rear = static_cast<float>(msg->steer_pos_rear);
+  float steer_pos_front = static_cast<float>(msg->steer_pos_front);
+  // calculate 1-step speed
+  float speed_front = std::fabs((last_steer_pos_front_ - steer_pos_front)/static_cast<float>(delta_t_));
+  float speed_rear = std::fabs((last_steer_pos_rear_ - steer_pos_rear)/static_cast<float>(delta_t_));
+  // average front and rear 
+  float curr_steer_speed_ = (speed_rear + speed_front) /2;
+
+  // Update steer error
+  float average_curr_steer = 100 * (steer_pos_rear + steer_pos_front) / 2;
+  float curr_steer_error = average_curr_steer / (steer_full_scale_ + 1e-6f);
+  steer_error_ = updateMovingAverage(steer_error_window_, curr_steer_error, steer_error_filter_window_size_);
+
+  // Use moving average to smooth slip estimate
+  steer_speed_ = updateMovingAverage(steer_velocity_window_, curr_steer_speed_, steer_speed_filter_window_size_);
+
+  // update last steer position
+  last_steer_pos_front_ = steer_pos_front;
+  last_steer_pos_rear_ = steer_pos_rear;
+  tlast_ = msg->header.stamp.sec+msg->header.stamp.nanosec*1e-9;
+}
+
 void WorksystemControlNode::enableWorksystem(cg_msgs::srv::EnableWorksystem::Request::SharedPtr req, cg_msgs::srv::EnableWorksystem::Response::SharedPtr res)
 {
   worksystem_enabled_ = req->enable_worksystem; // Enable/disable worksystem using service request
   res->worksystem_enabled = worksystem_enabled_; // Set response confirmation
+}
+
+float WorksystemControlNode::updateMovingAverage(std::list<float> &list, const float &new_val, const size_t &window_size) {
+  // Build up the filter
+  list.push_front(new_val);
+  if (list.size() > window_size) {
+    list.pop_back(); // remove oldest value
+  }
+
+  // Update the filter
+  return std::accumulate(list.begin(), list.end(), 0.0) / list.size();
 }
 
 }  // namespace motion_control

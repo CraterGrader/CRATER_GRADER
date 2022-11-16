@@ -19,11 +19,17 @@ void ToolPlanner::generateToolTargets(
         // Forward is determined by transforming poses by the yaw value
         std::vector<float> tool_positions;
         for (float velocity_target: trajectory.velocity_targets) {
+            // std::cout << "Current velocity: " << velocity_target << std::endl; // DEBUG
 
-            // If pose as positive x component, it's going forward
-            if (velocity_target >= 0) {
-                tool_positions.push_back(design_blade_height_);
+            if (autograder_enabled_) {
+                // If pose has positive x component, it's going forward
+                if (velocity_target >= 0) {
+                    tool_positions.push_back(design_blade_height_);
+                } else {
+                    tool_positions.push_back(raised_blade_height_);
+                }
             } else {
+                // Don't lower blade if autograder is disabled
                 tool_positions.push_back(raised_blade_height_);
             }
         }

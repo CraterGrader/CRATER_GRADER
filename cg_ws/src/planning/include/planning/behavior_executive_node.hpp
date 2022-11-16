@@ -8,6 +8,7 @@
 #include <cg_msgs/srv/enable_worksystem.hpp> // Service to enable/disable worksystem controller
 #include <nav_msgs/msg/odometry.hpp> // Callback for pose
 #include <tf2/LinearMath/Matrix3x3.h> // For converting from nav_msgs quaternions to rpy
+#include <limits> // used for infinity values
 
 // Finite state machine and states
 #include <planning/fsm/fsm.hpp>
@@ -23,6 +24,7 @@
 #include <planning/fsm/goals_remaining.hpp>
 #include <planning/fsm/get_worksystem_trajectory.hpp>
 #include <planning/fsm/following_trajectory.hpp>
+#include <planning/fsm/end_mission.hpp>
 #include <planning/fsm/stopped.hpp>
 
 // Viz
@@ -30,6 +32,9 @@
 #include <geometry_msgs/msg/pose_stamped.hpp> // For visualizing the current trajectory and agent pose
 #include <geometry_msgs/msg/pose_array.hpp> // For visualizing the current goal poses
 #include <tf2/LinearMath/Quaternion.h> // For visualizing the current goal poses
+
+// Debug
+#include <std_msgs/msg/bool.hpp> // Stepping through planning debug
 
 namespace cg {
 namespace planning {
@@ -42,12 +47,16 @@ public:
 private: 
   /* Publishers and Subscribers */
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_path_pub_;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr viz_visited_trajectories_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_goals_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr viz_state_l1_goals_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_agent_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr viz_curr_goal_pub_;
 
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr global_robot_state_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_robot_state_sub_;
+
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr debug_trigger_sub_;
 
   /* Services */
   // Create callback groups for service call in timer: https://docs.ros.org/en/galactic/How-To-Guides/Using-callback-groups.html
@@ -60,7 +69,6 @@ private:
 
   rclcpp::CallbackGroup::SharedPtr viz_timer_cb_group_;
   rclcpp::TimerBase::SharedPtr viz_timer_; // For controlled looping viz updates
-  long int viz_timer_callback_ms_ = 500;
 
   rclcpp::Client<cg_msgs::srv::SiteMap>::SharedPtr site_map_client_;
   rclcpp::Client<cg_msgs::srv::UpdateTrajectory>::SharedPtr update_trajectory_client_;
@@ -70,11 +78,15 @@ private:
   bool enableWorksystemService(const bool enable_worksystem, bool verbose);
 
   int fsm_timer_callback_ms_;
-  long int service_response_timeout_sec_ = 2;
+  long int viz_timer_callback_ms_;
+  long int service_response_timeout_ms_;
+  bool sync_callback_groups_{true};
 
   /* Message data */
   nav_msgs::msg::Path viz_path_;
+  nav_msgs::msg::Path viz_visited_trajs_;
   geometry_msgs::msg::PoseArray viz_goals_;
+  geometry_msgs::msg::PoseArray viz_state_l1_goals_;
   geometry_msgs::msg::PoseStamped viz_agent_;
   geometry_msgs::msg::PoseStamped viz_curr_goal_;
 
@@ -88,59 +100,61 @@ private:
   void globalRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void odomRobotStateCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
+  void debugTriggerCallback(const std_msgs::msg::Bool::SharedPtr msg);
+
   /* Important Objects */
-  cg::planning::TransportPlanner transport_planner_;
-  cg::planning::ExplorationPlanner exploration_planner_;
-  cg::planning::KinematicPlanner kinematic_planner_;
-  cg::planning::ToolPlanner tool_planner_;
-  cg::planning::VelocityPlanner velocity_planner_;
+  std::unique_ptr<cg::planning::TransportPlanner> transport_planner_;
+  std::unique_ptr<cg::planning::ExplorationPlanner> exploration_planner_;
+  std::unique_ptr<cg::planning::KinematicPlanner> kinematic_planner_;
+  std::unique_ptr<cg::planning::ToolPlanner> tool_planner_;
+  std::unique_ptr<cg::planning::VelocityPlanner> velocity_planner_;
+  bool debug_trigger_{false};
+  cg_msgs::msg::Pose2D last_debug_pose_;
 
   /* Variables */
   cg::mapping::Map<float> current_height_map_;
+  float current_map_coverage_ratio_;
+  std::vector<int> current_seen_map_;
   cg_msgs::msg::Pose2D local_map_relative_to_global_frame_;
   cg_msgs::msg::Pose2D global_map_relative_to_local_frame_;
 
-  // TODO: these could be params?
-  double thresh_pos_;
-  double thresh_head_;
+  // Params
+  double thresh_pos_ = 0.0;
+  double thresh_head_ = 0.0;
+  float thresh_euclidean_replan_ = 0.0;
+  float map_coverage_threshold_ = 0.0;
+  bool exploration_enable_topography_weight_ = false;
+  float topography_weight_ = 1.0;
+
+  // DEBUG
+  bool traj_debug_ = false;
+  std::vector<cg_msgs::msg::Pose2D> traj_debug_goal_poses_;
+  cg_msgs::msg::Pose2D traj_debug_agent_;
 
   // TODO: encapsulate these variables into their respective states, e.g. with friend classes/functions (for service calls)
   bool map_updated_ = false;
   bool updated_trajectory_ = false;
   bool calculated_trajectory_ = false;
   bool worksystem_enabled_ = false;
-  size_t num_poses_before_; // DEBUG
-
-  // DEBUG: test maps
-  // std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0,
-  //                               0, 0, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<float> designTOPO_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  size_t num_poses_before_ = 0; // DEBUG
+  size_t num_cycles_since_last_trajectory_ = 0;
+  size_t num_cycles_before_new_trajectory_ = 1;
 
   cg::mapping::Map<float> design_height_map_;
-  float threshold_z_ = 0.03; // TODO: make this a config parameter
+  float topology_equality_threshold_ = 0.0;
+  float thresh_max_assignment_distance_ = 0.0;
+  int transport_plan_max_calls_ = INT_MAX;
+  double viz_planning_height_ = 0.0;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
-  cg_msgs::msg::Pose2D current_goal_pose_;
-  cg_msgs::msg::Pose2D current_agent_pose_; // TODO: make callback so this gets updated, assumed to be in local map frame!
+  std::vector<cg_msgs::msg::Pose2D> viz_state_l1_goal_poses_;
+  cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!
+  cg_msgs::msg::Pose2D current_agent_pose_; // Assumed to be in local map frame!
+  cg_msgs::msg::Pose2D global_robot_pose_; // Assumed to be in global map frame!
   bool enable_worksystem_ = false;
-  cg_msgs::msg::Trajectory current_trajectory_; 
-  // std::vector<std::vector<cg_msgs::msg::Pose2D>> current_trajectories_;
+  cg_msgs::msg::Trajectory current_trajectory_;
+  std::vector<std::vector<cg_msgs::msg::Pose2D>> viz_visited_trajectories_;
+
 
   // Create Finite State Machine
   cg::planning::FSM fsm_;
@@ -158,6 +172,7 @@ private:
   cg::planning::GoalsRemaining goals_remaining_;
   cg::planning::GetWorksystemTrajectory get_worksystem_trajectory_;
   cg::planning::FollowingTrajectory following_trajectory_;
+  cg::planning::EndMission end_mission_;
   cg::planning::Stopped stopped_;
 
 }; // class BehaviorExecutive

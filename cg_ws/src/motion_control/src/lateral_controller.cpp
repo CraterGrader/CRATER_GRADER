@@ -61,7 +61,7 @@ double LateralController::stanleyControlLaw(
     double steer_correct_angle = -1 * std::atan2(k_ * cross_track_err, 1); // Positive cross track error should result in a negative steering control because of z-up coordinate system
 
     std::cout << " +++++++++ heading_err: " << heading_err << ", cross_track_err: " << cross_track_err << ", velocity: " << velocity << ", steer_correct_angle: " << steer_correct_angle << std::endl;
-    return heading_err + steer_correct_angle; 
+    return (heading_gain_ * heading_err) + steer_correct_angle; 
     }
 double LateralController::scaleToSteerActuators(double desired_steer){
   // Calculated using % full scale of steering angle [%FS / (steer angle in radians)]

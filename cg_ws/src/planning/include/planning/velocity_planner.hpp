@@ -12,7 +12,6 @@ class VelocityPlanner {
 
 public:
   // Updates the trajectory.velocity_targets field in-place
-  VelocityPlanner() {}
   VelocityPlanner(double velocity_constant) :
     constant_velocity_(velocity_constant) {}
 
@@ -23,8 +22,7 @@ public:
 
 private:
 
-  double constant_velocity_ = 15; // TODO: 1) make param DEBUG
-  // double constant_velocity_ = 15*0.003795275591; // m/s TODO: 1) make param 
+  double constant_velocity_;
 
 };
 

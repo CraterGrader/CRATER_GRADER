@@ -9,7 +9,7 @@ namespace planning {
 class FSM {
 
 public:
-  enum class State {
+  enum class StateL0 {
     READY,
     UPDATE_MAP,
     SITE_WORK_DONE,
@@ -22,7 +22,13 @@ public:
     GOALS_REMAINING,
     GET_WORKSYSTEM_TRAJECTORY,
     FOLLOWING_TRAJECTORY,
+    END_MISSION,
     STOPPED
+  };
+
+  enum class StateL1 {
+    EXPLORATION,
+    TRANSPORT
   };
 
   enum class Signal {
@@ -36,25 +42,34 @@ public:
     DRIVE,
     FOLLOW_TRAJECTORY,
     GOAL_REACHED,
+    REPLAN
   };
 
   // Constructors()
   FSM(){};
-  FSM(State start_state, Signal start_signal);
+  FSM(StateL1 start_state_l1, StateL0 start_state_l0, Signal start_signal);
   
   // Destructor(), for resetting static variables
   ~FSM();
 
   // Getters()
-  State getCurrState() const { return curr_state_; }
+  StateL1 getCurrStateL1() const { return curr_state_l1_; }
+  StateL0 getCurrStateL0() const { return curr_state_l0_; }
   Signal getPreSignal() const { return pre_signal_; }
 
+  // Setters()
+  void setCurrStateL1(StateL1 curr_state_l1) { curr_state_l1_ = curr_state_l1; }
+  void setCurrStateL0(StateL0 curr_state_l0) { curr_state_l0_ = curr_state_l0; }
+  void setPreSignal(Signal pre_signal) { pre_signal_ = pre_signal; }
+
   // Helpers
-  std::string currStateToString();
+  std::string currStateL1ToString();
+  std::string currStateL0ToString();
   std::string preSignalToString();
 
 protected: // "Shared private" variables
-  static State curr_state_; // Current state that should run
+  static StateL1 curr_state_l1_; // Current StateL1 that FSM is in
+  static StateL0 curr_state_l0_; // Current state that should run
   static Signal pre_signal_; // Precursing signal that led to the current state
 
 private:
@@ -64,7 +79,8 @@ private:
    * - Used to initialize the static state and signal
    * - May need to update the init_default_test if these defaults change
    */
-  static State defaultStartState() { return State::READY; }
+  static StateL1 defaultStartStateL1() { return StateL1::EXPLORATION; }
+  static StateL0 defaultStartStateL0() { return StateL0::READY; }
   static Signal defaultStartSignal() { return Signal::START; }
   /******************************/
 

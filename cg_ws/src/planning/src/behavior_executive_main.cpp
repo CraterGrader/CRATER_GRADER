@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
 
   RCLCPP_INFO(client_node->get_logger(), "Starting client node, shut down with CTRL-C");
   executor.spin();
+  // while (rclcpp::ok()) {
+    // executor.spin_some();
+  // }
   RCLCPP_INFO(client_node->get_logger(), "Keyboard interrupt, shutting down.\n");
 
   rclcpp::shutdown();

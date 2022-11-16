@@ -21,6 +21,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/SiteMap.srv"
   "srv/UpdateTrajectory.srv"
   "srv/EnableWorksystem.srv"
+  "srv/SaveMap.srv"
   # Implementation-specific messages
   DEPENDENCIES builtin_interfaces std_msgs
 )

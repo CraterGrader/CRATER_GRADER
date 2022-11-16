@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <planning/transport_planner.hpp>
+#include <limits> // for infinity
 
 TEST(TransportPlannerTest, vector_map)
 {
@@ -31,10 +32,12 @@ TEST(TransportPlannerTest, vector_map)
   cg::mapping::Map<float> current_height_map(map_height_cells, map_width_cells, resolution, heightMapStandIn);
   cg::mapping::Map<float> design_height_map(map_height_cells, map_width_cells, resolution, designTOPO);
   float threshold_z = 0.001; // symmetric height offset from design topo to make nodes for
+  float thresh_max_assignment_distance = std::numeric_limits<float>::infinity(); // something large so that all assignments are used
 
   // Solve transport problem
   cg::planning::TransportPlanner transport_planner;
-  float objective_value = transport_planner.planTransport(current_height_map, design_height_map, threshold_z);
+  std::vector<int> seen_map(map_height_cells * map_width_cells, 1);
+  float objective_value = transport_planner.planTransport(current_height_map, design_height_map, seen_map, threshold_z, thresh_max_assignment_distance);
   std::vector<cg::planning::TransportAssignment> transport_assignments = transport_planner.getTransportAssignments();
   
   // Check number of transport assignments

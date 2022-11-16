@@ -6,128 +6,127 @@ namespace cg_visualization
 {
   MarkerVizNode::MarkerVizNode() : Node("marker_viz_node") {
 
-    craters_pub_ = this->create_publisher<visualization_msgs::msg::MarkerArray>(
-        "/visualization_marker_array", 1);
-    arrow_pub_ = this->create_publisher<visualization_msgs::msg::Marker>(
-        "/visualization_marker", 1);
-    act_state_sub_ = this->create_subscription<cg_msgs::msg::ActuatorState>(
-        "/actuator/state", 1, std::bind(&MarkerVizNode::actStateCallback, this, std::placeholders::_1));
-
-    // Timer callback
-    timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(100),
-        std::bind(&MarkerVizNode::timerCallback, this));
+    tool_pose_pub_ = this->create_publisher<visualization_msgs::msg::Marker>(
+        "/viz/planning/tool_pose", 1);
+    enc_tele_sub_ = this->create_subscription<cg_msgs::msg::EncoderTelemetry>(
+        "/encoder_telemetry", 1, std::bind(&MarkerVizNode::updateToolViz, this, std::placeholders::_1));
 
     RCLCPP_INFO(this->get_logger(), "In constructor");
 
-    // Arrow parameters
-    this->declare_parameter<float>("arrow_scale_x", 0.5);
-    this->get_parameter("arrow_scale_x", arrow_scale_x_);
-    this->declare_parameter<float>("arrow_scale_y", 0.05);
-    this->get_parameter("arrow_scale_y", arrow_scale_y_);
-    this->declare_parameter<float>("arrow_scale_z", 0.05);
-    this->get_parameter("arrow_scale_z", arrow_scale_z_);
-    this->declare_parameter<float>("arrow_r", 1.0);
-    this->get_parameter("arrow_r", arrow_r_);
-    this->declare_parameter<float>("arrow_g", 0.0);
-    this->get_parameter("arrow_g", arrow_g_);
-    this->declare_parameter<float>("arrow_b", 1.0);
-    this->get_parameter("arrow_b", arrow_b_);
-
-    // Crater parameters
-    this->declare_parameter<float>("crater1x", 0.0);
-    this->get_parameter("crater1x", crater1x_);
-    this->declare_parameter<float>("crater1y", 0.0);
-    this->get_parameter("crater1y", crater1y_);
-    this->declare_parameter<int>("crater1id", 0);
-    this->get_parameter("crater1id", crater1id_);
-    this->declare_parameter<float>("crater2x", 0.0);
-    this->get_parameter("crater2x", crater2x_);
-    this->declare_parameter<float>("crater2y", 0.0);
-    this->get_parameter("crater2y", crater2y_);
-    this->declare_parameter<int>("crater2id", 1);
-    this->get_parameter("crater2id", crater2id_);
-
-    this->declare_parameter<float>("crater_scale_x", 0.1);
-    this->get_parameter("crater_scale_x", crater_scale_x_);
-    this->declare_parameter<float>("crater_scale_y", 0.1);
-    this->get_parameter("crater_scale_y", crater_scale_y_);
-    this->declare_parameter<float>("crater_scale_z", 0.2);
-    this->get_parameter("crater_scale_z", crater_scale_z_);
-    this->declare_parameter<float>("crater_r", 0.0);
-    this->get_parameter("crater_r", crater_r_);
-    this->declare_parameter<float>("crater_g", 1.0);
-    this->get_parameter("crater_g", crater_g_);
-    this->declare_parameter<float>("crater_b", 0.0);
-    this->get_parameter("crater_b", crater_b_);
-
-    makeCrater(crater1_, crater1id_, crater1x_, crater1y_);
-    craters_msg_.markers.push_back(crater1_);
-
-    // makeCrater(crater2_, crater2id_, crater2x_, crater2y_);
-    // craters_msg_.markers.push_back(crater2_);
+    toolPoseVizInit();
   }
 
-  void MarkerVizNode::makeCrater(visualization_msgs::msg::Marker &crater, int id, float craterx, float cratery)
+  void MarkerVizNode::updateToolViz(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   {
-    crater.header.frame_id = "map";
-    crater.header.stamp = this->get_clock()->now();
-    crater.ns = "craters";
-    crater.id = id;
-    crater.type = visualization_msgs::msg::Marker::CYLINDER;
-    crater.action = visualization_msgs::msg::Marker::ADD;
-    crater.pose.position.x = craterx;
-    crater.pose.position.y = cratery;
-    crater.pose.position.z = 0;
-    crater.pose.orientation.x = 0.0;
-    crater.pose.orientation.y = 0.0;
-    crater.pose.orientation.z = 0.0;
-    crater.pose.orientation.w = 1.0;
-    crater.scale.x = crater_scale_x_;
-    crater.scale.y = crater_scale_y_;
-    crater.scale.z = crater_scale_z_;
-    crater.color.a = 1.0; // Alpha controls transparency
-    crater.color.r = crater_r_;
-    crater.color.g = crater_g_;
-    crater.color.b = crater_b_;
+    float tool_pose = static_cast<float>(msg->tool_pos)/129;
+
+    // Update length and position of tool
+    tool1.pose.position.y = 2.5 - 0.5 * tool_pose/80.0;
+    tool1.scale.y = tool_pose/80.0;
+    tool2.pose.position.y = tool1.pose.position.y - tool1.scale.y/2;
+    tool_pose_pub_->publish(tool1);
+    tool_pose_pub_->publish(tool2);
   }
 
-  void MarkerVizNode::timerCallback()
+  void MarkerVizNode::toolPoseVizInit()
   {
+    // RCLCPP_INFO(this->get_logger(), "Starting Tool Pose Viz");
+    // Text Description
+    viz_text.header.frame_id = "map";
+    viz_text.header.stamp = this->get_clock()->now();
+    viz_text.ns = "viz_text";
+    viz_text.id = 0;
+    viz_text.type = visualization_msgs::msg::Marker::TEXT_VIEW_FACING;
+    viz_text.action = visualization_msgs::msg::Marker::ADD;
+    viz_text.pose.position.x = -2;
+    viz_text.pose.position.y = 3.5;
+    viz_text.pose.position.z = 0;
+    viz_text.pose.orientation.x = 0.0;
+    viz_text.pose.orientation.y = 0.0;
+    viz_text.pose.orientation.z = 0.0;
+    viz_text.pose.orientation.w = 1.0;
+    viz_text.scale.x = 0.1;
+    viz_text.scale.y = 0.1;
+    viz_text.scale.z = 0.4;
+    viz_text.color.a = 1.0;
+    viz_text.color.r = 0.0;
+    viz_text.color.g = 0.0;
+    viz_text.color.b = 0.0;
+    viz_text.text = "Tool Position";
+    // Vehicle Body
+    body.header.frame_id = "map";
+    body.header.stamp = this->get_clock()->now();
+    body.ns = "body";
+    body.id = 1;
+    body.type = visualization_msgs::msg::Marker::CUBE;
+    body.action = visualization_msgs::msg::Marker::ADD;
+    body.pose.position.x = -2.0;
+    body.pose.position.y = 3.0;
+    body.pose.position.z = 0.0;
+    body.pose.orientation = viz_text.pose.orientation;
+    body.scale.x = 3;
+    body.scale.y = 1;
+    body.scale.z = 0.1;
+    body.color.a = 1.0;
+    body.color.r = 0.6;
+    body.color.g = 0.6;
+    body.color.b = 0.6;
+    // Ground (Sand)
+    ground.header.frame_id = "map";
+    ground.header.stamp = this->get_clock()->now();
+    ground.ns = "ground";
+    ground.id = 2;
+    ground.type = visualization_msgs::msg::Marker::CUBE;
+    ground.action = visualization_msgs::msg::Marker::ADD;
+    ground.pose.position.x = -2.0;
+    ground.pose.position.y = 0.75;
+    ground.pose.position.z = 0;
+    ground.pose.orientation = viz_text.pose.orientation;
+    ground.scale.x = 3.0;
+    ground.scale.y = 1.5;
+    ground.scale.z = 0.1;
+    ground.color.a = 1.0;
+    ground.color.r = 0.961;
+    ground.color.g = 0.961;
+    ground.color.b = 0.863;
+    // Tool Blocks
+    tool1.header.frame_id = "map";
+    tool1.header.stamp = this->get_clock()->now();
+    tool1.ns = "tool1";
+    tool1.id = 3;
+    tool1.type = visualization_msgs::msg::Marker::CUBE;
+    tool1.action = visualization_msgs::msg::Marker::ADD;
+    tool1.pose.position.x = -2;
+    tool1.pose.position.y = 2.0;
+    tool1.pose.position.z = 0.1;
+    tool1.pose.orientation = viz_text.pose.orientation;
+    tool1.scale.x = 0.2;
+    tool1.scale.y = 1.0;
+    tool1.scale.z = 0.1;
+    tool1.color.a = 1.0;
+    tool1.color.r = 1.0;
+    tool1.color.g = 0.0;
+    tool1.color.b = 0.0;
+    tool2.header.frame_id = "map";
+    tool2.header.stamp = this->get_clock()->now();
+    tool2.ns = "tool2";
+    tool2.id = 4;
+    tool2.type = visualization_msgs::msg::Marker::CUBE;
+    tool2.action = visualization_msgs::msg::Marker::ADD;
+    tool2.pose.position.x = -2.2;
+    tool2.pose.position.y = 1.5;
+    tool2.pose.position.z = 0.1;
+    tool2.pose.orientation = viz_text.pose.orientation;
+    tool2.scale.x = 0.2;
+    tool2.scale.y = 0.5;
+    tool2.scale.z = 0.1;
+    tool2.color = tool1.color;
 
-    // Publish both craters and the steering angle
-    craters_pub_->publish(craters_msg_);
-    arrow_pub_->publish(steer_angle_arrow_);
-  }
-
-  void MarkerVizNode::actStateCallback(const cg_msgs::msg::ActuatorState::SharedPtr msg)
-  {
-    // Create arrow
-    steer_angle_arrow_.header.frame_id = "base_link";
-    steer_angle_arrow_.header.stamp = this->get_clock()->now();
-    steer_angle_arrow_.ns = "kinematics";
-    steer_angle_arrow_.id = 0;
-    steer_angle_arrow_.type = visualization_msgs::msg::Marker::ARROW;
-    steer_angle_arrow_.action = visualization_msgs::msg::Marker::ADD;
-    steer_angle_arrow_.pose.position.x = 0.2;
-    steer_angle_arrow_.pose.position.y = 0;
-    steer_angle_arrow_.pose.position.z = 0;
-
-    // rpy
-    tf2::Quaternion q;
-    q.setRPY(0, 0, -msg->steer_position); // Not sure why the steer angle needs to be negative
-    steer_angle_arrow_.pose.orientation.x = q.x();
-    steer_angle_arrow_.pose.orientation.y = q.y();
-    steer_angle_arrow_.pose.orientation.z = q.z();
-    steer_angle_arrow_.pose.orientation.w = q.w();
-
-    steer_angle_arrow_.scale.x = arrow_scale_x_;
-    steer_angle_arrow_.scale.y = arrow_scale_y_;
-    steer_angle_arrow_.scale.z = arrow_scale_z_;
-    steer_angle_arrow_.color.a = 1.0; // Don't forget to set the alpha!
-    steer_angle_arrow_.color.r = arrow_r_;
-    steer_angle_arrow_.color.g = arrow_g_;
-    steer_angle_arrow_.color.b = arrow_b_;
+    tool_pose_pub_->publish(viz_text);
+    tool_pose_pub_->publish(body);
+    tool_pose_pub_->publish(ground);
+    tool_pose_pub_->publish(tool1);
+    tool_pose_pub_->publish(tool2);
   }
 
 } // namespace cg_visualization

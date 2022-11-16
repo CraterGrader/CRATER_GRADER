@@ -15,6 +15,51 @@ size_t TransportPlanner::ij_to_index(size_t i, size_t j, size_t width) const {
     return (j + (i * width));
 }
 
+void TransportPlanner::makeGoalsFromAssignment(const std::vector<TransportAssignment> &transport_assignments, const size_t assignment_idx, std::vector<cg_msgs::msg::Pose2D> &goalPoses)
+{
+
+  // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
+  double yaw = static_cast<double>(atan2((transport_assignments[assignment_idx].sink_node.y - transport_assignments[assignment_idx].source_node.y), (transport_assignments[assignment_idx].sink_node.x - transport_assignments[assignment_idx].source_node.x)));
+
+  // convert src, sink nodes to poses
+  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].source_node.x, transport_assignments[assignment_idx].source_node.y, yaw);
+  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].sink_node.x, transport_assignments[assignment_idx].sink_node.y, yaw);
+
+  // Set up last offset pose
+  double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
+  double offset_pose_y = source_pose.pt.y - last_pose_offset_ * std::sin(yaw);
+
+  double last_pose_offset_constrained = last_pose_offset_;
+
+  if (offset_pose_x > boundary_max_ ||
+      offset_pose_x < boundary_min_ || 
+      offset_pose_y > boundary_max_ || 
+      offset_pose_y < boundary_min_) {
+
+    while (offset_pose_x > boundary_max_ ||
+           offset_pose_x < boundary_min_ || 
+           offset_pose_y > boundary_max_ || 
+           offset_pose_y < boundary_min_){
+
+      last_pose_offset_constrained -= boundary_increment_;
+      if (last_pose_offset_constrained <= 0.0f){
+        offset_pose_x = source_pose.pt.x;
+        offset_pose_y = source_pose.pt.y;
+      	break;
+      }
+      offset_pose_x = source_pose.pt.x - last_pose_offset_constrained * std::cos(yaw);
+      offset_pose_y = source_pose.pt.y - last_pose_offset_constrained * std::sin(yaw);
+    }
+  }
+
+  cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
+
+  // Push back the goal poses
+  goalPoses.push_back(source_pose);
+  goalPoses.push_back(sink_pose);
+  goalPoses.push_back(offset_pose);
+}
+
 /**
  * @brief Select a target pose to navigate in order to accomplish transport plan
  * 
@@ -23,7 +68,15 @@ size_t TransportPlanner::ij_to_index(size_t i, size_t j, size_t width) const {
  * @return cg_msgs::msg::Pose2D The pose to navigate to 
  */
 std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::msg::Pose2D &agent_pose, const cg::mapping::Map<float> &map){
-  (void)map; // map remains unused, legacy of interface 
+  (void)map; // map remains unused, legacy of interface
+
+  std::vector<cg_msgs::msg::Pose2D> goalPoses;
+  
+  // Return empty poses if there are no assigments
+  if ((transport_assignments_.size() == 0) || (std::count(unvisited_assignments_.begin(), unvisited_assignments_.end(), true) == 0)) {
+    return goalPoses;
+  }
+
   // define a minimum distance starting with the max value of float
   float min_dist = std::numeric_limits<float>::max();
   // index of minimium distance of transport_assignmnets
@@ -45,15 +98,23 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
   }
   // update unvisited_assignments with false for arg_min
   unvisited_assignments_.at(arg_min) = false;
-  // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
-  double yaw = static_cast<double>(atan2((transport_assignments_.at(arg_min).sink_node.y-transport_assignments_.at(arg_min).source_node.y),(transport_assignments_.at(arg_min).sink_node.x-transport_assignments_.at(arg_min).source_node.x)));
-  // convert src, sink nodes to poses
-  cg_msgs::msg::Pose2D source_pose_1 = cg::planning::create_pose2d(transport_assignments_.at(arg_min).source_node.x, transport_assignments_.at(arg_min).source_node.y, yaw);
-  cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments_.at(arg_min).sink_node.x, transport_assignments_.at(arg_min).sink_node.y, yaw);
-  // TODO: experiment with changing this pose to visualize movement done during push
-  cg_msgs::msg::Pose2D source_pose_2 = source_pose_1;
-  std::vector<cg_msgs::msg::Pose2D> goalPoses{source_pose_1,sink_pose,source_pose_2};
+
+  // Get goal poses
+  makeGoalsFromAssignment(transport_assignments_, arg_min, goalPoses);
+
   return goalPoses;
+}
+
+std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getUnvisitedGoalPoses() {
+  std::vector<cg_msgs::msg::Pose2D> unvisitedGoalPoses;
+  // Loop through all assignments
+  for (size_t i = 0; i < transport_assignments_.size(); ++i){
+    // If unvisited, push back the set of goal poses
+    if (unvisited_assignments_[i]) {
+      makeGoalsFromAssignment(transport_assignments_, i, unvisitedGoalPoses);
+    }
+  }
+  return unvisitedGoalPoses;
 }
 
 /**
@@ -65,9 +126,8 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
  * @param vol_sink Zero float value to be updated with sink volume
  * @param current_height_map The current height map that should be modified by the robot
  * @param design_height_map The desired final height map
- * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  */
-void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z)
+void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std::vector<TransportNode> &sink_nodes, float &vol_source, float &vol_sink, const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map)
 {
 
   // Loop through height map and assign points to either source or sink
@@ -79,8 +139,11 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
     float cell_height = current_height_map.getDataAtIdx(i);
     TransportNode node;
 
+    // Skip cell if not seen
+    if (seen_map[i] == 0) continue;
+
     // Positive height becomes a source; positive volume in +z
-    if (cell_height > (design_height_map.getDataAtIdx(i) + threshold_z))
+    if (cell_height > (design_height_map.getDataAtIdx(i) + source_threshold_z_))
     {
       node.x = pt.x;
       node.y = pt.y;
@@ -90,7 +153,7 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
       source_nodes.push_back(node);
     }
     // Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
-    else if (cell_height < (design_height_map.getDataAtIdx(i) - threshold_z))
+    else if (cell_height < (design_height_map.getDataAtIdx(i) - sink_threshold_z_))
     {
       node.x = pt.x;
       node.y = pt.y;
@@ -142,7 +205,7 @@ void TransportPlanner::calculate_distances(std::vector<float> &distances_between
  * @return float Optimization objective value
  */
 using namespace operations_research;
-float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssignment> &new_transport_assignments, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes, const std::vector<float> &distances_between_nodes, const float vol_source, const float vol_sink, bool verbose = false)
+float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssignment> &new_transport_assignments, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes, const std::vector<float> &distances_between_nodes, const float vol_source, const float vol_sink, const float thresh_max_assignment_distance, bool verbose = false)
 {
   // Declare the solver.
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -258,14 +321,19 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
     {
       size_t index = ij_to_index(i, j, m_policy);
       float transport_volume = transport_plan.at(index)->solution_value();
-      // All non-zero transports should be added as assignments
-      if (transport_volume > 0)
+      // All non-zero transports that are close enough should be added as assignments
+      cg_msgs::msg::Point2D source_pt = create_point2d(source_nodes[i].x, source_nodes[i].y);
+      cg_msgs::msg::Point2D sink_pt = create_point2d(sink_nodes[j].x, sink_nodes[j].y);
+      if ((transport_volume > 0) && (cg::planning::euclidean_distance(source_pt, sink_pt) <= thresh_max_assignment_distance))
       {
         TransportAssignment new_assignment = {.source_node = source_nodes[i], .sink_node = sink_nodes[j], .transport_volume = transport_volume};
         new_transport_assignments.push_back(new_assignment);
       }
     }
   }
+  
+  // Filter assignments to final set for planner to use
+  filterAssignments(new_transport_assignments);
 
   // update unvisited assignments, set all to true
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -288,6 +356,47 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
   return objective->Value();
 }
 
+void TransportPlanner::filterAssignments(std::vector<TransportAssignment> &new_transport_assignments) {
+
+  std::vector<TransportAssignment> filtered_transport_assignments;
+
+  // Initialize boolean mask to false
+  std::vector<bool> keep_assignment(new_transport_assignments.size(), false);
+
+  for (size_t i=0; i < new_transport_assignments.size(); ++i) {
+
+    // bool keep_assignment = true;
+    std::vector<cg_msgs::msg::Pose2D> assignment_goal_poses;
+    makeGoalsFromAssignment(new_transport_assignments, i, assignment_goal_poses);
+    cg_msgs::msg::Pose2D assignment_source_pose = assignment_goal_poses[0];
+    bool no_similar_poses = true;
+    for (size_t j=0; j < i; ++j) {
+      
+      std::vector<cg_msgs::msg::Pose2D> check_assignment_goal_poses;
+      makeGoalsFromAssignment(new_transport_assignments, j, check_assignment_goal_poses);
+      cg_msgs::msg::Pose2D check_assignment_source_pose = check_assignment_goal_poses[0];
+
+      // Skip transport that is too close
+      if (cg::planning::samePoseWithinThresh(assignment_source_pose, check_assignment_source_pose, thresh_filter_assignment_pos_, thresh_filter_assignment_head_) && keep_assignment[j]) {
+        no_similar_poses = false;
+        break;
+      }
+    }
+
+    if (no_similar_poses) {
+      keep_assignment[i] = true;
+    }
+
+  }
+
+  // Keep assignments
+  for (size_t i = 0; i < new_transport_assignments.size(); ++i) {
+    if (keep_assignment[i]) {
+      filtered_transport_assignments.push_back(new_transport_assignments[i]);
+    }
+  }
+  new_transport_assignments = filtered_transport_assignments;
+}
 
 /**
  * @brief Primary method to plan optimal transport of volume from source nodes to sink nodes
@@ -298,10 +407,9 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
  * 
  * @param current_height_map The current height map that should be modified by the robot
  * @param design_height_map The desired final height map
- * @param threshold_z Symmetric band threshold for how different a current height needs to be from design height to create a source or sink node
  * @return float The optimization objective value
  */
-float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const float threshold_z)
+float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_height_map, const cg::mapping::Map<float> &design_height_map, const std::vector<int> &seen_map, const float thresh_max_assignment_distance)
 {
   // ---------------------------------------------------
   // Initialize nodes and volume sums
@@ -309,7 +417,7 @@ float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_hei
   std::vector<TransportNode> sink_nodes;
   float vol_source = 0.0f;
   float vol_sink = 0.0f;
-  init_nodes(source_nodes, sink_nodes, vol_source, vol_sink, current_height_map, design_height_map, threshold_z);
+  init_nodes(source_nodes, sink_nodes, vol_source, vol_sink, current_height_map, design_height_map, seen_map);
 
   // ---------------------------------------------------
   // Calculate distances between nodes
@@ -319,7 +427,7 @@ float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_hei
   // ---------------------------------------------------
   // Solve the transport optimization problem
   std::vector<TransportAssignment> new_transport_assignments;
-  float objective_value = solveForTransportAssignments(new_transport_assignments, source_nodes, sink_nodes, distances_between_nodes, vol_source, vol_sink);
+  float objective_value = solveForTransportAssignments(new_transport_assignments, source_nodes, sink_nodes, distances_between_nodes, vol_source, vol_sink, thresh_max_assignment_distance);
 
   // Update current transport assignments
   transport_assignments_ = new_transport_assignments;

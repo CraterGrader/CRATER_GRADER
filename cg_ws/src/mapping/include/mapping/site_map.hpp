@@ -5,6 +5,7 @@
 #include <math.h>
 #include <assert.h>
 #include <numeric>
+#include <iostream>
 #include <cg_msgs/msg/site_map.hpp>
 #include "mapping/map_util.hpp"
 #include "mapping/index_point.hpp"
@@ -35,10 +36,15 @@ class SiteMap {
   void updateCellsBayes(); // method to update cells based on modified points
   void updateMapCoverage(); // method to check if map is all seen or not
   std::vector<cg::mapping::indexPoint> postProcess(std::vector<cg::mapping::indexPoint> ptsCheck); // method to do outlier rejection on pts
+  void normalizeHeightMap();
 
   // conversion methods
   cg_msgs::msg::SiteMap toMsg() const;
   void setHeightMapFromMsg(const cg_msgs::msg::SiteMap& msg);
+
+  // setters
+  bool setHeightMap(std::vector<float> input_data);
+  bool setSeenMap(std::vector<int> input_data);
 
   // getter funcitons 
   size_t getNcells() const {return height_*width_;}
@@ -48,10 +54,13 @@ class SiteMap {
   float getXTransform() const {return xTransform_;}
   float getYTransform() const {return yTransform_;}
   bool getSiteMapFullStatus() const {return siteMapFull_;}
+  float getSiteMapCoverage() const {return siteMapCoverageRatio_;}
   std::vector<CellBuffer> getBufferMap() const {return bufferMap_;}
   std::vector<float> getHeightMap() const {return heightMap_;}
+  std::vector<int> getSeenMap() const {return seenPointsMap_;}
+  std::vector<float> getVarianceMapFloats();
 
-  private:
+private:
   // map views
   std::vector<float> heightMap_;       // "view 1"
   std::vector<CellBuffer> bufferMap_;  // "view 2" 
@@ -59,7 +68,10 @@ class SiteMap {
   std::vector<int> seenPointsMap_; // "view 4" 
 
   // variables
-  bool siteMapFull_ = false; 
+  bool siteMapFull_ = false;
+  float siteMapCoverageRatio_ = 0.0f;
+  float plane_offset_ = 0.0f;
+  float plane_delta_ = 0.0f;
 
   // attributes
   size_t height_ = 1; // the vertical number of cells in the map 

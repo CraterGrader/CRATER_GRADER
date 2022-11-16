@@ -3,55 +3,72 @@
 namespace cg {
 namespace planning {
 
-    void KinematicPlanner::generatePath(
-        std::vector<cg_msgs::msg::Pose2D> &path,
-        const cg_msgs::msg::Pose2D &agent_pose,
-        const cg_msgs::msg::Pose2D &goal_pose,
-        const cg::mapping::Map<float> &map) {
-            // Instantiate lattice
-            std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice();
+void KinematicPlanner::generatePath(
+    std::vector<cg_msgs::msg::Pose2D> &path,
+    const cg_msgs::msg::Pose2D &agent_pose,
+    const cg_msgs::msg::Pose2D &goal_pose,
+    const cg::mapping::Map<float> &map) {
+        // Run A* search
+        path = KinematicPlanner::latticeAStarSearch(agent_pose, goal_pose, map);
 
-            // Run astar search
-            path = KinematicPlanner::latticeAStarSearch(agent_pose, goal_pose, map, base_lattice);
+        // Note: Path validity is already checked at every step of A* Search, do we need to check again here?
+        return;
+    }
 
-            // Note: Path validity is already checked at every step of A* Search, do we need to check again here?
-            return;
-        }
+std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
+    const cg_msgs::msg::Pose2D &agent_pose,
+    const cg_msgs::msg::Pose2D &goal_pose,
+    const cg::mapping::Map<float> &map) {
 
-    std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
-        const cg_msgs::msg::Pose2D &agent_pose,
-        const cg_msgs::msg::Pose2D &goal_pose,
-        const cg::mapping::Map<float> &map,
-        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice) const {
+    // List of final trajectories composed from lattice primitives
+    std::vector<cg_msgs::msg::Pose2D> final_path;
+
+    assert (goal_pose_distance_threshold_.size() == trajectory_heuristic_epsilon_.size());
+
+    visited_trajectories_.clear();
+    std::vector<AStarNode> visited_nodes;
+
+    // Lower cost has higher priority (i.e. earlier in queue) - Min Heap
+    // Will compare first value (cost) when calling pop()
+    std::priority_queue<
+        std::pair<float, AStarNode>, 
+        std::vector<std::pair<float, AStarNode>>, 
+        std::greater<std::pair<float, AStarNode>>> pq_nodes;
+    
+    // Initialize with first trajectory and node
+    std::vector<cg_msgs::msg::Pose2D> start_trajectory = {agent_pose};
+    AStarNode start_node = {0.0, -1, -1, agent_pose, start_trajectory};
+
+    // Initialze equality scalar for kinematic planner backup
+    bool found_plan = false;
+    int num_iter;
+    for (int run_iter = 0; run_iter < goal_pose_distance_threshold_.size(); ++run_iter) {
+
+        if (found_plan) break;
         
-        // TODO: Maybe stopping the planner if exceeding # iterations of lattice planning?
-        
-        // Ensure start is on the map
-        // assert(map.pose_on_map(agent_pose)); TODO ADD
+        std::vector<std::vector<cg_msgs::msg::Pose2D>> base_lattice = KinematicPlanner::generateBaseLattice(max_trajectory_length_);
+        std::cout << " ========== LATTICE GENERATED: " << std::endl;
+        std::cout << " Goal threshold: " << goal_pose_distance_threshold_[run_iter] << std::endl;
+        std::cout << " Heuristic Epsilon: " << trajectory_heuristic_epsilon_[run_iter] << std::endl;
 
-        // List of final trajectories composed from lattice primitives
-        std::vector<cg_msgs::msg::Pose2D> final_path;
-        
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> visited_trajectories;
-        std::vector<AStarNode> visited_nodes;
-
-        // Lower cost has higher priority (i.e. earlier in queue) - Min Heap
-        // Will compare first value (cost) when calling pop()
-        std::priority_queue<
+        final_path.clear();
+        visited_trajectories_.clear();
+        visited_nodes.clear();
+        pq_nodes = std::priority_queue<
             std::pair<float, AStarNode>, 
             std::vector<std::pair<float, AStarNode>>, 
-            std::greater<std::pair<float, AStarNode>>> pq_nodes;
-        
-        // Initialize with first trajectory and node
-        std::vector<cg_msgs::msg::Pose2D> start_trajectory = {agent_pose};
-        AStarNode start_node = {0.0, 0, 0, agent_pose, start_trajectory};
+            std::greater<std::pair<float, AStarNode>>>();
         pq_nodes.push(std::make_pair(0.0, start_node));
 
-        int num_iter = 0;
+        num_iter = 0;
         while (!pq_nodes.empty()) {
             num_iter++;
             if (num_iter % 100 == 0) {
-                std::cout << "# Latter Planner Iterations: " << num_iter << std::endl;
+                std::cout << "# Lattice Planner Iterations: " << num_iter << std::endl;
+            }
+
+            if (num_iter % pose_equality_scalar_iteration_ == 0) {
+                break;
             }
 
             // Obtain node with the lowest f-cost and remove from queue
@@ -60,38 +77,47 @@ namespace planning {
 
             // Check if current node can can complete trajectory
             auto [closest_traj_pose, closest_traj_idx] = KinematicPlanner::getClosestTrajectoryPoseToGoal(curr_node.trajectory, goal_pose);
-            if (KinematicPlanner::samePoseWithinThresh(closest_traj_pose, goal_pose)) {
+            if (cg::planning::samePoseWithinThresh(
+                closest_traj_pose, goal_pose,
+                goal_pose_distance_threshold_[run_iter], 
+                goal_pose_yaw_threshold_)) {
                 int curr_idx = curr_node.idx;
 
-                // Add final trajectory to 
-                if (visited_trajectories.empty()) {
-                    visited_trajectories.push_back(curr_node.trajectory);
-                    visited_nodes.push_back(curr_node);
-                }
-
+                std::cout << " ---------- final kinematic traj cost: " << curr_node.g_cost << std::endl;
+                
                 // Reverse last segment
-                std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
+                std::vector<cg_msgs::msg::Pose2D> traj_copy = curr_node.trajectory;
                 std::reverse(traj_copy.begin(), traj_copy.end());
                 final_path.insert(final_path.end(), 
-                                  traj_copy.begin() + (traj_copy.size() - 1 - closest_traj_idx), 
-                                  traj_copy.end());
+                                    traj_copy.begin() + (traj_copy.size() - 1 - closest_traj_idx), 
+                                    traj_copy.end());
                 
                 // Add trajectory segment in reverse order
-                curr_idx = visited_nodes[curr_idx].parent_idx;
-                while (curr_idx != 0) {
+                curr_idx = curr_node.parent_idx;
+                while (curr_idx != -1) {
                     
                     // Reverse current trajectory segment to push it on backwards
-                    std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_trajectories[curr_idx];
+                    std::vector<cg_msgs::msg::Pose2D> traj_copy = visited_nodes[curr_idx].trajectory;
                     std::reverse(traj_copy.begin(), traj_copy.end());
                     final_path.insert(final_path.end(), traj_copy.begin(), traj_copy.end());
 
                     curr_idx = visited_nodes[curr_idx].parent_idx;
                 }
 
+                // Insert initial agent pose
+                final_path.push_back(agent_pose);
+
                 // Since we have been pushing onto final_path backwards, reverse it
                 std::reverse(final_path.begin(), final_path.end());
-                
+                // -----------------------------------
+                // DEBUG
+                // for (cg_msgs::msg::Pose2D pose : final_path) {
+                //     std::cout << "final path pose <x,y,yaw> : < " << pose.pt.x << ", " << pose.pt.y << ", " << pose.yaw << std::endl;
+                // }
+                // -----------------------------------
+
                 // Break since found end point
+                found_plan = true;
                 break;
             }
 
@@ -108,7 +134,7 @@ namespace planning {
             }
 
             // Calculate trajectory heuristic h(s') for valid trajectories
-            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose);
+            std::vector<float> trajectories_heuristic = KinematicPlanner::trajectoriesHeuristic(valid_trajectories, goal_pose, trajectory_heuristic_epsilon_[run_iter]);
                 
             // Get trajectory costs c(s,s') for valid trajectories
             std::vector<float> trajectories_costs;
@@ -127,7 +153,8 @@ namespace planning {
                 // Skip if nose pose is close to another node that has been visited
                 bool skip_new_node = false;
                 for (auto visited_node : visited_nodes) {
-                    if (KinematicPlanner::samePoseWithinThresh(end_of_cur_traj_pose, visited_node.pose)) {
+                    if (cg::planning::samePoseWithinThresh(end_of_cur_traj_pose, visited_node.pose,
+                        pose_position_equality_threshold_, pose_yaw_equality_threshold_))  {
                         skip_new_node = true;
                         break;
                     }
@@ -139,211 +166,203 @@ namespace planning {
 
                 // Create new child node
                 AStarNode succ_node = {succ_g_cost, 
-                                       static_cast<int>(visited_trajectories.size()), // Current pose idx
-                                       curr_node.idx, // Parent pose idx
-                                       end_of_cur_traj_pose, // Current Pose
-                                       valid_trajectories[traj_idx]}; //
-                visited_trajectories.push_back(valid_trajectories[traj_idx]);
+                                        static_cast<int>(visited_nodes.size()), // Current pose idx
+                                        curr_node.idx, // Parent pose idx
+                                        end_of_cur_traj_pose, // Current Pose
+                                        valid_trajectories[traj_idx]}; //
                 visited_nodes.push_back(succ_node);
 
                 // Add new poses to pqueue using f(s') = g(s') + h(s')
                 float f_cost = succ_g_cost + trajectories_heuristic[traj_idx];
                 pq_nodes.push(std::make_pair(f_cost, succ_node));
+                visited_trajectories_.push_back(valid_trajectories[traj_idx]);
             }
         }
-
-        if (final_path.empty()) {
-            std::cout << "[WARN] No Solution Found, returning empty path..." << std::endl;
-        }
-
-        std::cout << "Final planner lattice iterations" << num_iter << std::endl;
-
-        return final_path;
-    }
-    
-
-    bool KinematicPlanner::samePoseWithinThresh(
-        const cg_msgs::msg::Pose2D &trajectory_end_pose,
-        const cg_msgs::msg::Pose2D &goal_pose) const {
-            
-            // Normalize yaw within +- M_PI for distance thresholding
-            float end_pose_yaw = std::fmod(trajectory_end_pose.yaw,2.0*M_PI);
-            if (end_pose_yaw < 0.0f) end_pose_yaw += 2.0*M_PI;
-
-            float goal_pose_yaw = std::fmod(goal_pose.yaw, 2.0*M_PI);
-            if (goal_pose_yaw < 0.0f) goal_pose_yaw += 2.0*M_PI;
-
-            return (
-                euclidean_distance(trajectory_end_pose.pt, goal_pose.pt) <= pose_position_equality_threshold_ &&
-                abs(end_pose_yaw - goal_pose_yaw) <= pose_yaw_equality_threshold_);
     }
 
-    std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice() const {
 
-        assert(turn_radii_min_ > 0 && turn_radii_max_ > 0);
-
-        // Generate turn_radii vector
-        std::vector<float> turn_radii;
-        float cur_radii = turn_radii_min_;
-        while (cur_radii <= turn_radii_max_) {
-            turn_radii.push_back(cur_radii);
-            cur_radii += turn_radii_resolution_;
-        }
-
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
-        for (float turn_radius: turn_radii) {
-            // Forwards right
-            lattice.push_back(generateLatticeArm(turn_radius, true, true));
-            // Forwards left
-            lattice.push_back(generateLatticeArm(turn_radius, true, false));
-            // Backwards right
-            lattice.push_back(generateLatticeArm(turn_radius, false, true));
-            // Backwards left
-            lattice.push_back(generateLatticeArm(turn_radius, false, false));
-        }
-        // Going straight, forwards/backwards
-        lattice.push_back(generateLatticeArm(0, true, false));
-        lattice.push_back(generateLatticeArm(0, false, false));
-        return lattice;
-        
-        }
-
-    std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
-        float turn_radius, bool forwards, bool right) const {
-
-        // Since left/right is handled with flags, turn radius should always be positive
-        assert(turn_radius >= 0);
-
-        std::vector<cg_msgs::msg::Pose2D> lattice_arm;
-        int num_segments = ceil(max_trajectory_length_ / trajectory_resolution_);
-        float x,y,yaw;
-        x = y = yaw = 0.0;
-
-        float max_arm_traj_length = max_trajectory_length_;
-        if (!forwards) max_arm_traj_length *= -1;
-
-        // Straight (forwards and backwards)
-        if (turn_radius < 1e-2) {
-            float incremental_movement = max_arm_traj_length / num_segments;
-            for (int n = 0; n < num_segments; ++n) {
-                x += incremental_movement;
-                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
-                lattice_arm.push_back(pose);
-            }
-        }
-        // Right (forwards and backwards)
-        else if (right) {
-            float start_rad = M_PI/2;
-            float stop_rad = (-max_arm_traj_length / turn_radius) + start_rad;
-            float rad_increment = (stop_rad - start_rad) / num_segments;
-            float cur_rad = start_rad;
-
-            for (int n = 0; n < num_segments; ++n) {
-                cur_rad += rad_increment;
-                x = turn_radius * cos(cur_rad);
-                y = turn_radius * sin(cur_rad) - turn_radius;
-                yaw = atan2(-cos(cur_rad), sin(cur_rad));
-
-                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
-                lattice_arm.push_back(pose);
-            }
-        // Left (forwards & backwards)
-        } else {
-            float start_rad = -M_PI/2;
-            float stop_rad = (max_arm_traj_length / turn_radius) + start_rad;
-            float rad_increment = (stop_rad - start_rad) / num_segments;
-            float cur_rad = start_rad;
-
-            for (int n = 0; n < num_segments; ++n) {
-                cur_rad += rad_increment;
-                x = turn_radius * cos(cur_rad);
-                y = turn_radius * sin(cur_rad) + turn_radius;
-                yaw = M_PI + atan2(-cos(cur_rad), sin(cur_rad));
-
-                cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
-                lattice_arm.push_back(pose);
-            }
-        }
-
-        return lattice_arm;
+    if (final_path.empty()) {
+        std::cout << "[WARN] No Solution Found, returning empty path..." << std::endl;
     }
 
-    std::pair<cg_msgs::msg::Pose2D, int> KinematicPlanner::getClosestTrajectoryPoseToGoal(
+    std::cout << "Final planner lattice iterations: " << num_iter << std::endl;
+
+    return final_path;
+}
+
+std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::generateBaseLattice(float max_trajectory_length) const {
+
+    // Generate turn_radii vector
+    std::vector<float> turn_radii;
+    float cur_radii = turn_radii_min_;
+    turn_radii.push_back(cur_radii);
+    for (size_t i = 1; i < n_arms_; ++i) {
+        cur_radii *= lattice_radii_scale_factor_;
+        turn_radii.push_back(cur_radii);
+    }
+
+    std::vector<std::vector<cg_msgs::msg::Pose2D>> lattice;
+    for (float turn_radius: turn_radii) {
+        // Forwards right
+        lattice.push_back(generateLatticeArm(turn_radius, true, true, max_trajectory_length));
+        // Forwards left
+        lattice.push_back(generateLatticeArm(turn_radius, true, false, max_trajectory_length));
+        // Backwards right
+        lattice.push_back(generateLatticeArm(turn_radius, false, true, max_trajectory_length));
+        // Backwards left
+        lattice.push_back(generateLatticeArm(turn_radius, false, false, max_trajectory_length));
+    }
+    // Going straight, forwards/backwards
+    lattice.push_back(generateLatticeArm(-1.0, true, false, max_trajectory_length));
+    lattice.push_back(generateLatticeArm(-1.0, false, false, max_trajectory_length));
+    return lattice;
+    }
+
+/**
+ * @brief Creates a lattice arm trajectory for given turn radius and direction (forwards vs. backwards, right vs. left)
+ * 
+ * @param turn_radius Always positive; treat negative turn radii as a straight section as special case
+ * @param forwards 
+ * @param right 
+ * @param max_trajectory_length 
+ * @return std::vector<cg_msgs::msg::Pose2D> 
+ */
+std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::generateLatticeArm(
+    float turn_radius, bool forwards, bool right, float max_trajectory_length) const {
+
+    std::vector<cg_msgs::msg::Pose2D> lattice_arm;
+    int num_segments = ceil(max_trajectory_length / trajectory_resolution_);
+    float x, y, yaw;
+    x = y = yaw = 0.0;
+
+    float max_arm_traj_length = max_trajectory_length;
+    if (!forwards) max_arm_traj_length *= -1;
+
+    // Straight (forwards and backwards)
+    if (turn_radius < 0.0) {
+        float incremental_movement = max_arm_traj_length / num_segments;
+        for (int n = 0; n < num_segments; ++n) {
+            x += incremental_movement;
+            cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
+            lattice_arm.push_back(pose);
+        }
+    }
+    // Right (forwards and backwards)
+    else if (right) {
+        float start_rad = M_PI/2;
+        float stop_rad = (-max_arm_traj_length / turn_radius) + start_rad;
+        float rad_increment = (stop_rad - start_rad) / num_segments;
+        float cur_rad = start_rad;
+
+        for (int n = 0; n < num_segments; ++n) {
+            cur_rad += rad_increment;
+            x = turn_radius * cos(cur_rad);
+            y = turn_radius * sin(cur_rad) - turn_radius;
+            yaw = atan2(-cos(cur_rad), sin(cur_rad));
+
+            cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
+            lattice_arm.push_back(pose);
+        }
+    // Left (forwards & backwards)
+    } else {
+        float start_rad = -M_PI/2;
+        float stop_rad = (max_arm_traj_length / turn_radius) + start_rad;
+        float rad_increment = (stop_rad - start_rad) / num_segments;
+        float cur_rad = start_rad;
+
+        for (int n = 0; n < num_segments; ++n) {
+            cur_rad += rad_increment;
+            x = turn_radius * cos(cur_rad);
+            y = turn_radius * sin(cur_rad) + turn_radius;
+            yaw = M_PI + atan2(-cos(cur_rad), sin(cur_rad));
+
+            cg_msgs::msg::Pose2D pose = create_pose2d(x, y, yaw);
+            lattice_arm.push_back(pose);
+        }
+    }
+
+    return lattice_arm;
+    }
+
+std::pair<cg_msgs::msg::Pose2D, int> KinematicPlanner::getClosestTrajectoryPoseToGoal(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
     const cg_msgs::msg::Pose2D &goal_pose) const {
 
-        float closest_distance = INFINITY;
-        float dist;
-        int closest_idx = -1;
-        for (size_t i = 0; i < trajectory.size(); ++i) {
-            dist = euclidean_distance(trajectory[i].pt, goal_pose.pt);
-            if (dist < closest_distance) {
-                closest_distance = dist;
-                closest_idx = i;
-            }
+    float closest_distance = INFINITY;
+    float dist;
+    int closest_idx = -1;
+    for (size_t i = 0; i < trajectory.size(); ++i) {
+        dist = euclidean_distance(trajectory[i].pt, goal_pose.pt);
+        if (dist < closest_distance) {
+            closest_distance = dist;
+            closest_idx = i;
         }
-        return std::make_pair(trajectory[closest_idx], closest_idx);
+    }
+    return std::make_pair(trajectory[closest_idx], closest_idx);
     }
 
-    std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::transformLatticeToPose(
-        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
-        const cg_msgs::msg::Pose2D &current_pose) const {
+std::vector<std::vector<cg_msgs::msg::Pose2D>> KinematicPlanner::transformLatticeToPose(
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &base_lattice,
+    const cg_msgs::msg::Pose2D &current_pose) const {
 
-        std::vector<std::vector<cg_msgs::msg::Pose2D>> transformed_lattice;   
-        for (std::vector<cg_msgs::msg::Pose2D> trajectory : base_lattice) {
-
-            std::vector<cg_msgs::msg::Pose2D> transformed_trajectory;
-            for (cg_msgs::msg::Pose2D pose : trajectory) {
-
-                transformed_trajectory.push_back(transformPose(pose, current_pose));
-            }
-            transformed_lattice.push_back(transformed_trajectory);
-        }
-
-        return transformed_lattice;
-    }
-
-
-    bool KinematicPlanner::isValidTrajectory(
-        const std::vector<cg_msgs::msg::Pose2D> &trajectory, 
-        const cg::mapping::Map<float> &map) const {
-
-        // Check if all points of vehicle are within bounds
+    std::vector<std::vector<cg_msgs::msg::Pose2D>> transformed_lattice;
+    for (std::vector<cg_msgs::msg::Pose2D> trajectory : base_lattice) {
+        std::vector<cg_msgs::msg::Pose2D> transformed_trajectory;
         for (cg_msgs::msg::Pose2D pose : trajectory) {
-            // Check if point is in limits of map
-            if (!map.validPoint(pose.pt)) return false;
+            transformed_trajectory.push_back(transformPose(pose, current_pose));
         }
-        return true;
+        transformed_lattice.push_back(transformed_trajectory);
     }
 
-    float KinematicPlanner::calculateTopographyCost(
-        const std::vector<cg_msgs::msg::Pose2D> &trajectory,
-        const cg::mapping::Map<float> &map) const {
+    return transformed_lattice;
+    }
 
-            float topography_cost = 0;
-            for (cg_msgs::msg::Pose2D pose : trajectory) {
 
-                size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
-                topography_cost += abs(map.getDataAtIdx(pose_idx)) * trajectory_resolution_;
-            }
+bool KinematicPlanner::isValidTrajectory(
+    const std::vector<cg_msgs::msg::Pose2D> &trajectory,
+    const cg::mapping::Map<float> &map) const {
 
-            // Weight topography cost
-            float weighted_topography_cost = topography_weight_ * topography_cost;
+    // Check if all points of vehicle are within bounds
+    for (cg_msgs::msg::Pose2D pose : trajectory) {
+        // Check if point is in limits of map
+        if (!map.validPoint(pose.pt)) return false;
+    }
+    return true;
+    }
 
-            return weighted_topography_cost;
+float KinematicPlanner::calculateTopographyCost(
+    const std::vector<cg_msgs::msg::Pose2D> &trajectory,
+    const cg::mapping::Map<float> &map) const {
+
+        size_t pose_idx = map.continousCoordsToCellIndex(trajectory[0].pt);
+        float curr_height = map.getDataAtIdx(pose_idx);
+        float topography_cost = 0;
+
+        for (cg_msgs::msg::Pose2D pose : trajectory) {
+            size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
+            float new_height = map.getDataAtIdx(pose_idx);
+            topography_cost += abs(new_height - curr_height) * trajectory_resolution_;
+            curr_height = new_height;
         }
 
-    std::vector<float> KinematicPlanner::trajectoriesHeuristic(
-        const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
-        const cg_msgs::msg::Pose2D &goal_pose) const {
-            std::vector<float> trajectories_heuristic;
-            for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
-                trajectories_heuristic.push_back(
-                    trajectory_heuristic_epsilon_ * euclidean_distance(trajectory.back().pt, goal_pose.pt));
-            }
-            // Distance between goal pose and final point of trajectory
-            return trajectories_heuristic;
+        // Weight topography cost
+        float weighted_topography_cost = topography_weight_ * topography_cost;
+
+        return weighted_topography_cost;
+    }
+
+std::vector<float> KinematicPlanner::trajectoriesHeuristic(
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories,
+    const cg_msgs::msg::Pose2D &goal_pose, double heuristic_epsilon) const {
+        std::vector<float> trajectories_heuristic;
+        for (std::vector<cg_msgs::msg::Pose2D> trajectory : trajectories) {
+            trajectories_heuristic.push_back(
+                static_cast<float>(heuristic_epsilon) * euclidean_distance(trajectory.front().pt, goal_pose.pt));
+                // std::fabs(smallest_angle_difference_signed(trajectory.back().yaw, goal_pose.yaw)) * turn_radii_min_ * 0.4);
         }
+        // Distance between goal pose and final point of trajectory
+        return trajectories_heuristic;
+    }
 
 
 } // namespace planning
