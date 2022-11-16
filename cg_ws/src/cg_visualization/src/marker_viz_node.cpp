@@ -45,12 +45,12 @@ namespace cg_visualization
   {
     // Publish both craters and the steering angle
     arrow_pub_->publish(steer_angle_arrow_);
-    tool_array.clear();
-    tool_array.push_back(tool1);
-    tool_array.push_back(tool2);
-    tool_array.push_back(tool_text);
-    tool_array.push_back(body);
-    tool_array.push_back(ground);
+    tool_array.markers.clear();
+    tool_array.markers.push_back(tool1);
+    tool_array.markers.push_back(tool2);
+    tool_array.markers.push_back(tool_text);
+    tool_array.markers.push_back(body);
+    tool_array.markers.push_back(ground);
     tool_pose_pub_->publish(tool_array);
   }
 
@@ -161,11 +161,13 @@ namespace cg_visualization
     tool2.scale.z = 0.1;
     tool2.color = tool1.color;
 
-    tool_pose_pub_->publish(tool_text);
-    tool_pose_pub_->publish(body);
-    tool_pose_pub_->publish(ground);
-    tool_pose_pub_->publish(tool1);
-    tool_pose_pub_->publish(tool2);
+    tool_array.markers.clear();
+    tool_array.markers.push_back(tool1);
+    tool_array.markers.push_back(tool2);
+    tool_array.markers.push_back(tool_text);
+    tool_array.markers.push_back(body);
+    tool_array.markers.push_back(ground);
+    tool_pose_pub_->publish(tool_array);
   }
 
 
