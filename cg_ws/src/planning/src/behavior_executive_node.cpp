@@ -96,6 +96,7 @@ namespace planning {
     std::vector<double> trajectory_heuristic_epsilon;
     float max_pose_equality_scalar;
     int pose_equality_scalar_iteration;
+    size_t footprint_size;
     this->declare_parameter<std::vector<double>>("goal_pose_distance_threshold", std::vector<double>({0.1, 0.2, 0.3, 0.4}));
     this->get_parameter("goal_pose_distance_threshold", goal_pose_distance_threshold);
     this->declare_parameter<float>("goal_pose_yaw_threshold", 0.00001);
@@ -122,6 +123,8 @@ namespace planning {
     this->get_parameter("max_pose_equality_scalar", max_pose_equality_scalar);
     this->declare_parameter<int>("pose_equality_scalar_iteration", 1000);
     this->get_parameter("pose_equality_scalar_iteration", pose_equality_scalar_iteration);
+    this->declare_parameter<int>("footprint_size", 3);
+    this->get_parameter("footprint_size", footprint_size);
 
     // Exploration planner
     double exploration_min_dist_from_map_boundary;
@@ -157,7 +160,8 @@ namespace planning {
         topography_weight_,
         trajectory_heuristic_epsilon,
         max_pose_equality_scalar,
-        pose_equality_scalar_iteration));
+        pose_equality_scalar_iteration,
+        footprint_size));
     tool_planner_ = std::make_unique<ToolPlanner>(ToolPlanner(design_blade_height, raised_blade_height));
     velocity_planner_ = std::make_unique<VelocityPlanner>(VelocityPlanner(constant_velocity));
 

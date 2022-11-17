@@ -42,7 +42,7 @@ std::vector<cg_msgs::msg::Pose2D> KinematicPlanner::latticeAStarSearch(
     // Initialze equality scalar for kinematic planner backup
     bool found_plan = false;
     int num_iter;
-    for (int run_iter = 0; run_iter < goal_pose_distance_threshold_.size(); ++run_iter) {
+    for (size_t run_iter = 0; run_iter < goal_pose_distance_threshold_.size(); ++run_iter) {
 
         if (found_plan) break;
         
@@ -336,8 +336,9 @@ float KinematicPlanner::calculateTopographyCost(
 
         float topography_cost = 0;
         for (cg_msgs::msg::Pose2D pose : trajectory) {
-            size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
-            topography_cost += abs(map.getDataAtIdx(pose_idx)) * trajectory_resolution_;
+
+            float footprintmax = KinematicPlanner::footPrintMaximum(map, pose.pt, footprint_size_);
+            topography_cost += std::fabs(footprintmax) * trajectory_resolution_;
         }
 
         // Weight topography cost
@@ -345,6 +346,24 @@ float KinematicPlanner::calculateTopographyCost(
 
         return weighted_topography_cost;
     }
+
+
+float KinematicPlanner::footPrintMaximum(const cg::mapping::Map<float> &map, const cg_msgs::msg::Point2D &base_pt, int footprint_size) const {
+
+    std::vector<float> footprint_vals;
+    for (int x_offset = -footprint_size; x_offset <= footprint_size; ++x_offset) {
+        for (int y_offset = -footprint_size; y_offset <= footprint_size; ++y_offset) {
+
+            cg_msgs::msg::Point2D neighbor = create_point2d(base_pt.x + x_offset, base_pt.x + x_offset);
+            if (map.validPoint(neighbor)) {
+
+            size_t idx = map.continousCoordsToCellIndex(neighbor);
+            footprint_vals.push_back(std::fabs(map.getDataAtIdx(idx)));
+            }
+        }
+    }
+    return *std::max_element(footprint_vals.begin(), footprint_vals.end());
+}
 
 std::vector<float> KinematicPlanner::trajectoriesHeuristic(
     const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories,
