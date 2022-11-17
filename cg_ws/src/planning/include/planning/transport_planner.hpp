@@ -52,6 +52,7 @@ public:
 
   // Setters()
   void setLastPoseOffset(double last_pose_offset){last_pose_offset_ = last_pose_offset;};
+  void setSourcePoseOffset(double source_pose_offset) { source_pose_offset_ = source_pose_offset; };
   void setSourceThresholdZ(float source_threshold_z) { source_threshold_z_ = source_threshold_z; };
   void setSinkThresholdZ(float sink_threshold_z) { sink_threshold_z_ = sink_threshold_z; };
   void setBoundaryMin(float boundary_min) { boundary_min_ = boundary_min; };
@@ -63,7 +64,8 @@ private:
   // Attributes
   std::vector<TransportAssignment> transport_assignments_; // Assignments for transporting volume from a source to a sink (i.e. the non-zero transports)
   std::vector<bool> unvisited_assignments_; // each index corresponds to a TransportAssignment in transport_assignments. true = unvisited, false = visited
-  double last_pose_offset_ = 1.0; // Offset for how far back to make final pose rearward of the first source node as <source pose, sink pose, offset pose>
+  double last_pose_offset_ = 1.0; // Offset for how far back to make final pose rearward of the first source node
+  double source_pose_offset_ = 1.0; // Offset for how far back to make final pose rearward of the original source node; positive is further from crater rim, negative is closer to crater valley
 
   float sink_threshold_z_ = 0.03;
   float source_threshold_z_ = 0.03;
