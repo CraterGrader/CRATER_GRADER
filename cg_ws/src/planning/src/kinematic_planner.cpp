@@ -334,15 +334,10 @@ float KinematicPlanner::calculateTopographyCost(
     const std::vector<cg_msgs::msg::Pose2D> &trajectory,
     const cg::mapping::Map<float> &map) const {
 
-        size_t pose_idx = map.continousCoordsToCellIndex(trajectory[0].pt);
-        float curr_height = map.getDataAtIdx(pose_idx);
         float topography_cost = 0;
-
         for (cg_msgs::msg::Pose2D pose : trajectory) {
             size_t pose_idx = map.continousCoordsToCellIndex(pose.pt);
-            float new_height = map.getDataAtIdx(pose_idx);
-            topography_cost += abs(new_height - curr_height) * trajectory_resolution_;
-            curr_height = new_height;
+            topography_cost += abs(map.getDataAtIdx(pose_idx)) * trajectory_resolution_;
         }
 
         // Weight topography cost
