@@ -351,7 +351,8 @@ void BehaviorExecutive::fsmTimerCallback()
     
     if (!calculated_trajectory_) {
       // Calculate path trajectory
-      if (!exploration_enable_topography_weight_ && fsm_.getCurrStateL1() == FSM::StateL1::EXPLORATION) {
+      if ((!exploration_enable_topography_weight_ && fsm_.getCurrStateL1() == FSM::StateL1::EXPLORATION)
+          || (fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT && current_goal_poses_.size() == 0)) {
         kinematic_planner_->setTopographyWeight(0.0);
       } else {
         kinematic_planner_->setTopographyWeight(topography_weight_);
