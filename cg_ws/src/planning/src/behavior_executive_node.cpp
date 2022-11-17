@@ -357,6 +357,7 @@ void BehaviorExecutive::fsmTimerCallback()
       } else {
         kinematic_planner_->setTopographyWeight(topography_weight_);
       }
+      std::cout << "    Terrain Topography Weight: " << kinematic_planner_->getTopographyWeight() << std::endl;
       kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
 
       // Calculate velocity trajectory
