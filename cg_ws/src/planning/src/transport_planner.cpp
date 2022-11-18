@@ -24,6 +24,9 @@ void TransportPlanner::makeGoalsFromAssignment(const std::vector<TransportAssign
   // Set up sink pose
   cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].sink_node.x, transport_assignments[assignment_idx].sink_node.y, yaw);
 
+  double sink_offset_pose_x = sink_pose.pt.x + sink_pose_offset_ * std::cos(yaw);
+  double sink_offset_pose_y = sink_pose.pt.y + sink_pose_offset_ * std::sin(yaw);
+
   // Set up source pose
   cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].source_node.x, transport_assignments[assignment_idx].source_node.y, yaw);
 
@@ -60,6 +63,7 @@ void TransportPlanner::makeGoalsFromAssignment(const std::vector<TransportAssign
   // Create final poses
   cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
   source_pose = cg::planning::create_pose2d(source_offset_pose_x, source_offset_pose_y, yaw);
+  sink_pose = cg::planning::create_pose2d(sink_offset_pose_x, sink_offset_pose_y, yaw);
 
   // Push back the goal poses
   goalPoses.push_back(offset_pose);

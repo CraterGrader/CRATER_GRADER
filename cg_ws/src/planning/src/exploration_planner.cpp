@@ -42,7 +42,7 @@ bool ExplorationPlanner::planExploration(const cg::mapping::Map<float> &map) {
     0.8*w, h/5.0, 135*M_PI/180
   ));
   exploration_waypoints_.push_back(cg::planning::create_pose2d(
-    2.0*w/3.0, h/3.0, 135*M_PI/180
+    7.0*w/12.0, 5.0*h/12.0, 135*M_PI/180
   ));
   // exploration_waypoints_.push_back(cg::planning::create_pose2d(
   //   w-min_dist_from_map_boundary_, min_dist_from_map_boundary_, 135*M_PI/180

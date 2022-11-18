@@ -199,13 +199,17 @@ namespace planning {
 
     double last_pose_offset;
     double source_pose_offset;
+    double sink_pose_offset;
     this->declare_parameter<double>("last_pose_offset", 1.0);
     this->get_parameter("last_pose_offset", last_pose_offset);
     this->declare_parameter<double>("source_pose_offset", 1.0);
     this->get_parameter("source_pose_offset", source_pose_offset);
+    this->declare_parameter<double>("sink_pose_offset", 1.0);
+    this->get_parameter("sink_pose_offset", sink_pose_offset);
 
     transport_planner_->setLastPoseOffset(last_pose_offset);
     transport_planner_->setSourcePoseOffset(source_pose_offset);
+    transport_planner_->setSinkPoseOffset(sink_pose_offset);
 
     // Exploration planner
     this->declare_parameter<float>("map_coverage_threshold", 0.01);
