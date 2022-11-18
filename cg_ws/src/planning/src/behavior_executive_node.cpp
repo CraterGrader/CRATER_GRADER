@@ -139,9 +139,9 @@ namespace planning {
 
     // Velocity planner
     this->declare_parameter<double>("constant_velocity", 100.0);
-    this->get_parameter<double>("constant_velocity", constant_velocity);
+    this->get_parameter<double>("constant_velocity", constant_velocity_);
     this->declare_parameter<double>("high_constant_velocity", 100.0);
-    this->get_parameter<double>("high_constant_velocity", high_constant_velocity);
+    this->get_parameter<double>("high_constant_velocity", high_constant_velocity_);
 
     transport_planner_ = std::make_unique<TransportPlanner>(TransportPlanner());
     exploration_planner_ = std::make_unique<ExplorationPlanner>(ExplorationPlanner(exploration_min_dist_from_map_boundary));
@@ -361,9 +361,9 @@ void BehaviorExecutive::fsmTimerCallback()
 
       // Calculate velocity trajectory
       if (fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT && current_goal_poses_.size() == 2) {
-        velocity_planner_->setVelocityTarget(high_constant_velocity);
+        velocity_planner_->setVelocityTarget(high_constant_velocity_);
       } else {
-        velocity_planner_->setVelocityTarget(constant_velocity);
+        velocity_planner_->setVelocityTarget(constant_velocity_);
       }
       std::cout << "Trajectory Velocity: " << velocity_planner_->getVelocityTarget() << std::endl;
       velocity_planner_->generateVelocityTargets(current_trajectory_, current_agent_pose_, current_height_map_);

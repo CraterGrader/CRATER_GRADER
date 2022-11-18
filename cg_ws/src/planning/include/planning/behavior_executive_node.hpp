@@ -145,8 +145,8 @@ private:
   double viz_planning_height_ = 0.0;
 
   // Velocity targets
-  double constant_velocity;
-  double high_constant_velocity;
+  double constant_velocity_;
+  double high_constant_velocity_;
 
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   std::vector<cg_msgs::msg::Pose2D> viz_state_l1_goal_poses_;
