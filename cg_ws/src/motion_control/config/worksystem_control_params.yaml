@@ -11,3 +11,4 @@ worksystem_control_node:
     lateral_heading_gain: 1.5
     min_drive_speed_scalar: 0.0
     max_steer_speed: 500.0
+    lookahead_heading_offset: 5
