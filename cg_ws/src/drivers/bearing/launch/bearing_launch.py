@@ -41,7 +41,7 @@ def generate_launch_description():
         bearing_params = yaml.load(
         stream,
         Loader = yaml.SafeLoader
-    )  
+    )
 
     # Camera input parameters
     usb_cam_path = os.path.join(
@@ -80,22 +80,6 @@ def generate_launch_description():
             parameters=[usb_cam_path]
         )
     ]
-
-    # Transforms for all tags declared in parameters above - 'map' to 'tagX'
-    for i in range(len(bearing_params['bearing_node']['ros__parameters']['tags']['position']['x'])):
-        nodes.append(Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            arguments=[bearing_params['bearing_node']['ros__parameters']['tags']['position']['x'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['position']['y'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['position']['z'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['orientation']['z'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['orientation']['y'][i],
-                    bearing_params['bearing_node']['ros__parameters']['tags']['orientation']['x'][i],
-                    'tag_map',
-                    'tag' + str(i)]
-        ))
-    print(bearing_params['bearing_node']['ros__parameters']['base_cam_tf'])
 
     # AprilTag node with remapping - adjust here if changes to rectified image name
     composable_node = ComposableNode(

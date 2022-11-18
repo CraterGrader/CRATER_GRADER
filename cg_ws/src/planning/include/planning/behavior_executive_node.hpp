@@ -137,6 +137,8 @@ private:
   bool calculated_trajectory_ = false;
   bool worksystem_enabled_ = false;
   size_t num_poses_before_ = 0; // DEBUG
+  size_t num_cycles_since_last_trajectory_ = 0;
+  size_t num_cycles_before_new_trajectory_ = 1;
 
   cg::mapping::Map<float> design_height_map_;
   float topology_equality_threshold_ = 0.0;

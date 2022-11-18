@@ -161,6 +161,9 @@ namespace planning {
     tool_planner_ = std::make_unique<ToolPlanner>(ToolPlanner(design_blade_height, raised_blade_height));
     velocity_planner_ = std::make_unique<VelocityPlanner>(VelocityPlanner(constant_velocity));
 
+    this->declare_parameter<int>("num_cycles_before_new_trajectory", 1);
+    this->get_parameter("num_cycles_before_new_trajectory", num_cycles_before_new_trajectory_);
+
     // Transport planner
     float source_threshold_z;
     float sink_threshold_z;
@@ -387,6 +390,7 @@ void BehaviorExecutive::fsmTimerCallback()
       // }
       // -------------------------------
       calculated_trajectory_ = true;
+      num_cycles_since_last_trajectory_ = 0;
     }
 
     if (calculated_trajectory_) {
@@ -411,7 +415,9 @@ void BehaviorExecutive::fsmTimerCallback()
   }
     break;
   case cg::planning::FSM::StateL0::FOLLOWING_TRAJECTORY:{
-    bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_, global_robot_pose_);
+
+    bool trigger_replan = num_cycles_since_last_trajectory_ >= num_cycles_before_new_trajectory_;
+    bool keep_following = following_trajectory_.runState(current_agent_pose_, current_goal_pose_, thresh_pos_, thresh_head_, thresh_euclidean_replan_, current_trajectory_, global_robot_state_, global_robot_pose_, trigger_replan);
 
     // Disable worksystem if goal is reached
     if (!keep_following) {
@@ -419,6 +425,7 @@ void BehaviorExecutive::fsmTimerCallback()
       worksystem_enabled_ = enableWorksystemService(enable_worksystem_, true);
     }
 
+    num_cycles_since_last_trajectory_++;
     break;}
   case cg::planning::FSM::StateL0::END_MISSION:
     end_mission_.runState();
