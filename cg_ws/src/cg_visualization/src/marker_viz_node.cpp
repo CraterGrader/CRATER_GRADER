@@ -58,8 +58,8 @@ namespace cg_visualization
     tool_pose_ = msg_tool_pose;
 
     // Update length and position of tool
-    tool1.pose.position.y = 2.25 - 0.15 * tool_pose_/80.0;
-    tool1.scale.y = 0.5 + 0.3 * tool_pose_/80.0;
+    tool1.pose.position.y = 2.25 - 0.25 * tool_pose_/80.0;
+    tool1.scale.y = 0.5 + 0.5 * tool_pose_/80.0;
     tool2.pose.position.y = tool1.pose.position.y - tool1.scale.y/2;
   }
 
