@@ -61,7 +61,7 @@ namespace arduino {
     this->get_parameter("freq_window_enc_telem", freq_window_enc_telem_);
 
     // Motor controller scaling
-    this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE", 22);
+    this->declare_parameter<int>("QP_TO_BYTE_STEER_SCALE", 35);
     this->get_parameter("QP_TO_BYTE_STEER_SCALE", QP_TO_BYTE_STEER_SCALE_);
     this->declare_parameter<int>("QP_TO_BYTE_STEER_OFFSET", 127);
     this->get_parameter("QP_TO_BYTE_STEER_OFFSET", QP_TO_BYTE_STEER_OFFSET_);

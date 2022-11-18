@@ -43,8 +43,8 @@ bool micro_ros_init_successful;
 
 /* Roboclaw declarations */
 // Roboclaw constants
-#define BYTE_TO_QPPS_DRIVE_SCALE 25  // Drive Scale 
-#define BYTE_TO_QP_STEER_SCALE 22 // Steer Scale
+#define BYTE_TO_QPPS_DRIVE_SCALE 25  // Drive Scale
+#define BYTE_TO_QP_STEER_SCALE 35 // Steer Scale = floor( (Full Scale QP as flashed on Roboclaw) / (255 - BYTE_TO_QPPS_DRIVE_STEER_OFFSET) )
 #define BYTE_TO_QPPS_DRIVE_STEER_OFFSET 127 // 
 #define BYTE_TO_QP_DELTA_POS_SCALE 10  // Drive Scale 
 #define BYTE_TO_QP_DELTA_POS_OFFSET 127 // 

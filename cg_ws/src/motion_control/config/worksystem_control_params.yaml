@@ -6,8 +6,8 @@ worksystem_control_node:
     steer_speed_filter_window_size: 10
     cmd_msg_filter_window_size: 10
 
-    lateral_stanley_gain: 2.0
+    lateral_stanley_gain: 2.5
     lateral_stanley_softening_constant: 0.0 # unused
-    lateral_heading_gain: 1.0
+    lateral_heading_gain: 1.5
     min_drive_speed_scalar: 0.0
     max_steer_speed: 500.0
