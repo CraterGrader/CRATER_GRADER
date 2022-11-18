@@ -18,7 +18,7 @@ namespace motion_control {
 class LateralController {
 public:
   LateralController() {}
-  LateralController(double k, double stanley_softening_constant);
+  LateralController(double k, double stanley_softening_constant, double heading_gain);
   double computeSteer(
       const cg_msgs::msg::Trajectory &target_trajectory,
       const nav_msgs::msg::Odometry &current_state,

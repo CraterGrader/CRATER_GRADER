@@ -21,9 +21,14 @@ void TransportPlanner::makeGoalsFromAssignment(const std::vector<TransportAssign
   // find desired heading of arg_min poses, equal to the arctan2 of the x & y delta distances
   double yaw = static_cast<double>(atan2((transport_assignments[assignment_idx].sink_node.y - transport_assignments[assignment_idx].source_node.y), (transport_assignments[assignment_idx].sink_node.x - transport_assignments[assignment_idx].source_node.x)));
 
-  // convert src, sink nodes to poses
-  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].source_node.x, transport_assignments[assignment_idx].source_node.y, yaw);
+  // Set up sink pose
   cg_msgs::msg::Pose2D sink_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].sink_node.x, transport_assignments[assignment_idx].sink_node.y, yaw);
+
+  // Set up source pose
+  cg_msgs::msg::Pose2D source_pose = cg::planning::create_pose2d(transport_assignments[assignment_idx].source_node.x, transport_assignments[assignment_idx].source_node.y, yaw);
+
+  double source_offset_pose_x = source_pose.pt.x - source_pose_offset_ * std::cos(yaw);
+  double source_offset_pose_y = source_pose.pt.y - source_pose_offset_ * std::sin(yaw);
 
   // Set up last offset pose
   double offset_pose_x = source_pose.pt.x - last_pose_offset_ * std::cos(yaw);
@@ -52,12 +57,14 @@ void TransportPlanner::makeGoalsFromAssignment(const std::vector<TransportAssign
     }
   }
 
+  // Create final poses
   cg_msgs::msg::Pose2D offset_pose = cg::planning::create_pose2d(offset_pose_x, offset_pose_y, yaw);
+  source_pose = cg::planning::create_pose2d(source_offset_pose_x, source_offset_pose_y, yaw);
 
   // Push back the goal poses
+  goalPoses.push_back(offset_pose);
   goalPoses.push_back(source_pose);
   goalPoses.push_back(sink_pose);
-  goalPoses.push_back(offset_pose);
 }
 
 /**
