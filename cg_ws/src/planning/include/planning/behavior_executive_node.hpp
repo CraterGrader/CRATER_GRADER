@@ -144,6 +144,10 @@ private:
   int transport_plan_max_calls_ = INT_MAX;
   double viz_planning_height_ = 0.0;
 
+  // Velocity targets
+  double constant_velocity_;
+  double high_constant_velocity_;
+
   std::vector<cg_msgs::msg::Pose2D> current_goal_poses_;
   std::vector<cg_msgs::msg::Pose2D> viz_state_l1_goal_poses_;
   cg_msgs::msg::Pose2D current_goal_pose_; // Assumed to be in local map frame!

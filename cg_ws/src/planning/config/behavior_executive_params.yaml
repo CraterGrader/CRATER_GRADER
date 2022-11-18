@@ -44,6 +44,7 @@ behavior_executive_node:
     raised_blade_height: 0.0   # Height of blade when lifted
 
     # Velocity planner
+    high_constant_velocity: 50.0 # Higher velocity only for offset to source trajectories
     constant_velocity: 30.0  # Constant velocity for velocity planner, %FS
 
     # Validation parameters

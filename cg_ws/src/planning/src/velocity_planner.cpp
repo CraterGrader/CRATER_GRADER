@@ -41,5 +41,11 @@ void VelocityPlanner::generateVelocityTargets(
 
     }
 
+void VelocityPlanner::setVelocityTarget(double desired_velocity) {
+    constant_velocity_ = desired_velocity;
+}
+
+
+
 } // namespace planning
 } // namespace cg
