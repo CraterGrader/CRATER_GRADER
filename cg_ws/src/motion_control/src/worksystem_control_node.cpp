@@ -88,7 +88,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   double lateral_heading_gain;
   this->declare_parameter<double>("lateral_heading_gain", 1.0);
   this->get_parameter("lateral_heading_gain", lateral_heading_gain);
-  double lookahead_heading_offset;
+  int lookahead_heading_offset;
   this->declare_parameter<int>("lookahead_heading_offset", 5);
   this->get_parameter("lookahead_heading_offset", lookahead_heading_offset);
 
