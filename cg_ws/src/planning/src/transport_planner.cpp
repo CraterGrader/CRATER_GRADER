@@ -367,6 +367,10 @@ float TransportPlanner::solveForTransportAssignments(std::vector<TransportAssign
   return objective->Value();
 }
 
+double TransportPlanner::calculateAssignmentYaw(TransportAssignment assignment) {
+  return static_cast<double>(atan2((assignment.sink_node.y - assignment.source_node.y), (assignment.sink_node.x - assignment.source_node.x)));
+}
+
 void TransportPlanner::filterAssignments(std::vector<TransportAssignment> &new_transport_assignments) {
 
   std::vector<TransportAssignment> filtered_transport_assignments;
@@ -374,21 +378,36 @@ void TransportPlanner::filterAssignments(std::vector<TransportAssignment> &new_t
   // Initialize boolean mask to false
   std::vector<bool> keep_assignment(new_transport_assignments.size(), false);
 
+  // Iterate through assignments
   for (size_t i=0; i < new_transport_assignments.size(); ++i) {
 
-    // bool keep_assignment = true;
+    // Get source goal pose
     std::vector<cg_msgs::msg::Pose2D> assignment_goal_poses;
     makeGoalsFromAssignment(new_transport_assignments, i, assignment_goal_poses);
-    cg_msgs::msg::Pose2D assignment_source_pose = assignment_goal_poses[0];
+    cg_msgs::msg::Pose2D assignment_source_pose = assignment_goal_poses[1];
+    
+    // Get source pose on rim (i.e. "undo" the offset)
+    double assignment_yaw = calculateAssignmentYaw(new_transport_assignments[i]);
+    double source_rim_pose_x = assignment_source_pose.pt.x + source_pose_offset_ * std::cos(assignment_yaw);
+    double source_rim_pose_y = assignment_source_pose.pt.y + source_pose_offset_ * std::sin(assignment_yaw);
+    cg_msgs::msg::Pose2D assignment_source_pose_rim = cg::planning::create_pose2d(source_rim_pose_x, source_rim_pose_y, assignment_yaw);
+
+    // Check against other assignments
     bool no_similar_poses = true;
     for (size_t j=0; j < i; ++j) {
-      
+      // Get assignment to check against
       std::vector<cg_msgs::msg::Pose2D> check_assignment_goal_poses;
       makeGoalsFromAssignment(new_transport_assignments, j, check_assignment_goal_poses);
-      cg_msgs::msg::Pose2D check_assignment_source_pose = check_assignment_goal_poses[0];
+      cg_msgs::msg::Pose2D check_assignment_source_pose = check_assignment_goal_poses[1];
+
+      // Check source pose on rim (i.e. "undo" the offset)
+      double check_assignment_yaw = calculateAssignmentYaw(new_transport_assignments[j]);
+      double check_source_rim_pose_x = check_assignment_source_pose.pt.x + source_pose_offset_ * std::cos(check_assignment_yaw);
+      double check_source_rim_pose_y = check_assignment_source_pose.pt.y + source_pose_offset_ * std::sin(check_assignment_yaw);
+      cg_msgs::msg::Pose2D check_assignment_source_pose_rim = cg::planning::create_pose2d(check_source_rim_pose_x, check_source_rim_pose_y, check_assignment_yaw);
 
       // Skip transport that is too close
-      if (cg::planning::samePoseWithinThresh(assignment_source_pose, check_assignment_source_pose, thresh_filter_assignment_pos_, thresh_filter_assignment_head_) && keep_assignment[j]) {
+      if (cg::planning::samePoseWithinThresh(assignment_source_pose_rim, check_assignment_source_pose_rim, thresh_filter_assignment_pos_, thresh_filter_assignment_head_) && keep_assignment[j]) {
         no_similar_poses = false;
         break;
       }

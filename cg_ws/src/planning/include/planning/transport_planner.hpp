@@ -46,6 +46,7 @@ public:
   void calculate_distances(std::vector<float> &distances_between_nodes, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes);
   float solveForTransportAssignments(std::vector<TransportAssignment> &new_transport_assignments, const std::vector<TransportNode> &source_nodes, const std::vector<TransportNode> &sink_nodes, const std::vector<float> &distances_between_nodes, const float vol_source, const float vol_sink, const float thresh_max_assignment_distance, bool verbose);
   void filterAssignments(std::vector<TransportAssignment> &new_transport_assignments);
+  double calculateAssignmentYaw(TransportAssignment assignment);
 
   // Getters()
   std::vector<TransportAssignment> getTransportAssignments() const {return transport_assignments_;};

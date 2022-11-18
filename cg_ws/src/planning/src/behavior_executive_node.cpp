@@ -366,7 +366,8 @@ void BehaviorExecutive::fsmTimerCallback()
       kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
 
       // Calculate velocity trajectory
-      if (fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT && current_goal_poses_.size() == 2) {
+      if (fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT && 
+      (current_goal_poses_.size() == 2 || current_goal_poses_.size() == 1)) {
         velocity_planner_->setVelocityTarget(high_constant_velocity_);
       } else {
         velocity_planner_->setVelocityTarget(constant_velocity_);
