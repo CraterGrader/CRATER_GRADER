@@ -66,7 +66,7 @@ double LateralController::stanleyControlLaw(
     }
 double LateralController::scaleToSteerActuators(double desired_steer){
   // Calculated using % full scale of steering angle [%FS / (steer angle in radians)]
-  double transfer_function_to_steer_position = 360.712; // TODO CHANGE IF STEERING LIMITS CHANGE
+  double transfer_function_to_steer_position = 286.5; // TODO CHANGE IF STEERING LIMITS CHANGE
 
   return transfer_function_to_steer_position * desired_steer;
 }
