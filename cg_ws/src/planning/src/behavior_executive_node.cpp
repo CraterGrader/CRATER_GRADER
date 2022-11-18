@@ -356,11 +356,13 @@ void BehaviorExecutive::fsmTimerCallback()
     
     if (!calculated_trajectory_) {
       // Calculate path trajectory
-      if (!exploration_enable_topography_weight_ && fsm_.getCurrStateL1() == FSM::StateL1::EXPLORATION) {
+      if ((!exploration_enable_topography_weight_ && fsm_.getCurrStateL1() == FSM::StateL1::EXPLORATION)
+          || (fsm_.getCurrStateL1() == FSM::StateL1::TRANSPORT && current_goal_poses_.size() == 0)) {
         kinematic_planner_->setTopographyWeight(0.0);
       } else {
         kinematic_planner_->setTopographyWeight(topography_weight_);
       }
+      std::cout << "    Terrain Topography Weight: " << kinematic_planner_->getTopographyWeight() << std::endl;
       kinematic_planner_->generatePath(current_trajectory_.path, current_agent_pose_, current_goal_pose_, current_height_map_);
 
       // Calculate velocity trajectory
