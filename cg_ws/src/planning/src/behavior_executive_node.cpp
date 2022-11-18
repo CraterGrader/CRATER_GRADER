@@ -160,7 +160,7 @@ namespace planning {
         max_pose_equality_scalar,
         pose_equality_scalar_iteration));
     tool_planner_ = std::make_unique<ToolPlanner>(ToolPlanner(design_blade_height, raised_blade_height));
-    velocity_planner_ = std::make_unique<VelocityPlanner>(VelocityPlanner(constant_velocity));
+    velocity_planner_ = std::make_unique<VelocityPlanner>(VelocityPlanner(constant_velocity_));
 
     // Transport planner
     float source_threshold_z;
