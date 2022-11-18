@@ -4,10 +4,11 @@
 namespace cg {
 namespace motion_control {
 
-LateralController::LateralController(double k, double stanley_softening_constant, double heading_gain) :
+LateralController::LateralController(double k, double stanley_softening_constant, double heading_gain, int lookahead_heading_offset) :
     k_(k),
     stanley_softening_constant_(stanley_softening_constant),
-    heading_gain_(heading_gain) {}
+    heading_gain_(heading_gain),
+    lookahead_heading_offset_(lookahead_heading_offset) {}
 
 double LateralController::computeSteer(
     const cg_msgs::msg::Trajectory &target_trajectory,
@@ -31,7 +32,10 @@ double LateralController::computeSteer(
     double closest_cross_track_error = transformed_error.y;
     // double closest_euclidian_error = std::numeric_limits<double>::infinity();
     std::cout << " ++++++ target yaw: " << target_trajectory.path[traj_idx].yaw << ", current yaw: " << cur_pose.yaw << std::endl;
-    double closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[traj_idx].yaw, cur_pose.yaw);
+
+    assert(lookahead_heading_offset_ >= 0);
+    int heading_offset_idx = std::min(target_trajectory.path.size()-1, traj_idx + lookahead_heading_offset_);
+    double closest_heading_error = cg::planning::smallest_angle_difference_signed(target_trajectory.path[heading_offset_idx].yaw, cur_pose.yaw);
     
     debug_.cross_track_err = closest_cross_track_error;
     debug_.heading_err = closest_heading_error;
