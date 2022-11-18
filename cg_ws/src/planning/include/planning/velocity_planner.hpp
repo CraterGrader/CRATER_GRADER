@@ -20,8 +20,11 @@ public:
     const cg_msgs::msg::Pose2D &agent_pose,
     const cg::mapping::Map<float> &map);
 
-private:
+  void setVelocityTarget(double desired_velocity);
 
+  double getVelocityTarget() const {return constant_velocity_;}
+
+private:
   double constant_velocity_;
 
 };
