@@ -41,13 +41,13 @@ double LateralController::computeSteer(
       std::pow(current_state.twist.twist.linear.x, 2) + 
       std::pow(current_state.twist.twist.linear.y, 2));
 
-    // Compute stanley control law
-    double desired_steer = LateralController::stanleyControlLaw(closest_heading_error, closest_cross_track_error, current_velocity);
-
     // Reverse driving needs to flip sign
     if (target_trajectory.velocity_targets[traj_idx] < 0) {
-        desired_steer = -desired_steer;
+        closest_heading_error = -closest_heading_error;
     }
+
+    // Compute stanley control law
+    double desired_steer = LateralController::stanleyControlLaw(closest_heading_error, closest_cross_track_error, current_velocity);
 
     // Scale the desired steer angle to actuator steer position
     return scaleToSteerActuators(desired_steer);

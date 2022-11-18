@@ -180,8 +180,8 @@ void WorksystemControlNode::encoderTelemetryCallback(const cg_msgs::msg::Encoder
   float curr_steer_speed_ = (speed_rear + speed_front) /2;
 
   // Update steer error
-  float average_curr_steer = 100 * (steer_pos_rear + steer_pos_front) / 2;
-  float curr_steer_error = average_curr_steer / (steer_full_scale_ + 1e-6f);
+  float average_curr_steer = (steer_pos_rear + steer_pos_front) / 2;
+  float curr_steer_error = 100 * average_curr_steer / (steer_full_scale_ + 1e-6f);
   steer_error_ = updateMovingAverage(steer_error_window_, curr_steer_error, steer_error_filter_window_size_);
 
   // Use moving average to smooth slip estimate
