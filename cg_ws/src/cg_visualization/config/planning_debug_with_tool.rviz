@@ -192,7 +192,7 @@ Visualization Manager:
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
-      Line Style: Lines
+      Line Style: Billboards
       Line Width: 0.029999999329447746
       Name: Current Trajectory
       Offset:
@@ -283,9 +283,9 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.46035316586494446
-        Min Value: -0.06771337985992432
-        Value: true
+        Max Value: 0.07000000029802322
+        Min Value: -0.10000000149011612
+        Value: false
       Axis: Z
       Channel Name: z
       Class: rviz_default_plugins/PointCloud2
@@ -318,7 +318,7 @@ Visualization Manager:
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 1
-        Min Value: 1
+        Min Value: 0.0020000000949949026
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -428,7 +428,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: AxisColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -449,7 +449,7 @@ Visualization Manager:
         Value: /viz/mapping/oss_map
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Class: rviz_default_plugins/Marker
       Enabled: true
       Name: Steer Angle
@@ -463,9 +463,9 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /visualization_marker
       Value: true
-    - Class: rviz_default_plugins/Marker
+    - Class: rviz_default_plugins/MarkerArray
       Enabled: true
-      Name: Marker
+      Name: MarkerArray
       Namespaces:
         body: true
         ground: true
@@ -475,7 +475,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /viz/planning/tool_pose_viz
@@ -525,7 +524,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: 0.004999999888241291
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -535,11 +534,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 98.86067199707031
+      Scale: 88.6781005859375
       Target Frame: map
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 2.624084234237671
-      Y: 3.2944724559783936
+      X: 2.9664857387542725
+      Y: 3.393509864807129
     Saved: ~
 Window Geometry:
   Displays:
@@ -558,4 +557,4 @@ Window Geometry:
     collapsed: true
   Width: 1278
   X: 0
-  Y: 0
+  Y: 52

@@ -54,11 +54,14 @@ namespace cg_visualization
 
   void MarkerVizNode::updateToolViz(const cg_msgs::msg::EncoderTelemetry::SharedPtr msg)
   {
+    RCLCPP_INFO(this->get_logger(), std::to_string(msg->tool_pos).c_str());
     float msg_tool_pose = static_cast<float>(msg->tool_pos)/328.0;
+    RCLCPP_INFO(this->get_logger(), std::to_string(msg_tool_pose).c_str());
     tool_pose_ = msg_tool_pose;
 
     // Update length and position of tool
     tool1.pose.position.y = 2.25 - 0.25 * tool_pose_/80.0;
+    RCLCPP_INFO(this->get_logger(), std::to_string(tool1.pose.position.y).c_str());
     tool1.scale.y = 0.5 + 0.5 * tool_pose_/80.0;
     tool2.pose.position.y = tool1.pose.position.y - tool1.scale.y/2;
   }
