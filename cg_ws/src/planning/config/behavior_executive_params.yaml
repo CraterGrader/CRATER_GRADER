@@ -22,21 +22,21 @@ behavior_executive_node:
 
     # Transport planner
     source_threshold_z: 0.02 # meters off fit plane
-    sink_threshold_z: 0.07 # meters below fit plane
+    sink_threshold_z: 0.075 # meters below fit plane
     thresh_max_assignment_distance: 0.6 # max meters between transport assignments
     last_pose_offset: 10.0 # meters to rearward offset last pose in transport assignment by
-    sink_pose_offset: 0.1 # meters to rearward offset sink pose in transport assignment by
+    sink_pose_offset: 0.0 # meters to rearward offset sink pose in transport assignment by
     source_pose_offset: 0.5 # meters to rearward offset source pose in transport assignment by
     transport_plan_max_calls: 100 # Number of calls to REPLAN_TRANSPORT before a replan is triggered
     boundary_min: 0.7 # max pose for x-y in sitemap frame
     boundary_max: 4.3 # min pose for x-y in sitemap frame
-    thresh_filter_assignment_pos: 0.2 # minimum meters between final transport assignments
+    thresh_filter_assignment_pos: 0.14 # minimum meters between final transport assignments
     thresh_filter_assignment_head: 6.28 # minimum heading [rad] between final transport assignments
 
     # Exploration planner
     map_coverage_threshold: 0.01
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
-    explored_once: false # set false to do exploration, true means system will skip exploration
+    explored_once: true # set false to do exploration, true means system will skip exploration
     exploration_enable_topography_weight: false # Use to enable/disable topography weight in exploration plan
 
     # Tool planner
@@ -48,7 +48,7 @@ behavior_executive_node:
     constant_velocity: 30.0  # Constant velocity for velocity planner, %FS
 
     # Validation parameters
-    topology_equality_threshold: 0.05 # Note: must be <= transport_threshold_z
+    topology_equality_threshold: 0.05
 
     # Timer callbacks
     fsm_timer_callback_ms: 500 # milliseconds
