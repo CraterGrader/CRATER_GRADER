@@ -31,7 +31,8 @@ public:
       topography_weight_(1.0f),
       trajectory_heuristic_epsilon_(std::vector<double>({1.0, 2.0, 5.0, 10.0})),
       max_pose_equality_scalar_(2.0),
-      pose_equality_scalar_iteration_(2000) {};
+      pose_equality_scalar_iteration_(2000),
+      footprint_size_(3) {};
 
   // Construct Fully Parametric Planner
   KinematicPlanner(
@@ -47,7 +48,8 @@ public:
     float topography_weight,
     std::vector<double> trajectory_heuristic_epsilon,
     float max_pose_equality_scalar,
-    int pose_equality_scalar_iteration) : 
+    int pose_equality_scalar_iteration,
+    size_t footprint_size) :
       goal_pose_distance_threshold_(goal_pose_distance_threshold), 
       goal_pose_yaw_threshold_(goal_pose_yaw_threshold), 
       turn_radii_min_(turn_radii_min), 
@@ -60,7 +62,8 @@ public:
       topography_weight_(topography_weight),
       trajectory_heuristic_epsilon_(trajectory_heuristic_epsilon),
       max_pose_equality_scalar_(max_pose_equality_scalar),
-      pose_equality_scalar_iteration_(pose_equality_scalar_iteration) {}; 
+      pose_equality_scalar_iteration_(pose_equality_scalar_iteration),
+      footprint_size_(footprint_size) {};
 
   // Updates the path field in-place
   void generatePath(
@@ -107,9 +110,15 @@ public:
     const std::vector<cg_msgs::msg::Pose2D> &trajectory,
     const cg::mapping::Map<float> &map) const;
 
+  // Calculates max value over given square cell footprint
+  float footPrintMaximum(
+    const cg::mapping::Map<float> &map,
+    const cg_msgs::msg::Point2D &pt,
+    int footprint_size) const;
+
   // Calculate heuristic associated with trajectories
   std::vector<float> trajectoriesHeuristic(
-    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories, 
+    const std::vector<std::vector<cg_msgs::msg::Pose2D>> &trajectories,
     const cg_msgs::msg::Pose2D &goal_pose,
     double heuristic_epsilon) const;
 
@@ -187,6 +196,7 @@ private:
   // Cost Parameters
   float topography_weight_;
   std::vector<double> trajectory_heuristic_epsilon_;
+  size_t footprint_size_;
 
   // A* parameters
   float max_pose_equality_scalar_;
