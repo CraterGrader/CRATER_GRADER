@@ -16,8 +16,8 @@ site_map:
     oosThreshold: 0.03 # meters 
 
     # Loading from a map filepath
-    static_map: true
-    load_height_map_from_filepath: true
+    static_map: false
+    load_height_map_from_filepath: false
     #### "Obvious crater" maps
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
     load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/weird_transport.csv" # use absolute path
