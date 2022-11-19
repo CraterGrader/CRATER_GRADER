@@ -61,6 +61,7 @@ public:
   void setBoundaryMax(float boundary_max) { boundary_max_ = boundary_max; };
   void setThreshFilterAssignmentPos(float thresh_filter_assignment_pos) { thresh_filter_assignment_pos_ = thresh_filter_assignment_pos; };
   void setThreshFilterAssignmentHead(double thresh_filter_assignment_head) { thresh_filter_assignment_head_ = thresh_filter_assignment_head; };
+  void setLastGoalPoseAngle(float last_goal_pose_angle) { last_goal_pose_angle_ = last_goal_pose_angle; };
 
 private: 
   // Attributes
@@ -78,6 +79,8 @@ private:
 
   float thresh_filter_assignment_pos_ = 0.0;
   double thresh_filter_assignment_head_ = 6.28;
+  double last_goal_pose_angle_ = 0.0;
+  bool provided_first_goal_pose_{false};
 };
 
 } // namespace planning

@@ -88,8 +88,13 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
     return goalPoses;
   }
 
+  if (!provided_first_goal_pose_) {
+    last_goal_pose_angle_ = agent_pose.yaw;
+    provided_first_goal_pose_ = true;
+  }
   // define a minimum distance starting with the max value of float
-  float min_dist = std::numeric_limits<float>::max();
+  float min_angle_diff = std::numeric_limits<float>::max();
+  float min_transport_angle;
   // index of minimium distance of transport_assignmnets
   size_t arg_min;
   // iterate through all transport assignemtns
@@ -98,17 +103,22 @@ std::vector<cg_msgs::msg::Pose2D> TransportPlanner::getGoalPose(const cg_msgs::m
     if (unvisited_assignments_.at(i)){
       // convert transport node to a 2D point for comparison 
       cg_msgs::msg::Point2D src_point = cg::planning::create_point2d(transport_assignments_.at(i).source_node.x, transport_assignments_.at(i).source_node.y);
+      cg_msgs::msg::Point2D sink_point = cg::planning::create_point2d(transport_assignments_.at(i).sink_node.x, transport_assignments_.at(i).sink_node.y);
       // calculate distance between pose and transport assignment
-      float dist = cg::planning::euclidean_distance(agent_pose.pt, src_point);
+
+      float transport_angle_from_center = std::atan2(sink_point.y - src_point.y, sink_point.x - src_point.x);
+      float angle_diff = cg::planning::smallest_angle_difference_signed(transport_angle_from_center, last_goal_pose_angle_);
       // check if dist is new min distance
-      if (dist < min_dist){
-        min_dist = dist;
+      if (angle_diff >= 0 && angle_diff < min_angle_diff){
+        min_angle_diff = angle_diff;
         arg_min = i; 
+        min_transport_angle = transport_angle_from_center;
       } 
     }
   }
   // update unvisited_assignments with false for arg_min
   unvisited_assignments_.at(arg_min) = false;
+  last_goal_pose_angle_ = min_transport_angle;
 
   // Get goal poses
   makeGoalsFromAssignment(transport_assignments_, arg_min, goalPoses);
