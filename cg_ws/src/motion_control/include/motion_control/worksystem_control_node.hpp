@@ -65,6 +65,8 @@ private:
   float steer_speed_ = 0.0f;
   float last_steer_pos_front_ = 0.0f;
   float last_steer_pos_rear_ = 0.0f;
+  float last_wheel_velocity_ = 0.0f;
+  float max_wheel_velocity_delta_ = 0.0f;
   double tlast_;
   double delta_t_; 
 

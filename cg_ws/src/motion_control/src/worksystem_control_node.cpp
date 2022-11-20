@@ -75,7 +75,9 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("min_drive_speed_scalar", min_drive_speed_scalar);
   this->declare_parameter<float>("max_steer_speed", 1000);
   this->get_parameter("max_steer_speed", max_steer_speed);
-  
+  this->declare_parameter<float>("max_wheel_velocity_delta", 10.0);
+  this->get_parameter("max_wheel_velocity_delta", max_wheel_velocity_delta_);
+
   this->declare_parameter<int>("steer_speed_filter_window_size", 10);
   this->get_parameter("steer_speed_filter_window_size", steer_speed_filter_window_size_);
   this->declare_parameter<int>("cmd_msg_filter_window_size", 10);
@@ -117,8 +119,8 @@ void WorksystemControlNode::timerCallback() {
     cmd_msg_.header.stamp = this->get_clock()->now();
     float wheel_velocity = lon_controller_->computeDrive(current_trajectory_, current_state, traj_idx_, steer_speed_);
     float steer_position = lat_controller_->computeSteer(current_trajectory_, current_state, traj_idx_);
-    cmd_msg_.wheel_velocity = updateMovingAverage(cmg_msg_steer_window_, wheel_velocity, cmd_msg_filter_window_size_);
-    cmd_msg_.steer_position = updateMovingAverage(cmg_msg_drive_window_, steer_position, cmd_msg_filter_window_size_);
+    cmd_msg_.wheel_velocity = wheel_velocity;
+    cmd_msg_.steer_position = steer_position;
 
     // Compute tool command
     // TODO eventually implement slip-based control
@@ -130,6 +132,15 @@ void WorksystemControlNode::timerCallback() {
     cmd_msg_.steer_position = 0.0;
     // Don't update the field for tool position yet
   }
+
+  // Smooth autonomy commands via mean filter
+  cmd_msg_.wheel_velocity = updateMovingAverage(cmg_msg_steer_window_, cmd_msg_.wheel_velocity, cmd_msg_filter_window_size_);
+  cmd_msg_.steer_position = updateMovingAverage(cmg_msg_drive_window_, cmd_msg_.steer_position, cmd_msg_filter_window_size_);  
+
+  // Apply max delta for wheel velocity
+  cmd_msg_.wheel_velocity = std::max(
+    last_wheel_velocity_ - max_wheel_velocity_delta_,
+    std::min(cmd_msg_.wheel_velocity, last_wheel_velocity_ + max_wheel_velocity_delta_));
 
   // Clamp these commands just in case cmd_mux doesn't handle acutator limits
   cmd_msg_.wheel_velocity = std::max(-100.0, std::min(cmd_msg_.wheel_velocity, 100.0)); // [-100.0, 100.0]
@@ -146,6 +157,8 @@ void WorksystemControlNode::timerCallback() {
   lat_debug_cross_track_err_pub_->publish(debug_msg);
   debug_msg.data = debug.heading_err;
   lat_debug_heading_err_pub_->publish(debug_msg);
+
+  last_wheel_velocity_ = cmd_msg_.wheel_velocity;
 }
 
 void WorksystemControlNode::updateTrajectory(cg_msgs::srv::UpdateTrajectory::Request::SharedPtr req, cg_msgs::srv::UpdateTrajectory::Response::SharedPtr res)
