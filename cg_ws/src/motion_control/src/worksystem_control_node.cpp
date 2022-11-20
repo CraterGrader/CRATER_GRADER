@@ -134,8 +134,8 @@ void WorksystemControlNode::timerCallback() {
   }
 
   // Smooth autonomy commands via mean filter
-  cmd_msg_.wheel_velocity = updateMovingAverage(cmg_msg_steer_window_, cmd_msg_.wheel_velocity, cmd_msg_filter_window_size_);
-  cmd_msg_.steer_position = updateMovingAverage(cmg_msg_drive_window_, cmd_msg_.steer_position, cmd_msg_filter_window_size_);  
+  cmd_msg_.wheel_velocity = updateMovingAverage(cmg_msg_drive_window_, cmd_msg_.wheel_velocity, cmd_msg_filter_window_size_);
+  cmd_msg_.steer_position = updateMovingAverage(cmg_msg_steer_window_, cmd_msg_.steer_position, cmd_msg_filter_window_size_);  
 
   // Apply max delta for wheel velocity
   cmd_msg_.wheel_velocity = std::max(
