@@ -53,67 +53,19 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz_default_plugins/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        april_tag0:
-          Value: true
-        april_tag1:
-          Value: true
-        april_tag2:
-          Value: true
-        april_tag3:
-          Value: true
-        base_link:
-          Value: true
-        camera:
-          Value: true
-        camera_depth_frame:
-          Value: true
-        camera_depth_optical_frame:
-          Value: true
-        camera_link:
-          Value: true
-        imu_link:
-          Value: true
-        map:
-          Value: true
-        odom:
-          Value: true
-        realsense_frame:
-          Value: true
-        rob_base_link:
-          Value: true
-        tag0:
-          Value: true
-        tag1:
-          Value: true
-        tag2:
-          Value: true
-        tag3:
-          Value: true
-        tag_map:
-          Value: true
-        total_station_prism:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          odom:
-            base_link:
-              imu_link:
-                {}
-              realsense_frame:
-                {}
-              total_station_prism:
-                {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
