@@ -75,7 +75,7 @@ WorksystemControlNode::WorksystemControlNode() : Node("worksystem_control_node")
   this->get_parameter("min_drive_speed_scalar", min_drive_speed_scalar);
   this->declare_parameter<float>("max_steer_speed", 1000);
   this->get_parameter("max_steer_speed", max_steer_speed);
-  this->declare_parameter<float>("max_wheel_velocity_delta", 10.0);
+  this->declare_parameter<double>("max_wheel_velocity_delta", 10.0);
   this->get_parameter("max_wheel_velocity_delta", max_wheel_velocity_delta_);
 
   this->declare_parameter<int>("steer_speed_filter_window_size", 10);

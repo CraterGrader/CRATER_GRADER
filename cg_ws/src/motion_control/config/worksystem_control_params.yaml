@@ -5,7 +5,7 @@ worksystem_control_node:
     longitudinal_velocity_kd: 0.5
     steer_speed_filter_window_size: 10
     cmd_msg_filter_window_size: 10
-    max_wheel_velocity_delta: 10.0 # %FS 
+    max_wheel_velocity_delta: 5.0 # %FS 
 
     lateral_stanley_gain: 2.5
     lateral_stanley_softening_constant: 0.0 # unused

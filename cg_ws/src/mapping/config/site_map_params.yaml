@@ -1,6 +1,6 @@
 site_map:
   ros__parameters:
-    # Map dimensions; UPDATE FOR BEHAVIORE EXECUTIVE BELOW
+    # Map dimensions; UPDATE FOR BEHAVIOR EXECUTIVE BELOW
     # site assumed to be 5mx5m
     height: 50 # number of cells in col
     width: 50 # number cells in row
@@ -20,7 +20,7 @@ site_map:
     load_height_map_from_filepath: false
     #### "Obvious crater" maps
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
-    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/weird_transport.csv" # use absolute path
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/run01_exploration_20221119.csv" # use absolute path
 
     #### "Malformed crater" maps
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/russells_fun_map.csv" # use absolute path

@@ -1,0 +1,25 @@
+rosbag2_bagfile_information:
+  version: 4
+  storage_identifier: sqlite3
+  relative_file_paths:
+    - rosbag2_2022_11_20-00_28_54_0.db3
+  duration:
+    nanoseconds: 877892075627
+  starting_time:
+    nanoseconds_since_epoch: 1668904134674481049
+  message_count: 20761
+  topics_with_message_count:
+    - topic_metadata:
+        name: /encoder_telemetry
+        type: cg_msgs/msg/EncoderTelemetry
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 11981
+    - topic_metadata:
+        name: /actuator_cmd
+        type: cg_msgs/msg/ActuatorCommand
+        serialization_format: cdr
+        offered_qos_profiles: ""
+      message_count: 8780
+  compression_format: ""
+  compression_mode: ""
