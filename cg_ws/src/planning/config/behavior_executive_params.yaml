@@ -22,7 +22,7 @@ behavior_executive_node:
 
     # Transport planner
     source_threshold_z: 0.02 # meters off fit plane
-    sink_threshold_z: 0.075 # meters below fit plane
+    sink_threshold_z: 0.09 # meters below fit plane
     thresh_max_assignment_distance: 0.6 # max meters between transport assignments
     last_pose_offset: 10.0 # meters to rearward offset last pose in transport assignment by
     sink_pose_offset: 0.0 # meters to rearward offset sink pose in transport assignment by
@@ -36,7 +36,12 @@ behavior_executive_node:
     # Exploration planner
     map_coverage_threshold: 0.01
     exploration_min_dist_from_map_boundary: 0.5 # Min meters from map boundary for circular pass
+
+    # -------------------------------------------------------
+    #### FVD
     explored_once: false # set false to do exploration, true means system will skip exploration
+    # -------------------------------------------------------
+    
     exploration_enable_topography_weight: false # Use to enable/disable topography weight in exploration plan
 
     # Tool planner
