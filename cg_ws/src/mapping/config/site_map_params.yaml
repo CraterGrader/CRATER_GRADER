@@ -16,8 +16,8 @@ site_map:
     oosThreshold: 0.03 # meters 
 
     # Loading from a map filepath
-    static_map: false
-    load_height_map_from_filepath: false
+    static_map: true
+    load_height_map_from_filepath: true
     #### "Obvious crater" maps
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
     load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/run01_exploration_20221119.csv" # use absolute path
@@ -41,6 +41,9 @@ site_map:
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/nov_11_crater.csv" # use absolute path
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/donut_exploration.csv" # use absolute path
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/autonomous_mapping.csv" # use absolute path
+
+    #### Other
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/cmu_craters_blurred_map.csv" # use absolute path
 
 behavior_executive_node:
   ros__parameters:
