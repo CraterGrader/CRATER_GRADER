@@ -22,7 +22,7 @@ behavior_executive_node:
 
     # Transport planner
     source_threshold_z: 0.02 # meters off fit plane
-    sink_threshold_z: 0.01 # meters below fit plane
+    sink_threshold_z: 0.09 # meters below fit plane
     thresh_max_assignment_distance: 0.6 # max meters between transport assignments
     last_pose_offset: 0.0 # meters to rearward offset last pose in transport assignment by
     sink_pose_offset: 0.0 # meters to rearward offset sink pose in transport assignment by
@@ -56,8 +56,8 @@ behavior_executive_node:
     viz_timer_callback_ms: 500 # milliseconds
 
     # Map loading
-    design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/landing_pad_design_map.csv" # use absolute path
     # design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/50x50_zeros_height_map.csv" # use absolute path
+    design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/landing_pad_design_map.csv" # use absolute path
 
     # Viz
     viz_planning_height: 1.0 # meters, in global frame
