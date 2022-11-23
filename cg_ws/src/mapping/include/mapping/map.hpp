@@ -125,6 +125,10 @@ cg_msgs::msg::Point2D Map<T>::indexToContinuousCoords(size_t idx) const {
   cg_msgs::msg::Point2D pt;
   pt.x = resolution_* (idx % width_);
   pt.y = resolution_ * std::floor(idx/width_);
+
+  // Offset to middle of cell
+  pt.x += resolution_ / 2;
+  pt.y += resolution_ / 2;
   return pt;
 }
 

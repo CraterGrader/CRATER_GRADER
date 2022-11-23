@@ -158,30 +158,34 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
     // Put associated coordinates and height with each index into a node
     cg_msgs::msg::Point2D pt = current_height_map.indexToContinuousCoords(i);
     float cell_height = current_height_map.getDataAtIdx(i);
+    float design_height = design_height_map.getDataAtIdx(i);
     TransportNode node;
 
     // Skip cell if not seen
     if (seen_map[i] == 0) continue;
 
     // Positive height becomes a source; positive volume in +z
-    if (cell_height > (design_height_map.getDataAtIdx(i) + source_threshold_z_))
+    std::cout << "cell height: " << cell_height << ", design height: " << design_height << std::endl;
+    if (cell_height > (design_height + source_threshold_z_))
     {
       node.x = pt.x;
       node.y = pt.y;
-      node.height = cell_height;
+      node.height = cell_height - design_height;
 
       vol_source += node.height;
       source_nodes.push_back(node);
+      std::cout << "    Source created" << std::endl;
     }
     // Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
-    else if (cell_height < (design_height_map.getDataAtIdx(i) - sink_threshold_z_))
+    else if (cell_height < (design_height - sink_threshold_z_))
     {
       node.x = pt.x;
       node.y = pt.y;
-      node.height = -cell_height;
+      node.height = -(cell_height - design_height); // make sink volume positive for solver
 
       vol_sink += node.height;
       sink_nodes.push_back(node);
+      std::cout << "    Sink created" << std::endl;
     }
   }
 }
@@ -466,6 +470,7 @@ float TransportPlanner::planTransport(const cg::mapping::Map<float> &current_hei
 
   // ---------------------------------------------------
   // Solve the transport optimization problem
+  std::cout << "num/vol source: " << source_nodes.size() << "/" << vol_source << "num/vol sink: " << sink_nodes.size() << "/" << vol_sink << std::endl; 
   std::vector<TransportAssignment> new_transport_assignments;
   float objective_value = solveForTransportAssignments(new_transport_assignments, source_nodes, sink_nodes, distances_between_nodes, vol_source, vol_sink, thresh_max_assignment_distance);
 

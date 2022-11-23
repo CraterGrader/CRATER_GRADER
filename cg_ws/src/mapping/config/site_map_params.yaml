@@ -19,8 +19,9 @@ site_map:
     static_map: true
     load_height_map_from_filepath: true
     #### "Obvious crater" maps
-    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
-    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/run01_exploration_20221119.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/pipeline_transport.csv" # use absolute path
+    load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/50x50_zeros_height_map.csv" # use absolute path
+    # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/landing_pad_design_map.csv" # use absolute path
 
     #### "Malformed crater" maps
     # load_height_map_filepath: "/root/CRATER_GRADER/cg_ws/src/mapping/saved_maps/russells_fun_map.csv" # use absolute path

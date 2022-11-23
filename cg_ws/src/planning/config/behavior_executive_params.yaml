@@ -26,11 +26,11 @@ behavior_executive_node:
     thresh_max_assignment_distance: 0.6 # max meters between transport assignments
     last_pose_offset: 0.0 # meters to rearward offset last pose in transport assignment by
     sink_pose_offset: 0.0 # meters to rearward offset sink pose in transport assignment by
-    source_pose_offset: 0.3 # meters to rearward offset source pose in transport assignment by
+    source_pose_offset: 0.0 # meters to rearward offset source pose in transport assignment by
     transport_plan_max_calls: 100 # Number of calls to REPLAN_TRANSPORT before a replan is triggered
     boundary_min: 0.7 # max pose for x-y in sitemap frame
     boundary_max: 4.3 # min pose for x-y in sitemap frame
-    thresh_filter_assignment_pos: 0.14 # minimum meters between final transport assignments
+    thresh_filter_assignment_pos: 0.0 # minimum meters between final transport assignments
     thresh_filter_assignment_head: 6.28 # minimum heading [rad] between final transport assignments
 
     # Exploration planner
@@ -56,8 +56,8 @@ behavior_executive_node:
     viz_timer_callback_ms: 500 # milliseconds
 
     # Map loading
-    # design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/landing_pad_design_map.csv" # use absolute path
-    design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/50x50_zeros_height_map.csv" # use absolute path
+    design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/landing_pad_design_map.csv" # use absolute path
+    # design_topo_filepath: "/root/CRATER_GRADER/cg_ws/src/planning/config/50x50_zeros_height_map.csv" # use absolute path
 
     # Viz
     viz_planning_height: 1.0 # meters, in global frame
@@ -67,7 +67,7 @@ behavior_executive_node:
 
     # TRAJECTORY DEBUG
     # Overwrites agent and goal poses with given values
-    traj_debug: true
+    traj_debug: false
     agent_x: 1.0
     agent_y: 3.0
     agent_yaw: 0.0
