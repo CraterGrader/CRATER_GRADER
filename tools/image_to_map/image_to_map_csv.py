@@ -10,7 +10,7 @@ Converts a pixel image to csv format for a Map object
 - Uncomment the plt. lines below to show the image; file will be written after closing window
 """
 # Set these parameters
-input_filepath = '/root/CRATER_GRADER/tools/image_to_map/data/cmu_craters_smoothed.png'
+input_filepath = '/root/CRATER_GRADER/tools/image_to_map/data/cmu_launchpad_150x150_v2.png'
 resolution = 0.1
 
 # Append for output filename

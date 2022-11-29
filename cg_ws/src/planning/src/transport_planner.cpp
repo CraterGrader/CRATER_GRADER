@@ -165,7 +165,6 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
     if (seen_map[i] == 0) continue;
 
     // Positive height becomes a source; positive volume in +z
-    std::cout << "cell height: " << cell_height << ", design height: " << design_height << std::endl;
     if (cell_height > (design_height + source_threshold_z_))
     {
       node.x = pt.x;
@@ -174,6 +173,7 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
 
       vol_source += node.height;
       source_nodes.push_back(node);
+      std::cout << "cell height: " << cell_height << ", design height: " << design_height << std::endl;
       std::cout << "    Source created" << std::endl;
     }
     // Negative height becomes a sink; for solver the sinks also must have positive volume, defined as positive in -z
@@ -185,6 +185,7 @@ void TransportPlanner::init_nodes(std::vector<TransportNode> &source_nodes, std:
 
       vol_sink += node.height;
       sink_nodes.push_back(node);
+      std::cout << "cell height: " << cell_height << ", design height: " << design_height << std::endl;
       std::cout << "    Sink created" << std::endl;
     }
   }
